@@ -1,0 +1,5 @@
+# Upload directory
+www/upload/
+
+# Custom configuration file
+www/config_custom.php

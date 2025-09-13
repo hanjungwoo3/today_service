@@ -1,0 +1,46 @@
+RewriteEngine On
+
+# HTTPS 리다이렉트 (이미 PHP에서 처리하므로 주석 처리)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 하위 폴더에서도 정상 동작하도록 설정
+# RewriteBase는 동적으로 설정할 수 없으므로 주석 처리
+# RewriteBase /
+
+# 존재하지 않는 파일에 대한 리다이렉트를 제거
+# 하위 폴더에서 동작할 때 불필요한 리다이렉트 방지
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteRule ^(.*)$ index.php [QSA,L]
+
+# 보안 설정
+<Files "config_custom.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "config_table.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# 하위 디렉토리에서도 정상 작동하도록 설정
+# CSS, JS, 이미지 파일들의 캐시 설정
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>
+
+# 하위 디렉토리에서도 정상 작동하도록 MIME 타입 설정
+<IfModule mod_mime.c>
+    AddType text/css .css
+    AddType application/javascript .js
+    AddType image/svg+xml .svg
+</IfModule> 

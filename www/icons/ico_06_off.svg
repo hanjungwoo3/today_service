@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>005_off@3x</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard-Copy" transform="translate(-255.000000, -703.000000)">
+            <g id="icon" transform="translate(15.000000, 703.000000)">
+                <g id="005_off" transform="translate(240.000000, 0.000000)">
+                    <rect id="Rectangle-Copy-4" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32" height="32"></rect>
+                    <path d="M6.97799789,28 L6,21.7190187 L13.1142801,18.0681078 L13.1142801,15.4132012 L10.7637448,12.122038 L10.7637448,7.74091542 C11.8884394,5.24697181 13.486547,4 15.5580674,4 C18.6653481,4 20.2302418,7.74091542 20.2302418,7.74091542 C20.2302418,7.74091542 20.2302418,9.20128961 20.2302418,12.122038 L17.8131939,15.4132012 L17.8131939,18.0681078 L26,21.7190187 L25.0220021,28" id="Path-5" stroke="#111111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <polyline id="Path-3-Copy-4" stroke="#111111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" transform="translate(14.570231, 24.184230) scale(-1, 1) rotate(90.000000) translate(-14.570231, -24.184230) " points="10.7544609 22.7544609 12.9258856 25.6139997 18.3860003 25.6139997"></polyline>
+                    <line x1="16.3997042" y1="18.9955503" x2="19.4395895" y2="22.4955503" id="Path-3-Copy-5" stroke="#111111" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" transform="translate(17.697627, 20.797923) rotate(90.000000) translate(-17.697627, -20.797923) "></line>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,88 @@
+<?php
+include_once('../config.php');
+
+$c_minister_assign_expiration = MINISTER_ASSIGN_EXPIRATION?MINISTER_ASSIGN_EXPIRATION:'7';
+$mb_id = mb_id();
+$where_type = "AND tt_type <> '편지'";
+$color_type = 'badge-success';
+$date = date("Y-m-d", strtotime("-".$c_minister_assign_expiration." days"));
+?>
+<nav class="navbar navbar-light bg-light mb-4">
+  <small class="mb-0 text-secondary">최근 <?=$c_minister_assign_expiration?>일 내에 배정받은 구역이 보입니다</small>
+</nav>
+<?php
+// 배정된 호별 구역 (일주일 이내)
+$sql = "SELECT tt_id, tt_name, tt_assigned, tt_assigned_group, tt_assigned_date, tt_type, tt_status, tt_num
+        FROM ".TERRITORY_TABLE." WHERE FIND_IN_SET({$mb_id},tt_assigned) AND mb_id = 0 AND tt_assigned_date > '{$date}' {$where_type}
+        ORDER BY tt_assigned_date DESC, tt_num";
+$result = $mysqli->query($sql);
+if($result->num_rows > 0){
+  while ($row=$result->fetch_assoc()) {
+    $tt_id = $row['tt_id'];
+    $territory_progress = get_territory_progress($tt_id);
+    if ($territory_progress['total'] != 0) {
+        $progress = floor((($territory_progress['visit']+$territory_progress['absence']) / $territory_progress['total']) * 100);
+    } else {
+        $progress = 0; // 또는 0 대신 다른 기본값을 설정할 수 있습니다.
+    }
+    $assigned_group_arr = get_assigned_group_name($row['tt_assigned'],$row['tt_assigned_group']);
+    $assigned_group = (is_array($assigned_group_arr) == 1)?implode(' <span class="mx-1">|</span> ', $assigned_group_arr):$assigned_group_arr;
+    
+    $all_past_records = get_all_past_records('territory',$tt_id);
+    ?>
+    <div class="list-group mb-2">
+      <div class="list-group-item d-flex flex-nowrap justify-content-between p-2 border-light">
+        <div class="flex-grow-1 pr-2">
+          <div class="mb-1">
+            <span class="badge badge-pill <?=$color_type?> badge-outline px-1 align-middle"><?=$row['tt_num']?> · <?=get_type_text($row['tt_type'])?></span>
+            <span class="badge badge-pill badge-secondary badge-outline px-1 align-middle">
+              <?=$row['tt_status'] == 'absence' || $row['tt_status'] == 'absence_reassign'?'<i class="bi bi-person-fill-slash"></i> 부재':'<i class="bi bi-people-fill"></i> 전체'?>
+            
+              <?php 
+              // 방문 기록이 있는지 확인
+              if(!empty($all_past_records)): ?>
+                <?php 
+                // 새로운 progress 키 사용
+                if($all_past_records[0]['progress'] == 'completed'): ?>
+                  <span class="text-success">완료</span>
+                <?php 
+                // 진행 중
+                elseif($all_past_records[0]['progress'] == 'in_progress'): ?>
+                  <span class="text-warning">진행 중</span>
+                <?php endif; ?>
+              <?php endif; ?>
+            </span>
+          </div>
+          <div>
+            <span class=" align-middle"><?=$row['tt_name']?></span>
+          </div>
+
+          <div class="progress d-inline-flex align-middle w-100 mt-n1" style="height: 5px;">
+            <div class="progress-bar <?= $progress == 100 ? 'bg-success' : 'bg-warning'?>" role="progressbar" style="width:<?=$progress.'%';?>" aria-valuenow="<?=$progress;?>" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+
+          <div class="mt-n2">
+            <small class="text-secondary d-inline-block">
+              전체 <?=$territory_progress['total']?> · 만남 <?=$territory_progress['visit']?> · 부재 <?=$territory_progress['absence']?> · 남은 집 <?=$territory_progress['total'] - $territory_progress['visit'] - $territory_progress['absence']?>
+            </small>
+          </div>
+
+          <?php if($assigned_group) echo '<div class="assigned_group_name mt-1">'.$assigned_group.'</div>'; ?>
+          
+          <?php if(!empty_date($row['tt_assigned_date'])):?>
+            <div class="mt-1">
+              <small class="text-secondary"><?=get_datetime_text($row['tt_assigned_date'])?> 배정</small>
+            </div>
+          <?php endif;?>
+        </div>
+        <div class="align-self-center flex-shrink-0">
+          <button type="button" class="btn btn-outline-secondary" onclick="open_territory_view(<?=$tt_id?>,'start')">시작</button>
+        </div>
+      </div>
+    </div>
+  <?php
+  }
+}else{
+  echo '<div class="text-center align-middle p-5 text-secondary" >배정받은 구역이 없습니다</div>';
+}
+?>
