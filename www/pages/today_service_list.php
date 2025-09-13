@@ -36,6 +36,18 @@ $tp_sql = "SELECT t.*, m.m_date, ms.ms_time, mp.mp_name
            ORDER BY t.tp_num+0 ASC, t.tp_num ASC";
 $tp_result = $mysqli->query($tp_sql);
 
+// 모임형태 사용 설정 가져오기
+$c_meeting_schedule_type_use = unserialize(MEETING_SCHEDULE_TYPE_USE);
+
+// 사용 가능한 모임형태 필터링
+$allowed_types = array();
+for($i = 1; $i <= 6; $i++) {
+  if(!isset($c_meeting_schedule_type_use[$i]) || $c_meeting_schedule_type_use[$i] === 'use') {
+    $allowed_types[] = $i;
+  }
+}
+$type_filter = !empty($allowed_types) ? "AND ms.ms_type IN (".implode(',', $allowed_types).")" : "";
+
 // 당일 모임장소 출력
 $ma_id = get_addschedule_id($today);
 $sql = "SELECT 
@@ -66,6 +78,7 @@ $sql = "SELECT
         AND ms.ms_week = '{$week}' 
         AND (ms.g_id = 0 OR ms.g_id = '{$mb_g_id}') 
         AND (m.m_cancle IS NULL OR m.m_cancle != 2) 
+        {$type_filter}
       ORDER BY 
         ms.ms_time, 
         g.g_name, 

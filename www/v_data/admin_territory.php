@@ -4,13 +4,15 @@
 <?php
 $where = array();
 
-if(isset($s_num)) $where[] = "tt.tt_num LIKE '%{$s_num}%'"; // 구역번호검색
-if(isset($s_name)) $where[] = "tt.tt_name LIKE '%{$s_name}%'"; // 구역명검색
-if($s_type && $s_type != '전체') $where[] = "tt.tt_type = '{$s_type}'"; // 구역형태검색
-if($s_type != '편지') $where[] ="tt.tt_type <> '편지'";
+// 검색 파라미터 Notice 방지 및 안전 처리
+if(isset($s_num) && $s_num !== '') $where[] = "tt.tt_num LIKE '%{$s_num}%'"; // 구역번호검색
+if(isset($s_name) && $s_name !== '') $where[] = "tt.tt_name LIKE '%{$s_name}%'"; // 구역명검색
+if(isset($s_type) && $s_type != '전체') $where[] = "tt.tt_type = '{$s_type}'"; // 구역형태검색
+// 기본적으로 '편지'는 제외. 단, s_type 이 '편지'로 명시된 경우에는 포함
+if(!isset($s_type) || $s_type != '편지') $where[] ="tt.tt_type <> '편지'";
 
 // 배정여부검색
-if($s_assign && $s_assign != '선택안함'){
+if(isset($s_assign) && $s_assign != '선택안함'){
   switch ($s_assign) {
       case '개인구역': $where[] = "tt.mb_id <> ''"; break;
       case '분배되지않음': $where[] = "tt.ms_id = '' AND tt.tt_ms_all = ''"; break;
@@ -26,7 +28,7 @@ if($s_assign && $s_assign != '선택안함'){
 }
 
 // 배정상태검색
-if($s_status && $s_status != '선택안함'){
+if(isset($s_status) && $s_status != '선택안함'){
     switch ($s_status) {
         case '미배정': $where[] = "tt.tt_status = '' AND tt.tt_assigned_date = '0000-00-00'"; break;
         case '첫배정': $where[] = "tt.tt_status = '' AND tt.tt_assigned_date <> '0000-00-00'"; break;
@@ -37,14 +39,14 @@ if($s_status && $s_status != '선택안함'){
   }
 
 // 세대추가요청검색
-if($s_memo && $s_memo != '선택안함'){
+if(isset($s_memo) && $s_memo != '선택안함'){
   switch ($s_memo) {
       case '미포함': $where[] = "tt.tt_memo = ''"; break;
       case '포함': $where[] = "tt.tt_memo <> ''"; break;
   }
 }
 
-$page = $page?$page:1;
+$page = isset($page)?$page:1;
 $where = $where?'WHERE '.implode(' AND ',$where):'';
 $total = $mysqli->query("SELECT count(*) FROM ".TERRITORY_TABLE." tt LEFT JOIN ".MEETING_SCHEDULE_TABLE." ms ON tt.ms_id = ms.ms_id {$where}")->fetch_row()[0];
 $limit = TERRITORY_ITEM_PER_PAGE?TERRITORY_ITEM_PER_PAGE:50;

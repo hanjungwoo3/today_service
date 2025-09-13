@@ -28,7 +28,7 @@ define('BASE_PATH', $base_path);
 
 define('ICON', BASE_PATH.'/icons/icon-jw-n.png'); // 아이콘
 define('VERSION','2025082014'); // js, css 버전
-define('APP_VERSION','2.5.2'); // 앱 버전 (대규모변경).(보이는부분&기능추가).(보이지않는부분)
+define('APP_VERSION','2.5.3'); // 앱 버전 (대규모변경).(보이는부분&기능추가).(보이지않는부분)
 
 // 보안설정이나 프레임이 달라도 쿠키가 통하도록 설정
 header('P3P: CP="ALL CURa ADMa DEVa TAIa OUR BUS IND PHY ONL UNI PUR FIN COM NAV INT DEM CNT STA POL HEA PRE LOC OTC"');

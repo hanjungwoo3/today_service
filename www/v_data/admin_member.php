@@ -18,7 +18,7 @@ if($result->num_rows > 0){
       $data[] = array(
         'id' => $row['mb_id'],
         'mb_name' => $row['mb_name'],
-        'mb_sex' => $row['mb_sex']=='M'?'형제':'자매',
+        'mb_sex' => $row['mb_sex']=='M'||empty($row['mb_sex'])?'형제':'자매',
         'mb_hp' => get_hp_text(decrypt($row['mb_hp'])),
         'pioneer' => $row['mb_pioneer'],
         'mb_pioneer' => get_member_pioneer_text($row['mb_pioneer']),

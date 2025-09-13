@@ -12,7 +12,6 @@
 
   <nav class="navbar navbar-light bg-light mb-2">
     <small class="float-right mb-1 mt-1 text-secondary">모임 일시와 장소를 확인해 주세요<br></small>
-    <!-- <h6 class="float-right mb-1 mt-1">오늘은 <span class="text-primary"><?=date('y년 m월 d일',time())?></span> 입니다.</h6> -->
   </nav>
   <small class="text-secondary">날짜 선택</small>
   <div class="input-group mb-4" id="guide_history_date">

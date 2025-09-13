@@ -4,15 +4,9 @@
 $mb_id = mb_id();
 $today = date('Y-m-d');
 $tdatetime = date('Y-m-d H:i');
-$ms_ids = explode(',',get_ms_id_by_guide($mb_id));
-
-// if(isset($_POST['s_date'])){
-//   $s_date = $_POST['s_date'];
-// }elseif(isset($_GET['toYear']) && isset($_GET['toMonth'])){
-//   $s_date = isset($_GET['s_date'])?$_GET['s_date']:((date('Y-m') == date('Y-m', mktime(0, 0, 0, $_GET['toMonth'], 1, $_GET['toYear'])))?$today:date('Y-m-d', mktime(0, 0, 0, $_GET['toMonth'], 1, $_GET['toYear'])));
-// }else{
-//   $s_date = $today;
-// }
+// 빈 문자열 안전 처리 (PHP 5.5~8.3)
+$ms_id_string = get_ms_id_by_guide($mb_id);
+$ms_ids = !empty($ms_id_string) ? explode(',', $ms_id_string) : array();
 
 if(!isset($s_date)){
   if(isset($_GET['toYear']) && isset($_GET['toMonth'])){
@@ -24,8 +18,24 @@ if(!isset($s_date)){
 
 $week_val = date('N',strtotime($s_date));
 
+// 모임형태 사용 설정 가져오기
+$c_meeting_schedule_type_use = unserialize(MEETING_SCHEDULE_TYPE_USE);
+
+// 사용 가능한 모임형태 필터링
+$allowed_types = array();
+for($i = 1; $i <= 6; $i++) {
+  if(!isset($c_meeting_schedule_type_use[$i]) || $c_meeting_schedule_type_use[$i] === 'use') {
+    $allowed_types[] = $i;
+  }
+}
+
+// 현재 날짜 이후용 필터 (MEETING_SCHEDULE_TABLE의 ms_type 사용)
+$type_filter = !empty($allowed_types) ? "AND ms.ms_type IN (".implode(',', $allowed_types).")" : "";
+
 if($s_date >= $today){
   $ma_id = get_addschedule_id_sub($s_date);
+  // 회중일정 ID 조건 안전 생성 (빈 IN() 방지)
+  $ma_condition = (!empty($ma_id)) ? "(ms.ma_id IN({$ma_id}) OR ms.ma_id = '0')" : "ms.ma_id = '0'";
   $sql = "SELECT 
       ms.ms_id, 
       COALESCE(m.ms_time,ms.ms_time) AS ms_time, 
@@ -50,8 +60,9 @@ if($s_date >= $today){
       ".MEETING_TABLE." m ON ms.ms_id = m.ms_id
       AND m.m_date = '{$s_date}'
     WHERE 
-      (ms.ma_id IN({$ma_id}) OR ms.ma_id = '0') 
+      {$ma_condition} 
       AND ms.ms_week = '{$week_val}' 
+      {$type_filter}
     ORDER BY 
       ms.ms_time, 
       g.g_name, 

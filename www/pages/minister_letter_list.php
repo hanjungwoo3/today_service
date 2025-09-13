@@ -63,7 +63,7 @@ if($result->num_rows > 0){
 
           <div class="mt-n2">
             <small class="text-secondary d-inline-block">
-              전체 <?=$territory_progress['total']?> · 뱔송 <?=$territory_progress['visit']?> · 남은 집 <?=$territory_progress['total'] - $territory_progress['visit'] - $territory_progress['absence']?>
+              전체 <?=$territory_progress['total']?> · 발송 <?=$territory_progress['visit']?> · 남은 집 <?=$territory_progress['total'] - $territory_progress['visit'] - $territory_progress['absence']?>
             </small>
           </div>
 

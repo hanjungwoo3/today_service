@@ -244,13 +244,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         break;
       case 'copy': // 구역 복제
-        // SELECT 쿼리로 기존 데이터 가져오기
-        $sql = "SELECT * FROM ".TERRITORY_TABLE." WHERE tt_id = ?";
-        $stmt = $mysqli->prepare($sql);
-        $stmt->bind_param('i', $postData['pid']); // $pid는 tt_id로 정수형 변수
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
+        // 간결한 방식: 정수화 후 단순 조회 (PHP 5.5~8.3 호환)
+        $pid = isset($postData['pid']) ? (int)$postData['pid'] : 0;
+        $row = $mysqli->query("SELECT tt_num, tt_name, tt_type, tt_polygon, tt_address, tt_address2 FROM ".TERRITORY_TABLE." WHERE tt_id = {$pid}")->fetch_assoc();
+        if(!$row){ echo '0'; break; }
   
         // 현재 날짜 가져오기
         $today = date('Y-m-d');
@@ -266,7 +263,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   
         // 반복문 실행
         $return = array();
-        for ($i = 0; $i < $postData['count']; $i++) {
+        $copyCount = isset($postData['count']) ? (int)$postData['count'] : 1;
+        if($copyCount < 1){ $copyCount = 1; }
+        for ($i = 0; $i < $copyCount; $i++) {
           $return[] = $territory->insert($insertData);
         }
   

@@ -1,3 +1,5 @@
+<?php $c_meeting_schedule_type_use = unserialize(MEETING_SCHEDULE_TYPE_USE); ?>
+
 <template v-if="location === 'guide'">
   <div class="form-group row">
     <label for="search_type" class="col-4 col-md-2 col-form-label">구역 유형</label>
@@ -27,35 +29,38 @@
   <div class="col-8 col-md-10">
     <select name="s_assign" class="form-control" id="s_assign" v-model="s_assign">
       <option value="선택안함">선택 안 함</option>
-      <option value="전체">전체</option>
-      <option value="호별"><?=get_meeting_schedule_type_text(1)?></option>
-      <option value="전시대"><?=get_meeting_schedule_type_text(2)?></option>
-      <template v-if="location === 'guide'">
-        <?php $c_meeting_schedule_type_use = unserialize(MEETING_SCHEDULE_TYPE_USE); ?>
-        <?php if(!isset($c_meeting_schedule_type_use[3]) || $c_meeting_schedule_type_use[3] === 'use'): ?>
-        <option value="추가1"><?=get_meeting_schedule_type_text(3)?></option>
-        <?php endif; ?>
-        <?php if(!isset($c_meeting_schedule_type_use[4]) || $c_meeting_schedule_type_use[4] === 'use'): ?>
-        <option value="추가2"><?=get_meeting_schedule_type_text(4)?></option>
-        <?php endif; ?>
-        <?php if(!isset($c_meeting_schedule_type_use[5]) || $c_meeting_schedule_type_use[5] === 'use'): ?>
-        <option value="추가3"><?=get_meeting_schedule_type_text(5)?></option>
-        <?php endif; ?>
-        <?php if(!isset($c_meeting_schedule_type_use[6]) || $c_meeting_schedule_type_use[6] === 'use'): ?>
-        <option value="추가4"><?=get_meeting_schedule_type_text(6)?></option>
-        <?php endif; ?>
-      </template>
-      <template v-if="location === 'admin'">
-        <option value="추가1"><?=get_meeting_schedule_type_text(3)?></option>
-        <option value="추가2"><?=get_meeting_schedule_type_text(4)?></option>
-        <option value="추가3"><?=get_meeting_schedule_type_text(5)?></option>
-        <option value="추가4"><?=get_meeting_schedule_type_text(6)?></option>
-      </template>
-      <?php echo $ms_options;?>
       <template v-if="location === 'admin'">
         <option value="분배되지않음">분배되지 않음</option>
         <option value="개인구역">개인 구역</option>
       </template>
+      <optgroup label="모임 형태">
+        <option value="전체">전체</option>
+        <option value="호별"><?=get_meeting_schedule_type_text(1)?></option>
+        <option value="전시대"><?=get_meeting_schedule_type_text(2)?></option>
+        <template v-if="location === 'guide'">
+          <?php if(!isset($c_meeting_schedule_type_use[3]) || $c_meeting_schedule_type_use[3] === 'use'): ?>
+          <option value="추가1"><?=get_meeting_schedule_type_text(3)?></option>
+          <?php endif; ?>
+          <?php if(!isset($c_meeting_schedule_type_use[4]) || $c_meeting_schedule_type_use[4] === 'use'): ?>
+          <option value="추가2"><?=get_meeting_schedule_type_text(4)?></option>
+          <?php endif; ?>
+          <?php if(!isset($c_meeting_schedule_type_use[5]) || $c_meeting_schedule_type_use[5] === 'use'): ?>
+          <option value="추가3"><?=get_meeting_schedule_type_text(5)?></option>
+          <?php endif; ?>
+          <?php if(!isset($c_meeting_schedule_type_use[6]) || $c_meeting_schedule_type_use[6] === 'use'): ?>
+          <option value="추가4"><?=get_meeting_schedule_type_text(6)?></option>
+          <?php endif; ?>
+        </template>
+        <template v-if="location === 'admin'">
+          <option value="추가1"><?php if(empty($c_meeting_schedule_type_use[3])){ echo '[미사용] '; } ?><?=get_meeting_schedule_type_text(3)?></option>
+          <option value="추가2"><?php if(empty($c_meeting_schedule_type_use[4])){ echo '[미사용] '; } ?><?=get_meeting_schedule_type_text(4)?></option>
+          <option value="추가3"><?php if(empty($c_meeting_schedule_type_use[5])){ echo '[미사용] '; } ?><?=get_meeting_schedule_type_text(5)?></option>
+          <option value="추가4"><?php if(empty($c_meeting_schedule_type_use[6])){ echo '[미사용] '; } ?><?=get_meeting_schedule_type_text(6)?></option>
+        </template>
+      </optgroup>
+      <optgroup label="모임 계획">
+        <?php echo $ms_options;?>
+      </optgroup>
     </select>
   </div>
 </div>

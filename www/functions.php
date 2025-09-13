@@ -748,11 +748,30 @@ function get_guide_option($mb_id){
 	global $mysqli;
 
 	$return = '';
-	$sql = "SELECT * FROM ".MEMBER_TABLE." WHERE mb_moveout_date = '0000-00-00' ORDER BY mb_sex ASC, mb_name ASC";
+	$mb_sex = '';
+
+	$sql = "SELECT mb_id, mb_name, mb_sex FROM ".MEMBER_TABLE." WHERE mb_moveout_date = '0000-00-00' ORDER BY mb_sex ASC, mb_name ASC";
 	$result = $mysqli->query($sql);
 	if($result->num_rows > 0){
 		while ($row=$result->fetch_assoc()){
-			if(is_admin(mb_id()) || (!is_admin(mb_id()) && is_guide($row['mb_id'])) ) $return .= '<option value="'.$row['mb_id'].'" '.get_selected_text($row['mb_id'], $mb_id).'>'.$row['mb_name'].'</option>';
+
+			if(empty($row['mb_sex'])){
+				$row['mb_sex'] = 'M';
+			}
+
+			if($mb_sex != $row['mb_sex']){
+				$mb_sex = $row['mb_sex'];
+				$return .= '<optgroup label="'.($row['mb_sex']=='M'?'형제':'자매').'">';
+			}
+
+			if(is_admin(mb_id()) || (!is_admin(mb_id()) && is_guide($row['mb_id'])) ) {
+				$return .= '<option value="'.$row['mb_id'].'" '.get_selected_text($row['mb_id'], $mb_id).'>'.$row['mb_name'].'</option>';
+			}
+
+			if($mb_sex != $row['mb_sex']){
+				$mb_sex = $row['mb_sex'];
+				$return .= '</optgroup>';
+			}
 		}
 	}
 
@@ -1359,20 +1378,20 @@ function get_territory_type_options($use, $tt_type){
 		$return = '<option value="전체">전체</option>';
 		foreach ($type as $key => $value){
 			if(is_admin($mb_id)){
-				$return .= '<option value="'.$value.'">'.get_type_text($value).'</option>';
+				$return .= '<option value="'.$value.'">'.($c_territory_type_use[$key] == 'use' ? '' : '[미사용] ').get_type_text($value).'</option>';
 			}else{
 				if(!isset($c_territory_type_use[$key]) || !empty(($c_territory_type_use[$key]))){
-					$return .= '<option value="'.$value.'">'.get_type_text($value).'</option>';
+					$return .= '<option value="'.$value.'">'.($c_territory_type_use[$key] == 'use' ? '' : '[미사용] ').get_type_text($value).'</option>';
 				}			
 			}
 		}
 	}elseif($use == 'edit'){
 		foreach ($type as $key => $value){
 			if(is_admin($mb_id)){
-				$return .= '<option value="'.$value.'" '.get_selected_text($tt_type, $value).'>'.get_type_text($value).'</option>';
+				$return .= '<option value="'.$value.'" '.get_selected_text($tt_type, $value).'>'.($c_territory_type_use[$key] == 'use' ? '' : '[미사용] ').get_type_text($value).'</option>';
 			}else{
 				if(!isset($c_territory_type_use[$key]) || !empty(($c_territory_type_use[$key]))){
-					$return .= '<option value="'.$value.'" '.get_selected_text($tt_type, $value).'>'.get_type_text($value).'</option>';
+					$return .= '<option value="'.$value.'" '.get_selected_text($tt_type, $value).'>'.($c_territory_type_use[$key] == 'use' ? '' : '[미사용] ').get_type_text($value).'</option>';
 				}
 			}
 		}
@@ -1388,9 +1407,14 @@ function get_meeting_schedule_type_options($ms_type){
 
 	$return = '';
 	foreach ($type as $value){
-		if(!isset($c_meeting_schedule_type_use[$value]) || $c_meeting_schedule_type_use[$value] === 'use'){
-			$return .= '<option value="'.$value.'" '.get_selected_text($ms_type, $value).'>'.get_meeting_schedule_type_text($value).'</option>';
+		$type_text = get_meeting_schedule_type_text($value);
+		
+		// 미사용 모임형태인지 확인
+		if(isset($c_meeting_schedule_type_use[$value]) && $c_meeting_schedule_type_use[$value] !== 'use') {
+			$type_text = '[미사용] ' . $type_text;
 		}
+		
+		$return .= '<option value="'.$value.'" '.get_selected_text($ms_type, $value).'>'.$type_text.'</option>';
 	}
 
 	return $return;

@@ -190,7 +190,7 @@ $date_parts = explode("-", $date);
                         전체 ({{getTerritoryCountByType('all')}})
                       </label>
                     </div>
-                    <div class="form-check form-check-inline mb-1" v-for="type in territoryTypes">
+                    <div class="form-check form-check-inline mb-1" v-for="type in territoryTypes" v-if="type!='편지'">
                       <input type="radio" class="form-check-input" :name="'territoryTypeFilter'" :id="'filterType'+type" :value="type" v-model="territoryTypeFilter">
                       <label class="form-check-label" :for="'filterType'+type">
                         {{type}} ({{getTerritoryCountByType(type)}})

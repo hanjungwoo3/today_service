@@ -67,6 +67,20 @@ if($mrt_result->num_rows > 0){
 
 <!-- 봉사모임 -->
 <?php
+
+// 모임형태 사용 설정 가져오기
+$c_meeting_schedule_type_use = unserialize(MEETING_SCHEDULE_TYPE_USE);
+
+// 사용 가능한 모임형태 필터링
+$allowed_types = array();
+for($i = 1; $i <= 6; $i++) {
+  if(!isset($c_meeting_schedule_type_use[$i]) || $c_meeting_schedule_type_use[$i] === 'use') {
+    $allowed_types[] = $i;
+  }
+}
+// 현재 날짜 이후용 필터 (MEETING_SCHEDULE_TABLE의 ms_type 사용)
+$type_filter = !empty($allowed_types) ? "AND ms.ms_type IN (".implode(',', $allowed_types).")" : "";
+
 if($s_date >= $today){
   $ma_id = get_addschedule_id_sub($s_date);
   $sql = "SELECT 
@@ -81,7 +95,7 @@ if($s_date >= $today){
       m.m_guide, 
       m.mb_id,
       COALESCE(m.ms_guide,ms.ms_guide) AS ms_guide, 
-      COALESCE(m.ms_guide2,ms.ms_guide2) AS ms_guide2, 
+      COALESCE(m.ms_guide2,ms.ms_guide2) AS ms_guide2,  
       COALESCE(m.ms_week,ms.ms_week) AS ms_week
     FROM 
       ".MEETING_SCHEDULE_TABLE." ms
@@ -97,6 +111,7 @@ if($s_date >= $today){
       AND ms.ms_week = '{$week_val}' 
       AND (ms.g_id = 0 OR ms.g_id = '{$mb_g_id}') 
       AND (m.m_cancle IS NULL OR m.m_cancle != 2) 
+      {$type_filter} 
     ORDER BY 
       ms.ms_time, 
       g.g_name, 
