@@ -1,0 +1,769 @@
+/* 기본 스타일 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #000000;
+    color: #ffffff;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* 설정 페이지 스타일 */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.setup-page {
+    background-color: #2a2a2a;
+    border-radius: 15px;
+    padding: 40px;
+    width: 100%;
+    max-width: 700px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 10px; /* 제목 아래 여백 더 줄임 */
+    color: #ffffff;
+}
+
+.setup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px; /* 훨씬 더 줄임 */
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 3px; /* 훨씬 더 컴팩트하게 */
+}
+
+.input-group label {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffffff;
+    min-width: 140px;
+    text-align: left;
+}
+
+.input-group input[type="text"],
+.input-group input[type="number"],
+.input-group textarea {
+    flex: 1;
+    padding: 10px 12px; /* 패딩 줄임 */
+    background-color: #404040;
+    border: 1px solid #555555;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+/* textarea 전용 스타일 */
+.input-group textarea {
+    resize: vertical; /* 세로 크기 조절만 허용 */
+    font-family: inherit; /* 부모 폰트 상속 */
+    line-height: 1.4; /* 줄 간격 */
+}
+
+/* 제목 textarea (2줄) */
+.input-group textarea#title {
+    min-height: 50px; /* 2줄에 맞는 높이 */
+}
+
+/* 안내메시지 textarea (3줄) */
+.input-group textarea#end_message {
+    min-height: 75px; /* 3줄에 맞는 높이 */
+}
+
+.input-group input[type="text"]:focus,
+.input-group input[type="number"]:focus,
+.input-group textarea:focus {
+    outline: none;
+    border-color: #00ffff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.input-group input::placeholder,
+.input-group textarea::placeholder {
+    color: #888888;
+}
+
+/* 파일 입력 스타일 */
+.file-input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.input-group input[type="file"] {
+    display: none;
+}
+
+.file-button {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.file-button:hover {
+    background: linear-gradient(135deg, #2980b9, #1f5f8b);
+    transform: translateY(-2px);
+}
+
+.file-info {
+    color: #27ae60;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 버튼 스타일 */
+.start-button,
+.timer-button {
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    margin-top: 5px; /* 시작 버튼 위 여백 줄임 */
+}
+
+.start-button:hover,
+.timer-button:hover {
+    background: linear-gradient(135deg, #2980b9, #1f5f8b);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+/* 정보 섹션 스타일 */
+.info-section {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.info-row {
+    display: flex;
+    gap: 12px;
+}
+
+.info-box {
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: #ffffff;
+    flex: 1;
+}
+
+.info-box h4 {
+    margin: 0 0 6px 0;
+    font-size: 13px;
+    font-weight: bold;
+    color: #00ffff;
+}
+
+.info-box p {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #cccccc;
+}
+
+/* 전체화면 안내 메시지 */
+.fullscreen-notice {
+    padding: 8px 10px;
+    background-color: rgba(52, 152, 219, 0.1);
+    border: 1px solid rgba(52, 152, 219, 0.3);
+    border-radius: 6px;
+    color: #3498db;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* HTML 태그 안내 메시지 */
+.html-notice {
+    margin-top: 8px;
+    padding: 10px 12px; /* 패딩 줄임 */
+    background-color: rgba(255, 165, 0, 0.1);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 8px;
+    color: #ffa500;
+    font-size: 13px;
+    text-align: center;
+    line-height: 1.4;
+}
+
+.html-notice code {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #00ffff;
+    margin: 0 2px;
+}
+
+/* 키보드 키 스타일 */
+kbd {
+    background: #444444;
+    border: 1px solid #666666;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-family: monospace;
+    color: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    display: inline-block;
+}
+
+/* 타이머 페이지 스타일 */
+.timer-body {
+    background-color: #000000;
+    overflow: hidden;
+    cursor: default; /* 마우스 포인터 표시 */
+    position: relative; /* 의사 요소 위치 기준 */
+}
+
+/* 타이머 컨테이너 */
+.timer-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    position: fixed; /* 고정 위치로 크기 변화 방지 */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* 배경 이미지에만 투명도 적용하기 위한 의사 요소 - 전체화면에서도 작동 */
+.timer-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('screenshot/jw.png');
+    background-repeat: no-repeat;
+    background-position: calc(100% - 70px) calc(100% - 70px);
+    background-size: 150px;
+    opacity: 0.7; /* 투명도 70% */
+    pointer-events: none; /* 클릭 이벤트 차단 */
+    z-index: -1; /* 다른 요소들 뒤로 */
+}
+
+.timer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+    max-width: 800px;
+    position: relative; /* 상대 위치로 안정성 확보 */
+}
+
+.timer-title {
+    font-size: clamp(40px, 9vw, 108px); /* 폰트 크기를 2배로 증가 */
+    font-weight: bold;
+    color: #ffffff;
+    text-align: center; /* 가운데 정렬 */
+    margin-bottom: 20px;
+    width: 100%; /* 전체 너비 사용 */
+    max-width: none; /* 최대 너비 제한 제거 */
+    box-sizing: border-box; /* 패딩/마진 포함한 크기 계산 */
+    white-space: nowrap; /* 줄바꿈 방지 */
+    overflow: visible; /* 넘치는 텍스트 표시 */
+    word-wrap: normal; /* 줄바꿈 방지 */
+    text-overflow: ellipsis; /* 넘치는 텍스트는 ... 처리 */
+    padding: 10px 20px; /* 좌우 패딩 추가로 여유 공간 확보 */
+    background-color: transparent; /* 디버깅 배경 제거 */
+    display: block; /* 블록 요소로 명시적 설정 */
+    position: fixed; /* 고정 위치로 변경 */
+    top: 50%; /* 화면 가운데 */
+    left: 50%;
+    transform: translate(-50%, -50%); /* 정확한 중앙 정렬 */
+    margin: 0; /* 마진 제거 */
+}
+
+/* 원형 진행바 컨테이너 */
+.timer-display-container {
+    position: relative;
+    display: none; /* 기본적으로 숨김 */
+    justify-content: center;
+    align-items: center;
+}
+
+.circular-progress {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: clamp(320px, 50vmin, 550px); /* 원 크기 조금 증가 */
+    height: clamp(320px, 50vmin, 550px);
+}
+
+.progress-ring {
+    display: none !important; /* 진행바 SVG만 숨김 */
+}
+
+.progress-ring-background {
+    fill: transparent;
+    stroke: #111111; /* 배경(진행될 부분)을 매우 어둡게 */
+    stroke-width: 60; /* 진행바 두께 4배 증가 (30 → 60) */
+    stroke-opacity: 1; /* 배경 진행바 투명도 최대 */
+}
+
+.progress-ring-circle {
+    fill: transparent;
+    stroke: #0a0a0a; /* 진행된 부분을 거의 검은색으로 */
+    stroke-width: 60; /* 진행바 두께 4배 증가 (30 → 60) */
+    stroke-linecap: butt;
+    transition: stroke-dashoffset 0.5s ease-in-out, stroke 0.3s ease;
+    visibility: hidden; /* 기본적으로 숨김 */
+    opacity: 0;
+    stroke-opacity: 1; /* 진행바 투명도 최대 */
+}
+
+.progress-ring-ticks {
+    /* 틱은 항상 보이도록 설정 */
+    visibility: visible;
+    opacity: 1;
+}
+
+/* 타이머 디스플레이 */
+.timer-display {
+    position: fixed !important;
+    bottom: 120px !important; /* 안내 메시지 위에 배치 */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    text-align: center;
+    z-index: 10;
+    pointer-events: none; /* 클릭 이벤트 방지 */
+    max-width: 70%; /* 원의 70% 너비로 제한 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 타이머 숫자 */
+.timer-number {
+    font-size: clamp(60px, 12vw, 120px); /* 타이머 폰트 크기 조금 줄임 */
+    font-weight: bold;
+    color: #aaaaaa; /* 더 어둡게 */
+    font-family: 'Courier New', monospace;
+    white-space: nowrap; /* 줄바꿈 방지 */
+    transition: all 0.2s ease;
+}
+
+/* 가로줄 진행바 컨테이너 */
+.horizontal-progress-container {
+    position: relative;
+    margin-top: 0; /* 타이머 숫자에 바로 붙이기 */
+    width: 100%; /* 타이머 정도 넓이로 */
+    height: 8px; /* 두께 2배로 */
+    background-color: #333333;
+    border-radius: 4px;
+    overflow: hidden;
+    z-index: 10;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 가로줄 진행바 */
+.horizontal-progress-bar {
+    width: 0%;
+    height: 100%;
+    background: #e0e0e0; /* 흰색보다 조금 어둡게 */
+    border-radius: 4px;
+    transition: width 0.5s ease-in-out;
+    box-shadow: 0 0 5px rgba(224, 224, 224, 0.3);
+}
+
+/* 음악 정보 디스플레이 */
+.music-info {
+    display: none !important; /* 음악 정보 완전히 숨김 */
+}
+
+/* 타이머 컨트롤 */
+.timer-controls {
+    display: none; /* 기본적으로 숨김 */
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.control-btn {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.005);
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.15);
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* 안내 메시지 */
+.guide-message {
+    font-size: clamp(32px, 6vw, 48px);
+    font-weight: normal;
+    color: #888888;
+    text-align: center;
+    opacity: 0.8;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.8);
+        background-color: rgba(255, 140, 0, 0.2);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 15px rgba(255, 140, 0, 0);
+        background-color: rgba(255, 140, 0, 0.4);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 140, 0, 0);
+        background-color: rgba(255, 140, 0, 0.2);
+    }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .setup-page {
+        padding: 30px 20px;
+        margin: 10px;
+    }
+    
+    .input-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .info-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .input-group label {
+        min-width: auto;
+        font-size: 16px;
+    }
+    
+    .file-input-container {
+        width: 100%;
+    }
+    
+    .timer-content {
+        gap: 20px;
+    }
+    
+    .timer-controls {
+        gap: 15px;
+    }
+    
+    .control-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .setup-page {
+        padding: 20px 15px;
+    }
+    
+    .title {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    
+    .input-group label {
+        font-size: 14px;
+    }
+    
+    .input-group input[type="text"],
+    .input-group input[type="number"],
+    .input-group textarea {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+    
+    .input-group textarea#title {
+        min-height: 45px; /* 모바일에서 제목 2줄 */
+    }
+    
+    .input-group textarea#end_message {
+        min-height: 65px; /* 모바일에서 안내메시지 3줄 */
+    }
+    
+    .start-button,
+    .timer-button {
+        font-size: 16px;
+        padding: 12px 25px;
+    }
+}
+
+/* 전체화면 스타일 */
+:fullscreen {
+    background-color: #1a1a1a;
+}
+
+:-webkit-full-screen {
+    background-color: #1a1a1a;
+}
+
+:-moz-full-screen {
+    background-color: #1a1a1a;
+}
+
+/* 스크롤바 스타일 (웹킷 기반 브라우저) */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #2a2a2a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #555555;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #777777;
+}
+
+/* 음악 선택 스타일링 */
+.music-selection {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 10px;
+}
+
+.music-selection input[type="radio"] {
+    margin-right: 5px;
+}
+
+.music-selection label {
+    color: #ffffff;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.music-selection label:hover {
+    color: #00ffff;
+}
+
+/* 시간 선택 컨테이너 */
+.time-select-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.time-select-container select {
+    flex: 1;
+    min-width: 80px;
+}
+
+/* 온라인 음악 선택 드롭다운 */
+select {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #444;
+    border-radius: 8px;
+    background: #2a2a2a;
+    color: #ffffff;
+    font-size: 18px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    min-height: 50px;
+}
+
+select:focus {
+    border-color: #00ffff;
+    box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.2);
+}
+
+select option {
+    background: #2a2a2a;
+    color: #ffffff;
+    padding: 12px;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* 음악 선택 컨테이너 */
+.music-select-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.music-select-container select {
+    flex: 1;
+}
+
+/* 랜덤 버튼 */
+.random-btn {
+    background: #444444;
+    border: 1px solid #666666;
+    color: #ffffff;
+    padding: 15px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    min-width: 60px;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.random-btn:hover {
+    background: #555555;
+    border-color: #00ffff;
+    transform: scale(1.05);
+}
+
+.random-btn:active {
+    transform: scale(0.95);
+}
+
+/* 음악 힌트 메시지 */
+.music-hint {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #888888;
+    font-style: italic;
+}
+
+/* 파일 입력 스타일링 */
+.file-input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-input-container input[type="file"] {
+    display: none;
+}
+
+.file-button {
+    background: #444;
+    color: white;
+    border: 1px solid #666;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.file-button:hover {
+    background: #555;
+}
+
+.file-info {
+    color: #ccc;
+    font-size: 14px;
+    font-style: italic;
+}
+
+/* 안내 메시지 스타일 */
+.guide-message {
+    position: fixed;
+    bottom: 20px; /* 40px에서 20px로 조금 아래로 */
+    left: 0;
+    right: 0;
+    width: 100vw;
+    min-height: 50px;
+    margin: 0;
+    padding: 15px 20px;
+    color: #aaaaaa; /* 더 어둡게 */
+    font-size: clamp(32px, 6vw, 48px);
+    font-weight: normal;
+    text-align: center;
+    z-index: 1000;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 메시지 라인 */
+.guide-message .message-line {
+    display: block;
+    white-space: nowrap;
+    overflow: visible;
+    max-width: none;
+    width: 100%;
+    transition: opacity 2s ease-in-out;
+    opacity: 0;
+}

@@ -1,5 +1,8 @@
 # Upload directory
-www/upload/
+upload/
 
 # Custom configuration file
-www/config_custom.php
+config_custom.php
+
+t/timer_settings.json
+
