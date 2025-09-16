@@ -160,6 +160,7 @@ if (!$settings) {
         let remainingSeconds = TOTAL_SECONDS;
         let isRunning = true;
         let isPaused = false;
+        let isManuallyPaused = false; // 사용자가 수동으로 일시정지했는지 추적
         let timerInterval;
         let blinkInterval;
         
@@ -447,8 +448,9 @@ if (!$settings) {
             guideMessage.style.display = 'none';
             stopMessageRotation();
             
-            // 타이머 완료 후 전체화면 상태 유지
-            console.log('타이머 완료 - 전체화면 유지');
+            // 타이머 완료 후 전체화면 상태 확인 및 안내 메시지 표시
+            console.log('타이머 완료 - 전체화면 상태 확인');
+            updateFullscreenNotice();
             
             // 안내 메시지 제거 (사용자 요청)
         }
@@ -551,13 +553,13 @@ if (!$settings) {
                 display: none;
                 cursor: pointer;
             `;
-            fullscreenNotice.innerHTML = '전체 화면으로 전환하세요<br><span style="font-size: 0.7em; opacity: 0.8;">(스페이스바를 누르거나, 클릭)</span>';
+            fullscreenNotice.innerHTML = '전체 화면으로 전환하세요<br><span style="font-size: 0.7em; opacity: 0.8;">(스페이스바 또는 클릭)</span>';
             
             // 클릭 시 전체화면 전환
             fullscreenNotice.addEventListener('click', function() {
-                if (isReady && !isFullscreenReady) {
-                    console.log('전체화면 안내 메시지 클릭: 전체화면 전환');
-                    toggleFullscreen();
+                console.log('전체화면 안내 메시지 클릭: 전체화면 전환');
+                toggleFullscreen();
+                if (isReady) {
                     isFullscreenReady = true;
                 }
             });
@@ -650,16 +652,32 @@ if (!$settings) {
             }
         }
         
-        // 전체화면 안내 메시지 업데이트
+        // 전체화면 안내 메시지 업데이트 및 타이머 제어
         function updateFullscreenNotice() {
             const fullscreenNotice = document.getElementById('fullscreenNotice');
-            if (fullscreenNotice && isReady) {
-                const isFullscreen = document.fullscreenElement || 
-                                   document.webkitFullscreenElement || 
-                                   document.mozFullScreenElement || 
-                                   document.msFullscreenElement;
-                
-                if (!isFullscreen) {
+            const isFullscreen = document.fullscreenElement || 
+                               document.webkitFullscreenElement || 
+                               document.mozFullScreenElement || 
+                               document.msFullscreenElement;
+            
+            // 전체화면 상태 변화에 따른 타이머 제어
+            if (isRunning) {
+                if (!isFullscreen && !isPaused) {
+                    // 전체화면 해제 시 타이머 일시정지 (자동 일시정지)
+                    console.log('전체화면 해제됨 - 타이머 일시정지');
+                    isManuallyPaused = false; // 자동 일시정지이므로 수동이 아님
+                    togglePause();
+                } else if (isFullscreen && isPaused && !isManuallyPaused) {
+                    // 전체화면 진입 시 타이머 재개 (자동 일시정지였던 경우만)
+                    console.log('전체화면 진입됨 - 타이머 재개 (자동 일시정지였음)');
+                    togglePause();
+                }
+            }
+            
+            // 안내 메시지 표시/숨김
+            if (fullscreenNotice) {
+                // 준비 상태이거나 타이머 실행 중일 때 모두 안내 메시지 표시
+                if (!isFullscreen && (isReady || isRunning)) {
                     fullscreenNotice.style.display = 'block';
                 } else {
                     fullscreenNotice.style.display = 'none';
@@ -679,10 +697,11 @@ if (!$settings) {
                 startTimeDisplay.remove();
             }
             
-            const fullscreenNotice = document.getElementById('fullscreenNotice');
-            if (fullscreenNotice) {
-                fullscreenNotice.remove();
-            }
+            // 전체화면 안내 메시지는 제거하지 않음 (타이머 실행 중에도 필요)
+            // const fullscreenNotice = document.getElementById('fullscreenNotice');
+            // if (fullscreenNotice) {
+            //     fullscreenNotice.remove();
+            // }
             
             if (currentTimeInterval) {
                 clearInterval(currentTimeInterval);
@@ -848,7 +867,13 @@ if (!$settings) {
         // 타이머 화면에서 제목 클릭 처리 (일시정지/재생 토글)
         function handleTimerStateClick() {
             if (isRunning) {
-                console.log('제목 클릭: 일시정지/재생 토글');
+                console.log('제목 클릭: 일시정지/재생 토글 (수동)');
+                // 수동 일시정지/재생 플래그 설정
+                if (!isPaused) {
+                    isManuallyPaused = true; // 수동으로 일시정지
+                } else {
+                    isManuallyPaused = false; // 수동으로 재생
+                }
                 togglePause();
             }
         }
@@ -892,6 +917,7 @@ if (!$settings) {
             // 타이머 화면에서 클릭 기능 추가 (제목, 타이머 숫자, 진행바)
             const timerTitle = document.querySelector('.timer-title');
             const timerDisplay = document.querySelector('.timer-display');
+            const timerNumber = document.querySelector('.timer-number');
             const circularProgress = document.querySelector('.circular-progress');
             
             if (timerTitle) {
@@ -903,7 +929,14 @@ if (!$settings) {
             
             if (timerDisplay) {
                 timerDisplay.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
+                timerDisplay.style.pointerEvents = 'auto'; // 클릭 이벤트 활성화
                 timerDisplay.addEventListener('click', handleTimerStateClick);
+            }
+            
+            if (timerNumber) {
+                timerNumber.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
+                timerNumber.style.pointerEvents = 'auto'; // 클릭 이벤트 활성화
+                timerNumber.addEventListener('click', handleTimerStateClick);
             }
             
             if (circularProgress) {
@@ -1170,23 +1203,39 @@ if (!$settings) {
             } else if (e.key === ' ') {
                 e.preventDefault();
                 
-                // 준비 상태에서 스페이스바 1번: 전체화면 전환
-                if (isReady && !isFullscreenReady) {
-                    console.log('스페이스바 1번: 전체화면 전환');
+                // 현재 전체화면 상태 확인
+                const isFullscreen = document.fullscreenElement || 
+                                   document.webkitFullscreenElement || 
+                                   document.mozFullScreenElement || 
+                                   document.msFullscreenElement;
+                
+                // 전체화면이 아닐 때 스페이스바: 전체화면 전환
+                if (!isFullscreen) {
+                    console.log('스페이스바: 전체화면 전환');
                     toggleFullscreen();
-                    isFullscreenReady = true;
+                    if (isReady) {
+                        isFullscreenReady = true;
+                    }
                     return;
                 }
                 
-                // 전체화면 준비 상태에서 스페이스바 2번: 타이머 시작
+                // 전체화면 상태에서의 기존 로직
+                // 준비 상태에서 스페이스바: 타이머 시작
                 if (isReady && isFullscreenReady) {
-                    console.log('스페이스바 2번: 타이머 시작');
+                    console.log('스페이스바: 타이머 시작');
                     startTimerFromReady();
                     return;
                 }
                 
-                // 타이머 실행 중 스페이스바: 일시정지/재생
+                // 타이머 실행 중 스페이스바: 일시정지/재생 (수동)
                 if (isRunning) {
+                    console.log('스페이스바: 일시정지/재생 토글 (수동)');
+                    // 수동 일시정지/재생 플래그 설정
+                    if (!isPaused) {
+                        isManuallyPaused = true; // 수동으로 일시정지
+                    } else {
+                        isManuallyPaused = false; // 수동으로 재생
+                    }
                     togglePause();
                 }
             } else if (e.key === 'F11') {
