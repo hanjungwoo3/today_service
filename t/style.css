@@ -521,6 +521,68 @@ kbd {
     }
 }
 
+/* 타이머 시작 시 깜빡임 애니메이션 */
+@keyframes flashScreen {
+    0% {
+        background-color: #000000;
+    }
+    16.66% {
+        background-color: #ffffff;
+    }
+    33.33% {
+        background-color: #000000;
+    }
+    50% {
+        background-color: #ffffff;
+    }
+    66.66% {
+        background-color: #000000;
+    }
+    83.33% {
+        background-color: #ffffff;
+    }
+    100% {
+        background-color: #000000;
+    }
+}
+
+@keyframes flashTitle {
+    0% {
+        color: #ffffff;
+    }
+    16.66% {
+        color: #000000;
+    }
+    33.33% {
+        color: #ffffff;
+    }
+    50% {
+        color: #000000;
+    }
+    66.66% {
+        color: #ffffff;
+    }
+    83.33% {
+        color: #000000;
+    }
+    100% {
+        color: #ffffff;
+    }
+}
+
+/* 깜빡임 효과 클래스 */
+.timer-flash .timer-body {
+    animation: flashScreen 2.5s ease-in-out;
+}
+
+.timer-flash .timer-container {
+    animation: flashScreen 2.5s ease-in-out;
+}
+
+.timer-flash .timer-title {
+    animation: flashTitle 2.5s ease-in-out;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
     .setup-page {
@@ -781,7 +843,7 @@ select option {
     min-height: 50px;
     margin: 0;
     padding: 15px 20px;
-    color: #aaaaaa; /* 더 어둡게 */
+    color: #ffffff; /* 투명도 없이 순백색 */
     font-size: clamp(48px, 9vw, 72px); /* 폰트 크기 조금 줄임 */
     font-weight: normal;
     text-align: center;

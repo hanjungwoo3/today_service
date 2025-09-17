@@ -894,90 +894,99 @@ if (!$settings) {
         function startTimerFromReady() {
             if (!isReady) return;
             
-            isReady = false;
-            isFullscreenReady = false;
-            isRunning = true;
+            // 깜빡임 효과 시작
+            const bodyElement = document.body;
+            bodyElement.classList.add('timer-flash');
             
-            // 타이머 컨테이너에 실행 중 클래스 추가 (레이아웃을 위로 이동)
-            const timerContainer = document.querySelector('.timer-container');
-            if (timerContainer) {
-                timerContainer.classList.add('timer-running');
-            }
-            
-            // 준비 메시지 제거 (이제 메시지가 없으므로 불필요)
-            
-            // 현재 시간 표시 제거
-            removeCurrentTimeDisplay();
-            
-            // 안내 메시지 표시 (타이머 시작 시)
-            if (guideMessage && GUIDE_MESSAGES.length > 0) {
-                guideMessage.style.display = 'block';
-                startMessageRotation();
-            } else {
-                console.log('안내 메시지가 없거나 요소를 찾을 수 없음');
-            }
-            
-            // 타이머 디스플레이 컨테이너 표시
-            const timerDisplayContainer = document.querySelector('.timer-display-container');
-            if (timerDisplayContainer) {
-                timerDisplayContainer.style.display = 'flex'; // CSS 기본값이 none이므로 flex로 변경
-            }
-            
-            // 진행바 다시 보이기
-            const progressRing = document.querySelector('.progress-ring-circle');
-            if (progressRing) {
-                progressRing.style.visibility = 'visible';
-                progressRing.style.opacity = '1';
-            }
-            
-            // 컨트롤 버튼들이 삭제되어 표시할 필요 없음
-            
-            // 타이머 화면에서 클릭 기능 추가 (제목, 타이머 숫자, 진행바)
-            const timerTitle = document.querySelector('.timer-title');
-            const timerDisplay = document.querySelector('.timer-display');
-            const timerNumber = document.querySelector('.timer-number');
-            const circularProgress = document.querySelector('.circular-progress');
-            
-            if (timerTitle) {
-                timerTitle.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
-                // 기존 이벤트 리스너 제거 후 새로운 기능 추가
-                timerTitle.removeEventListener('click', handleReadyStateClick);
-                timerTitle.addEventListener('click', handleTimerStateClick);
-            }
-            
-            if (timerDisplay) {
-                timerDisplay.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
-                timerDisplay.style.pointerEvents = 'auto'; // 클릭 이벤트 활성화
-                timerDisplay.addEventListener('click', handleTimerStateClick);
-            }
-            
-            if (timerNumber) {
-                timerNumber.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
-                timerNumber.style.pointerEvents = 'auto'; // 클릭 이벤트 활성화
-                timerNumber.addEventListener('click', handleTimerStateClick);
-            }
-            
-            if (circularProgress) {
-                circularProgress.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
-                circularProgress.addEventListener('click', handleTimerStateClick);
-            }
-            
-            // 타이머 시작
-            updateDisplay();
-            startTimer();
-            
-            // 음악 재생 시작 (타이머 시작과 함께)
-            if (backgroundMusic) {
-                console.log('타이머 시작과 함께 음악 재생 시도');
-                backgroundMusic.play().then(() => {
-                    console.log('음악 재생 성공');
-                }).catch(e => {
-                    console.log('음악 자동 재생 차단:', e.message);
-                    showMusicPlayButton();
-                });
-            }
-            
-            console.log('타이머 시작됨');
+            // 1.5초 후에 깜빡임 효과 제거하고 타이머 실제 시작
+            setTimeout(() => {
+                bodyElement.classList.remove('timer-flash');
+                
+                isReady = false;
+                isFullscreenReady = false;
+                isRunning = true;
+                
+                // 타이머 컨테이너에 실행 중 클래스 추가 (레이아웃을 위로 이동)
+                const timerContainer = document.querySelector('.timer-container');
+                if (timerContainer) {
+                    timerContainer.classList.add('timer-running');
+                }
+                
+                // 준비 메시지 제거 (이제 메시지가 없으므로 불필요)
+                
+                // 현재 시간 표시 제거
+                removeCurrentTimeDisplay();
+                
+                // 안내 메시지 표시 (타이머 시작 시)
+                if (guideMessage && GUIDE_MESSAGES.length > 0) {
+                    guideMessage.style.display = 'block';
+                    startMessageRotation();
+                } else {
+                    console.log('안내 메시지가 없거나 요소를 찾을 수 없음');
+                }
+                
+                // 타이머 디스플레이 컨테이너 표시
+                const timerDisplayContainer = document.querySelector('.timer-display-container');
+                if (timerDisplayContainer) {
+                    timerDisplayContainer.style.display = 'flex'; // CSS 기본값이 none이므로 flex로 변경
+                }
+                
+                // 진행바 다시 보이기
+                const progressRing = document.querySelector('.progress-ring-circle');
+                if (progressRing) {
+                    progressRing.style.visibility = 'visible';
+                    progressRing.style.opacity = '1';
+                }
+                
+                // 컨트롤 버튼들이 삭제되어 표시할 필요 없음
+                
+                // 타이머 화면에서 클릭 기능 추가 (제목, 타이머 숫자, 진행바)
+                const timerTitle = document.querySelector('.timer-title');
+                const timerDisplay = document.querySelector('.timer-display');
+                const timerNumber = document.querySelector('.timer-number');
+                const circularProgress = document.querySelector('.circular-progress');
+                
+                if (timerTitle) {
+                    timerTitle.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
+                    // 기존 이벤트 리스너 제거 후 새로운 기능 추가
+                    timerTitle.removeEventListener('click', handleReadyStateClick);
+                    timerTitle.addEventListener('click', handleTimerStateClick);
+                }
+                
+                if (timerDisplay) {
+                    timerDisplay.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
+                    timerDisplay.style.pointerEvents = 'auto'; // 클릭 이벤트 활성화
+                    timerDisplay.addEventListener('click', handleTimerStateClick);
+                }
+                
+                if (timerNumber) {
+                    timerNumber.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
+                    timerNumber.style.pointerEvents = 'auto'; // 클릭 이벤트 활성화
+                    timerNumber.addEventListener('click', handleTimerStateClick);
+                }
+                
+                if (circularProgress) {
+                    circularProgress.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
+                    circularProgress.addEventListener('click', handleTimerStateClick);
+                }
+                
+                // 타이머 시작
+                updateDisplay();
+                startTimer();
+                
+                // 음악 재생 시작 (타이머 시작과 함께)
+                if (backgroundMusic) {
+                    console.log('타이머 시작과 함께 음악 재생 시도');
+                    backgroundMusic.play().then(() => {
+                        console.log('음악 재생 성공');
+                    }).catch(e => {
+                        console.log('음악 자동 재생 차단:', e.message);
+                        showMusicPlayButton();
+                    });
+                }
+                
+                console.log('타이머 시작됨');
+            }, 2500); // 2.5초 후 실행
         }
         
         // 즉시 초기화 (스크립트가 body 끝에 있으므로 DOM 요소들이 이미 로드됨)
