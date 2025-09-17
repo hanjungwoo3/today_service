@@ -428,6 +428,12 @@ if (!$settings) {
             clearInterval(timerInterval);
             isRunning = false;
             
+            // 타이머 컨테이너에서 실행 중 클래스 제거
+            const timerContainer = document.querySelector('.timer-container');
+            if (timerContainer) {
+                timerContainer.classList.remove('timer-running');
+            }
+            
             // 음악 페이드 아웃 효과
             if (backgroundMusic && !backgroundMusic.paused) {
                 fadeOutMusic(backgroundMusic, 2000); // 2초에 걸쳐 페이드 아웃
@@ -474,6 +480,12 @@ if (!$settings) {
         function stopTimer() {
             clearInterval(timerInterval);
             isRunning = false;
+            
+            // 타이머 컨테이너에서 실행 중 클래스 제거
+            const timerContainer = document.querySelector('.timer-container');
+            if (timerContainer) {
+                timerContainer.classList.remove('timer-running');
+            }
             
             // 음악 페이드 아웃 효과 (빠른 페이드 아웃)
             if (backgroundMusic && !backgroundMusic.paused) {
@@ -885,6 +897,12 @@ if (!$settings) {
             isReady = false;
             isFullscreenReady = false;
             isRunning = true;
+            
+            // 타이머 컨테이너에 실행 중 클래스 추가 (레이아웃을 위로 이동)
+            const timerContainer = document.querySelector('.timer-container');
+            if (timerContainer) {
+                timerContainer.classList.add('timer-running');
+            }
             
             // 준비 메시지 제거 (이제 메시지가 없으므로 불필요)
             

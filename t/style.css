@@ -269,6 +269,13 @@ kbd {
     bottom: 0;
     width: 100vw;
     height: 100vh;
+    transition: all 0.5s ease; /* 부드러운 전환 효과 */
+}
+
+/* 타이머 실행 중일 때 컨테이너는 중앙 정렬 유지 */
+.timer-container.timer-running {
+    align-items: center; /* 중앙 정렬 유지 */
+    padding-top: 0; /* 패딩 제거 */
 }
 
 /* 배경 이미지에만 투명도 적용하기 위한 의사 요소 - 전체화면에서도 작동 */
@@ -319,6 +326,18 @@ kbd {
     left: 50%;
     transform: translate(-50%, -50%); /* 정확한 중앙 정렬 */
     margin: 0; /* 마진 제거 */
+    transition: all 0.5s ease; /* 부드러운 전환 효과 */
+}
+
+/* 타이머 실행 중일 때 제목 스타일 */
+.timer-container.timer-running .timer-title {
+    position: fixed; /* 고정 위치 유지 */
+    top: 15vh; /* 상단에서 15% 위치 */
+    left: 50%;
+    transform: translateX(-50%); /* 가로 중앙 정렬만 유지 */
+    font-size: clamp(24px, 6vw, 72px); /* 타이머 실행 중 더 작은 크기 */
+    margin-bottom: 0; /* 마진 제거 */
+    z-index: 10; /* 타이머보다 높은 z-index */
 }
 
 /* 원형 진행바 컨테이너 */
@@ -327,7 +346,10 @@ kbd {
     display: none; /* 기본적으로 숨김 */
     justify-content: center;
     align-items: center;
+    transition: all 0.5s ease; /* 부드러운 전환 효과 */
 }
+
+/* 타이머 실행 중일 때 진행바 컨테이너는 기본 스타일 유지 */
 
 .circular-progress {
     position: relative;
@@ -379,11 +401,24 @@ kbd {
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: all 0.5s ease; /* 부드러운 전환 효과 */
+}
+
+/* 타이머 실행 중일 때 타이머 디스플레이 */
+.timer-container.timer-running .timer-display {
+    position: fixed !important;
+    bottom: auto !important;
+    top: 60vh !important; /* 화면 아래쪽 위치 */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    margin-top: 0;
+    pointer-events: auto; /* 클릭 이벤트 활성화 */
+    z-index: 5; /* 제목보다 낮은 z-index */
 }
 
 /* 타이머 숫자 */
 .timer-number {
-    font-size: clamp(60px, 12vw, 120px); /* 타이머 폰트 크기 조금 줄임 */
+    font-size: clamp(80px, 16vw, 160px); /* 타이머 폰트 크기 증가 */
     font-weight: bold;
     color: #aaaaaa; /* 더 어둡게 */
     font-family: 'Courier New', monospace;
@@ -739,7 +774,7 @@ select option {
 /* 안내 메시지 스타일 */
 .guide-message {
     position: fixed;
-    bottom: 20px; /* 40px에서 20px로 조금 아래로 */
+    bottom: 60px; /* 20px에서 60px로 위로 이동 */
     left: 0;
     right: 0;
     width: 100vw;
@@ -747,7 +782,7 @@ select option {
     margin: 0;
     padding: 15px 20px;
     color: #aaaaaa; /* 더 어둡게 */
-    font-size: clamp(32px, 6vw, 48px);
+    font-size: clamp(48px, 9vw, 72px); /* 폰트 크기 조금 줄임 */
     font-weight: normal;
     text-align: center;
     z-index: 1000;
