@@ -583,6 +583,11 @@ kbd {
     animation: flashTitle 2.5s ease-in-out;
 }
 
+/* 깜빡임 효과 중에는 배경 이미지(jw.png) 숨기기 */
+.timer-flash .timer-container::after {
+    opacity: 0;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
     .setup-page {
