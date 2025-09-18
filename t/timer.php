@@ -64,6 +64,11 @@ if (!$settings) {
         </div>
     </div>
     
+    <!-- 카운트다운 오버레이 -->
+    <div id="countdownOverlay" class="countdown-overlay">
+        <div id="countdownNumber" class="countdown-number">10</div>
+    </div>
+    
     <?php 
     $music_url = isset($settings['online_music']) ? $settings['online_music'] : '';
     if (!empty($music_url)): 
@@ -726,6 +731,49 @@ if (!$settings) {
             }
         }
         
+        // 카운트다운 관련 변수
+        let countdownActive = false;
+        let countdownInterval = null;
+        let countdownValue = 10;
+        
+        // 카운트다운 시작
+        function startCountdown() {
+            if (countdownActive) return;
+            
+            countdownActive = true;
+            countdownValue = 10;
+            
+            const countdownOverlay = document.getElementById('countdownOverlay');
+            const countdownNumber = document.getElementById('countdownNumber');
+            
+            // 오버레이 표시
+            countdownOverlay.style.display = 'flex';
+            
+            // 카운트다운 로직
+            countdownInterval = setInterval(() => {
+                countdownNumber.textContent = countdownValue;
+                
+                // 애니메이션 재시작을 위해 클래스 제거 후 추가
+                countdownNumber.style.animation = 'none';
+                countdownNumber.offsetHeight; // 리플로우 강제 실행
+                countdownNumber.style.animation = 'countdownPulse 1s ease-in-out';
+                
+                console.log(`카운트다운: ${countdownValue}`);
+                countdownValue--;
+                
+                if (countdownValue < 0) {
+                    clearInterval(countdownInterval);
+                    countdownOverlay.style.display = 'none';
+                    countdownActive = false;
+                    
+                    // 카운트다운 완료 후 타이머 시작
+                    if (isReady && isFullscreenReady) {
+                        startTimerFromReady();
+                    }
+                }
+            }, 1000);
+        }
+        
         // 자동 시작 시간 체크
         function checkAutoStart() {
             const autoStartHour = <?= isset($settings['auto_start_hour']) ? $settings['auto_start_hour'] : -1 ?>;
@@ -746,25 +794,30 @@ if (!$settings) {
             const currentMinute = now.getMinutes();
             const currentSecond = now.getSeconds();
             
-            // 설정된 시간과 일치하고 0초인 경우 자동 시작
-            if (currentHour === autoStartHour && currentMinute === autoStartMinute && currentSecond === 0) {
-                console.log(`자동 시작: ${autoStartHour}시 ${autoStartMinute}분`);
+            // 시작 시간 계산
+            const startTime = new Date();
+            startTime.setHours(autoStartHour, autoStartMinute, 0, 0);
+            
+            // 시작 시간이 현재 시간보다 이전이면 다음날로 설정
+            if (startTime <= now) {
+                startTime.setDate(startTime.getDate() + 1);
+            }
+            
+            const timeDiff = startTime - now;
+            const remainingSeconds = Math.floor(timeDiff / 1000);
+            
+            // 정확히 10초 남았을 때 카운트다운 시작
+            if (remainingSeconds === 10 && !countdownActive) {
+                console.log('10초 카운트다운 시작');
                 
                 // 전체화면이 아니면 먼저 전체화면으로 전환
                 if (!isFullscreenReady) {
                     toggleFullscreen();
                     isFullscreenReady = true;
-                    
-                    // 전체화면 전환 후 잠시 대기 후 타이머 시작
-                    setTimeout(() => {
-                        if (isReady && isFullscreenReady) {
-                            startTimerFromReady();
-                        }
-                    }, 500);
-                } else {
-                    // 이미 전체화면이면 바로 타이머 시작
-                    startTimerFromReady();
                 }
+                
+                // 카운트다운 시작
+                startCountdown();
             }
         }
         
@@ -898,7 +951,7 @@ if (!$settings) {
             const bodyElement = document.body;
             bodyElement.classList.add('timer-flash');
             
-            // 1.5초 후에 깜빡임 효과 제거하고 타이머 실제 시작
+            // 0.8초 후에 깜빡임 효과 제거하고 타이머 실제 시작
             setTimeout(() => {
                 bodyElement.classList.remove('timer-flash');
                 
@@ -986,7 +1039,7 @@ if (!$settings) {
                 }
                 
                 console.log('타이머 시작됨');
-            }, 2500); // 2.5초 후 실행
+            }, 800); // 0.8초 후 실행
         }
         
         // 즉시 초기화 (스크립트가 body 끝에 있으므로 DOM 요소들이 이미 로드됨)
