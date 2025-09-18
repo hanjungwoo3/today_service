@@ -736,12 +736,17 @@ if (!$settings) {
         let countdownInterval = null;
         let countdownValue = 10;
         
-        // 카운트다운 시작
+        // 카운트다운 시작 (기본 10초)
         function startCountdown() {
+            startCountdownWithTime(10);
+        }
+        
+        // 지정된 시간부터 카운트다운 시작
+        function startCountdownWithTime(seconds) {
             if (countdownActive) return;
             
             countdownActive = true;
-            countdownValue = 10;
+            countdownValue = seconds;
             
             const countdownOverlay = document.getElementById('countdownOverlay');
             const countdownNumber = document.getElementById('countdownNumber');
@@ -749,17 +754,27 @@ if (!$settings) {
             // 오버레이 표시
             countdownOverlay.style.display = 'flex';
             
+            // 첫 번째 숫자 즉시 표시
+            countdownNumber.textContent = countdownValue;
+            countdownNumber.style.animation = 'none';
+            countdownNumber.offsetHeight; // 리플로우 강제 실행
+            countdownNumber.style.animation = 'countdownPulse 1s ease-in-out';
+            console.log(`카운트다운: ${countdownValue}`);
+            
             // 카운트다운 로직
             countdownInterval = setInterval(() => {
-                countdownNumber.textContent = countdownValue;
-                
-                // 애니메이션 재시작을 위해 클래스 제거 후 추가
-                countdownNumber.style.animation = 'none';
-                countdownNumber.offsetHeight; // 리플로우 강제 실행
-                countdownNumber.style.animation = 'countdownPulse 1s ease-in-out';
-                
-                console.log(`카운트다운: ${countdownValue}`);
                 countdownValue--;
+                
+                if (countdownValue >= 0) {
+                    countdownNumber.textContent = countdownValue;
+                    
+                    // 애니메이션 재시작을 위해 클래스 제거 후 추가
+                    countdownNumber.style.animation = 'none';
+                    countdownNumber.offsetHeight; // 리플로우 강제 실행
+                    countdownNumber.style.animation = 'countdownPulse 1s ease-in-out';
+                    
+                    console.log(`카운트다운: ${countdownValue}`);
+                }
                 
                 if (countdownValue < 0) {
                     clearInterval(countdownInterval);
@@ -794,17 +809,23 @@ if (!$settings) {
             const currentMinute = now.getMinutes();
             const currentSecond = now.getSeconds();
             
-            // 시작 시간 계산
+            // 시작 시간 계산 (오늘 기준)
             const startTime = new Date();
             startTime.setHours(autoStartHour, autoStartMinute, 0, 0);
             
-            // 시작 시간이 현재 시간보다 이전이면 다음날로 설정
-            if (startTime <= now) {
-                startTime.setDate(startTime.getDate() + 1);
-            }
-            
             const timeDiff = startTime - now;
             const remainingSeconds = Math.floor(timeDiff / 1000);
+            
+            // 오늘 설정 시간이 이미 지났는지 확인
+            if (remainingSeconds < 0) {
+                // 오늘 시간이 지났으면 다음날로 설정
+                startTime.setDate(startTime.getDate() + 1);
+                const nextDayTimeDiff = startTime - now;
+                const nextDayRemainingSeconds = Math.floor(nextDayTimeDiff / 1000);
+                
+                // 다음날까지의 시간이 10초 이하면 카운트다운 시작하지 않음 (너무 긴 시간)
+                return;
+            }
             
             // 정확히 10초 남았을 때 카운트다운 시작
             if (remainingSeconds === 10 && !countdownActive) {
@@ -816,8 +837,29 @@ if (!$settings) {
                     isFullscreenReady = true;
                 }
                 
-                // 카운트다운 시작
+                // 10초 카운트다운 시작
                 startCountdown();
+            }
+            
+            // 10초 미만 남았고 카운트다운이 진행 중이 아닐 때는 시간이 되면 바로 타이머 시작
+            if (remainingSeconds <= 0 && remainingSeconds > -1 && !countdownActive && !isRunning) {
+                console.log('시간 도달, 타이머 즉시 시작');
+                
+                // 전체화면이 아니면 먼저 전체화면으로 전환
+                if (!isFullscreenReady) {
+                    toggleFullscreen();
+                    isFullscreenReady = true;
+                    
+                    // 전체화면 전환 후 잠시 대기 후 타이머 시작
+                    setTimeout(() => {
+                        if (isReady && isFullscreenReady) {
+                            startTimerFromReady();
+                        }
+                    }, 500);
+                } else {
+                    // 이미 전체화면이면 바로 타이머 시작
+                    startTimerFromReady();
+                }
             }
         }
         
