@@ -9,6 +9,7 @@ session_start();
                 'seconds' => (int)(isset($_POST['seconds']) ? $_POST['seconds'] : 0),
                 'end_message' => isset($_POST['end_message']) ? $_POST['end_message'] : '완료!',
                 'online_music' => isset($_POST['online_music']) ? $_POST['online_music'] : '',
+                'music_category' => isset($_POST['music_category']) ? $_POST['music_category'] : 'all',
                 'auto_start_hour' => (int)(isset($_POST['auto_start_hour']) ? $_POST['auto_start_hour'] : -1),
                 'auto_start_minute' => (int)(isset($_POST['auto_start_minute']) ? $_POST['auto_start_minute'] : 0)
             );
@@ -34,6 +35,7 @@ session_start();
             'seconds' => 0,
             'end_message' => '완료!',
             'online_music' => '',
+            'music_category' => 'all',
             'auto_start_hour' => -1,
             'auto_start_minute' => 0
         );
@@ -157,6 +159,29 @@ $settings['online_music'] = '';
                 </div>
                 
                        <div class="input-group">
+                           <label for="music_category">음악 카테고리 :</label>
+                            <div class="category-select-container">
+                                <select id="music_category" name="music_category">
+                                    <?php
+                                    $selected_category = isset($settings['music_category']) ? $settings['music_category'] : 'all';
+                                    $categories = array(
+                                        'all' => '전체',
+                                        '집회' => '집회 (161곡)',
+                                        '노래' => '노래 (79곡)',
+                                        '연주' => '연주 (3곡)',
+                                        '어린이' => '어린이 (47곡)'
+                                    );
+                                    
+                                    foreach ($categories as $value => $label) {
+                                        $selected = ($selected_category === $value) ? 'selected' : '';
+                                        echo "<option value=\"$value\" $selected>$label</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                        
+                       <div class="input-group">
                            <label for="online_music">배경음악 :</label>
                             <div class="music-select-container">
                                 <select id="online_music" name="online_music">
@@ -166,11 +191,17 @@ $settings['online_music'] = '';
                                         $music_list = json_decode(file_get_contents('music_list.json'), true);
                                         $selected_music = isset($settings['online_music']) ? $settings['online_music'] : '';
                                         
-                                                                // PHP에서는 랜덤 선택하지 않음 (JavaScript에서 처리)
-                                        
+                                        // PHP에서는 모든 곡을 출력하고, JavaScript에서 필터링
                                         foreach ($music_list['songs'] as $song) {
                                             $selected = ($selected_music === $song['url']) ? 'selected' : '';
-                                            echo "<option value=\"{$song['url']}\" $selected>{$song['title']}</option>";
+                                            // 카테고리 정보를 data 속성으로 추가
+                                            $category = '';
+                                            if (strpos($song['title'], '(집회)') !== false) $category = '집회';
+                                            elseif (strpos($song['title'], '(노래)') !== false) $category = '노래';
+                                            elseif (strpos($song['title'], '(연주)') !== false) $category = '연주';
+                                            elseif (strpos($song['title'], '(어린이)') !== false) $category = '어린이';
+                                            
+                                            echo "<option value=\"{$song['url']}\" data-category=\"$category\" $selected>{$song['title']}</option>";
                                         }
                                     }
                                     ?>
@@ -266,11 +297,60 @@ $settings['online_music'] = '';
                 }
             });
         
-        // 랜덤 음악 선택 함수
+        // 카테고리별 음악 필터링 함수
+        function filterMusicByCategory() {
+            const categorySelect = document.getElementById('music_category');
+            const musicSelect = document.getElementById('online_music');
+            const selectedCategory = categorySelect.value;
+            
+            // 모든 옵션을 가져와서 필터링
+            const allOptions = musicSelect.querySelectorAll('option');
+            
+            // 첫 번째 옵션 (빈 값) 제외하고 모든 옵션 숨기기
+            allOptions.forEach((option, index) => {
+                if (index === 0) {
+                    // 첫 번째 옵션 ("음악을 선택하세요")은 항상 표시
+                    option.style.display = '';
+                } else if (selectedCategory === 'all') {
+                    // 전체 선택 시 모든 옵션 표시
+                    option.style.display = '';
+                } else {
+                    // 선택된 카테고리와 일치하는 옵션만 표시
+                    const optionCategory = option.getAttribute('data-category');
+                    option.style.display = (optionCategory === selectedCategory) ? '' : 'none';
+                }
+            });
+            
+            // 현재 선택된 음악이 필터링된 카테고리에 속하지 않으면 초기화
+            const currentSelected = musicSelect.value;
+            if (currentSelected && selectedCategory !== 'all') {
+                const currentOption = musicSelect.querySelector(`option[value="${currentSelected}"]`);
+                if (currentOption && currentOption.getAttribute('data-category') !== selectedCategory) {
+                    musicSelect.value = '';
+                }
+            }
+            
+            console.log('카테고리 필터링:', selectedCategory);
+        }
+        
+        // 랜덤 음악 선택 함수 (카테고리 필터링 적용)
         function selectRandomMusic() {
             const musicSelect = document.getElementById('online_music');
+            const categorySelect = document.getElementById('music_category');
+            const selectedCategory = categorySelect.value;
+            
             const allOptions = musicSelect.querySelectorAll('option');
-            const options = Array.from(allOptions).filter(option => option.value !== ''); // 빈 값 제외
+            let options;
+            
+            if (selectedCategory === 'all') {
+                // 전체 카테고리에서 선택 (빈 값 제외)
+                options = Array.from(allOptions).filter(option => option.value !== '');
+            } else {
+                // 선택된 카테고리에서만 선택
+                options = Array.from(allOptions).filter(option => 
+                    option.value !== '' && option.getAttribute('data-category') === selectedCategory
+                );
+            }
             
             if (options.length > 0) {
                 // 랜덤 인덱스 선택
@@ -281,7 +361,7 @@ $settings['online_music'] = '';
                 musicSelect.value = randomOption.value;
                 
                 // 선택된 음악 정보 출력
-                console.log('랜덤 음악 선택:', randomOption.textContent);
+                console.log('랜덤 음악 선택 (' + selectedCategory + '):', randomOption.textContent);
                 
                 // 음악 테스트 (CDN 직접 연결만 시도)
                 const selectedOption = randomOption;
@@ -296,13 +376,29 @@ $settings['online_music'] = '';
                 }
                 
                 return true; // 성공
+            } else {
+                console.log('선택된 카테고리에 음악이 없습니다:', selectedCategory);
+                return false; // 실패
             }
-            return false; // 실패
         }
         
-        // 페이지 로드 시 랜덤 음악 선택 (설정된 음악이 없을 때만)
+        // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', function() {
             const musicSelect = document.getElementById('online_music');
+            const categorySelect = document.getElementById('music_category');
+            
+            // 카테고리 변경 이벤트 리스너 추가
+            categorySelect.addEventListener('change', function() {
+                filterMusicByCategory();
+                
+                // 카테고리 변경 후 음악이 선택되지 않았으면 랜덤 선택
+                if (!musicSelect.value || musicSelect.value === '') {
+                    selectRandomMusic();
+                }
+            });
+            
+            // 초기 필터링 적용
+            filterMusicByCategory();
             
             // 현재 선택된 값이 없거나 빈 값일 때만 랜덤 선택
             if (!musicSelect.value || musicSelect.value === '') {
@@ -332,6 +428,7 @@ $settings['online_music'] = '';
             const seconds = parseInt(document.getElementById('seconds').value);
             const endMessage = document.getElementById('end_message').value;
             const selectedMusic = document.getElementById('online_music').value;
+            const selectedCategory = document.getElementById('music_category').value;
             
             // 0분 0초 체크
             if (minutes === 0 && seconds === 0) {
@@ -344,6 +441,7 @@ $settings['online_music'] = '';
             console.log('- 제목:', title);
             console.log('- 시간:', minutes, '분', seconds, '초');
             console.log('- 안내 메시지:', endMessage);
+            console.log('- 음악 카테고리:', selectedCategory);
             console.log('- 선택된 음악:', selectedMusic);
             
             if (!selectedMusic) {

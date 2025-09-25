@@ -783,6 +783,16 @@ select option {
     line-height: 1.5;
 }
 
+/* 카테고리 선택 컨테이너 */
+.category-select-container {
+    display: flex;
+    align-items: center;
+}
+
+.category-select-container select {
+    width: 100%;
+}
+
 /* 음악 선택 컨테이너 */
 .music-select-container {
     display: flex;
