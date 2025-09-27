@@ -166,8 +166,8 @@ $settings['online_music'] = '';
                                     $selected_category = isset($settings['music_category']) ? $settings['music_category'] : 'all';
                                     $categories = array(
                                         'all' => '전체',
-                                        '집회' => '집회 (161곡)',
-                                        '노래' => '노래 (79곡)',
+                                        '집회' => '집회 (162곡)',
+                                        '노래' => '노래 (80곡)',
                                         '연주' => '연주 (3곡)',
                                         '어린이' => '어린이 (47곡)'
                                     );
