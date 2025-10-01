@@ -1,19 +1,18 @@
 <?php
-declare(strict_types=1);
 
 date_default_timezone_set('Asia/Seoul');
 
 require_once __DIR__ . '/lib/helpers.php';
 
-$now = new DateTimeImmutable('now');
-$year = (int)($_GET['year'] ?? $now->format('Y'));
-$month = (int)($_GET['month'] ?? $now->format('n'));
+$now = new DateTime('now');
+$year = (int)(isset($_GET['year']) ? $_GET['year'] : $now->format('Y'));
+$month = (int)(isset($_GET['month']) ? $_GET['month'] : $now->format('n'));
 
-[$year, $month] = normalizeYearMonth($year, $month);
+list($year, $month) = normalizeYearMonth($year, $month);
 
 $calendarData = loadCalendarData($year, $month);
 $weeks = buildCalendarWeeks($year, $month);
-$today = new DateTimeImmutable('now');
+$today = new DateTime('now');
 
 ?>
 <!doctype html>
@@ -21,7 +20,7 @@ $today = new DateTimeImmutable('now');
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title><?= htmlspecialchars((string)$year, ENT_QUOTES) ?>년 <?= htmlspecialchars((string)$month, ENT_QUOTES) ?>월 일정</title>
+    <title><?php echo htmlspecialchars((string)$year, ENT_QUOTES); ?>년 <?php echo htmlspecialchars((string)$month, ENT_QUOTES); ?>월 일정</title>
     <style>
       * {
         box-sizing: border-box;
@@ -413,28 +412,28 @@ $today = new DateTimeImmutable('now');
     <div class="container">
       <div class="header">
         <?php
-          $prevDate = (new DateTimeImmutable(sprintf('%04d-%02d-01', $year, $month)))->modify('-1 month');
-          $nextDate = (new DateTimeImmutable(sprintf('%04d-%02d-01', $year, $month)))->modify('+1 month');
+          $prevDate = new DateTime(sprintf('%04d-%02d-01', $year, $month));
+          $prevDate->modify('-1 month');
+          $nextDate = new DateTime(sprintf('%04d-%02d-01', $year, $month));
+          $nextDate->modify('+1 month');
         ?>
-        <a href="?year=<?= $prevDate->format('Y') ?>&month=<?= $prevDate->format('n') ?>" class="nav-btn">[이전]</a>
-        <a href="?year=<?= $now->format('Y') ?>&month=<?= $now->format('n') ?>" class="title"><?= htmlspecialchars((string)$year, ENT_QUOTES) ?>년 <?= htmlspecialchars((string)$month, ENT_QUOTES) ?>월 봉사 일정</a>
-        <a href="?year=<?= $nextDate->format('Y') ?>&month=<?= $nextDate->format('n') ?>" class="nav-btn">[다음]</a>
+        <a href="?year=<?php echo $prevDate->format('Y'); ?>&month=<?php echo $prevDate->format('n'); ?>" class="nav-btn">[이전]</a>
+        <a href="?year=<?php echo $now->format('Y'); ?>&month=<?php echo $now->format('n'); ?>" class="title"><?php echo htmlspecialchars((string)$year, ENT_QUOTES); ?>년 <?php echo htmlspecialchars((string)$month, ENT_QUOTES); ?>월 봉사 일정</a>
+        <a href="?year=<?php echo $nextDate->format('Y'); ?>&month=<?php echo $nextDate->format('n'); ?>" class="nav-btn">[다음]</a>
       </div>
 
       <?php
-        // 이번 달 일정 메모 수집
-        $monthNotes = [];
+        $monthNotes = array();
         foreach ($calendarData['dates'] as $dateKey => $entry) {
-          $noteText = trim($entry['note'] ?? '');
+          $noteText = trim(isset($entry['note']) ? $entry['note'] : '');
           if (!empty($noteText)) {
-            // 날짜가 현재 월에 속하는지 확인
-            $entryDate = new DateTimeImmutable($dateKey);
+            $entryDate = new DateTime($dateKey);
             if ((int)$entryDate->format('Y') === $year && (int)$entryDate->format('n') === $month) {
               $monthNotes[$dateKey] = $noteText;
             }
           }
         }
-        ksort($monthNotes); // 날짜순 정렬
+        ksort($monthNotes);
       ?>
 
       <?php if (!empty($monthNotes)): ?>
@@ -442,15 +441,15 @@ $today = new DateTimeImmutable('now');
           <ul class="notes-list">
             <?php foreach ($monthNotes as $dateKey => $noteText): ?>
               <?php
-                $noteDate = new DateTimeImmutable($dateKey);
+                $noteDate = new DateTime($dateKey);
                 $day = (int)$noteDate->format('j');
                 $weekdayNum = (int)$noteDate->format('w');
-                $weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+                $weekdays = array('일', '월', '화', '수', '목', '금', '토');
                 $weekday = $weekdays[$weekdayNum];
               ?>
               <li class="note-item">
-                <span class="note-date"><?= $month ?>월 <?= $day ?>일(<?= $weekday ?>) :</span>
-                <span class="note-text"><?= nl2br(htmlspecialchars($noteText, ENT_QUOTES)) ?></span>
+                <span class="note-date"><?php echo $month; ?>월 <?php echo $day; ?>일(<?php echo $weekday; ?>) :</span>
+                <span class="note-text"><?php echo nl2br(htmlspecialchars($noteText, ENT_QUOTES)); ?></span>
               </li>
             <?php endforeach; ?>
           </ul>
@@ -458,8 +457,8 @@ $today = new DateTimeImmutable('now');
       <?php endif; ?>
 
       <div class="weekdays">
-        <?php foreach (['일','월','화','수','목','금','토'] as $weekday): ?>
-          <div class="weekday"><?= $weekday ?></div>
+        <?php foreach (array('일','월','화','수','목','금','토') as $weekday): ?>
+          <div class="weekday"><?php echo $weekday; ?></div>
         <?php endforeach; ?>
       </div>
 
@@ -469,23 +468,23 @@ $today = new DateTimeImmutable('now');
             <?php
               $isCurrentMonth = (int)$date->format('n') === $month;
               $dateKey = $date->format('Y-m-d');
-              $assignments = $calendarData['dates'][$dateKey] ?? ['note' => '', 'names' => ['', '', '']];
+              $assignments = isset($calendarData['dates'][$dateKey]) ? $calendarData['dates'][$dateKey] : array('note' => '', 'names' => array('', '', ''));
               $dayClass = getDayClass($date, $today, $isCurrentMonth);
               $numberClass = getDayNumberClass($date, $today, $isCurrentMonth);
-              $note = $assignments['note'] ?? '';
-              $names = $assignments['names'] ?? ['', '', ''];
+              $note = isset($assignments['note']) ? $assignments['note'] : '';
+              $names = isset($assignments['names']) ? $assignments['names'] : array('', '', '');
               $isSaturday = (int)$date->format('w') === 6;
               $colors = getScheduleColorForDay($calendarData['schedule_guide'], $date);
             ?>
-            <div class="day <?= $dayClass ?>">
+            <div class="day <?php echo $dayClass; ?>">
               <?php if ($isCurrentMonth && !empty(trim($note))): ?>
-                <div class="note"><?= htmlspecialchars(trim($note), ENT_QUOTES) ?></div>
+                <div class="note"><?php echo htmlspecialchars(trim($note), ENT_QUOTES); ?></div>
               <?php endif; ?>
-              <div class="day-num <?= $numberClass ?>"><?= $date->format('j') ?></div>
+              <div class="day-num <?php echo $numberClass; ?>"><?php echo $date->format('j'); ?></div>
               <?php if ($isCurrentMonth): ?>
                 <div class="names">
                   <?php foreach ($names as $i => $name): ?>
-                    <div class="name name-bg-<?= htmlspecialchars($colors[$i], ENT_QUOTES) ?>"><?= htmlspecialchars(trim($name), ENT_QUOTES) ?></div>
+                    <div class="name name-bg-<?php echo htmlspecialchars($colors[$i], ENT_QUOTES); ?>"><?php echo htmlspecialchars(trim($name), ENT_QUOTES); ?></div>
                   <?php endforeach; ?>
                 </div>
               <?php endif; ?>
@@ -513,36 +512,34 @@ $today = new DateTimeImmutable('now');
           </thead>
           <tbody>
             <?php 
-              $dayLabels = ['월요일' => 'monday', '화요일' => 'tuesday', '수요일' => 'wednesday', 
-                            '목요일' => 'thursday', '금요일' => 'friday', '토요일' => 'saturday', '일요일' => 'sunday'];
+              $dayLabels = array('월요일' => 'monday', '화요일' => 'tuesday', '수요일' => 'wednesday', 
+                            '목요일' => 'thursday', '금요일' => 'friday', '토요일' => 'saturday', '일요일' => 'sunday');
               $scheduleGuide = $calendarData['schedule_guide'];
               $todayWeekday = (int)$today->format('w');
-              $todayDayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+              $todayDayNames = array('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday');
               $todayDayKey = $todayDayNames[$todayWeekday];
             ?>
             <?php foreach ($dayLabels as $dayLabel => $dayKey): ?>
               <?php 
                 $isToday = $dayKey === $todayDayKey;
-                $morningData = $scheduleGuide[$dayKey]['morning'] ?? ['text' => '', 'color' => 'white'];
-                $afternoonData = $scheduleGuide[$dayKey]['afternoon'] ?? ['text' => '', 'color' => 'white'];
-                $eveningData = $scheduleGuide[$dayKey]['evening'] ?? ['text' => '', 'color' => 'white'];
+                $morningData = isset($scheduleGuide[$dayKey]['morning']) ? $scheduleGuide[$dayKey]['morning'] : array('text' => '', 'color' => 'white');
+                $afternoonData = isset($scheduleGuide[$dayKey]['afternoon']) ? $scheduleGuide[$dayKey]['afternoon'] : array('text' => '', 'color' => 'white');
+                $eveningData = isset($scheduleGuide[$dayKey]['evening']) ? $scheduleGuide[$dayKey]['evening'] : array('text' => '', 'color' => 'white');
                 
-                // 모든 시간대가 비어있는지 확인
                 $hasContent = !empty(trim($morningData['text'])) || !empty(trim($afternoonData['text'])) || !empty(trim($eveningData['text']));
                 
-                // 내용이 있는 요일만 표시
                 if (!$hasContent) continue;
               ?>
-              <tr class="<?= $isToday ? 'today-row' : '' ?>">
-                <td class="day-label"><?= $dayLabel ?></td>
-                <td class="schedule-cell color-<?= htmlspecialchars($morningData['color'], ENT_QUOTES) ?>">
-                  <?= nl2br(htmlspecialchars($morningData['text'], ENT_QUOTES)) ?>
+              <tr class="<?php echo $isToday ? 'today-row' : ''; ?>">
+                <td class="day-label"><?php echo $dayLabel; ?></td>
+                <td class="schedule-cell color-<?php echo htmlspecialchars($morningData['color'], ENT_QUOTES); ?>">
+                  <?php echo nl2br(htmlspecialchars($morningData['text'], ENT_QUOTES)); ?>
                 </td>
-                <td class="schedule-cell color-<?= htmlspecialchars($afternoonData['color'], ENT_QUOTES) ?>">
-                  <?= nl2br(htmlspecialchars($afternoonData['text'], ENT_QUOTES)) ?>
+                <td class="schedule-cell color-<?php echo htmlspecialchars($afternoonData['color'], ENT_QUOTES); ?>">
+                  <?php echo nl2br(htmlspecialchars($afternoonData['text'], ENT_QUOTES)); ?>
                 </td>
-                <td class="schedule-cell color-<?= htmlspecialchars($eveningData['color'], ENT_QUOTES) ?>">
-                  <?= nl2br(htmlspecialchars($eveningData['text'], ENT_QUOTES)) ?>
+                <td class="schedule-cell color-<?php echo htmlspecialchars($eveningData['color'], ENT_QUOTES); ?>">
+                  <?php echo nl2br(htmlspecialchars($eveningData['text'], ENT_QUOTES)); ?>
                 </td>
               </tr>
             <?php endforeach; ?>
@@ -552,4 +549,3 @@ $today = new DateTimeImmutable('now');
     </div>
   </body>
 </html>
-

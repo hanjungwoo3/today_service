@@ -1,8 +1,7 @@
 <?php
-declare(strict_types=1);
 
 if (!defined('ROOT_DIR')) {
-    define('ROOT_DIR', dirname(__DIR__, 1));
+    define('ROOT_DIR', dirname(dirname(__FILE__)));
 }
 
 if (!defined('STORAGE_DIR')) {
@@ -10,40 +9,37 @@ if (!defined('STORAGE_DIR')) {
     define('STORAGE_DIR', $storagePath);
 }
 
-function normalizeYearMonth(int $year, int $month): array
+function normalizeYearMonth($year, $month)
 {
-    $date = DateTimeImmutable::createFromFormat('!Y-n', sprintf('%04d-%d', $year, $month));
+    $date = DateTime::createFromFormat('!Y-n', sprintf('%04d-%d', $year, $month));
     if (!$date) {
-        $date = new DateTimeImmutable();
+        $date = new DateTime();
     }
-    return [(int)$date->format('Y'), (int)$date->format('n')];
+    return array((int)$date->format('Y'), (int)$date->format('n'));
 }
 
-function buildCalendarWeeks(int $year, int $month): array
+function buildCalendarWeeks($year, $month)
 {
-    $firstDay = new DateTimeImmutable(sprintf('%04d-%02d-01', $year, $month));
-    $start = $firstDay->modify('last sunday');
-    $weeks = [];
-    $current = $start;
-    $foundLastWeek = false;
+    $firstDay = new DateTime(sprintf('%04d-%02d-01', $year, $month));
+    $firstDay->modify('last sunday');
+    $weeks = array();
+    $current = clone $firstDay;
 
     for ($week = 0; $week < 6; $week++) {
-        $weekDates = [];
+        $weekDates = array();
         $hasCurrentMonth = false;
         
         for ($day = 0; $day < 7; $day++) {
-            $weekDates[] = $current;
+            $weekDates[] = clone $current;
             if ((int)$current->format('n') === $month) {
                 $hasCurrentMonth = true;
             }
-            $current = $current->modify('+1 day');
+            $current->modify('+1 day');
         }
         
-        // 현재 월의 날짜가 있으면 포함
         if ($hasCurrentMonth) {
             $weeks[] = $weekDates;
         } else if (count($weeks) > 0) {
-            // 이미 주가 있고, 현재 주에 현재 월이 없으면 종료 (다음 달만 있음)
             break;
         }
     }
@@ -51,87 +47,87 @@ function buildCalendarWeeks(int $year, int $month): array
     return $weeks;
 }
 
-function loadCalendarData(int $year, int $month): array
+function loadCalendarData($year, $month)
 {
     $path = getMonthFilePath($year, $month);
     if (!file_exists($path)) {
-        return [
-            'dates' => [],
+        return array(
+            'dates' => array(),
             'schedule_guide' => getDefaultScheduleGuide()
-        ];
+        );
     }
 
     $json = file_get_contents($path);
     if ($json === false) {
-        return [
-            'dates' => [],
+        return array(
+            'dates' => array(),
             'schedule_guide' => getDefaultScheduleGuide()
-        ];
+        );
     }
 
     $data = json_decode($json, true);
     if (!is_array($data) || !isset($data['dates']) || !is_array($data['dates'])) {
-        return [
-            'dates' => [],
+        return array(
+            'dates' => array(),
             'schedule_guide' => getDefaultScheduleGuide()
-        ];
+        );
     }
 
-    return [
+    return array(
         'dates' => normalizeCalendarDates($data['dates']),
         'schedule_guide' => isset($data['schedule_guide']) && is_array($data['schedule_guide']) 
             ? $data['schedule_guide'] 
             : getDefaultScheduleGuide()
-    ];
+    );
 }
 
-function getDefaultScheduleGuide(): array
+function getDefaultScheduleGuide()
 {
-    $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-    $times = ['morning', 'afternoon', 'evening'];
-    $guide = [];
+    $days = array('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday');
+    $times = array('morning', 'afternoon', 'evening');
+    $guide = array();
     
     foreach ($days as $day) {
-        $guide[$day] = [];
+        $guide[$day] = array();
         foreach ($times as $time) {
-            $guide[$day][$time] = ['text' => '', 'color' => 'white'];
+            $guide[$day][$time] = array('text' => '', 'color' => 'white');
         }
     }
     
     return $guide;
 }
 
-function getScheduleColorForDay(array $scheduleGuide, DateTimeImmutable $date): array
+function getScheduleColorForDay($scheduleGuide, $date)
 {
     $weekday = (int)$date->format('w');
-    $dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    $dayNames = array('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday');
     $dayName = $dayNames[$weekday];
     
     if (!isset($scheduleGuide[$dayName])) {
-        return ['white', 'white', 'white'];
+        return array('white', 'white', 'white');
     }
     
     $daySchedule = $scheduleGuide[$dayName];
-    return [
-        $daySchedule['morning']['color'] ?? 'white',
-        $daySchedule['afternoon']['color'] ?? 'white',
-        $daySchedule['evening']['color'] ?? 'white'
-    ];
+    return array(
+        isset($daySchedule['morning']['color']) ? $daySchedule['morning']['color'] : 'white',
+        isset($daySchedule['afternoon']['color']) ? $daySchedule['afternoon']['color'] : 'white',
+        isset($daySchedule['evening']['color']) ? $daySchedule['evening']['color'] : 'white'
+    );
 }
 
-function getMonthFilePath(int $year, int $month): string
+function getMonthFilePath($year, $month)
 {
     $monthKey = sprintf('%04d-%02d', $year, $month);
     return STORAGE_DIR . '/' . $monthKey . '.json';
 }
 
-function getBackupDir(int $year, int $month): string
+function getBackupDir($year, $month)
 {
     $monthKey = sprintf('%04d-%02d', $year, $month);
     return STORAGE_DIR . '/backups/' . $monthKey;
 }
 
-function getDayClass(DateTimeImmutable $date, DateTimeImmutable $today, bool $isCurrentMonth): string
+function getDayClass($date, $today, $isCurrentMonth)
 {
     if (!$isCurrentMonth) {
         return 'outside';
@@ -147,47 +143,46 @@ function getDayClass(DateTimeImmutable $date, DateTimeImmutable $today, bool $is
     return $dateStr < $todayStr ? 'past' : 'future';
 }
 
-function getHolidaysFilePath(): string
+function getHolidaysFilePath()
 {
     return STORAGE_DIR . '/holidays.json';
 }
 
-function loadHolidays(): array
+function loadHolidays()
 {
     $filePath = getHolidaysFilePath();
     
     if (!file_exists($filePath)) {
-        return [];
+        return array();
     }
     
     $json = @file_get_contents($filePath);
     if ($json === false) {
-        return [];
+        return array();
     }
     
     $data = json_decode($json, true);
-    return is_array($data) ? $data : [];
+    return is_array($data) ? $data : array();
 }
 
-function updateHolidaysFromIcs(): array
+function updateHolidaysFromIcs()
 {
     $icsUrl = 'https://holidays.hyunbin.page/basic.ics';
     
-    // 타임아웃 설정 (10초)
-    $context = stream_context_create([
-        'http' => [
+    $context = stream_context_create(array(
+        'http' => array(
             'timeout' => 10,
             'ignore_errors' => true
-        ]
-    ]);
+        )
+    ));
     
     $icsData = @file_get_contents($icsUrl, false, $context);
     
     if ($icsData === false) {
-        return ['success' => false, 'error' => '공휴일 데이터를 가져올 수 없습니다.'];
+        return array('success' => false, 'error' => '공휴일 데이터를 가져올 수 없습니다.');
     }
     
-    $holidays = [];
+    $holidays = array();
     preg_match_all('/DTSTART;VALUE=DATE:(\d{8})/m', $icsData, $matches);
     
     if (!empty($matches[1])) {
@@ -199,18 +194,17 @@ function updateHolidaysFromIcs(): array
         }
     }
     
-    // 파일로 저장
     $filePath = getHolidaysFilePath();
-    $json = json_encode($holidays, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+    $json = json_encode($holidays);
     
     if (@file_put_contents($filePath, $json) === false) {
-        return ['success' => false, 'error' => '공휴일 데이터를 저장할 수 없습니다.'];
+        return array('success' => false, 'error' => '공휴일 데이터를 저장할 수 없습니다.');
     }
     
-    return ['success' => true, 'count' => count($holidays)];
+    return array('success' => true, 'count' => count($holidays));
 }
 
-function isHoliday(DateTimeImmutable $date): bool
+function isHoliday($date)
 {
     static $holidays = null;
     
@@ -221,7 +215,7 @@ function isHoliday(DateTimeImmutable $date): bool
     return in_array($date->format('Y-m-d'), $holidays, true);
 }
 
-function getDayNumberClass(DateTimeImmutable $date, DateTimeImmutable $today, bool $isCurrentMonth): string
+function getDayNumberClass($date, $today, $isCurrentMonth)
 {
     if (!$isCurrentMonth) {
         return 'default';
@@ -233,7 +227,6 @@ function getDayNumberClass(DateTimeImmutable $date, DateTimeImmutable $today, bo
     $weekday = (int)$date->format('w');
     $class = 'default';
     
-    // 공휴일 확인 (일요일보다 우선)
     if (isHoliday($date)) {
         $class = 'sunday';
     } elseif ($weekday === 0) {
@@ -251,9 +244,9 @@ function getDayNumberClass(DateTimeImmutable $date, DateTimeImmutable $today, bo
     return trim($class);
 }
 
-function normalizeCalendarDates(array $dates): array
+function normalizeCalendarDates($dates)
 {
-    $normalized = [];
+    $normalized = array();
     foreach ($dates as $date => $entry) {
         if (!is_string($date) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
             continue;
@@ -264,13 +257,22 @@ function normalizeCalendarDates(array $dates): array
     return $normalized;
 }
 
-function normalizeDayEntry(mixed $entry): array
+function isAssocArray($arr)
+{
+    if (!is_array($arr)) {
+        return false;
+    }
+    $keys = array_keys($arr);
+    return array_keys($keys) !== $keys;
+}
+
+function normalizeDayEntry($entry)
 {
     $note = '';
-    $names = ['', '', ''];
+    $names = array('', '', '');
 
     if (is_array($entry)) {
-        if (!array_is_list($entry)) {
+        if (isAssocArray($entry)) {
             if (isset($entry['note'])) {
                 $note = trim((string)$entry['note']);
             }
@@ -282,16 +284,18 @@ function normalizeDayEntry(mixed $entry): array
         }
     }
 
-    return [
+    return array(
         'note' => $note,
         'names' => $names,
-    ];
+    );
 }
 
-function normalizeNamesArray(array $names): array
+function normalizeNamesArray($names)
 {
-    $normalized = array_map(static fn($name) => trim((string)$name), $names);
+    $normalized = array();
+    foreach ($names as $name) {
+        $normalized[] = trim((string)$name);
+    }
     $normalized = array_slice($normalized, 0, 3);
     return array_pad($normalized, 3, '');
 }
-
