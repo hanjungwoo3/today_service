@@ -1,17 +1,22 @@
 <?php
-// 관리자 권한 체크
-require_once dirname(__FILE__) . '/../config.php';
-session_check();
-
-// 관리자가 아니면 접근 차단
-if (!is_admin(mb_id())) {
-    echo '<script>alert("관리자만 접근할 수 있습니다."); location.href="'.BASE_PATH.'/";</script>';
-    exit;
-}
-
 date_default_timezone_set('Asia/Seoul');
 
 require_once __DIR__ . '/lib/helpers.php';
+
+// 관리자 권한 체크 (선택적)
+$is_admin = false;
+if (file_exists(dirname(__FILE__) . '/../config.php')) {
+    require_once dirname(__FILE__) . '/../config.php';
+    if (function_exists('mb_id') && function_exists('is_admin')) {
+        $is_admin = is_admin(mb_id());
+    }
+}
+
+// 관리자가 아니면 view.php로 리다이렉트
+if (!$is_admin) {
+    header('Location: view.php' . (isset($_GET['year']) && isset($_GET['month']) ? '?year='.$_GET['year'].'&month='.$_GET['month'] : ''));
+    exit;
+}
 
 $now = new DateTime('now');
 $year = (int)(isset($_GET['year']) ? $_GET['year'] : $now->format('Y'));
