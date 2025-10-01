@@ -1,31 +1,29 @@
 <?php
-declare(strict_types=1);
 
 date_default_timezone_set('Asia/Seoul');
 header('Content-Type: application/json; charset=utf-8');
 
-require_once __DIR__ . '/../lib/helpers.php';
+require_once dirname(__FILE__) . '/../lib/helpers.php';
 
-$method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';
 
 if ($method === 'POST') {
     $result = updateHolidaysFromIcs();
     
     if ($result['success']) {
-        echo json_encode([
+        echo json_encode(array(
             'success' => true,
             'message' => "공휴일 데이터를 업데이트했습니다. ({$result['count']}개)"
-        ]);
+        ));
     } else {
-        http_response_code(500);
-        echo json_encode([
+        header('HTTP/1.1 500 Internal Server Error');
+        echo json_encode(array(
             'success' => false,
             'error' => $result['error']
-        ]);
+        ));
     }
     exit;
 }
 
-http_response_code(405);
-echo json_encode(['success' => false, 'error' => '허용되지 않은 메서드입니다.']);
-
+header('HTTP/1.1 405 Method Not Allowed');
+echo json_encode(array('success' => false, 'error' => '허용되지 않은 메서드입니다.'));
