@@ -6,3 +6,5 @@ config_custom.php
 
 t/timer_settings.json
 
+# calendar storage
+c/storage/
