@@ -60,7 +60,7 @@ $today = new DateTime('now');
       .header .nav-btn {
         color: #fff;
         text-decoration: none;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 600;
         padding: 4px 8px;
         border-radius: 4px;
@@ -75,7 +75,7 @@ $today = new DateTime('now');
       .header .title {
         color: #fff;
         text-decoration: none;
-        font-size: 15px;
+        font-size: 17px;
         font-weight: 700;
         flex: 1;
         transition: opacity 0.2s;
@@ -95,7 +95,7 @@ $today = new DateTime('now');
       .weekday {
         padding: 6px 2px;
         text-align: center;
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 600;
         color: #64748b;
       }
@@ -111,7 +111,7 @@ $today = new DateTime('now');
         border-right: 1px solid #e2e8f0;
         border-bottom: 1px solid #e2e8f0;
         padding: 3px;
-        font-size: 10px;
+        font-size: 12px;
         display: flex;
         flex-direction: column;
         position: relative;
@@ -132,7 +132,7 @@ $today = new DateTime('now');
       }
 
       .time-label {
-        font-size: 11px;
+        font-size: 13px;
         font-weight: 400;
         color: #d1d5db;
         padding: 0;
@@ -157,7 +157,8 @@ $today = new DateTime('now');
       }
 
       .day.today {
-        border: 3px solid rgba(220, 38, 38, 0.6) !important;
+        border: 1px solid rgba(220, 38, 38, 0.6) !important;
+        background: #fef2f2 !important;
       }
 
       .day.past {
@@ -176,7 +177,7 @@ $today = new DateTime('now');
         height: 20px;
         border-radius: 50%;
         font-weight: 600;
-        font-size: 11px;
+        font-size: 13px;
         margin-bottom: 2px;
         position: relative;
         z-index: 2;
@@ -215,7 +216,7 @@ $today = new DateTime('now');
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 11px;
+        font-size: 13px;
         font-weight: 600;
         color: rgba(74, 109, 167, 0.35);
         padding: 3px;
@@ -238,7 +239,7 @@ $today = new DateTime('now');
       }
 
       .name {
-        font-size: 11px;
+        font-size: 13px;
         color: #1e293b;
         padding: 0;
         font-weight: 500;
@@ -290,7 +291,7 @@ $today = new DateTime('now');
 
       .note-item {
         padding: 3px 0;
-        font-size: 10px;
+        font-size: 12px;
         line-height: 1.4;
       }
 
@@ -317,7 +318,7 @@ $today = new DateTime('now');
       .schedule-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 10px;
+        font-size: 12px;
         background: #fff;
         border: 1px solid #e2e8f0;
       }
@@ -346,7 +347,7 @@ $today = new DateTime('now');
       }
 
       .schedule-table .schedule-cell {
-        font-size: 9px;
+        font-size: 11px;
         min-height: 30px;
       }
 
@@ -393,11 +394,11 @@ $today = new DateTime('now');
         }
 
         .header .title {
-          font-size: 13px;
+          font-size: 15px;
         }
 
         .header .nav-btn {
-          font-size: 11px;
+          font-size: 13px;
           padding: 3px 6px;
         }
 
@@ -418,7 +419,7 @@ $today = new DateTime('now');
           $nextDate->modify('+1 month');
         ?>
         <a href="?year=<?php echo $prevDate->format('Y'); ?>&month=<?php echo $prevDate->format('n'); ?>" class="nav-btn">[이전]</a>
-        <a href="?year=<?php echo $now->format('Y'); ?>&month=<?php echo $now->format('n'); ?>" class="title"><?php echo htmlspecialchars((string)$year, ENT_QUOTES); ?>년 <?php echo htmlspecialchars((string)$month, ENT_QUOTES); ?>월 봉사 일정</a>
+        <a href="?year=<?php echo $now->format('Y'); ?>&month=<?php echo $now->format('n'); ?>" class="title"><?php echo htmlspecialchars((string)$year, ENT_QUOTES); ?>년 <?php echo htmlspecialchars((string)$month, ENT_QUOTES); ?>월</a>
         <a href="?year=<?php echo $nextDate->format('Y'); ?>&month=<?php echo $nextDate->format('n'); ?>" class="nav-btn">[다음]</a>
       </div>
 
