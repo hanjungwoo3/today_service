@@ -262,17 +262,14 @@ $today = new DateTime('now');
 
       .name-bg-green {
         color: #16a34a;
-        font-weight: 600;
       }
 
       .name-bg-blue {
         color: #2563eb;
-        font-weight: 600;
       }
 
       .name-bg-red {
         color: #dc2626;
-        font-weight: 600;
       }
 
       /* Monthly Notes */
@@ -357,17 +354,14 @@ $today = new DateTime('now');
 
       .schedule-table .color-green {
         color: #16a34a;
-        font-weight: 600;
       }
 
       .schedule-table .color-blue {
         color: #2563eb;
-        font-weight: 600;
       }
 
       .schedule-table .color-red {
         color: #dc2626;
-        font-weight: 600;
       }
 
       .schedule-table .today-row {
