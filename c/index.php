@@ -6,9 +6,15 @@ require_once __DIR__ . '/lib/helpers.php';
 // 관리자 권한 체크 (선택적)
 $is_admin = false;
 if (file_exists(dirname(__FILE__) . '/../config.php')) {
-    require_once dirname(__FILE__) . '/../config.php';
-    if (function_exists('mb_id') && function_exists('is_admin')) {
-        $is_admin = is_admin(mb_id());
+    try {
+        require_once dirname(__FILE__) . '/../config.php';
+        if (function_exists('mb_id') && function_exists('is_admin')) {
+            $is_admin = is_admin(mb_id());
+        }
+    } catch (Exception $e) {
+        // config.php 로드 실패 시 view.php로 리다이렉트
+        header('Location: view.php' . (isset($_GET['year']) && isset($_GET['month']) ? '?year='.$_GET['year'].'&month='.$_GET['month'] : ''));
+        exit;
     }
 }
 
@@ -180,9 +186,66 @@ if ($status === 'saved') {
         <div class="footer-actions">
           <button type="button" id="loadPrevMonth" class="load-prev-btn">이전달 값 불러오기</button>
           <button type="button" id="updateHolidays" class="update-holidays-btn">공휴일 업데이트</button>
+          <button type="button" id="copyViewLink" class="copy-link-btn">달력보기 링크 복사</button>
           <button type="submit" id="saveBtn">저장하기</button>
         </div>
       </form>
     </div>
+    
+    <script>
+      // 달력보기 링크 복사 버튼
+      document.getElementById('copyViewLink').addEventListener('click', function() {
+        var year = '<?php echo $year; ?>';
+        var month = '<?php echo $month; ?>';
+        var protocol = window.location.protocol;
+        var host = window.location.host;
+        var pathname = window.location.pathname;
+        var baseUrl = protocol + '//' + host + pathname.replace(/index\.php$/, '').replace(/\/$/, '');
+        var viewUrl = baseUrl + '/view.php?year=' + year + '&month=' + month;
+        
+        // 클립보드 복사
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(viewUrl).then(function() {
+            alert('링크가 복사되었습니다!\n' + viewUrl);
+          }).catch(function(err) {
+            fallbackCopyTextToClipboard(viewUrl);
+          });
+        } else {
+          fallbackCopyTextToClipboard(viewUrl);
+        }
+      });
+      
+      // 구형 브라우저용 복사 함수
+      function fallbackCopyTextToClipboard(text) {
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.top = 0;
+        textArea.style.left = 0;
+        textArea.style.width = "2em";
+        textArea.style.height = "2em";
+        textArea.style.padding = 0;
+        textArea.style.border = "none";
+        textArea.style.outline = "none";
+        textArea.style.boxShadow = "none";
+        textArea.style.background = "transparent";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          var successful = document.execCommand('copy');
+          if (successful) {
+            alert('링크가 복사되었습니다!\n' + text);
+          } else {
+            alert('복사에 실패했습니다. 링크를 직접 복사해주세요:\n' + text);
+          }
+        } catch (err) {
+          alert('복사에 실패했습니다. 링크를 직접 복사해주세요:\n' + text);
+        }
+        
+        document.body.removeChild(textArea);
+      }
+    </script>
   </body>
 </html>
