@@ -1,4 +1,13 @@
 <?php
+// 관리자 권한 체크
+require_once dirname(__FILE__) . '/../config.php';
+session_check();
+
+// 관리자가 아니면 접근 차단
+if (!is_admin(mb_id())) {
+    echo '<script>alert("관리자만 접근할 수 있습니다."); location.href="'.BASE_PATH.'/";</script>';
+    exit;
+}
 
 date_default_timezone_set('Asia/Seoul');
 
