@@ -6,15 +6,9 @@ require_once __DIR__ . '/lib/helpers.php';
 // 관리자 권한 체크 (선택적)
 $is_admin = false;
 if (file_exists(dirname(__FILE__) . '/../config.php')) {
-    try {
-        require_once dirname(__FILE__) . '/../config.php';
-        if (function_exists('mb_id') && function_exists('is_admin')) {
-            $is_admin = is_admin(mb_id());
-        }
-    } catch (Exception $e) {
-        // config.php 로드 실패 시 view.php로 리다이렉트
-        header('Location: view.php' . (isset($_GET['year']) && isset($_GET['month']) ? '?year='.$_GET['year'].'&month='.$_GET['month'] : ''));
-        exit;
+    require_once dirname(__FILE__) . '/../config.php';
+    if (function_exists('mb_id') && function_exists('is_admin')) {
+        $is_admin = is_admin(mb_id());
     }
 }
 
@@ -184,15 +178,25 @@ if ($status === 'saved') {
         </div>
 
         <div class="footer-actions">
-          <button type="button" id="loadPrevMonth" class="load-prev-btn">이전달 값 불러오기</button>
-          <button type="button" id="updateHolidays" class="update-holidays-btn">공휴일 업데이트</button>
-          <button type="button" id="copyViewLink" class="copy-link-btn">달력보기 링크 복사</button>
-          <button type="submit" id="saveBtn">저장하기</button>
+          <div class="footer-left-actions">
+            <button type="button" id="loadPrevMonth" class="load-prev-btn">이전달 값 불러오기</button>
+            <button type="button" id="updateHolidays" class="update-holidays-btn">공휴일 업데이트</button>
+            <button type="button" id="copyViewLink" class="copy-link-btn">달력보기 링크 복사</button>
+          </div>
+          <button type="submit" id="saveBtn" class="save-btn">저장하기</button>
         </div>
       </form>
     </div>
     
     <script>
+      // 저장하기 버튼 confirm
+      document.getElementById('calendarForm').addEventListener('submit', function(e) {
+        if (!confirm('저장하시겠습니까?')) {
+          e.preventDefault();
+          return false;
+        }
+      });
+      
       // 달력보기 링크 복사 버튼
       document.getElementById('copyViewLink').addEventListener('click', function() {
         var year = '<?php echo $year; ?>';
