@@ -169,17 +169,40 @@ function updateHolidaysFromIcs()
 {
     $icsUrl = 'https://holidays.hyunbin.page/basic.ics';
     
-    $context = stream_context_create(array(
-        'http' => array(
-            'timeout' => 10,
-            'ignore_errors' => true
-        )
-    ));
-    
-    $icsData = @file_get_contents($icsUrl, false, $context);
-    
-    if ($icsData === false) {
-        return array('success' => false, 'error' => '공휴일 데이터를 가져올 수 없습니다.');
+    // Try cURL first
+    if (function_exists('curl_init')) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $icsUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        $icsData = curl_exec($ch);
+        $error = curl_error($ch);
+        curl_close($ch);
+        
+        if ($icsData === false || empty($icsData)) {
+            return array('success' => false, 'error' => '공휴일 데이터를 가져올 수 없습니다. cURL 오류: ' . $error);
+        }
+    } else {
+        // Fallback to file_get_contents with SSL options
+        $context = stream_context_create(array(
+            'http' => array(
+                'timeout' => 10,
+                'ignore_errors' => true
+            ),
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false
+            )
+        ));
+        
+        $icsData = @file_get_contents($icsUrl, false, $context);
+        
+        if ($icsData === false) {
+            return array('success' => false, 'error' => '공휴일 데이터를 가져올 수 없습니다. allow_url_fopen이 비활성화되었거나 SSL 지원이 없습니다.');
+        }
     }
     
     $holidays = array();
