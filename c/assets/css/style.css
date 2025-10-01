@@ -435,14 +435,16 @@ button:hover {
   gap: 8px;
 }
 
-.save-btn {
+.save-btn,
+#saveBtn {
   background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
   color: #991b1b !important;
   font-weight: 600 !important;
   border: 1px solid #fca5a5 !important;
 }
 
-.save-btn:hover {
+.save-btn:hover,
+#saveBtn:hover {
   background: linear-gradient(135deg, #fecaca, #fca5a5) !important;
   box-shadow: 0 12px 20px rgba(153, 27, 27, 0.15) !important;
 }
@@ -511,6 +513,15 @@ button:hover {
   button {
     font-size: 12px;
     padding: 5px 10px;
+  }
+  
+  .footer-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .footer-left-actions {
+    flex-direction: column;
   }
 }
 

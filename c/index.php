@@ -43,7 +43,7 @@ if ($status === 'saved') {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>월간 일정 관리</title>
-    <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time(); ?>" />
     <script defer src="assets/js/app.js"></script>
   </head>
   <body>
