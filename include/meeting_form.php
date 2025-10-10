@@ -15,6 +15,12 @@ $copy_ms_id = 0;
 $ms_limit = '';
 $c_meeting_schedule_type_attend_limit = unserialize(MEETING_SCHEDULE_TYPE_ATTEND_LIMIT);
 
+// 안전 가드 및 기본 초기화
+$ms_id = isset($ms_id) ? $ms_id : 0;
+$ma_id = isset($ma_id) ? $ma_id : 0;
+$gu_id1 = array();
+$gu_id2 = array();
+
 $guide_sql ="SELECT * FROM ".MEMBER_TABLE." WHERE mb_moveout_date = '0000-00-00' ORDER BY mb_sex, mb_name";
 $group = get_group_data_all();
 $mp = get_meeting_place_data_all();
@@ -27,29 +33,37 @@ $ms_result = $mysqli->query($ms_sql);
 if($ms_id){
   $row = get_meeting_schedule_data($ms_id);
 
-  $ms_week = $row['ms_week'];
-  $ms_type = $row['ms_type'];
-  $ms_time = $row['ms_time'];
-  $g_id = $row['g_id'];
-  $mp_id = $row['mp_id'];
-  $copy_ms_id = $row['copy_ms_id'];
-  $ms_limit = $row['ms_limit'];
+  if(is_array($row) && !empty($row)){
+    $ms_week = $row['ms_week'];
+    $ms_type = $row['ms_type'];
+    $ms_time = $row['ms_time'];
+    $g_id = $row['g_id'];
+    $mp_id = $row['mp_id'];
+    $copy_ms_id = $row['copy_ms_id'];
+    $ms_limit = $row['ms_limit'];
 
-  if($row['ms_guide']){
-    $ms_guide = $row['ms_guide'];
-    foreach (get_guide_data($ms_guide) as $value) $gu_id1[] = $value['name'];
-    $gu_id1_string = implode(",", $gu_id1);
-  }
+    if(!empty($row['ms_guide'])){
+      $ms_guide = $row['ms_guide'];
+      $guide_list_1 = get_guide_data($ms_guide);
+      if(is_array($guide_list_1)){
+        foreach ($guide_list_1 as $value) $gu_id1[] = $value['name'];
+      }
+      $gu_id1_string = !empty($gu_id1) ? implode(",", $gu_id1) : '';
+    }
 
-  if($row['ms_guide2']){
-    $ms_guide2 = $row['ms_guide2'];
-    foreach (get_guide_data($ms_guide2) as $value) $gu_id2[] = $value['name'];
-    $gu_id2_string = implode(",", $gu_id2);
-  }
+    if(!empty($row['ms_guide2'])){
+      $ms_guide2 = $row['ms_guide2'];
+      $guide_list_2 = get_guide_data($ms_guide2);
+      if(is_array($guide_list_2)){
+        foreach ($guide_list_2 as $value) $gu_id2[] = $value['name'];
+      }
+      $gu_id2_string = !empty($gu_id2) ? implode(",", $gu_id2) : '';
+    }
 
-  if(isset($row) && (($row['ms_start_time'] != $row['ms_finish_time']) || !empty_date($row['ms_start_time']))){
-    $ms_start_time = $row['ms_start_time'];
-    $ms_finish_time = $row['ms_finish_time'];
+    if(isset($row) && (($row['ms_start_time'] != $row['ms_finish_time']) || !empty_date($row['ms_start_time']))){
+      $ms_start_time = $row['ms_start_time'];
+      $ms_finish_time = $row['ms_finish_time'];
+    }
   }
 }
 ?>
@@ -113,7 +127,7 @@ if($ms_id){
           <option value='0' disabled>-- 인도자 선택 --</option>
           <?php
           $guide_result = $mysqli->query($guide_sql);
-          if($guide_result->num_rows > 0){
+          if($guide_result && $guide_result->num_rows > 0){
             while($g1 = $guide_result->fetch_assoc()){
               $m_idx = $g1['mb_id'];
               $selected = check_include_guide($m_idx, $ms_guide)?'selected="selected"':'';
@@ -132,7 +146,7 @@ if($ms_id){
           <option value='0' disabled>-- 보조자 선택 --</option>
           <?php
           $guide_result = $mysqli->query($guide_sql);
-          if($guide_result->num_rows > 0){
+          if($guide_result && $guide_result->num_rows > 0){
             while($g2 = $guide_result->fetch_assoc()){
               $m_idx2 = $g2['mb_id'];
               $selected = check_include_guide($m_idx2, $ms_guide2)?'selected="selected"':'';
@@ -171,10 +185,12 @@ if($ms_id){
         <select class="form-control select-custom font-weight-bold" name="copy_ms_id" id="copy_ms_id">
           <option value='0'>-- 구역 복사 선택 --</option>
           <?php
+          if($ms_result && $ms_result->num_rows > 0){
           while($ms = $ms_result->fetch_assoc()){
             echo "<option value='".$ms['ms_id']."' ".get_selected_text($ms['ms_id'], $copy_ms_id).">".'('.$ms['ms_id'].') '.get_week_text($ms['ms_week']).' '.get_meeting_data_text($ms['ms_time'], $ms['g_name'], $ms['mp_name']);
             if($ms['ma_id']) echo ' [회중일정]';
             echo '</option>';
+          }
           }
           ?>
         </select>

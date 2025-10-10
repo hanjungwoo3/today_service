@@ -18,7 +18,6 @@ foreach($all_past_records as $visit_data) {
         $formatted_records[] = array(
             'tpr_id' => isset($record['id']) ? $record['id'] : null,
             'tpr_assigned_date' => isset($record['assigned_date']) ? $record['assigned_date'] : '',
-            'tpr_status' => isset($record['status']) ? $record['status'] : '',
             'tpr_start_date' => isset($record['start_date']) ? $record['start_date'] : '',
             'tpr_end_date' => isset($record['end_date']) ? $record['end_date'] : '',
             'tpr_mb_name' => isset($record['assigned']) ? $record['assigned'] : '',

@@ -1473,7 +1473,7 @@ $(document).ready(function(){
         // 부재자 방문 사용 여부에 따른 필터링
         if (this.absence_use == 'use') {
           // 부재자 방문 사용 시: 부재 완료인 구역은 배정 불가
-          if (territory.current_status == '1' && territory.progress_status == 'completed') return false;
+          // if (territory.current_status == '1' && territory.progress_status == 'completed') return false;
         } else {
           // 부재자 방문 미사용 시: 전체 완료인 구역, 부재 구역은 배정 불가
           if (territory.progress_status == 'completed' || territory.current_status == '1') return false;

@@ -78,12 +78,12 @@ try {
         if (strtoupper($nud ?? '') == "N") {
             // mb_name만 있으면 처리하고, 나머지는 기본값으로 설정
             if (empty($mb_name)) continue; // mb_name이 없으면 건너뛰기
+            if (empty($mb_pw)) continue; // mb_pw이 없으면 건너뛰기
             
             // 기본값 설정
             $mb_sex = !empty($mb_sex) ? $mb_sex : 'M'; // 성별 기본값: 형제
-            $mb_position = !empty($mb_position) ? $mb_position : '1'; // 직책 기본값: 전도인
+            $mb_position = !empty($mb_position) ? $mb_position : ''; // 직책 기본값: 전도인
             $mb_pioneer = !empty($mb_pioneer) ? $mb_pioneer : '1'; // 파이오니아 기본값: 전도인
-            $mb_auth = !empty($mb_auth) ? $mb_auth : ''; // 권한 기본값: 없음
             $mb_display = !empty($mb_display) ? $mb_display : '0'; // 전시대 기본값: 미선정
             $g_id = !empty($g_id) ? $g_id : '0'; // 봉사집단 기본값: 없음
             $mb_movein_date = !empty($mb_movein_date) ? $mb_movein_date : '0000-00-00'; // 전입날짜 기본값

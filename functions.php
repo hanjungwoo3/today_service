@@ -720,20 +720,28 @@ function get_ms_id_by_guide($mb_id){
 
 // ID 로 부터 인도자 보조자 정보 구하기
 function get_guide_data($guide){
-	global $mysqli;
+    global $mysqli;
 
-	$return = array();
-	$sql = "SELECT mb_name, mb_hp FROM ".MEMBER_TABLE." WHERE mb_id IN ({$guide}) ORDER BY mb_name";
-	$result = $mysqli->query($sql);
-	if($result->num_rows > 0){
-		while ($row = $result->fetch_assoc()) {
-			$return[] = array(
-				'name' => $row['mb_name'],
-				'hp' => decrypt($row['mb_hp'])
-			);
-		}
-	}
-	return $return;
+    // 숫자와 콤마만 허용하도록 정제
+    $safe = preg_replace('/[^0-9,]/', '', (string)$guide);
+    $safe = trim($safe, ',');
+
+    if($safe === ''){
+        return array();
+    }
+
+    $return = array();
+    $sql = "SELECT mb_name, mb_hp FROM ".MEMBER_TABLE." WHERE mb_id IN ({$safe}) ORDER BY mb_name";
+    $result = $mysqli->query($sql);
+    if($result && $result->num_rows > 0){
+        while ($row = $result->fetch_assoc()) {
+            $return[] = array(
+                'name' => $row['mb_name'],
+                'hp' => decrypt($row['mb_hp'])
+            );
+        }
+    }
+    return $return;
 }
 
 // 해당 봉사모임의 인도자인지 확인하기
@@ -2264,7 +2272,7 @@ function get_all_past_records($table, $pid){
     if($table == 'territory'){
 
 		        // 그 다음 record 데이터 가져오기
-		$sql = "SELECT ttr_start_date, ttr_end_date, ttr_status, ttr_assigned, ttr_assigned_date
+		$sql = "SELECT ttr_id, ttr_start_date, ttr_end_date, ttr_status, ttr_assigned, ttr_assigned_date
 		FROM ".TERRITORY_RECORD_TABLE." 
 		WHERE tt_id = {$pid} 
 		ORDER BY create_datetime ASC";
@@ -2272,6 +2280,7 @@ function get_all_past_records($table, $pid){
         if($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
                 $return[] = array(
+					'id' => $row['ttr_id'],
                     'table' => 'territory_record',
                     'start_date' => $row['ttr_start_date'],
                     'end_date' => $row['ttr_end_date'],
@@ -2283,7 +2292,7 @@ function get_all_past_records($table, $pid){
         }
 
         // 먼저 territory_table 데이터 가져오기
-        $sql = "SELECT tt_start_date, tt_end_date, tt_status, tt_assigned, tt_assigned_date
+        $sql = "SELECT tt_id, tt_start_date, tt_end_date, tt_status, tt_assigned, tt_assigned_date
                 FROM ".TERRITORY_TABLE." WHERE tt_id = {$pid}";
         $result = $mysqli->query($sql);
         if($result->num_rows > 0) {
@@ -2293,6 +2302,7 @@ function get_all_past_records($table, $pid){
             $assigned_names = get_assigned_member_name($row['tt_assigned']);
             
             $return[] = array(
+                'id' => $row['tt_id'],
                 'table' => 'territory',
                 'start_date' => $row['tt_start_date'],
                 'end_date' => $row['tt_end_date'], 
@@ -2305,7 +2315,7 @@ function get_all_past_records($table, $pid){
     }elseif($table == 'telephone'){
 
 		// 그 다음 record 데이터 가져오기
-		$sql = "SELECT tpr_start_date, tpr_end_date, tpr_status, tpr_assigned, tpr_assigned_date
+		$sql = "SELECT tpr_id, tpr_start_date, tpr_end_date, tpr_status, tpr_assigned, tpr_assigned_date
 		FROM ".TELEPHONE_RECORD_TABLE." 
 		WHERE tp_id = {$pid} 
 		ORDER BY create_datetime ASC";
@@ -2313,6 +2323,7 @@ function get_all_past_records($table, $pid){
         if($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
                 $return[] = array(
+                    'id' => $row['tpr_id'],
                     'table' => 'telephone_record',
                     'start_date' => $row['tpr_start_date'],
                     'end_date' => $row['tpr_end_date'],
@@ -2324,7 +2335,7 @@ function get_all_past_records($table, $pid){
         }
 
         // 먼저 telephone_table 데이터 가져오기
-        $sql = "SELECT tp_start_date, tp_end_date, tp_status, tp_assigned, tp_assigned_date
+        $sql = "SELECT tp_id, tp_start_date, tp_end_date, tp_status, tp_assigned, tp_assigned_date
                 FROM ".TELEPHONE_TABLE." WHERE tp_id = {$pid}";
         $result = $mysqli->query($sql);
         if($result->num_rows > 0) {
@@ -2334,6 +2345,7 @@ function get_all_past_records($table, $pid){
             $assigned_names = get_assigned_member_name($row['tp_assigned']);
             
             $return[] = array(
+                'id' => $row['tp_id'],
                 'table' => 'telephone',
                 'start_date' => $row['tp_start_date'],
                 'end_date' => $row['tp_end_date'],
@@ -2359,6 +2371,7 @@ function get_all_past_records($table, $pid){
         if($current_visit === null) {
             $current_visit = strpos($status, 'absence') !== false ? '부재' : '전체';
             $current_records[] = array(
+                'id' => $record['id'],
                 'table' => $record['table'],
                 'start_date' => $record['start_date'],
                 'end_date' => $record['end_date'],
@@ -2413,6 +2426,7 @@ function get_all_past_records($table, $pid){
             // 새로운 방문 시작
             $current_visit = strpos($status, 'absence') !== false ? '부재' : '전체';
             $current_records = array(array(
+                'id' => $record['id'],
                 'table' => $record['table'],
                 'start_date' => $record['start_date'],
                 'end_date' => $record['end_date'],
@@ -2421,6 +2435,7 @@ function get_all_past_records($table, $pid){
             ));
         } else {
             $current_records[] = array(
+                'id' => $record['id'],
                 'table' => $record['table'],
                 'start_date' => $record['start_date'],
                 'end_date' => $record['end_date'],
