@@ -3,19 +3,27 @@ date_default_timezone_set('Asia/Seoul');
 
 require_once __DIR__ . '/lib/helpers.php';
 
-// 관리자 권한 체크 (선택적)
-$is_admin = false;
-if (file_exists(dirname(__FILE__) . '/../config.php')) {
-    require_once dirname(__FILE__) . '/../config.php';
-    if (function_exists('mb_id') && function_exists('is_admin')) {
-        $is_admin = is_admin(mb_id());
-    }
+// 로컬 개발 모드 체크
+$localConfigFile = __DIR__ . '/config.php';
+if (file_exists($localConfigFile)) {
+    require_once $localConfigFile;
 }
 
-// 관리자가 아니면 view.php로 리다이렉트
-if (!$is_admin) {
-    header('Location: view.php' . (isset($_GET['year']) && isset($_GET['month']) ? '?year='.$_GET['year'].'&month='.$_GET['month'] : ''));
-    exit;
+// 로컬 모드가 아닐 때만 관리자 권한 체크
+if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
+    $is_admin = false;
+    if (file_exists(dirname(__FILE__) . '/../config.php')) {
+        require_once dirname(__FILE__) . '/../config.php';
+        if (function_exists('mb_id') && function_exists('is_admin')) {
+            $is_admin = is_admin(mb_id());
+        }
+    }
+
+    // 관리자가 아니면 view.php로 리다이렉트
+    if (!$is_admin) {
+        header('Location: view.php' . (isset($_GET['year']) && isset($_GET['month']) ? '?year='.$_GET['year'].'&month='.$_GET['month'] : ''));
+        exit;
+    }
 }
 
 $now = new DateTime('now');

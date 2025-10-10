@@ -8,3 +8,6 @@ t/timer_settings.json
 
 # calendar storage
 c/storage/
+
+# Local development config
+c/config.php

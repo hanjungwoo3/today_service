@@ -212,22 +212,13 @@ $today = new DateTime('now');
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(74, 109, 167, 0.15);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 13px;
-        font-weight: 600;
-        color: rgba(74, 109, 167, 0.35);
+        font-size: 0;
         padding: 3px;
-        word-break: break-word;
-        text-align: center;
         z-index: 0;
         pointer-events: none;
-      }
-
-      .note:empty {
-        display: none;
       }
 
       .names {
@@ -287,13 +278,8 @@ $today = new DateTime('now');
       }
 
       .note-item {
-        padding: 3px 0;
         font-size: 12px;
         line-height: 1.4;
-      }
-
-      .note-item:last-child {
-        padding-bottom: 0;
       }
 
       .note-date {
@@ -429,22 +415,95 @@ $today = new DateTime('now');
           }
         }
         ksort($monthNotes);
+        
+        // 파스텔 색상 정의 (투명도 포함)
+        $pastelColors = array(
+          'rgba(255, 253, 208, 0.5)',  // 연한 노랑
+          'rgba(207, 233, 255, 0.5)',  // 연한 파랑
+          'rgba(255, 224, 224, 0.5)',  // 연한 빨강
+          'rgba(220, 252, 231, 0.5)',  // 연한 그린
+          'rgba(243, 232, 255, 0.5)',  // 연한 보라
+          'rgba(255, 237, 213, 0.5)',  // 연한 오렌지
+          'rgba(252, 231, 243, 0.5)',  // 연한 핑크
+          'rgba(225, 245, 254, 0.5)'   // 연한 하늘색
+        );
+        
+        // 메모별로 날짜들을 그룹화하고 색상 할당
+        $noteGroups = array();
+        $noteColors = array();
+        $colorIndex = 0;
+        
+        foreach ($monthNotes as $dateKey => $noteText) {
+          if (!isset($noteGroups[$noteText])) {
+            $noteGroups[$noteText] = array();
+            $noteColors[$noteText] = $pastelColors[$colorIndex % count($pastelColors)];
+            $colorIndex++;
+          }
+          $noteGroups[$noteText][] = $dateKey;
+        }
+        
+        // 각 메모에 대해 연속된 날짜 구간을 찾아 포맷팅
+        $groupedNotes = array();
+        $weekdays = array('일', '월', '화', '수', '목', '금', '토');
+        
+        foreach ($noteGroups as $noteText => $dateKeys) {
+          $dateRanges = array();
+          $i = 0;
+          $count = count($dateKeys);
+          
+          while ($i < $count) {
+            $startDate = new DateTime($dateKeys[$i]);
+            $endDate = clone $startDate;
+            $j = $i + 1;
+            
+            // 연속된 날짜 찾기
+            while ($j < $count) {
+              $nextDate = new DateTime($dateKeys[$j]);
+              $dayDiff = ($nextDate->getTimestamp() - $endDate->getTimestamp()) / 86400;
+              
+              if ($dayDiff == 1) {
+                $endDate = clone $nextDate;
+                $j++;
+              } else {
+                break;
+              }
+            }
+            
+            // 날짜 범위를 텍스트로 변환
+            $startDay = (int)$startDate->format('j');
+            $startWeekdayNum = (int)$startDate->format('w');
+            $startWeekday = $weekdays[$startWeekdayNum];
+            
+            if ($startDate->format('Y-m-d') === $endDate->format('Y-m-d')) {
+              // 단일 날짜
+              $dateRanges[] = $startDay . '일(' . $startWeekday . ')';
+            } else {
+              // 범위
+              $endDay = (int)$endDate->format('j');
+              $endWeekdayNum = (int)$endDate->format('w');
+              $endWeekday = $weekdays[$endWeekdayNum];
+              $dateRanges[] = $startDay . '일(' . $startWeekday . ')~' . $endDay . '일(' . $endWeekday . ')';
+            }
+            
+            $i = $j;
+          }
+          
+          // 모든 날짜 범위를 쉼표로 연결
+          $groupedNotes[] = array(
+            'dateRange' => $month . '월 ' . implode(', ', $dateRanges),
+            'note' => $noteText,
+            'color' => $noteColors[$noteText]
+          );
+        }
       ?>
 
-      <?php if (!empty($monthNotes)): ?>
+      <?php if (!empty($groupedNotes)): ?>
         <div class="monthly-notes">
           <ul class="notes-list">
-            <?php foreach ($monthNotes as $dateKey => $noteText): ?>
-              <?php
-                $noteDate = new DateTime($dateKey);
-                $day = (int)$noteDate->format('j');
-                $weekdayNum = (int)$noteDate->format('w');
-                $weekdays = array('일', '월', '화', '수', '목', '금', '토');
-                $weekday = $weekdays[$weekdayNum];
-              ?>
-              <li class="note-item">
-                <span class="note-date"><?php echo $month; ?>월 <?php echo $day; ?>일(<?php echo $weekday; ?>) :</span>
-                <span class="note-text"><?php echo nl2br(htmlspecialchars($noteText, ENT_QUOTES)); ?></span>
+            <?php foreach ($groupedNotes as $noteGroup): ?>
+              <li class="note-item" style="background: <?php echo htmlspecialchars($noteGroup['color'], ENT_QUOTES); ?>; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px;">
+                <span class="note-date"><?php echo htmlspecialchars($noteGroup['dateRange'], ENT_QUOTES); ?> :</span>
+                <span class="note-text"><?php echo nl2br(htmlspecialchars($noteGroup['note'], ENT_QUOTES)); ?></span>
               </li>
             <?php endforeach; ?>
           </ul>
@@ -466,14 +525,20 @@ $today = new DateTime('now');
               $assignments = isset($calendarData['dates'][$dateKey]) ? $calendarData['dates'][$dateKey] : array('note' => '', 'names' => array('', '', ''));
               $dayClass = getDayClass($date, $today, $isCurrentMonth);
               $numberClass = getDayNumberClass($date, $today, $isCurrentMonth);
-              $note = isset($assignments['note']) ? $assignments['note'] : '';
+              $note = isset($assignments['note']) ? trim($assignments['note']) : '';
               $names = isset($assignments['names']) ? $assignments['names'] : array('', '', '');
               $isSaturday = (int)$date->format('w') === 6;
               $colors = getScheduleColorForDay($calendarData['schedule_guide'], $date);
+              
+              // 메모 배경색 찾기
+              $noteBackgroundColor = '';
+              if (!empty($note) && isset($noteColors[$note])) {
+                $noteBackgroundColor = $noteColors[$note];
+              }
             ?>
             <div class="day <?php echo $dayClass; ?>">
-              <?php if ($isCurrentMonth && !empty(trim($note))): ?>
-                <div class="note"><?php echo htmlspecialchars(trim($note), ENT_QUOTES); ?></div>
+              <?php if ($isCurrentMonth && !empty($note)): ?>
+                <div class="note" style="<?php echo !empty($noteBackgroundColor) ? 'background: ' . htmlspecialchars($noteBackgroundColor, ENT_QUOTES) . ';' : ''; ?>"><?php echo htmlspecialchars($note, ENT_QUOTES); ?></div>
               <?php endif; ?>
               <div class="day-num <?php echo $numberClass; ?>"><?php echo $date->format('j'); ?></div>
               <?php if ($isCurrentMonth): ?>

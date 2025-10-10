@@ -48,21 +48,35 @@ git clone <repository-url>
 cd google-cal
 ```
 
-### 2. 저장 디렉토리 권한 설정
+### 2. 로컬 개발 환경 설정
+로컬에서 로그인 없이 테스트하려면:
+```bash
+cp config.php.sample config.php
+```
+
+`config.php` 파일을 열어 `LOCAL_MODE`를 활성화:
+```php
+<?php
+define('LOCAL_MODE', true);
+```
+
+**참고:** `config.php`는 `.gitignore`에 포함되어 있어 서버에 업로드되지 않습니다.
+
+### 3. 저장 디렉토리 권한 설정
 ```bash
 mkdir -p storage/backups
 chmod 775 storage
 chmod 775 storage/backups
 ```
 
-### 3. PHP 개발 서버 실행
+### 4. PHP 개발 서버 실행
 ```bash
 php -S 0.0.0.0:8000
 ```
 
-### 4. 브라우저 접속
-- 읽기 전용 뷰: `http://localhost:8000/` 또는 `http://localhost:8000/index.php`
-- 관리자 편집 페이지: `http://localhost:8000/admin.php`
+### 5. 브라우저 접속
+- 읽기 전용 뷰: `http://localhost:8000/view.php`
+- 관리자 편집 페이지: `http://localhost:8000/index.php`
 
 ## 사용 방법
 
@@ -180,10 +194,16 @@ php -S 0.0.0.0:8000
 
 ## 배포
 
-### Apache/Nginx 환경
+### 실 서버 환경
 1. 프로젝트 루트 디렉토리를 웹 서버의 document root로 설정
 2. `storage/` 디렉토리가 웹 서버에서 쓰기 가능하도록 권한 설정
-3. PHP 8.1 이상 필요
+3. **`config.php` 파일을 생성하지 않음** (자동으로 관리자 권한 체크 수행)
+4. PHP 5.2 이상 필요 (구버전 서버 호환)
+
+**권한 구조:**
+- **관리자**: `index.php`로 접근하여 달력 수정 가능
+- **일반 사용자**: `view.php`로 접근하여 보기만 가능
+- 관리자가 아닌 사용자가 `index.php` 접근 시 자동으로 `view.php`로 리다이렉트
 
 ### 다른 프로젝트에 통합
 이 프로그램을 다른 프로젝트의 서브 디렉토리에 넣어 사용할 수 있습니다:
