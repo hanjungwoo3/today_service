@@ -4,6 +4,15 @@ date_default_timezone_set('Asia/Seoul');
 
 require_once __DIR__ . '/lib/helpers.php';
 
+// 로그인한 사용자 ID 가져오기 (선택적)
+$loggedInUserId = '';
+if (file_exists(dirname(__FILE__) . '/../config.php')) {
+  @require_once dirname(__FILE__) . '/../config.php';
+  if (function_exists('mb_id')) {
+    $loggedInUserId = mb_id();
+  }
+}
+
 $now = new DateTime('now');
 $year = (int)(isset($_GET['year']) ? $_GET['year'] : $now->format('Y'));
 $month = (int)(isset($_GET['month']) ? $_GET['month'] : $now->format('n'));
@@ -244,6 +253,12 @@ $today = new DateTime('now');
 
       .name:empty::before {
         content: '\00a0';
+      }
+
+      .name.my-name {
+        border: 1px solid #dc2626;
+        border-radius: 2px;
+        font-weight: 600;
       }
 
       /* Name font colors */
@@ -544,7 +559,15 @@ $today = new DateTime('now');
               <?php if ($isCurrentMonth): ?>
                 <div class="names">
                   <?php foreach ($names as $i => $name): ?>
-                    <div class="name name-bg-<?php echo htmlspecialchars($colors[$i], ENT_QUOTES); ?>"><?php echo htmlspecialchars(trim($name), ENT_QUOTES); ?></div>
+                    <?php 
+                      $trimmedName = trim($name);
+                      $isMyName = !empty($loggedInUserId) && !empty($trimmedName) && $loggedInUserId === $trimmedName;
+                      $nameClass = 'name name-bg-' . htmlspecialchars($colors[$i], ENT_QUOTES);
+                      if ($isMyName) {
+                        $nameClass .= ' my-name';
+                      }
+                    ?>
+                    <div class="<?php echo $nameClass; ?>"><?php echo htmlspecialchars($trimmedName, ENT_QUOTES); ?></div>
                   <?php endforeach; ?>
                 </div>
               <?php endif; ?>
