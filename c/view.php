@@ -259,9 +259,10 @@ $today = new DateTime('now');
       }
 
       .name.my-name {
-        border: 1px solid #dc2626;
-        border-radius: 2px;
-        font-weight: 600;
+        background: linear-gradient(135deg, #ef4444, #f97316) !important;
+        color: #fff !important;
+        font-weight: 700;
+        border-radius: 3px;
       }
 
       /* Name font colors */
