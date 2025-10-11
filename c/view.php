@@ -4,12 +4,15 @@ date_default_timezone_set('Asia/Seoul');
 
 require_once __DIR__ . '/lib/helpers.php';
 
-// 로그인한 사용자 ID 가져오기 (선택적)
-$loggedInUserId = '';
+// 로그인한 사용자 이름 가져오기 (선택적)
+$loggedInUserName = '';
 if (file_exists(dirname(__FILE__) . '/../config.php')) {
   @require_once dirname(__FILE__) . '/../config.php';
-  if (function_exists('mb_id')) {
-    $loggedInUserId = mb_id();
+  if (function_exists('mb_id') && function_exists('get_member_name')) {
+    $mbId = mb_id();
+    if (!empty($mbId)) {
+      $loggedInUserName = get_member_name($mbId);
+    }
   }
 }
 
@@ -561,7 +564,7 @@ $today = new DateTime('now');
                   <?php foreach ($names as $i => $name): ?>
                     <?php 
                       $trimmedName = trim($name);
-                      $isMyName = !empty($loggedInUserId) && !empty($trimmedName) && $loggedInUserId === $trimmedName;
+                      $isMyName = !empty($loggedInUserName) && !empty($trimmedName) && $loggedInUserName === $trimmedName;
                       $nameClass = 'name name-bg-' . htmlspecialchars($colors[$i], ENT_QUOTES);
                       if ($isMyName) {
                         $nameClass .= ' my-name';
