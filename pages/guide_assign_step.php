@@ -97,9 +97,9 @@ $date_parts = explode("-", $date);
             <div class="p-2 bg-light text-center text-secondary">구역을 선택해 주세요</div>
           </template>
           <template v-else>
-            <span class="badge badge-info badge-territory mr-2 my-1 bedge-big " :class="selected_territories.includes(value.id)?'':'d-none'" v-for="(value, index) in territories" v-on:click="selectTerritory(value.id,index)" v-if="value.og_type!='편지'">{{value.num}} · 일반</span>
+            <span class="badge badge-info badge-territory mr-2 my-1 bedge-big " :class="selected_territories.includes(value.id)?'':'d-none'" v-for="(value, index) in territories" v-on:click="selectTerritory(value.id,index)" v-if="value.type!='편지'">{{value.num}} · 일반</span>
             <span class="badge badge-info badge-territory mr-2 my-1 bedge-big" :class="selected_telephones.includes(value.id)?'':'d-none'" v-for="(value, index) in telephones" v-on:click="selectTelephone(value.id,index)">{{value.num}} · 전화</span>
-            <span class="badge badge-info badge-territory mr-2 my-1 bedge-big" :class="selected_territories.includes(value.id)?'':'d-none'" v-for="(value, index) in territories" v-on:click="selectTerritory(value.id,index)" v-if="value.og_type=='편지'">{{value.num}} · 편지</span>
+            <span class="badge badge-info badge-territory mr-2 my-1 bedge-big" :class="selected_territories.includes(value.id)?'':'d-none'" v-for="(value, index) in territories" v-on:click="selectTerritory(value.id,index)" v-if="value.type=='편지'">{{value.num}} · 편지</span>
             <span class="badge badge-info badge-territory mr-2 my-1 bedge-big" :class="selected_displays.includes(value.id)?'':'d-none'" v-for="(value, index) in displays" v-on:click="selectDisplay(value.id,index)">{{value.name+' '+value.num+'팀'}} · 전시대</span>
 
           </template>
@@ -331,13 +331,8 @@ $date_parts = explode("-", $date);
                     <div class="mt-2 px-2 py-1 bg-light rounded" v-if="hasVisitItems(value.all_past_records, 'territory')">
                       <div v-html="visitsHtml(value.all_past_records, 'territory', value.id)"></div>
                     </div>
-                    <div class="assigned_group_name mt-1 ">
-                      {{value.assigned_group_name}}
-                    </div>
                   </li>
                   <div class="list-group-item clearfix border-top-0 p-2 mt-0" :class="selected_territories.includes(value.id)?'active':''">
-                    <button class="btn btn-sm btn-outline-danger float-left" type="button" v-on:click="cancelAssign(value.id, 'territory')" v-if="auth">배정취소</button>
-                    <button class="btn btn-sm btn-outline-secondary float-left" type="button" v-on:click="setSelectedMembers(value.id, 'territory', value.assigned_ids,value.assigned_group)" v-if="value.assigned_ids != '' && auth">배정 불러오기</button>
                     <button class="btn btn-sm btn-outline-secondary ml-1 float-right" type="button" v-on:click="ViewTerritory(value.id)">보기</button>
                     <button class="btn btn-sm btn-outline-secondary float-right" type="button" v-on:click="map_view('territory', value.id)">지도</button>
                   </div>
@@ -373,7 +368,7 @@ $date_parts = explode("-", $date);
             <div class="tab-pane fade" id="v-pills-assign" role="tabpanel" aria-labelledby="v-pills-assign-tab">
               <h6 class="border-bottom mt-2 pb-1">일반</h6>
               <ul class="list-group mb-2">
-                <template v-for="(value, index) in territories" v-if="value.m_id == m_id&&value.og_type!='편지'">
+                <template v-for="(value, index) in assigned_data.territory" v-if="value.type!='편지'">
                   <li class="list-group-item clearfix border-bottom-0 p-2" :class="selected_territories.includes(value.id)?'active':''">
                     <p class="mb-1">
                       <span class="badge badge-pill badge-success badge-outline px-1 align-middle">{{value.num}} · {{value.type}}</span>
@@ -414,14 +409,14 @@ $date_parts = explode("-", $date);
                   </li>
                   <div class="list-group-item clearfix border-top-0 p-2 mt-0" :class="selected_territories.includes(value.id)?'active':''">
                     <button class="btn btn-sm btn-outline-danger mr-1 float-left" type="button" v-on:click="cancelAssign(value.id, 'territory')" v-if="auth">배정취소</button>
-                    <button class="btn btn-sm btn-outline-secondary float-left" type="button" v-on:click="setSelectedMembers(value.id, 'territory', value.assigned_ids,value.assigned_group)" v-if="value.assigned_ids != '' && auth">배정 불러오기</button>
+                    <button class="btn btn-sm btn-outline-secondary float-left" type="button" v-on:click="setSelectedMembers(value.id, 'territory', value.assigned_ids,value.assigned_group)" v-if="value.assigned_ids != '' && auth">배정불러오기</button>
                     <button class="btn btn-sm btn-outline-secondary ml-1 float-right" type="button" v-on:click="ViewTerritory(value.id)">보기</button>
                     <button class="btn btn-sm btn-outline-secondary float-right" type="button" v-on:click="map_view('territory', value.id)">지도</button>
                   </div>
                 </template>
               </ul>
               <ul class="list-group mb-2">
-                <li class="list-group-item clearfix disabled p-2" v-for="(value, index) in territories_record" v-if="value.og_type!='편지'">
+                <li class="list-group-item clearfix disabled p-2" v-for="(value, index) in territories_record" v-if="value.type!='편지'">
                   <p class="mb-1">
                     <span class="badge badge-pill badge-success badge-outline px-1 align-middle">{{value.num}} · {{value.type}}</span>
                     <span class="badge badge-pill badge-secondary badge-outline px-1 align-middle" >
@@ -466,7 +461,7 @@ $date_parts = explode("-", $date);
 
               <h6 class="border-bottom mt-2 pb-1">전화</h6>
               <ul class="list-group mb-2">
-                <template v-for="(value, index) in telephones" v-if="value.m_id == m_id">
+                <template v-for="(value, index) in assigned_data.telephone">
                   <li class="list-group-item clearfix border-bottom-0 p-2" :class="selected_telephones.includes(value.id)?'active':''">
                     <p class="mb-1">
                       <span class="badge badge-pill badge-warning badge-outline px-1 align-middle">{{value.num}} · 전화</span>
@@ -506,9 +501,9 @@ $date_parts = explode("-", $date);
                     </div>
                   </li>
                   <div class="list-group-item clearfix border-top-0 p-2 mt-0" :class="selected_telephones.includes(value.id)?'active':''">
-                    <button class="btn btn-sm btn-outline-danger float-left" type="button" v-on:click="cancelAssign(value.id, 'telephone')" v-if="auth">배정취소</button>
+                    <button class="btn btn-sm btn-outline-danger mr-1 float-left" type="button" v-on:click="cancelAssign(value.id, 'telephone')" v-if="auth">배정취소</button>
+                    <button class="btn btn-sm btn-outline-secondary float-left" type="button" v-on:click="setSelectedMembers(value.id, 'telephone', value.assigned_ids,value.assigned_group)" v-if="value.assigned_ids != '' && auth">배정불러오기</button>
                     <button class="btn btn-sm btn-outline-secondary float-right" type="button" v-on:click="ViewTelephone(value.id)">보기</button>
-                    <button class="btn btn-sm btn-outline-secondary mr-2 float-right" type="button" v-on:click="setSelectedMembers(value.id, 'telephone', value.assigned_ids,value.assigned_group)" v-if="value.assigned_ids != '' && auth">배정 불러오기</button>
                   </div>
                 </template>
               </ul>
@@ -558,7 +553,7 @@ $date_parts = explode("-", $date);
 
               <h6 class="border-bottom mt-2 pb-1">편지</h6>
               <ul class="list-group mb-2">
-                <template v-for="(value, index) in territories" v-if="value.m_id == m_id&&value.og_type=='편지'">
+                <template v-for="(value, index) in assigned_data.territory" v-if="value.type=='편지'">
                   <li class="list-group-item clearfix border-bottom-0 p-2" :class="selected_territories.includes(value.id)?'active':''">
                     <p class="mb-1">
                       <span class="badge badge-pill badge-info badge-outline px-1 align-middle">{{value.num}} · 편지</span>
@@ -598,14 +593,14 @@ $date_parts = explode("-", $date);
                     </div>
                   </li>
                   <div class="list-group-item clearfix border-top-0 p-2 mt-0" :class="selected_territories.includes(value.id)?'active':''">
-                    <button class="btn btn-sm btn-outline-danger float-left" type="button" v-on:click="cancelAssign(value.id, 'territory')" v-if="auth">배정취소</button>
+                    <button class="btn btn-sm btn-outline-danger mr-1 float-left" type="button" v-on:click="cancelAssign(value.id, 'territory')" v-if="auth">배정취소</button>
+                    <button class="btn btn-sm btn-outline-secondary float-left" type="button" v-on:click="setSelectedMembers(value.id, 'territory', value.assigned_ids,value.assigned_group)" v-if="value.assigned_ids != '' && auth">배정불러오기</button>
                     <button class="btn btn-sm btn-outline-secondary float-right" type="button" v-on:click="ViewTerritory(value.id)">보기</button>
-                    <button class="btn btn-sm btn-outline-secondary mr-2 float-right" type="button" v-on:click="setSelectedMembers(value.id, 'territory', value.assigned_ids,value.assigned_group)" v-if="value.assigned_ids != '' && auth">배정 불러오기</button>
                   </div>
                 </template>
               </ul>
               <ul class="list-group mb-2">
-                <li class="list-group-item clearfix disabled p-2" v-for="(value, index) in territories_record" v-if="value.og_type=='편지'">
+                <li class="list-group-item clearfix disabled p-2" v-for="(value, index) in territories_record" v-if="value.type=='편지'">
                   <p class="mb-1">
                     <span class="badge badge-pill badge-info badge-outline px-1 align-middle">{{value.num}} · 편지</span>
                     <span class="badge badge-pill badge-secondary badge-outline px-1 align-middle" >
@@ -661,18 +656,13 @@ $date_parts = explode("-", $date);
                     </div>
                   </li>
                   <div class="list-group-item clearfix border-top-0 p-2 mt-0" :class="selected_displays.includes(value.id)?'active':''">
-                    <button class="btn btn-sm btn-outline-danger float-left" type="button" v-on:click="cancelAssign(value.id, 'display')" v-if="auth">배정취소</button>
+                    <button class="btn btn-sm btn-outline-danger mr-1 float-left" type="button" v-on:click="cancelAssign(value.id, 'display')" v-if="auth">배정취소</button>
+                    <button class="btn btn-sm btn-outline-secondary float-left" type="button" v-on:click="setSelectedMembers(value.id, 'display', value.assigned_ids,value.assigned_group)" v-if="value.assigned_ids != '' && auth">배정불러오기</button>
                     <template v-if="(value.address != '') || (value.address != '')">
-                      <button type="button" class="btn btn-outline-info btn-sm float-right" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
-                        <i class="bi bi-geo-alt"></i>
-                      </button>
-                      <div class="dropdown-menu">
-                        <button class="dropdown-item" type="button" v-on:click="ViewRoadview(value.address)" v-if="value.address != ''">로드뷰</button>
-                        <button class="dropdown-item" type="button" v-on:click="KakaoNavi(value.address)" v-if="value.address != ''">길찾기</button>
-                        <button class="dropdown-item" type="button" v-on:click="ViewMap(value.address)" v-if="value.address != ''">지도보기</button>
-                      </div>
+                      <button class="btn btn-sm btn-outline-secondary ml-1 float-right" type="button" v-on:click="ViewMap(value.address)">지도</button>
+                      <button class="btn btn-sm btn-outline-secondary ml-1 float-right" type="button" v-on:click="KakaoNavi(value.address)">길찾기</button>
+                      <button class="btn btn-sm btn-outline-secondary float-right" type="button" v-on:click="ViewRoadview(value.address)">로드뷰</button>
                     </template>
-                    <button class="btn btn-sm btn-outline-secondary mr-2 float-right" type="button" v-on:click="setSelectedMembers(value.id, 'display', value.assigned_ids,value.assigned_group)" v-if="value.assigned_ids != '' && auth">배정 불러오기</button>
                   </div>
                 </template>
               </ul>
@@ -684,9 +674,9 @@ $date_parts = explode("-", $date);
       <div class="row invisible">
         <div class="col-12">
 
-            <span class="badge badge-info badge-territory mr-2 my-1 bedge-big" :class="selected_territories.includes(value.id)?'':'d-none'" v-for="(value, index) in territories" v-if="value.og_type!='편지'">{{value.num}} · 일반</span>
+            <span class="badge badge-info badge-territory mr-2 my-1 bedge-big" :class="selected_territories.includes(value.id)?'':'d-none'" v-for="(value, index) in territories" v-if="value.type!='편지'">{{value.num}} · 일반</span>
             <span class="badge badge-info badge-territory mr-2 my-1 bedge-big" :class="selected_telephones.includes(value.id)?'':'d-none'" v-for="(value, index) in telephones" >{{value.num}} · 전화</span>
-            <span class="badge badge-info badge-territory mr-2 my-1 bedge-big" :class="selected_territories.includes(value.id)?'':'d-none'" v-for="(value, index) in territories" v-if="value.og_type=='편지'">{{value.num}} · 편지</span>
+            <span class="badge badge-info badge-territory mr-2 my-1 bedge-big" :class="selected_territories.includes(value.id)?'':'d-none'" v-for="(value, index) in territories" v-if="value.type=='편지'">{{value.num}} · 편지</span>
             <span class="badge badge-info badge-territory mr-2 my-1 bedge-big" :class="selected_displays.includes(value.id)?'':'d-none'" v-for="(value, index) in displays" >{{index+1}} · 전시대</span>
 
         </div>
@@ -772,7 +762,7 @@ $(document).ready(function(){
       displays:[],
       territories_record:[],
       telephones_record:[],
-
+      assigned_data:[],
       territoryTypeFilter: 'all',
       territoryTypes: [],
       activeTabId: '',
@@ -865,6 +855,7 @@ $(document).ready(function(){
           this.listDisplay();
           this.listTerritoryRecord();
           this.listTelephoneRecord();
+          this.listAssignedData();
           
           // 탭이 로드된 후 첫 번째 활성 탭 설정
           this.$nextTick(() => {
@@ -1189,8 +1180,8 @@ $(document).ready(function(){
         return letters.length;
       },
       getCountAssignedTotal(){
-        var territories = this.territories.filter((element) => element.m_id == this.m_id);
-        var telephones = this.telephones.filter((element) => element.m_id == this.m_id);
+        var territories = this.assigned_data.territory || [];
+        var telephones = this.assigned_data.telephone || [];
         var displays = this.displays.filter((element) => element.m_id == this.m_id);
 
         var territories_record = this.territories_record;
@@ -1276,6 +1267,7 @@ $(document).ready(function(){
           v_guide_assign_step.listTerritory();
           v_guide_assign_step.listTelephone();
           v_guide_assign_step.listDisplay();
+          v_guide_assign_step.listAssignedData();
           v_guide_assign_step.countAssignMember();
 
           v_guide_assign_step.selected_members = [];
@@ -1290,12 +1282,13 @@ $(document).ready(function(){
         if(!this.auth) return false;
         if(this.m_id == '') return false;
 
-        $('#confirm-modal').confirm('구역 배정을 취소하시겠습니까?<br>배정된 후의 봉사 기록은 삭제됩니다.').on({
+        $('#confirm-modal').confirm('구역 배정을 취소하시겠습니까?<br>배정이 취소되면 해당 구역의 봉사 기록이 함께 삭제됩니다.').on({
           confirm: function () {
             $.post(BASE_PATH+'/pages/guide_work.php', { work: 'assign_cancel', pid: id, table: table, m_id: v_guide_assign_step.m_id }, function(data) {
               v_guide_assign_step.listTerritory();
               v_guide_assign_step.listTelephone();
               v_guide_assign_step.listDisplay();
+              v_guide_assign_step.listAssignedData();
               v_guide_assign_step.countAssignMember();
             });
 
@@ -1377,6 +1370,12 @@ $(document).ready(function(){
           v_guide_assign_step.telephones_record = telephones;
         });
       },
+        listAssignedData(){
+          $.post(BASE_PATH+'/v_data/guide_assign_step_assigned.php', { m_id:v_guide_assign_step.m_id }, function(data) {
+            var assigned_data = JSON.parse(data);
+            v_guide_assign_step.assigned_data = assigned_data;
+          });
+        },
       ViewTerritory(id){
         open_territory_view(id,'view');
       },
@@ -1468,7 +1467,7 @@ $(document).ready(function(){
         // 이미 배정된 구역은 제외
         if (territory.m_id == this.m_id) return false;
         // 편지 구역은 제외 (편지 탭에서 처리)
-        if (territory.og_type == '편지') return false;
+        if (territory.type == '편지') return false;
         
         // 부재자 방문 사용 여부에 따른 필터링
         if (this.absence_use == 'use') {
@@ -1500,7 +1499,7 @@ $(document).ready(function(){
         // 이미 배정된 구역은 제외
         if (territory.m_id == this.m_id) return false;
         // 편지 구역만 포함
-        if (territory.og_type != '편지') return false;
+        if (territory.type != '편지') return false;
         
         // 부재자 방문 사용 여부에 따른 필터링
         if (this.absence_use == 'use') {
@@ -1522,6 +1521,7 @@ $(document).ready(function(){
   setInterval(() => v_guide_assign_step.listTerritory(), 10000);
   setInterval(() => v_guide_assign_step.listTelephone(), 10000);
   setInterval(() => v_guide_assign_step.listDisplay(), 10000);
+  setInterval(() => v_guide_assign_step.listAssignedData(), 10000);
   setInterval(() => v_guide_assign_step.countAssignMember(), 10000);
 
 </script>

@@ -2,6 +2,7 @@
 <?php check_accessible('admin');?>
 
 <?php $c_territory_type = unserialize(TERRITORY_TYPE);?>
+<?php $c_house_condition_use = unserialize(HOUSE_CONDITION_USE);?>
 
 <header class="navbar navbar-expand-xl fixed-top header">
   <h1 class="text-white mb-0  navbar-brand">관리자 <span class="d-xl-none">세대 관리</span></h1>
@@ -44,7 +45,15 @@
             <option value="1"><?=get_house_condition_text(1)?></option>
             <option value="2"><?=get_house_condition_text(2)?></option>
             <?php endif; ?>
-            <?php for($i=3; $i<11; $i++) echo '<option value="'.$i.'">'.get_house_condition_text($i).'</option>'; ?>
+            <?php
+              for($i=3; $i<11; $i++){
+                $label = get_house_condition_text($i);
+                if(empty($c_house_condition_use[$i]) || $c_house_condition_use[$i] != 'use'){
+                  $label = '[미사용] ' . $label;
+                }
+                echo '<option value="'.$i.'">'.$label.'</option>';
+              }
+            ?>
           </select>
         </div>
       </div>

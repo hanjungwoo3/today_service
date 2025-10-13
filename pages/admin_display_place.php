@@ -2,6 +2,7 @@
 <?php check_accessible('admin');?>
 
 <?php $ms_options = get_meeting_option();?>
+<?php $c_meeting_schedule_type_use = unserialize(MEETING_SCHEDULE_TYPE_USE); ?>
 <?php $sql = "SELECT dp_id, dp_name, dp_address, dp_count, d_ms_all, ms_id FROM ".DISPLAY_PLACE_TABLE." ORDER BY dp_name ASC";?>
 <?php $result = $mysqli->query($sql);?>
 
@@ -27,10 +28,10 @@
 							<option value="all_3">전체</option>
 							<option value="all_1"><?=get_meeting_schedule_type_text(1)?></option>
 							<option value="all_2"><?=get_meeting_schedule_type_text(2)?></option>
-							<option value="all_4"><?=get_meeting_schedule_type_text(3)?></option>
-							<option value="all_5"><?=get_meeting_schedule_type_text(4)?></option>
-							<option value="all_6"><?=get_meeting_schedule_type_text(5)?></option>
-							<option value="all_7"><?=get_meeting_schedule_type_text(6)?></option>
+							<option value="all_4"><?php if(empty($c_meeting_schedule_type_use[3])){ echo '[미사용] '; } ?><?=get_meeting_schedule_type_text(3)?></option>
+							<option value="all_5"><?php if(empty($c_meeting_schedule_type_use[4])){ echo '[미사용] '; } ?><?=get_meeting_schedule_type_text(4)?></option>
+							<option value="all_6"><?php if(empty($c_meeting_schedule_type_use[5])){ echo '[미사용] '; } ?><?=get_meeting_schedule_type_text(5)?></option>
+							<option value="all_7"><?php if(empty($c_meeting_schedule_type_use[6])){ echo '[미사용] '; } ?><?=get_meeting_schedule_type_text(6)?></option>
 						</optgroup>
 						<optgroup label="모임 계획">
 							<?php echo $ms_options;?>

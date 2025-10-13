@@ -30,7 +30,7 @@ while($ms = $result->fetch_assoc()){
 <div id="v_guide_territory">
   <div id="container" class="container-fluid">
 
-    <button type="button" class="btn btn-outline-success mb-4" onclick="statistics_map_view();"><i class="bi bi-geo-alt"></i><span class="align-middle"> 구역 전체 지도</span></button>
+    <button type="button" class="btn btn-outline-success mb-4" onclick="statistics_map_view();"><i class="bi bi-geo-alt"></i><span class="align-middle"> 구역전체지도</span></button>
 
     <form id="guide-management-territory-search-form" action="" method="post" class="clearfix mb-4">
       <?php include_once('../include/territory_search_filter.php');?>

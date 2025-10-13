@@ -383,7 +383,7 @@ $c_meeting_schedule_type_attend_limit = unserialize(MEETING_SCHEDULE_TYPE_ATTEND
               <div id="map" style="height:600px;display:none;"></div>
             </div>
             <small class="text-muted">
-              그려진 회중 구역 경계는 관리자 > 일반 구역 관리 > 구역 전체 지도 에 표시됩니다.
+              그려진 회중 구역 경계는 관리자 > 일반 구역 관리 > 구역전체지도 에 표시됩니다.
             </small>
           </div>
           <div class="col-12 col-md-12 pt-4">
@@ -764,7 +764,7 @@ $c_meeting_schedule_type_attend_limit = unserialize(MEETING_SCHEDULE_TYPE_ATTEND
       <!-- 구역 -->
       <div class="tab-pane fade" id="v-pills-territory" role="tabpanel" aria-labelledby="v-pills-territory-tab">
 
-        <h5 class="border-bottom mt-4 mb-3 pb-2">구역</h5>
+        <h5 class="border-bottom mt-4 mb-3 pb-2">관리자 구역 관리</h5>
 
         <div class="form-group row">
           <label for="territory_item_per_page" class="col-4 col-md-2 col-form-label">페이지 당 구역 개수</label>
@@ -774,16 +774,16 @@ $c_meeting_schedule_type_attend_limit = unserialize(MEETING_SCHEDULE_TYPE_ATTEND
         </div>
 
         <div class="form-group row">
-          <label class="col-4 col-md-2 col-form-label">구역 정렬</label>
+          <label class="col-4 col-md-2 col-form-label">구역 번호 정렬</label>
           <div class="col-8 col-md-10">
             <div style="line-height:40px;">
               <label>
                 <input type="radio" name="admin_territory_sort" value="0" <?=empty(ADMIN_TERRITORY_SORT)?'checked="checked"':'';?>>
-                문자로 정렬
+                문자
               </label>
               <label>
                 <input type="radio" name="admin_territory_sort" value="1" <?=ADMIN_TERRITORY_SORT == '1'?'checked="checked"':'';?>>
-                숫자로 정렬
+                숫자
               </label>
             </div>
           </div>

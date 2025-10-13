@@ -69,7 +69,7 @@ if(!empty($group_data)){
 	<?php endif; ?>
 
 	<h5 class="border-bottom mt-4 mb-3 pb-2">구역</h5>
-	<button type="button" class="btn btn-outline-success mb-4" onclick="statistics_map_view();"><i class="bi bi-geo-alt"></i><span class="align-middle"> 구역 전체 지도</span></button>
+	<button type="button" class="btn btn-outline-success mb-4" onclick="statistics_map_view();"><i class="bi bi-geo-alt"></i><span class="align-middle"> 구역전체지도</span></button>
 
 </div>
 

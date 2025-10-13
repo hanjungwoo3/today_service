@@ -36,8 +36,8 @@ $where .= " AND t.tt_type IN (".implode(',',$in_tt_type).")";
 
 // 해당하는 요일의 구역 불러오기 (개인구역 제외)
 $sql = "SELECT t.tt_id, t.tt_assigned, t.tt_assigned_date, t.tt_assigned_group, t.tt_type, t.tt_status, t.tt_num, t.tt_name, t.tt_start_date, t.tt_end_date, t.m_id, t.tt_address
-        FROM ".TERRITORY_TABLE." AS t LEFT JOIN (SELECT tt_id, ttr_start_date FROM ".TERRITORY_RECORD_TABLE." ORDER BY ttr_start_date DESC) AS tr ON tr.tt_id = t.tt_id
-        WHERE ((t.ms_id <> 0 AND t.ms_id = ".$ms_data['ms_id'].") OR (t.ms_id <> 0 AND t.ms_id = ".$ms_data['copy_ms_id'].") {$ms_all}) AND t.mb_id = 0 {$where} GROUP BY t.tt_id";
+        FROM ".TERRITORY_TABLE." AS t
+        WHERE ((t.ms_id <> 0 AND t.ms_id = ".$ms_data['ms_id'].") OR (t.ms_id <> 0 AND t.ms_id = ".$ms_data['copy_ms_id'].") {$ms_all}) AND t.mb_id = 0 {$where}";
 $result = $mysqli->query($sql);
 if($result->num_rows > 0){
 	while ($row = $result->fetch_assoc()) {
@@ -56,7 +56,6 @@ if($result->num_rows > 0){
 		$progress_percent = ($territory_progress['total'] > 0)?floor((($territory_progress['visit']+$territory_progress['absence'])/$territory_progress['total'])*100):0;
 
 		// 부재자 방문 설정에 따른 배정 제한
-		$latest_record = get_latest_record('territory',$tt_id);
 		$all_past_records = get_all_past_records('territory',$tt_id);
 
 		// 진행상태
@@ -74,42 +73,15 @@ if($result->num_rows > 0){
 			$assigned_group_name = (is_array($assigned_group_arr))?implode(' | ',$assigned_group_arr):$assigned_group_arr;
 		}
 
-		// 최신 유효 봉사일 찾기 (방문 최신순, 기록 최신순)
-		$latest_past_date = '';
-		if(is_array($all_past_records) && !empty($all_past_records)){
-			foreach($all_past_records as $visit){
-				if(isset($visit['records']) && is_array($visit['records']) && !empty($visit['records'])){
-					foreach($visit['records'] as $rec){
-						$sd = '';
-						if(!empty($rec['end_date']) && $rec['end_date'] !== '0000-00-00'){
-							$sd = $rec['end_date'];
-						}elseif(!empty($rec['start_date']) && $rec['start_date'] !== '0000-00-00'){
-							$sd = $rec['start_date'];
-						}
-						if(!empty($sd) && $sd !== '0000-00-00'){
-							// 최신 날짜 찾기 (문자열 비교로 충분)
-							if($latest_past_date === '' || $sd > $latest_past_date){
-								$latest_past_date = $sd;
-							}
-						}
-					}
-				}
-			}
-		}
-
 		$data[] = array(
 			'id' => $tt_id,
 			'num' => $row['tt_num'],
 			'name' => $row['tt_name'],
-			'og_type' => $row['tt_type'],
 			'type' => get_type_text($row['tt_type']),
 			'm_id' => $row['m_id'],
 			'start_date' => (!empty($row['tt_start_date']) && $row['tt_start_date'] !== '0000-00-00')?$row['tt_start_date']:'',
 			'end_date' => (!empty($row['tt_end_date']) && $row['tt_end_date'] !== '0000-00-00')?$row['tt_end_date']:'',
-			'r_start_date' => (!empty($latest_record['ttr_start_date']) && $latest_record['ttr_start_date'] !== '0000-00-00')?$latest_record['ttr_start_date']:'',
-			'r_end_date' => (!empty($latest_record['ttr_end_date']) && $latest_record['ttr_end_date'] !== '0000-00-00')?$latest_record['ttr_end_date']:'',
 			'assigned_date' => (!empty($row['tt_assigned_date']) && $row['tt_assigned_date'] !== '0000-00-00')?$row['tt_assigned_date']:'',
-			'r_assigned_date' => (!empty($latest_record['ttr_assigned_date']) && $latest_record['ttr_assigned_date'] !== '0000-00-00')?$latest_record['ttr_assigned_date']:'',
 			'status' => $tt_status,
 			'total' => $territory_progress['total'],
 			'visit' => $territory_progress['visit'],
@@ -118,7 +90,6 @@ if($result->num_rows > 0){
 			'assigned_ids' => $row['tt_assigned'],
 			'assigned_group' => $row['tt_assigned_group'],
 			'assigned_group_name' => $assigned_group_name,
-			'latest_past_date' => $latest_past_date,
 			'current_status' => $current_status,
 			'progress_status' => $progress_status,
 			'all_past_records' => $all_past_records
@@ -127,23 +98,13 @@ if($result->num_rows > 0){
 	}
 }
 
-
-$start_date = array();
-$r_start_date = array();
-$assigned_date = array();
 $num = array();
 $name = array();
 $num_prefix = array();
 $num_numeric = array();
-$lp_start_date = array();
-$has_lp_date = array();
 $progress_status = array();
-$current_status = array();
 
 foreach ($data as $key => $row) {
-	$start_date[$key] = $row['start_date'];
-	$r_start_date[$key] = $row['r_start_date'];
-	$assigned_date[$key] = $row['assigned_date'];
 	$num[$key] = (string)$row['num'];
 	$name[$key] = (string)$row['name'];
 	// 접두문자(숫자 제거)와 숫자부분 분리
@@ -151,7 +112,6 @@ foreach ($data as $key => $row) {
 	$digits = preg_replace('/[^0-9]/','', $row['num']);
 	$num_numeric[$key] = $digits === '' ? 0 : (int)$digits;
 	$lp_start_date[$key] = isset($row['latest_past_date']) ? $row['latest_past_date'] : '';
-	$has_lp_date[$key] = !empty($row['latest_past_date']) ? 1 : 0; // latest_past_date 있으면 1, 없으면 0
 	
 	// all_past_records의 progress 값을 숫자로 변환 (정렬용)
 	$progress_status_num = 0; // 기본값: incomplete
@@ -164,7 +124,6 @@ foreach ($data as $key => $row) {
 	}
 
 	$progress_status[$key] = $progress_status_num;
-	$current_status[$key] = isset($row['current_status']) ? (int)$row['current_status'] : 0;
 }
 
 if(GUIDE_CARD_ORDER == '1'){ // 구역번호순 (접두문자→숫자→이름)

@@ -23,11 +23,12 @@ switch($ms_data['ms_type']) {
 
 // 해당하는 요일의 구역 불러오기 (개인구역 제외)
 $sql = "SELECT tp.tp_id, tp.tp_assigned, tp.tp_assigned_date, tp.tp_assigned_group, tp.tp_status, tp.tp_num, tp.tp_name, tp.tp_start_date, tp.tp_end_date, tp.m_id
-        FROM ".TELEPHONE_TABLE." AS tp LEFT JOIN (SELECT tp_id, tpr_start_date FROM ".TELEPHONE_RECORD_TABLE." ORDER BY tpr_start_date DESC) AS tpr ON tpr.tp_id = tp.tp_id
-        WHERE ((tp.ms_id <> 0 AND tp.ms_id = ".$ms_data['ms_id'].") OR (tp.ms_id <> 0 AND tp.ms_id = ".$ms_data['copy_ms_id'].") {$ms_all}) AND tp.mb_id = 0 {$where} GROUP BY tp.tp_id";
+        FROM ".TELEPHONE_TABLE." AS tp
+        WHERE ((tp.ms_id <> 0 AND tp.ms_id = ".$ms_data['ms_id'].") OR (tp.ms_id <> 0 AND tp.ms_id = ".$ms_data['copy_ms_id'].") {$ms_all}) AND tp.mb_id = 0 {$where}";
 $result = $mysqli->query($sql);
 if($result->num_rows > 0){
     while ($row = $result->fetch_assoc()) {
+        $tp_id = $row['tp_id'];
 
         // 배정된지 일주일이 지난 구역만 보임
         $c_minister_assign_expiration = MINISTER_TELEPHONE_ASSIGN_EXPIRATION?MINISTER_TELEPHONE_ASSIGN_EXPIRATION:'7';
@@ -37,12 +38,10 @@ if($result->num_rows > 0){
         $tp_status = (empty($row['tp_status']) && empty_date($row['tp_assigned_date']))?'unassigned':$row['tp_status'];
         
         // 진행률 구하기
-        $tp_id = $row['tp_id'];
         $telephone_progress = get_telephone_progress($tp_id);
         $progress_percent =($telephone_progress['total'] > 0)?floor((($telephone_progress['visit']+$telephone_progress['absence'])/$telephone_progress['total'])*100):0;
 
         // 부재자 방문 설정에 따른 배정 제한
-        $latest_record = get_latest_record('telephone',$tp_id);
         $all_past_records = get_all_past_records('telephone',$tp_id);
         
         // 진행상태
@@ -60,36 +59,11 @@ if($result->num_rows > 0){
           $assigned_group_name = (is_array($assigned_group_arr))?implode(' | ',$assigned_group_arr):$assigned_group_arr;
         }
 
-        // 최신 유효 봉사일 찾기 (방문 최신순, 기록 최신순)
-        $latest_past_date = '';
-        if(is_array($all_past_records) && !empty($all_past_records)){
-            foreach($all_past_records as $visit){
-                if(isset($visit['records']) && is_array($visit['records']) && !empty($visit['records'])){
-                    foreach($visit['records'] as $rec){
-                        $sd = '';
-                        if(!empty($rec['end_date']) && $rec['end_date'] !== '0000-00-00'){
-                            $sd = $rec['end_date'];
-                        }elseif(!empty($rec['start_date']) && $rec['start_date'] !== '0000-00-00'){
-                            $sd = $rec['start_date'];
-                        }
-                        if(!empty($sd) && $sd !== '0000-00-00'){
-                            // 최신 날짜 찾기 (문자열 비교로 충분)
-                            if($latest_past_date === '' || $sd > $latest_past_date){
-                                $latest_past_date = $sd;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         $data[] = array(
             'id' => $tp_id,
             'num' => $row['tp_num'],
             'name' => $row['tp_name'],
             'm_id' => $row['m_id'],
-            'r_start_date' => (!empty($latest_record['tpr_start_date']) && $latest_record['tpr_start_date'] !== '0000-00-00')?$latest_record['tpr_start_date']:'',
-            'r_end_date' => (!empty($latest_record['tpr_end_date']) && $latest_record['tpr_end_date'] !== '0000-00-00')?$latest_record['tpr_end_date']:'',
             'start_date' => (!empty($row['tp_start_date']) && $row['tp_start_date'] !== '0000-00-00')?$row['tp_start_date']:'',
             'end_date' => (!empty($row['tp_end_date']) && $row['tp_end_date'] !== '0000-00-00')?$row['tp_end_date']:'',
             'assigned_date' => (!empty($row['tp_assigned_date']) && $row['tp_assigned_date'] !== '0000-00-00')?$row['tp_assigned_date']:'',
@@ -101,7 +75,6 @@ if($result->num_rows > 0){
             'assigned_ids' => $row['tp_assigned'],
             'assigned_group' => $row['tp_assigned_group'],
             'assigned_group_name' => $assigned_group_name,
-            'latest_past_date' => $latest_past_date,
             'current_status' => $current_status,
             'progress_status' => $progress_status,
             'all_past_records' => $all_past_records
@@ -110,30 +83,19 @@ if($result->num_rows > 0){
     }
 }
 
-$start_date = array();
-$r_start_date = array();
-$assigned_date = array();
 $num = array();
 $name = array();
 $num_prefix = array();
 $num_numeric = array();
-$lp_start_date = array();
-$has_lp_date = array();
 $progress_status = array();
-$current_status = array();
 
 foreach ($data as $key => $row) {
-    $start_date[$key] = $row['start_date'];
-    $r_start_date[$key] = $row['r_start_date'];
-    $assigned_date[$key] = $row['assigned_date'];
     $num[$key] = (string)$row['num'];
     $name[$key] = (string)$row['name'];
     // 접두문자(숫자 제거)와 숫자부분 분리
     $num_prefix[$key] = trim(preg_replace('/[0-9]/','', $row['num']));
     $digits = preg_replace('/[^0-9]/','', $row['num']);
     $num_numeric[$key] = $digits === '' ? 0 : (int)$digits;
-    $lp_start_date[$key] = isset($row['latest_past_date']) ? $row['latest_past_date'] : '';
-    $has_lp_date[$key] = !empty($row['latest_past_date']) ? 1 : 0; // latest_past_date 있으면 1, 없으면 0
 
     // all_past_records의 progress 값을 숫자로 변환 (정렬용)
     $progress_status_num = 0; // 기본값: incomplete
@@ -146,7 +108,6 @@ foreach ($data as $key => $row) {
     }
 
 	$progress_status[$key] = $progress_status_num;
-    $current_status[$key] = isset($row['current_status']) ? $row['current_status'] : '0';
 }
 
 if(GUIDE_CARD_ORDER == '1'){ // 구역번호순 (접두문자→숫자→이름)

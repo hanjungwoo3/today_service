@@ -14,7 +14,7 @@
 
   <div id="container" class="container-fluid">
 
-    <button type="button" class="btn btn-outline-success mb-4" onclick="statistics_map_view();"><i class="bi bi-geo-alt"></i><span class="align-middle"> 구역 전체 지도</span></button>
+    <button type="button" class="btn btn-outline-success mb-4" onclick="statistics_map_view();"><i class="bi bi-geo-alt"></i><span class="align-middle"> 구역전체지도</span></button>
 
     <form id="admin-territory-search-form" class="clearfix" action="" method="post">
       <?php include_once('../include/territory_search_filter.php');?>

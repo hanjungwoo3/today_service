@@ -73,8 +73,16 @@
       <option value="미배정">미배정</option>
       <option value="첫배정">첫 배정</option>
       <option value="재배정">재배정</option>
-      <option value="부재자">부재자 첫 배정</option>
-      <option value="부재자재배정">부재자 재배정</option>
+      <template v-if="location === 'guide'">
+        <?php if(ABSENCE_USE == 'use'): ?>
+        <option value="부재자">부재자 첫 배정</option>
+        <option value="부재자재배정">부재자 재배정</option>
+        <?php endif; ?>
+      </template>
+      <template v-else>
+        <option value="부재자"><?php if(ABSENCE_USE != 'use'){ echo '[미사용] '; } ?>부재자 첫 배정</option>
+        <option value="부재자재배정"><?php if(ABSENCE_USE != 'use'){ echo '[미사용] '; } ?>부재자 재배정</option>
+      </template>
     </select>
   </div>
 </div>

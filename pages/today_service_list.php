@@ -351,7 +351,7 @@ if($tt_result->num_rows || $d_result->num_rows || $tp_result->num_rows):
               </small>
             </div>
 
-            <?php if($assigned_group) echo '<div class="assigned_group_name mt-1">'.$assigned_group.'</div>'; ?>
+            <?php if($tp_assigned_group) echo '<div class="assigned_group_name mt-1">'.$tp_assigned_group.'</div>'; ?>
           </div>
           <div class="align-self-center flex-shrink-0">
             <button type="button" class="btn btn-outline-secondary" onclick="open_telephone_view(<?=$tp_id?>,'start')">시작</button>
