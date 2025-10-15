@@ -66,7 +66,7 @@ if (!$settings) {
     
     <!-- 카운트다운 오버레이 -->
     <div id="countdownOverlay" class="countdown-overlay">
-        <div id="countdownNumber" class="countdown-number">10</div>
+        <div id="countdownNumber" class="countdown-number">3</div>
     </div>
     
     <?php 
@@ -157,12 +157,26 @@ if (!$settings) {
         </script>
     <?php endif; ?>
     
-        <script>
-            // 타이머 설정
-            const TOTAL_SECONDS = <?= ($settings['minutes'] * 60) + (isset($settings['seconds']) ? $settings['seconds'] : 0) ?>;
-            const END_MESSAGE = <?= json_encode($settings['end_message']) ?>;
+    <script>
+        // 서버 시간 동기화
+        const SERVER_TIMESTAMP = <?= time() ?>; // PHP 서버 시간 (Unix timestamp)
+        const CLIENT_TIMESTAMP = Math.floor(Date.now() / 1000); // 클라이언트 시간 (Unix timestamp)
+        const TIME_OFFSET = SERVER_TIMESTAMP - CLIENT_TIMESTAMP; // 서버-클라이언트 시간 차이 (초)
         
-        let remainingSeconds = TOTAL_SECONDS;
+        console.log('서버 시간:', new Date(SERVER_TIMESTAMP * 1000).toLocaleString());
+        console.log('클라이언트 시간:', new Date(CLIENT_TIMESTAMP * 1000).toLocaleString());
+        console.log('시간 차이:', TIME_OFFSET, '초');
+        
+        // 서버 시간 기준 현재 시간을 반환하는 함수
+        function getServerTime() {
+            return new Date((Date.now() / 1000 + TIME_OFFSET) * 1000);
+        }
+        
+        // 타이머 설정
+        const TOTAL_SECONDS = <?= ($settings['minutes'] * 60) + (isset($settings['seconds']) ? $settings['seconds'] : 0) ?>;
+        const END_MESSAGE = <?= json_encode($settings['end_message']) ?>;
+    
+    let remainingSeconds = TOTAL_SECONDS;
         let isRunning = true;
         let isPaused = false;
         let isManuallyPaused = false; // 사용자가 수동으로 일시정지했는지 추적
@@ -619,8 +633,8 @@ if (!$settings) {
         function updateStartTimeDisplay() {
             const startTimeDisplay = document.getElementById('startTimeDisplay');
             if (startTimeDisplay) {
-                // 현재 시간 가져오기
-                const now = new Date();
+                // 현재 시간 가져오기 (서버 시간 사용)
+                const now = getServerTime();
                 const currentHours = String(now.getHours()).padStart(2, '0');
                 const currentMinutes = String(now.getMinutes()).padStart(2, '0');
                 const currentSeconds = String(now.getSeconds()).padStart(2, '0');
@@ -628,7 +642,7 @@ if (!$settings) {
                 const autoStartHour = <?= isset($settings['auto_start_hour']) ? $settings['auto_start_hour'] : -1 ?>;
                 const autoStartMinute = <?= isset($settings['auto_start_minute']) ? $settings['auto_start_minute'] : 0 ?>;
                 
-                let timeDisplayHTML = `현재시간: ${currentHours}시 ${currentMinutes}분 ${currentSeconds}초<br>`;
+                let timeDisplayHTML = `서버시간: ${currentHours}시 ${currentMinutes}분 ${currentSeconds}초<br>`;
                 
                 if (autoStartHour === -1) {
                     timeDisplayHTML += '자동 시작 사용 안함';
@@ -636,8 +650,8 @@ if (!$settings) {
                     const hourStr = String(autoStartHour).padStart(2, '0');
                     const minuteStr = String(autoStartMinute).padStart(2, '0');
                     
-                    // 시작 시간 계산
-                    const startTime = new Date();
+                    // 시작 시간 계산 (서버 시간 사용)
+                    const startTime = getServerTime();
                     startTime.setHours(autoStartHour, autoStartMinute, 0, 0);
                     
                     // 시작 시간이 현재 시간보다 이전이면 다음날로 설정
@@ -734,11 +748,11 @@ if (!$settings) {
         // 카운트다운 관련 변수
         let countdownActive = false;
         let countdownInterval = null;
-        let countdownValue = 10;
+        let countdownValue = 3;
         
-        // 카운트다운 시작 (기본 10초)
+        // 카운트다운 시작 (기본 3초)
         function startCountdown() {
-            startCountdownWithTime(10);
+            startCountdownWithTime(3);
         }
         
         // 지정된 시간부터 카운트다운 시작
@@ -804,13 +818,14 @@ if (!$settings) {
                 return;
             }
             
-            const now = new Date();
+            // 서버 시간 사용
+            const now = getServerTime();
             const currentHour = now.getHours();
             const currentMinute = now.getMinutes();
             const currentSecond = now.getSeconds();
             
-            // 시작 시간 계산 (오늘 기준)
-            const startTime = new Date();
+            // 시작 시간 계산 (오늘 기준, 서버 시간 사용)
+            const startTime = getServerTime();
             startTime.setHours(autoStartHour, autoStartMinute, 0, 0);
             
             const timeDiff = startTime - now;
@@ -823,13 +838,13 @@ if (!$settings) {
                 const nextDayTimeDiff = startTime - now;
                 const nextDayRemainingSeconds = Math.floor(nextDayTimeDiff / 1000);
                 
-                // 다음날까지의 시간이 10초 이하면 카운트다운 시작하지 않음 (너무 긴 시간)
+                // 다음날까지의 시간이 3초 이하면 카운트다운 시작하지 않음 (너무 긴 시간)
                 return;
             }
             
-            // 정확히 10초 남았을 때 카운트다운 시작
-            if (remainingSeconds === 10 && !countdownActive) {
-                console.log('10초 카운트다운 시작');
+            // 정확히 3초 남았을 때 카운트다운 시작
+            if (remainingSeconds === 3 && !countdownActive) {
+                console.log('3초 카운트다운 시작');
                 
                 // 전체화면이 아니면 먼저 전체화면으로 전환
                 if (!isFullscreenReady) {
@@ -837,11 +852,11 @@ if (!$settings) {
                     isFullscreenReady = true;
                 }
                 
-                // 10초 카운트다운 시작
+                // 3초 카운트다운 시작
                 startCountdown();
             }
             
-            // 10초 미만 남았고 카운트다운이 진행 중이 아닐 때는 시간이 되면 바로 타이머 시작
+            // 3초 미만 남았고 카운트다운이 진행 중이 아닐 때는 시간이 되면 바로 타이머 시작
             if (remainingSeconds <= 0 && remainingSeconds > -1 && !countdownActive && !isRunning) {
                 console.log('시간 도달, 타이머 즉시 시작');
                 
