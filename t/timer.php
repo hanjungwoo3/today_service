@@ -842,9 +842,9 @@ if (!$settings) {
                 return;
             }
             
-            // 정확히 3초 남았을 때 카운트다운 시작
-            if (remainingSeconds === 3 && !countdownActive) {
-                console.log('3초 카운트다운 시작');
+            // 정확히 4초 남았을 때 카운트다운 시작 (번쩍임 효과 0.8초 고려)
+            if (remainingSeconds === 4 && !countdownActive) {
+                console.log('3초 카운트다운 시작 (4초 전부터 시작하여 정시 타이머 시작)');
                 
                 // 전체화면이 아니면 먼저 전체화면으로 전환
                 if (!isFullscreenReady) {
