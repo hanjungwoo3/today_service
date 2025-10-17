@@ -13,6 +13,7 @@ if (file_exists($localConfigFile)) {
 // 로그인한 사용자 이름 가져오기 (선택적)
 // 로컬 모드가 아닐 때만 상위 디렉토리 config.php 로드
 $loggedInUserName = '';
+$is_admin = false;
 if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
   if (file_exists(dirname(__FILE__) . '/../config.php')) {
     @require_once dirname(__FILE__) . '/../config.php';
@@ -22,7 +23,14 @@ if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
         $loggedInUserName = get_member_name($mbId);
       }
     }
+    // 관리자 권한 체크
+    if (function_exists('mb_id') && function_exists('is_admin')) {
+      $is_admin = is_admin(mb_id());
+    }
   }
+} else {
+  // 로컬 모드일 때는 관리자로 설정
+  $is_admin = true;
 }
 
 $now = new DateTime('now');
@@ -415,6 +423,13 @@ $today = new DateTime('now');
           padding: 2px;
         }
       }
+      
+      /* 일정관리 버튼 hover 효과 */
+      .admin-btn:hover {
+        background: #e2e8f0 !important;
+        color: #64748b !important;
+        border-color: #cbd5e1 !important;
+      }
     </style>
   </head>
   <body>
@@ -642,6 +657,26 @@ $today = new DateTime('now');
           </tbody>
         </table>
       </div>
+      
+      <?php if ($is_admin): ?>
+        <div style="text-align: center; margin-top: 30px; padding: 20px;">
+          <a href="index.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>" 
+             class="admin-btn"
+             style="display: inline-block; 
+                    padding: 8px 16px; 
+                    background: #f1f5f9; 
+                    color: #94a3b8; 
+                    text-decoration: none; 
+                    border-radius: 6px; 
+                    font-weight: 400; 
+                    font-size: 13px;
+                    border: 1px solid #e2e8f0;
+                    box-shadow: none;
+                    transition: all 0.2s ease;">
+            일정관리
+          </a>
+        </div>
+      <?php endif; ?>
     </div>
   </body>
 </html>
