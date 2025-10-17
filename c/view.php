@@ -72,7 +72,6 @@ $today = new DateTime('now');
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
         overflow: visible;
-        padding-right: 35px;
       }
 
       .header {
@@ -119,6 +118,7 @@ $today = new DateTime('now');
         grid-template-columns: repeat(7, 1fr);
         background: #f1f5f9;
         border-bottom: 1px solid #e2e8f0;
+        padding-right: 35px;
       }
 
       .weekday {
@@ -133,6 +133,7 @@ $today = new DateTime('now');
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         position: relative;
+        padding-right: 35px;
       }
 
       .day {
