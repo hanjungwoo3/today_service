@@ -652,8 +652,8 @@ $today = new DateTime('now');
           </thead>
           <tbody>
             <?php 
-              $dayLabels = array('월요일' => 'monday', '화요일' => 'tuesday', '수요일' => 'wednesday', 
-                            '목요일' => 'thursday', '금요일' => 'friday', '토요일' => 'saturday', '일요일' => 'sunday');
+              $dayLabels = array('월' => 'monday', '화' => 'tuesday', '수' => 'wednesday', 
+                            '목' => 'thursday', '금' => 'friday', '토' => 'saturday', '일' => 'sunday');
               $scheduleGuide = $calendarData['schedule_guide'];
               $todayWeekday = (int)$today->format('w');
               $todayDayNames = array('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday');
