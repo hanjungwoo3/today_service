@@ -4,14 +4,23 @@ date_default_timezone_set('Asia/Seoul');
 
 require_once __DIR__ . '/lib/helpers.php';
 
+// 로컬 개발 모드 체크
+$localConfigFile = __DIR__ . '/config.php';
+if (file_exists($localConfigFile)) {
+    require_once $localConfigFile;
+}
+
 // 로그인한 사용자 이름 가져오기 (선택적)
+// 로컬 모드가 아닐 때만 상위 디렉토리 config.php 로드
 $loggedInUserName = '';
-if (file_exists(dirname(__FILE__) . '/../config.php')) {
-  @require_once dirname(__FILE__) . '/../config.php';
-  if (function_exists('mb_id') && function_exists('get_member_name')) {
-    $mbId = mb_id();
-    if (!empty($mbId)) {
-      $loggedInUserName = get_member_name($mbId);
+if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
+  if (file_exists(dirname(__FILE__) . '/../config.php')) {
+    @require_once dirname(__FILE__) . '/../config.php';
+    if (function_exists('mb_id') && function_exists('get_member_name')) {
+      $mbId = mb_id();
+      if (!empty($mbId)) {
+        $loggedInUserName = get_member_name($mbId);
+      }
     }
   }
 }

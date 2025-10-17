@@ -56,29 +56,6 @@ body {
   gap: 6px;
 }
 
-.load-prev-btn {
-  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-  color: #166534;
-  font-weight: 600;
-  border: 1px solid #86efac;
-}
-
-.load-prev-btn:hover {
-  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-  box-shadow: 0 12px 20px rgba(22, 101, 52, 0.15);
-}
-
-.copy-link-btn {
-  background: linear-gradient(135deg, #fef3c7, #fde047);
-  color: #854d0e;
-  font-weight: 600;
-  border: 1px solid #fbbf24;
-}
-
-.copy-link-btn:hover {
-  background: linear-gradient(135deg, #fde047, #facc15);
-  box-shadow: 0 12px 20px rgba(133, 77, 14, 0.15);
-}
 
 button,
 select {
@@ -422,31 +399,106 @@ button:hover {
   border-color: #1f2937;
 }
 
-.footer-actions {
+/* 저장하기 버튼 섹션 */
+.save-section {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.footer-left-actions {
-  display: flex;
-  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 2px solid #e0e7ff;
 }
 
 .save-btn,
 #saveBtn {
   background: linear-gradient(135deg, #fee2e2, #fecaca) !important;
   color: #991b1b !important;
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   border: 1px solid #fca5a5 !important;
+  font-size: 15px !important;
+  padding: 10px 24px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 6px rgba(153, 27, 27, 0.1);
 }
 
 .save-btn:hover,
 #saveBtn:hover {
   background: linear-gradient(135deg, #fecaca, #fca5a5) !important;
-  box-shadow: 0 12px 20px rgba(153, 27, 27, 0.15) !important;
+  box-shadow: 0 12px 20px rgba(153, 27, 27, 0.2) !important;
+}
+
+/* 유틸리티 버튼 섹션 */
+.utility-buttons-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.utility-button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.utility-btn {
+  align-self: flex-start;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.utility-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(71, 85, 105, 0.1);
+}
+
+.utility-description {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #64748b;
+  padding-left: 4px;
+}
+
+.link-copy-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.link-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 6px 10px;
+  font-size: 11px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #475569;
+  font-family: 'Courier New', monospace;
+  transition: all 0.2s ease;
+}
+
+.link-input:focus {
+  outline: none;
+  border-color: #60a5fa;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.link-input:hover {
+  background: #f1f5f9;
+  cursor: text;
 }
 
 .status-bar {
@@ -515,13 +567,26 @@ button:hover {
     padding: 5px 10px;
   }
   
-  .footer-actions {
+  .save-section {
+    justify-content: stretch;
+  }
+  
+  .save-btn,
+  #saveBtn {
+    width: 100%;
+  }
+  
+  .utility-buttons-section {
+    margin-top: 24px;
+  }
+  
+  .link-copy-row {
     flex-direction: column;
     align-items: stretch;
   }
   
-  .footer-left-actions {
-    flex-direction: column;
+  .link-input {
+    min-width: 100%;
   }
 }
 

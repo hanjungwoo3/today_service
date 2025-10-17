@@ -185,13 +185,35 @@ if ($status === 'saved') {
           </div>
         </div>
 
-        <div class="footer-actions">
-          <div class="footer-left-actions">
-            <button type="button" id="loadPrevMonth" class="load-prev-btn">이전달 값 불러오기</button>
-            <button type="button" id="updateHolidays" class="update-holidays-btn">공휴일 업데이트</button>
-            <button type="button" id="copyViewLink" class="copy-link-btn">달력보기 링크 복사</button>
-          </div>
+        <div class="save-section">
           <button type="submit" id="saveBtn" class="save-btn">저장하기</button>
+        </div>
+
+        <div class="utility-buttons-section">
+          <div class="utility-button-group">
+            <button type="button" id="loadPrevMonth" class="utility-btn">이전달 값 불러오기</button>
+            <p class="utility-description">지난 달 입력했던 일정 메모와 이름들을 현재 달력으로 복사만 합니다. 복사한 후 "저장하기" 버튼을 눌러야 적용됩니다.</p>
+          </div>
+
+          <div class="utility-button-group">
+            <button type="button" id="updateHolidays" class="utility-btn">공휴일 업데이트</button>
+            <p class="utility-description">공휴일인 경우 구글 달력을 참조해서 날짜가 붉은 색 숫자로 표시됩니다. 공휴일이 적용되지 않을 경우 [공휴일 업데이트] 버튼을 클릭하면 sync 할 수 있습니다.</p>
+          </div>
+
+          <div class="utility-button-group">
+            <div class="link-copy-row">
+              <button type="button" id="copyViewLink" class="utility-btn">달력보기 링크 복사</button>
+              <?php
+                $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+                $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+                $scriptName = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '/index.php';
+                $baseUrl = $protocol . '://' . $host . dirname($scriptName);
+                $viewUrl = $baseUrl . '/view.php?year=' . $year . '&month=' . $month;
+              ?>
+              <input type="text" id="viewLinkInput" class="link-input" readonly value="<?php echo htmlspecialchars($viewUrl, ENT_QUOTES); ?>" />
+            </div>
+            <p class="utility-description">현재 달력을 읽기 전용으로 볼 수 있는 링크를 클립보드에 복사합니다. 다른 사람들과 공유할 때 사용하세요.</p>
+          </div>
         </div>
       </form>
     </div>
@@ -205,15 +227,21 @@ if ($status === 'saved') {
         }
       });
       
+      // 달력보기 링크 input box 클릭 시 전체 선택
+      var viewLinkInput = document.getElementById('viewLinkInput');
+      if (viewLinkInput) {
+        viewLinkInput.addEventListener('click', function() {
+          this.select();
+        });
+      }
+      
       // 달력보기 링크 복사 버튼
       document.getElementById('copyViewLink').addEventListener('click', function() {
-        var year = '<?php echo $year; ?>';
-        var month = '<?php echo $month; ?>';
-        var protocol = window.location.protocol;
-        var host = window.location.host;
-        var pathname = window.location.pathname;
-        var baseUrl = protocol + '//' + host + pathname.replace(/index\.php$/, '').replace(/\/$/, '');
-        var viewUrl = baseUrl + '/view.php?year=' + year + '&month=' + month;
+        var viewLinkInput = document.getElementById('viewLinkInput');
+        var viewUrl = viewLinkInput.value;
+        
+        // input box 전체 선택
+        viewLinkInput.select();
         
         // 클립보드 복사
         if (navigator.clipboard && navigator.clipboard.writeText) {
