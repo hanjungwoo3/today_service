@@ -661,6 +661,7 @@ $today = new DateTime('now');
       <?php if ($is_admin): ?>
         <div style="text-align: center; margin-top: 30px; padding: 20px;">
           <a href="index.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>" 
+             id="adminBtn"
              class="admin-btn"
              style="display: inline-block; 
                     padding: 8px 16px; 
@@ -673,9 +674,25 @@ $today = new DateTime('now');
                     border: 1px solid #e2e8f0;
                     box-shadow: none;
                     transition: all 0.2s ease;">
-            일정관리
+            <span id="adminBtnText">일정관리</span>
           </a>
         </div>
+        <script>
+          // iframe 안에서만 새창으로 열기
+          (function() {
+            const isInIframe = window.self !== window.top;
+            const adminBtn = document.getElementById('adminBtn');
+            const adminBtnText = document.getElementById('adminBtnText');
+            
+            if (isInIframe) {
+              adminBtnText.textContent = '일정관리 ↗';
+              adminBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.open(this.href, '_blank', 'noopener,noreferrer');
+              });
+            }
+          })();
+        </script>
       <?php endif; ?>
     </div>
   </body>
