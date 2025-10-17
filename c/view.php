@@ -66,7 +66,7 @@ $today = new DateTime('now');
       }
 
       .container {
-        max-width: 340px;
+        max-width: 380px;
         margin: 0 auto;
         background: #fff;
         border-radius: 12px;
@@ -119,6 +119,18 @@ $today = new DateTime('now');
         background: #f1f5f9;
         border-bottom: 1px solid #e2e8f0;
         padding-right: 35px;
+        position: relative;
+      }
+      
+      .weekdays::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 35px;
+        height: 100%;
+        background: #fff;
+        border-bottom: 1px solid #e2e8f0;
       }
 
       .weekday {
@@ -127,6 +139,11 @@ $today = new DateTime('now');
         font-size: 12px;
         font-weight: 600;
         color: #64748b;
+        border-right: 1px solid #e2e8f0;
+      }
+      
+      .weekday:nth-child(7) {
+        border-right: none;
       }
 
       .calendar {
@@ -134,6 +151,17 @@ $today = new DateTime('now');
         grid-template-columns: repeat(7, 1fr);
         position: relative;
         padding-right: 35px;
+      }
+      
+      .calendar::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 35px;
+        height: 100%;
+        background: #fff;
+        pointer-events: none;
       }
 
       .day {
