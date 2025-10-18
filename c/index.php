@@ -106,12 +106,15 @@ if ($status === 'saved') {
                     class="assignment-note"
                   />
                   <div class="assignments">
-                    <?php for ($i = 0; $i < 3; $i++): ?>
+                    <?php 
+                      $timePlaceholders = array('오전', '오후', '저녁');
+                      for ($i = 0; $i < 3; $i++): 
+                    ?>
                       <input
                         type="text"
                         name="entries[<?php echo $dateKey; ?>][names][<?php echo $i; ?>]"
                         value="<?php echo htmlspecialchars((string)(isset($assignments['names'][$i]) ? $assignments['names'][$i] : ''), ENT_QUOTES); ?>"
-                        placeholder="이름 <?php echo $i + 1; ?>"
+                        placeholder="<?php echo $timePlaceholders[$i]; ?>"
                         class="assignment-input bg-<?php echo htmlspecialchars($colors[$i], ENT_QUOTES); ?>"
                       />
                     <?php endfor; ?>
