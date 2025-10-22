@@ -64,8 +64,8 @@ if (!$settings) {
         </div>
     </div>
     
-    <!-- 카운트다운 오버레이 -->
-    <div id="countdownOverlay" class="countdown-overlay">
+    <!-- 카운트다운 오버레이 (비활성화) -->
+    <div id="countdownOverlay" class="countdown-overlay" style="display: none;">
         <div id="countdownNumber" class="countdown-number">3</div>
     </div>
     
@@ -750,57 +750,22 @@ if (!$settings) {
         let countdownInterval = null;
         let countdownValue = 3;
         
-        // 카운트다운 시작 (기본 3초)
+        // 카운트다운 시작 (기본 3초) - 비활성화됨
         function startCountdown() {
-            startCountdownWithTime(3);
+            // 카운트다운 기능 비활성화 - 바로 타이머 시작
+            console.log('카운트다운 건너뛰고 바로 타이머 시작');
+            if (isReady && isFullscreenReady) {
+                startTimerFromReady();
+            }
         }
         
-        // 지정된 시간부터 카운트다운 시작
+        // 지정된 시간부터 카운트다운 시작 - 비활성화됨
         function startCountdownWithTime(seconds) {
-            if (countdownActive) return;
-            
-            countdownActive = true;
-            countdownValue = seconds;
-            
-            const countdownOverlay = document.getElementById('countdownOverlay');
-            const countdownNumber = document.getElementById('countdownNumber');
-            
-            // 오버레이 표시
-            countdownOverlay.style.display = 'flex';
-            
-            // 첫 번째 숫자 즉시 표시
-            countdownNumber.textContent = countdownValue;
-            countdownNumber.style.animation = 'none';
-            countdownNumber.offsetHeight; // 리플로우 강제 실행
-            countdownNumber.style.animation = 'countdownPulse 1s ease-in-out';
-            console.log(`카운트다운: ${countdownValue}`);
-            
-            // 카운트다운 로직
-            countdownInterval = setInterval(() => {
-                countdownValue--;
-                
-                if (countdownValue >= 0) {
-                    countdownNumber.textContent = countdownValue;
-                    
-                    // 애니메이션 재시작을 위해 클래스 제거 후 추가
-                    countdownNumber.style.animation = 'none';
-                    countdownNumber.offsetHeight; // 리플로우 강제 실행
-                    countdownNumber.style.animation = 'countdownPulse 1s ease-in-out';
-                    
-                    console.log(`카운트다운: ${countdownValue}`);
-                }
-                
-                if (countdownValue < 0) {
-                    clearInterval(countdownInterval);
-                    countdownOverlay.style.display = 'none';
-                    countdownActive = false;
-                    
-                    // 카운트다운 완료 후 타이머 시작
-                    if (isReady && isFullscreenReady) {
-                        startTimerFromReady();
-                    }
-                }
-            }, 1000);
+            // 카운트다운 기능 비활성화 - 바로 타이머 시작
+            console.log('카운트다운 건너뛰고 바로 타이머 시작');
+            if (isReady && isFullscreenReady) {
+                startTimerFromReady();
+            }
         }
         
         // 자동 시작 시간 체크
@@ -842,22 +807,8 @@ if (!$settings) {
                 return;
             }
             
-            // 정확히 4초 남았을 때 카운트다운 시작 (번쩍임 효과 0.8초 고려)
-            if (remainingSeconds === 4 && !countdownActive) {
-                console.log('3초 카운트다운 시작 (4초 전부터 시작하여 정시 타이머 시작)');
-                
-                // 전체화면이 아니면 먼저 전체화면으로 전환
-                if (!isFullscreenReady) {
-                    toggleFullscreen();
-                    isFullscreenReady = true;
-                }
-                
-                // 3초 카운트다운 시작
-                startCountdown();
-            }
-            
-            // 3초 미만 남았고 카운트다운이 진행 중이 아닐 때는 시간이 되면 바로 타이머 시작
-            if (remainingSeconds <= 0 && remainingSeconds > -1 && !countdownActive && !isRunning) {
+            // 정확히 시간이 되면 바로 타이머 시작 (카운트다운 없음)
+            if (remainingSeconds <= 0 && remainingSeconds > -1 && !isRunning) {
                 console.log('시간 도달, 타이머 즉시 시작');
                 
                 // 전체화면이 아니면 먼저 전체화면으로 전환
