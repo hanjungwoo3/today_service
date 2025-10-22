@@ -150,9 +150,9 @@ if (!$settings) {
             console.log('음악이 선택되지 않았습니다.');
             
             // 음악이 없을 때 정보 표시
-            const musicInfo = document.getElementById('musicInfo');
-            if (musicInfo) {
-                musicInfo.textContent = '♪ 음악 없음';
+            const musicInfoEl = document.getElementById('musicInfo');
+            if (musicInfoEl) {
+                musicInfoEl.textContent = '♪ 음악 없음';
             }
         </script>
     <?php endif; ?>
