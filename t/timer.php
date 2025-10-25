@@ -180,6 +180,7 @@ if (!$settings) {
         let isRunning = true;
         let isPaused = false;
         let isManuallyPaused = false; // 사용자가 수동으로 일시정지했는지 추적
+        let isMusicFadingOut = false; // 음악 페이드 아웃 시작 여부 추적
         let timerInterval;
         let blinkInterval;
         
@@ -429,6 +430,13 @@ if (!$settings) {
                 if (isRunning && !isPaused) {
                     remainingSeconds--;
                     updateDisplay();
+                    
+                    // 20초 전에 음악 페이드 아웃 시작 (10초간 페이드 아웃하여 10초 전에 완전히 정지)
+                    if (remainingSeconds === 20 && !isMusicFadingOut && backgroundMusic && !backgroundMusic.paused) {
+                        isMusicFadingOut = true;
+                        fadeOutMusic(backgroundMusic, 10000); // 10초에 걸쳐 페이드 아웃
+                        console.log('⏰ 타이머 종료 20초 전 - 음악 페이드 아웃 시작 (10초 전에 정지 예정)');
+                    }
                     
                     // 0초가 되면 1초 후에 종료 (0초를 1초간 표시)
                     if (remainingSeconds <= 0) {
