@@ -647,11 +647,9 @@ $categorized = categorizePrograms($data['program']);
 
         .week-selector-header {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #667eea;
+            padding: 8px;
         }
 
         .week-selector-title {
@@ -802,7 +800,6 @@ $categorized = categorizePrograms($data['program']);
             <div id="weekSelectorModal" class="week-selector-modal hidden">
                 <div class="week-selector-content">
                     <div class="week-selector-header">
-                        <div class="week-selector-title">📅 주차 선택</div>
                         <button class="week-selector-close" onclick="hideWeekSelector()">×</button>
                     </div>
                     <div id="weekSelectorBody"></div>

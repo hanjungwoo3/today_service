@@ -432,12 +432,11 @@ function filterAssignedNames($v) {
         .week-selector-header {
             position: sticky;
             top: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 10px 12px;
+            background: white;
+            padding: 8px;
             border-radius: 8px 8px 0 0;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             z-index: 10;
         }
@@ -448,9 +447,9 @@ function filterAssignedNames($v) {
         }
 
         .week-selector-close {
-            background: rgba(255,255,255,0.2);
+            background: #f0f0f0;
             border: none;
-            color: white;
+            color: #666;
             font-size: 20px;
             width: 26px;
             height: 26px;
@@ -464,7 +463,7 @@ function filterAssignedNames($v) {
         }
 
         .week-selector-close:hover {
-            background: rgba(255,255,255,0.3);
+            background: #e0e0e0;
         }
 
         .week-selector-year {
@@ -820,7 +819,6 @@ function filterAssignedNames($v) {
             <div id="weekSelectorModal" class="week-selector-modal hidden">
                 <div class="week-selector-content">
                     <div class="week-selector-header">
-                        <div class="week-selector-title">📅 주차 선택</div>
                         <button class="week-selector-close" onclick="hideWeekSelector()">×</button>
                     </div>
                     <div id="weekSelectorBody"></div>
