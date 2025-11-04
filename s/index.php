@@ -613,11 +613,11 @@ $categorized = categorizePrograms($data['program']);
             z-index: 1000;
             width: 100%;
             max-width: 380px;
-            display: none;
+            display: block;
         }
 
-        .week-selector-modal:not(.hidden) {
-            display: block;
+        .week-selector-modal.hidden {
+            display: none !important;
         }
 
         .week-selector-content {
@@ -770,17 +770,6 @@ $categorized = categorizePrograms($data['program']);
         <div class="loading-text" id="loadingText">처리 중입니다...</div>
     </div>
 
-    <!-- 주차 선택 모달 -->
-    <div id="weekSelectorModal" class="week-selector-modal hidden">
-        <div class="week-selector-content">
-            <div class="week-selector-header">
-                <div class="week-selector-title">📅 주차 선택</div>
-                <button class="week-selector-close" onclick="hideWeekSelector()">×</button>
-            </div>
-            <div id="weekSelectorBody"></div>
-        </div>
-    </div>
-
     <div class="container">
         <div class="navigation">
             <div class="nav-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
@@ -788,6 +777,17 @@ $categorized = categorizePrograms($data['program']);
                 <a href="?year=<?php echo $currentYear; ?>&week=<?php echo $currentWeek; ?>" class="nav-button" style="background: #4CAF50;">📅 이번주</a>
                 <button onclick="showWeekSelector()" class="action-button" style="background: #FF9800;">📆 주차선택</button>
                 <a href="?year=<?php echo $nextYear; ?>&week=<?php echo $nextWeek; ?>" class="nav-button" style="background: #667eea;">다음 ▶</a>
+            </div>
+
+            <!-- 주차 선택 모달 -->
+            <div id="weekSelectorModal" class="week-selector-modal hidden">
+                <div class="week-selector-content">
+                    <div class="week-selector-header">
+                        <div class="week-selector-title">📅 주차 선택</div>
+                        <button class="week-selector-close" onclick="hideWeekSelector()">×</button>
+                    </div>
+                    <div id="weekSelectorBody"></div>
+                </div>
             </div>
         </div>
 

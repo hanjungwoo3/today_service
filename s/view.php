@@ -397,10 +397,11 @@ function filterAssignedNames($v) {
             z-index: 1000;
             width: 100%;
             max-width: 380px;
+            display: block;
         }
 
         .week-selector-modal.hidden {
-            display: none;
+            display: none !important;
         }
 
         .week-selector-content {
@@ -777,17 +778,6 @@ function filterAssignedNames($v) {
     </style>
 </head>
 <body>
-    <!-- 주차 선택 모달 -->
-    <div id="weekSelectorModal" class="week-selector-modal hidden">
-        <div class="week-selector-content">
-            <div class="week-selector-header">
-                <div class="week-selector-title">📅 주차 선택</div>
-                <button class="week-selector-close" onclick="hideWeekSelector()">×</button>
-            </div>
-            <div id="weekSelectorBody"></div>
-        </div>
-    </div>
-
     <div class="container">
         <div class="navigation">
             <?php
@@ -805,6 +795,17 @@ function filterAssignedNames($v) {
                 <?php if ($nextWeekData !== null): ?>
                     <a href="?year=<?php echo $nextWeekData['year']; ?>&week=<?php echo $nextWeekData['week']; ?>" class="nav-button" style="background: #667eea;">다음 ▶</a>
                 <?php endif; ?>
+            </div>
+
+            <!-- 주차 선택 모달 -->
+            <div id="weekSelectorModal" class="week-selector-modal hidden">
+                <div class="week-selector-content">
+                    <div class="week-selector-header">
+                        <div class="week-selector-title">📅 주차 선택</div>
+                        <button class="week-selector-close" onclick="hideWeekSelector()">×</button>
+                    </div>
+                    <div id="weekSelectorBody"></div>
+                </div>
             </div>
         </div>
 
