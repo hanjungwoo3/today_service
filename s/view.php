@@ -387,6 +387,22 @@ function filterAssignedNames($v) {
             background: #5568d3;
         }
 
+        /* 주차 선택 오버레이 */
+        .week-selector-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .week-selector-overlay.active {
+            display: block;
+        }
+
         /* 주차 선택 모달 */
         .week-selector-modal {
             position: absolute;
@@ -797,6 +813,9 @@ function filterAssignedNames($v) {
                 <?php endif; ?>
             </div>
 
+            <!-- 주차 선택 오버레이 -->
+            <div id="weekSelectorOverlay" class="week-selector-overlay" onclick="hideWeekSelector()"></div>
+
             <!-- 주차 선택 모달 -->
             <div id="weekSelectorModal" class="week-selector-modal hidden">
                 <div class="week-selector-content">
@@ -1129,6 +1148,7 @@ function filterAssignedNames($v) {
                 if (result.success) {
                     renderWeekSelector(result.weeks);
                     document.getElementById('weekSelectorModal').classList.remove('hidden');
+                    document.getElementById('weekSelectorOverlay').classList.add('active');
                 } else {
                     alert('주차 목록을 불러올 수 없습니다.');
                 }
@@ -1140,6 +1160,7 @@ function filterAssignedNames($v) {
 
         function hideWeekSelector() {
             document.getElementById('weekSelectorModal').classList.add('hidden');
+            document.getElementById('weekSelectorOverlay').classList.remove('active');
         }
 
         function renderWeekSelector(availableWeeks) {

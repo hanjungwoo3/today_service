@@ -604,6 +604,22 @@ $categorized = categorizePrograms($data['program']);
             line-height: 1.6;
         }
 
+        /* 주차 선택 오버레이 */
+        .week-selector-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .week-selector-overlay.active {
+            display: block;
+        }
+
         .week-selector-modal {
             position: absolute;
             top: 100%;
@@ -778,6 +794,9 @@ $categorized = categorizePrograms($data['program']);
                 <button onclick="showWeekSelector()" class="action-button" style="background: #FF9800;">📆 주차선택</button>
                 <a href="?year=<?php echo $nextYear; ?>&week=<?php echo $nextWeek; ?>" class="nav-button" style="background: #667eea;">다음 ▶</a>
             </div>
+
+            <!-- 주차 선택 오버레이 -->
+            <div id="weekSelectorOverlay" class="week-selector-overlay" onclick="hideWeekSelector()"></div>
 
             <!-- 주차 선택 모달 -->
             <div id="weekSelectorModal" class="week-selector-modal hidden">
@@ -1244,6 +1263,7 @@ $categorized = categorizePrograms($data['program']);
                 if (result.success) {
                     renderWeekSelector(result.weeks);
                     document.getElementById('weekSelectorModal').classList.remove('hidden');
+                    document.getElementById('weekSelectorOverlay').classList.add('active');
                 } else {
                     alert('주차 목록을 불러올 수 없습니다.');
                 }
@@ -1256,6 +1276,7 @@ $categorized = categorizePrograms($data['program']);
 
         function hideWeekSelector() {
             document.getElementById('weekSelectorModal').classList.add('hidden');
+            document.getElementById('weekSelectorOverlay').classList.remove('active');
         }
 
         function renderWeekSelector(availableWeeks) {
