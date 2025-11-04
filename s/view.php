@@ -324,7 +324,7 @@ function filterAssignedNames($v) {
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: white;
             padding: 2px;
             min-height: 100vh;
             font-size: 12px;
