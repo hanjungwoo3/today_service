@@ -24,8 +24,11 @@ if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
     }
 } else {
     // 로컬 개발 환경에서는 테스트용 사용자 설정
-    if (defined('USER') && !empty(USER)) {
-        $loggedInUserName = USER;
+    if (defined('USER')) {
+        $userName = constant('USER');
+        if (!empty($userName)) {
+            $loggedInUserName = $userName;
+        }
     }
     // 로컬 모드일 때는 관리자로 설정
     $is_admin = true;

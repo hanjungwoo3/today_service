@@ -930,8 +930,8 @@ $categorized = categorizePrograms($data['program']);
             <p style="font-size: 10px; color: #666; margin: 0 0 8px 0; line-height: 1.4;">
                 대회, 순회 방문, 기념식 주간 등 정규 집회가 없는 경우에 사용하세요.
             </p>
-            <input type="text" class="no-meeting-title" id="no_meeting_title" placeholder="제목 입력 (예: 대회)" value="<?php echo htmlspecialchars($data['no_meeting_title'] ?? ''); ?>" style="<?php echo (empty($data['no_meeting']) || !$data['no_meeting']) ? 'display:none;' : ''; ?>">
-            <textarea class="no-meeting-reason" id="no_meeting_reason" placeholder="상세 사유 입력 (예: 지역대회 주간)" rows="10" style="<?php echo (empty($data['no_meeting']) || !$data['no_meeting']) ? 'display:none;' : ''; ?>"><?php echo htmlspecialchars($data['no_meeting_reason'] ?? ''); ?></textarea>
+            <input type="text" class="no-meeting-title" id="no_meeting_title" placeholder="제목 입력 (예: 대회)" value="<?php echo htmlspecialchars(isset($data['no_meeting_title']) ? $data['no_meeting_title'] : ''); ?>" style="<?php echo (empty($data['no_meeting']) || !$data['no_meeting']) ? 'display:none;' : ''; ?>">
+            <textarea class="no-meeting-reason" id="no_meeting_reason" placeholder="상세 사유 입력 (예: 지역대회 주간)" rows="10" style="<?php echo (empty($data['no_meeting']) || !$data['no_meeting']) ? 'display:none;' : ''; ?>"><?php echo htmlspecialchars(isset($data['no_meeting_reason']) ? $data['no_meeting_reason'] : ''); ?></textarea>
         </div>
 
         <div class="actions">

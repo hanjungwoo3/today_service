@@ -255,7 +255,8 @@ class MeetingDataManager {
                 if (is_array($oldAssigned)) {
                     $hasValue = false;
                     foreach ($oldAssigned as $val) {
-                        if (!empty(trim($val))) {
+                        $trimmedVal = trim($val);
+                        if (!empty($trimmedVal)) {
                             $hasValue = true;
                             break;
                         }
