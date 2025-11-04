@@ -41,7 +41,34 @@ if ($week < 1) {
     $year++;
 }
 
-// 이전/다음 주차 계산
+// 사용 가능한 주차 목록 가져오기
+$availableWeeks = $manager->getAvailableWeeks();
+
+// 현재 주차의 인덱스 찾기
+$currentIndex = -1;
+for ($i = 0; $i < count($availableWeeks); $i++) {
+    if ($availableWeeks[$i]['year'] == $year && $availableWeeks[$i]['week'] == $week) {
+        $currentIndex = $i;
+        break;
+    }
+}
+
+// 이전/다음 주차 정보
+// availableWeeks는 내림차순 정렬 (최신 -> 과거)
+$prevWeekData = null;
+$nextWeekData = null;
+
+// 인덱스 + 1 = 과거 주차 (이전)
+if ($currentIndex >= 0 && $currentIndex < count($availableWeeks) - 1) {
+    $prevWeekData = $availableWeeks[$currentIndex + 1];
+}
+
+// 인덱스 - 1 = 최신 주차 (다음)
+if ($currentIndex > 0) {
+    $nextWeekData = $availableWeeks[$currentIndex - 1];
+}
+
+// 기본값 설정 (데이터가 없을 경우를 위한 계산)
 $prevWeek = $week - 1;
 $prevYear = $year;
 if ($prevWeek < 1) {
@@ -789,10 +816,18 @@ $categorized = categorizePrograms($data['program']);
     <div class="container">
         <div class="navigation">
             <div class="nav-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
-                <a href="?year=<?php echo $prevYear; ?>&week=<?php echo $prevWeek; ?>" class="nav-button" style="background: #667eea;">◀ 이전</a>
+                <?php if ($prevWeekData !== null): ?>
+                    <a href="?year=<?php echo $prevWeekData['year']; ?>&week=<?php echo $prevWeekData['week']; ?>" class="nav-button" style="background: #667eea;">◀ 이전</a>
+                <?php else: ?>
+                    <span class="nav-button" style="background: #ccc; color: #888; cursor: not-allowed; pointer-events: none;">◀ 이전</span>
+                <?php endif; ?>
                 <a href="?year=<?php echo $currentYear; ?>&week=<?php echo $currentWeek; ?>" class="nav-button" style="background: #4CAF50;">📅 이번주</a>
                 <button onclick="showWeekSelector()" class="action-button" style="background: #FF9800;">📆 선택</button>
-                <a href="?year=<?php echo $nextYear; ?>&week=<?php echo $nextWeek; ?>" class="nav-button" style="background: #667eea;">다음 ▶</a>
+                <?php if ($nextWeekData !== null): ?>
+                    <a href="?year=<?php echo $nextWeekData['year']; ?>&week=<?php echo $nextWeekData['week']; ?>" class="nav-button" style="background: #667eea;">다음 ▶</a>
+                <?php else: ?>
+                    <span class="nav-button" style="background: #ccc; color: #888; cursor: not-allowed; pointer-events: none;">다음 ▶</span>
+                <?php endif; ?>
             </div>
 
             <!-- 주차 선택 오버레이 -->

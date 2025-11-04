@@ -833,20 +833,18 @@ function filterAssignedNames($v) {
 <body>
     <div class="container">
         <div class="navigation">
-            <?php
-            // 버튼 개수에 따라 그리드 컬럼 수 동적 조정
-            $buttonCount = 2; // 기본: 이번주, 주차선택
-            if ($prevWeekData !== null) $buttonCount++;
-            if ($nextWeekData !== null) $buttonCount++;
-            ?>
-            <div class="nav-row" style="display: grid; grid-template-columns: repeat(<?php echo $buttonCount; ?>, 1fr); gap: 6px;">
+            <div class="nav-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
                 <?php if ($prevWeekData !== null): ?>
                     <a href="?year=<?php echo $prevWeekData['year']; ?>&week=<?php echo $prevWeekData['week']; ?>" class="nav-button" style="background: #667eea;">◀ 이전</a>
+                <?php else: ?>
+                    <span class="nav-button" style="background: #ccc; color: #888; cursor: not-allowed; pointer-events: none;">◀ 이전</span>
                 <?php endif; ?>
                 <a href="?year=<?php echo $currentYear; ?>&week=<?php echo $currentWeek; ?>" class="nav-button" style="background: #4CAF50;">📅 이번주</a>
                 <button onclick="showWeekSelector()" class="nav-button" style="background: #FF9800;">📆 선택</button>
                 <?php if ($nextWeekData !== null): ?>
                     <a href="?year=<?php echo $nextWeekData['year']; ?>&week=<?php echo $nextWeekData['week']; ?>" class="nav-button" style="background: #667eea;">다음 ▶</a>
+                <?php else: ?>
+                    <span class="nav-button" style="background: #ccc; color: #888; cursor: not-allowed; pointer-events: none;">다음 ▶</span>
                 <?php endif; ?>
             </div>
 
