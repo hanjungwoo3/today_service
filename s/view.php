@@ -865,8 +865,8 @@ function filterAssignedNames($v) {
 
         <?php if (!empty($data['no_meeting']) && $data['no_meeting']): ?>
             <!-- 배정없음 표시 -->
-            <div style="text-align: center; padding: 15px 5px; background: #fff3cd; border: 3px solid #ffc107; border-radius: 12px; margin: 20px 0;">
-                <div style="font-size: 22px; font-weight: 700; color: #856404; margin-bottom: 8px;">
+            <div style="text-align: center; padding: 15px 5px; background: #f5f5f5; border-radius: 12px; margin: 20px 0;">
+                <div style="font-size: 22px; font-weight: 700; color: #666; margin-bottom: 8px;">
                     <?php echo !empty($data['no_meeting_title']) ? htmlspecialchars($data['no_meeting_title']) : '배정없음'; ?>
                 </div>
                 <?php if (!empty($data['no_meeting_reason'])): ?>
