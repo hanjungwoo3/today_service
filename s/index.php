@@ -188,6 +188,7 @@ $categorized = categorizePrograms($data['program']);
             flex-direction: column;
             margin-bottom: 6px;
             gap: 4px;
+            position: relative;
         }
 
         .nav-row {
@@ -604,31 +605,28 @@ $categorized = categorizePrograms($data['program']);
         }
 
         .week-selector-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            z-index: 1000;
+            width: 100%;
+            max-width: 380px;
             display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            padding: 20px;
         }
 
         .week-selector-modal:not(.hidden) {
-            display: flex;
+            display: block;
         }
 
         .week-selector-content {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            max-width: 360px;
+            border-radius: 8px;
             width: 100%;
-            max-height: 80vh;
+            max-height: 400px;
             overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
 
         .week-selector-header {
@@ -667,9 +665,9 @@ $categorized = categorizePrograms($data['program']);
 
         .week-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 10px;
         }
 
         .week-item {

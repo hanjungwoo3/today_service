@@ -360,6 +360,7 @@ function filterAssignedNames($v) {
 
         .navigation {
             margin-bottom: 6px;
+            position: relative;
         }
 
         .nav-row {
@@ -388,17 +389,14 @@ function filterAssignedNames($v) {
 
         /* 주차 선택 모달 */
         .week-selector-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
             z-index: 1000;
-            padding: 20px;
+            width: 100%;
+            max-width: 380px;
         }
 
         .week-selector-modal.hidden {
@@ -409,8 +407,7 @@ function filterAssignedNames($v) {
             background: white;
             border-radius: 8px;
             width: 100%;
-            max-width: 360px;
-            max-height: 80vh;
+            max-height: 400px;
             overflow-y: auto;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         }
@@ -464,7 +461,7 @@ function filterAssignedNames($v) {
 
         .week-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 6px;
             padding: 10px;
         }
