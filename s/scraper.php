@@ -50,13 +50,13 @@ class MeetingLinkScraper {
                     // 전체 URL 생성
                     $fullUrl = (strpos($href, 'http') === 0) ? $href : $this->baseUrl . $href;
 
-                    $meetingLink = [
+                    $meetingLink = array(
                         'year' => $year,
                         'week' => $week,
                         'url' => $fullUrl,
                         'title' => $text,
                         'document_id' => $matches[1]
-                    ];
+                    );
                     break;
                 }
             }
@@ -81,11 +81,11 @@ class MeetingLinkScraper {
         @$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
         $xpath = new DOMXPath($dom);
 
-        $result = [
+        $result = array(
             'date' => '',
             'bible_reading' => '',
-            'program' => []
-        ];
+            'program' => array()
+        );
 
         // 날짜 추출 (예: "11월 3-9일")
         $h1 = $xpath->query('//h1');
@@ -149,10 +149,10 @@ class MeetingLinkScraper {
                 continue;
             }
 
-            $result['program'][] = [
+            $result['program'][] = array(
                 'title' => $title,
                 'duration' => $time
-            ];
+            );
         }
 
         return $result;
@@ -167,7 +167,7 @@ class MeetingLinkScraper {
      * @return array
      */
     public function getMultipleWeeks($year, $startWeek, $endWeek) {
-        $results = [];
+        $results = array();
 
         for ($week = $startWeek; $week <= $endWeek; $week++) {
             echo "주차 {$week} 수집 중...\n";
@@ -217,11 +217,11 @@ class MeetingLinkScraper {
         }
 
         // file_get_contents 대안
-        $context = stream_context_create([
-            'http' => [
+        $context = stream_context_create(array(
+            'http' => array(
                 'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            ]
-        ]);
+            )
+        ));
 
         return @file_get_contents($url, false, $context);
     }

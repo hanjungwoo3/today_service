@@ -1,6 +1,6 @@
 <?php
 // 로컬 개발 모드 체크
-$localConfigFile = __DIR__ . '/../c/config.php';
+$localConfigFile = dirname(__FILE__) . '/../c/config.php';
 if (file_exists($localConfigFile)) {
     require_once $localConfigFile;
 }
@@ -27,6 +27,8 @@ if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
     if (defined('USER') && !empty(USER)) {
         $loggedInUserName = USER;
     }
+    // 로컬 모드일 때는 관리자로 설정
+    $is_admin = true;
 }
 
 require_once 'api.php';
@@ -99,9 +101,9 @@ if ($currentIndex > 0) {
 
 // 프로그램을 섹션별로 분류
 function categorizePrograms($programs) {
-    $treasures = [];
-    $ministry = [];
-    $living = [];
+    $treasures = array();
+    $ministry = array();
+    $living = array();
 
     foreach ($programs as $item) {
         // section 정보가 있으면 그것을 사용
@@ -134,17 +136,17 @@ function categorizePrograms($programs) {
         }
     }
 
-    return [
+    return array(
         'treasures' => $treasures,
         'ministry' => $ministry,
         'living' => $living
-    ];
+    );
 }
 
 $categorized = categorizePrograms($data['program']);
 
 // 로그인한 사용자의 향후 배정 특권 수집
-$myUpcomingAssignments = [];
+$myUpcomingAssignments = array();
 if (!empty($loggedInUserName)) {
     // 실제 현재 날짜 기준 주차 계산
     $currentYear = (int)date('Y');
@@ -172,25 +174,25 @@ if (!empty($loggedInUserName)) {
             $dateRange = $weekStart->format('n월j일') . '-' . $weekEnd->format('j일');
 
             // 해당 주차의 배정 임시 저장
-            $weekAssignments = [];
+            $weekAssignments = array();
 
             // 기본 배정 확인 (소개말, 시작기도)
             if (!empty($weekData['assignments'])) {
-                $openingAssignments = [
-                    'opening_remarks' => ['label' => '소개말', 'order' => 0],
-                    'opening_prayer' => ['label' => '시작 기도', 'order' => 1]
-                ];
+                $openingAssignments = array(
+                    'opening_remarks' => array('label' => '소개말', 'order' => 0),
+                    'opening_prayer' => array('label' => '시작 기도', 'order' => 1)
+                );
 
                 foreach ($openingAssignments as $key => $info) {
                     if (!empty($weekData['assignments'][$key]) && trim($weekData['assignments'][$key]) === $loggedInUserName) {
-                        $weekAssignments[] = [
+                        $weekAssignments[] = array(
                             'year' => $weekInfo['year'],
                             'week' => $weekInfo['week'],
                             'dateRange' => $dateRange,
                             'section' => '',
                             'title' => $info['label'],
                             'order' => $info['order']
-                        ];
+                        );
                     }
                 }
             }
@@ -216,22 +218,22 @@ if (!empty($loggedInUserName)) {
                         $sectionName = '';
                         if (isset($item['section'])) {
                             if ($item['section'] === 'treasures') {
-                                $sectionName = $weekData['sections']['treasures'] ?? '성경에 담긴 보물';
+                                $sectionName = isset($weekData['sections']['treasures']) ? $weekData['sections']['treasures'] : '성경에 담긴 보물';
                             } elseif ($item['section'] === 'ministry') {
-                                $sectionName = $weekData['sections']['ministry'] ?? '야외 봉사에 힘쓰십시오';
+                                $sectionName = isset($weekData['sections']['ministry']) ? $weekData['sections']['ministry'] : '야외 봉사에 힘쓰십시오';
                             } else {
-                                $sectionName = $weekData['sections']['living'] ?? '그리스도인 생활';
+                                $sectionName = isset($weekData['sections']['living']) ? $weekData['sections']['living'] : '그리스도인 생활';
                             }
                         }
 
-                        $weekAssignments[] = [
+                        $weekAssignments[] = array(
                             'year' => $weekInfo['year'],
                             'week' => $weekInfo['week'],
                             'dateRange' => $dateRange,
                             'section' => $sectionName,
                             'title' => $item['title'],
                             'order' => 2 + $programIndex
-                        ];
+                        );
                     }
 
                     $programIndex++;
@@ -240,29 +242,27 @@ if (!empty($loggedInUserName)) {
 
             // 기본 배정 확인 (맺음말, 마치는기도)
             if (!empty($weekData['assignments'])) {
-                $closingAssignments = [
-                    'closing_remarks' => ['label' => '맺음말', 'order' => 1000],
-                    'closing_prayer' => ['label' => '마치는 기도', 'order' => 1001]
-                ];
+                $closingAssignments = array(
+                    'closing_remarks' => array('label' => '맺음말', 'order' => 1000),
+                    'closing_prayer' => array('label' => '마치는 기도', 'order' => 1001)
+                );
 
                 foreach ($closingAssignments as $key => $info) {
                     if (!empty($weekData['assignments'][$key]) && trim($weekData['assignments'][$key]) === $loggedInUserName) {
-                        $weekAssignments[] = [
+                        $weekAssignments[] = array(
                             'year' => $weekInfo['year'],
                             'week' => $weekInfo['week'],
                             'dateRange' => $dateRange,
                             'section' => '',
                             'title' => $info['label'],
                             'order' => $info['order']
-                        ];
+                        );
                     }
                 }
             }
 
             // 주차 내에서 순서대로 정렬 후 전체 배열에 추가
-            usort($weekAssignments, function($a, $b) {
-                return $a['order'] - $b['order'];
-            });
+            usort($weekAssignments, 'compareAssignmentOrder');
 
             foreach ($weekAssignments as $assignment) {
                 unset($assignment['order']); // order 필드 제거
@@ -273,22 +273,32 @@ if (!empty($loggedInUserName)) {
 
     // 가까운 미래부터 표시하기 위해 주차별로 그룹화 후 역순으로 재배치
     // 주차별로 그룹화
-    $groupedByWeek = [];
+    $groupedByWeek = array();
     foreach ($myUpcomingAssignments as $assignment) {
         $key = $assignment['year'] . '_' . $assignment['week'];
         if (!isset($groupedByWeek[$key])) {
-            $groupedByWeek[$key] = [];
+            $groupedByWeek[$key] = array();
         }
         $groupedByWeek[$key][] = $assignment;
     }
 
     // 그룹 순서를 역순으로 하여 다시 평면화
-    $myUpcomingAssignments = [];
+    $myUpcomingAssignments = array();
     foreach (array_reverse($groupedByWeek) as $weekGroup) {
         foreach ($weekGroup as $assignment) {
             $myUpcomingAssignments[] = $assignment;
         }
     }
+}
+
+// 배정 순서 정렬을 위한 비교 함수
+function compareAssignmentOrder($a, $b) {
+    return $a['order'] - $b['order'];
+}
+
+// 배정명 필터링을 위한 함수
+function filterAssignedNames($v) {
+    return !empty(trim($v));
 }
 ?>
 <!DOCTYPE html>
@@ -824,7 +834,7 @@ if (!empty($loggedInUserName)) {
                 <div class="assignment-item">
                     <span class="assignment-label">소개말</span>
                     <?php
-                        $openingRemarksName = trim($data['assignments']['opening_remarks'] ?? '');
+                        $openingRemarksName = isset($data['assignments']['opening_remarks']) ? trim($data['assignments']['opening_remarks']) : '';
                         $isMyOpeningRemarks = !empty($loggedInUserName) && !empty($openingRemarksName) && $loggedInUserName === $openingRemarksName;
                         $openingRemarksClass = 'assignment-name';
                         if (empty($openingRemarksName)) {
@@ -840,7 +850,7 @@ if (!empty($loggedInUserName)) {
                 <div class="assignment-item">
                     <span class="assignment-label">시작 기도</span>
                     <?php
-                        $openingPrayerName = trim($data['assignments']['opening_prayer'] ?? '');
+                        $openingPrayerName = isset($data['assignments']['opening_prayer']) ? trim($data['assignments']['opening_prayer']) : '';
                         $isMyOpeningPrayer = !empty($loggedInUserName) && !empty($openingPrayerName) && $loggedInUserName === $openingPrayerName;
                         $openingPrayerClass = 'assignment-name';
                         if (empty($openingPrayerName)) {
@@ -870,11 +880,11 @@ if (!empty($loggedInUserName)) {
                 </div>
                 <?php
                     // assigned가 배열인 경우 빈 값 제외
-                    $assignedNames = [];
+                    $assignedNames = array();
                     if (is_array($item['assigned'])) {
-                        $assignedNames = array_filter($item['assigned'], function($v) { return !empty(trim($v)); });
+                        $assignedNames = array_filter($item['assigned'], 'filterAssignedNames');
                     } elseif (!empty($item['assigned'])) {
-                        $assignedNames = [$item['assigned']];
+                        $assignedNames = array($item['assigned']);
                     }
                 ?>
                 <?php if (empty($assignedNames)): ?>
@@ -913,11 +923,11 @@ if (!empty($loggedInUserName)) {
                 </div>
                 <?php
                     // assigned가 배열인 경우 빈 값 제외
-                    $assignedNames = [];
+                    $assignedNames = array();
                     if (is_array($item['assigned'])) {
-                        $assignedNames = array_filter($item['assigned'], function($v) { return !empty(trim($v)); });
+                        $assignedNames = array_filter($item['assigned'], 'filterAssignedNames');
                     } elseif (!empty($item['assigned'])) {
-                        $assignedNames = [$item['assigned']];
+                        $assignedNames = array($item['assigned']);
                     }
                 ?>
                 <?php if (empty($assignedNames)): ?>
@@ -956,11 +966,11 @@ if (!empty($loggedInUserName)) {
                 </div>
                 <?php
                     // assigned가 배열인 경우 빈 값 제외
-                    $assignedNames = [];
+                    $assignedNames = array();
                     if (is_array($item['assigned'])) {
-                        $assignedNames = array_filter($item['assigned'], function($v) { return !empty(trim($v)); });
+                        $assignedNames = array_filter($item['assigned'], 'filterAssignedNames');
                     } elseif (!empty($item['assigned'])) {
-                        $assignedNames = [$item['assigned']];
+                        $assignedNames = array($item['assigned']);
                     }
                 ?>
                 <?php if (empty($assignedNames)): ?>
@@ -994,7 +1004,7 @@ if (!empty($loggedInUserName)) {
                     <div class="assignment-item">
                         <span class="assignment-label">맺음말</span>
                         <?php
-                            $closingRemarksName = trim($data['assignments']['closing_remarks'] ?? '');
+                            $closingRemarksName = isset($data['assignments']['closing_remarks']) ? trim($data['assignments']['closing_remarks']) : '';
                             $isMyClosingRemarks = !empty($loggedInUserName) && !empty($closingRemarksName) && $loggedInUserName === $closingRemarksName;
                             $closingRemarksClass = 'assignment-name';
                             if (empty($closingRemarksName)) {
@@ -1010,7 +1020,7 @@ if (!empty($loggedInUserName)) {
                     <div class="assignment-item">
                         <span class="assignment-label">마치는 기도</span>
                         <?php
-                            $closingPrayerName = trim($data['assignments']['closing_prayer'] ?? '');
+                            $closingPrayerName = isset($data['assignments']['closing_prayer']) ? trim($data['assignments']['closing_prayer']) : '';
                             $isMyClosingPrayer = !empty($loggedInUserName) && !empty($closingPrayerName) && $loggedInUserName === $closingPrayerName;
                             $closingPrayerClass = 'assignment-name';
                             if (empty($closingPrayerName)) {
@@ -1046,6 +1056,42 @@ if (!empty($loggedInUserName)) {
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>
+        <?php endif; ?>
+        <?php if ($is_admin): ?>
+        <div style="text-align: center; margin-top: 10px; padding: 10px 20px;">
+          <a href="index.php?year=<?php echo $year; ?>&week=<?php echo $week; ?>"
+             id="adminBtn"
+             class="admin-btn"
+             style="display: inline-block;
+                    padding: 8px 16px;
+                    background: #f1f5f9;
+                    color: #94a3b8;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    font-weight: 400;
+                    font-size: 13px;
+                    border: 1px solid #e2e8f0;
+                    box-shadow: none;
+                    transition: all 0.2s ease;">
+            <span id="adminBtnText">관리자모드로 보기</span>
+          </a>
+        </div>
+        <script>
+          // iframe 안에서만 새창으로 열기
+          (function() {
+            const isInIframe = window.self !== window.top;
+            const adminBtn = document.getElementById('adminBtn');
+            const adminBtnText = document.getElementById('adminBtnText');
+
+            if (isInIframe) {
+              adminBtnText.textContent = '관리자모드로 보기 ↗';
+              adminBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.open(this.href, '_blank', 'noopener,noreferrer');
+              });
+            }
+          })();
+        </script>
         <?php endif; ?>
     </div>
 

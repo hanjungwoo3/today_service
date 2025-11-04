@@ -75,9 +75,9 @@ if ($data === null) {
 
 // 프로그램을 섹션별로 분류
 function categorizePrograms($programs) {
-    $treasures = [];
-    $ministry = [];
-    $living = [];
+    $treasures = array();
+    $ministry = array();
+    $living = array();
 
     foreach ($programs as $item) {
         // section 정보가 있으면 그것을 사용
@@ -110,11 +110,11 @@ function categorizePrograms($programs) {
         }
     }
 
-    return [
+    return array(
         'treasures' => $treasures,
         'ministry' => $ministry,
         'living' => $living
-    ];
+    );
 }
 
 $categorized = categorizePrograms($data['program']);
@@ -951,12 +951,12 @@ $categorized = categorizePrograms($data['program']);
 
             <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                    <span style="font-weight: 600; font-size: 12px; color: #333;">미리보기</span>
+                    <span style="font-weight: 600; font-size: 12px; color: #333;">사용자모드로 보기</span>
                 </div>
                 <p style="font-size: 10px; color: #666; margin-bottom: 8px; line-height: 1.4;">
-                    현재 입력한 내용을 새 창에서 미리 볼 수 있습니다. 저장되지 않은 내용은 반영되지 않으니, 저장 후 확인하세요.
+                    현재 입력한 내용을 사용자 화면에서 확인할 수 있습니다. 저장되지 않은 내용은 반영되지 않으니, 저장 후 확인하세요.
                 </p>
-                <button onclick="window.open('view.php?year=<?php echo $year; ?>&week=<?php echo $week; ?>', '_blank')" class="action-button preview" style="width: 100%; margin: 0;">👁️ 미리보기</button>
+                <a href="view.php?year=<?php echo $year; ?>&week=<?php echo $week; ?>" class="action-button preview" style="width: 100%; margin: 0; display: block; text-align: center; text-decoration: none;">👁️ 사용자모드로 보기</a>
             </div>
 
             <div style="background: #fff5f5; border: 1px solid #ffcccc; border-radius: 6px; padding: 10px; margin-top: 10px;">

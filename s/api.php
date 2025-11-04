@@ -8,10 +8,11 @@ require_once 'scraper.php';
 
 class MeetingDataManager {
 
-    private $dataDir = __DIR__ . '/data';
+    private $dataDir;
     private $scraper;
 
     public function __construct() {
+        $this->dataDir = dirname(__FILE__) . '/data';
         $this->scraper = new MeetingLinkScraper();
 
         // data 디렉토리 확인
@@ -77,25 +78,25 @@ class MeetingDataManager {
         }
 
         // 3. 데이터 구조 생성
-        $data = [
+        $data = array(
             'year' => $year,
             'week' => $week,
             'url' => $linkData['url'],
             'date' => $program['date'],
             'bible_reading' => $program['bible_reading'],
-            'sections' => [
+            'sections' => array(
                 'treasures' => '성경에 담긴 보물',
                 'ministry' => '야외 봉사에 힘쓰십시오',
                 'living' => '그리스도인 생활'
-            ],
-            'program' => [],
-            'assignments' => [
+            ),
+            'program' => array(),
+            'assignments' => array(
                 'opening_remarks' => '',
                 'closing_remarks' => '',
                 'opening_prayer' => '',
                 'closing_prayer' => ''
-            ]
-        ];
+            )
+        );
 
         // 프로그램 항목에 assigned와 section 필드 추가
         foreach ($program['program'] as $item) {
@@ -114,12 +115,12 @@ class MeetingDataManager {
                 }
             }
 
-            $data['program'][] = [
+            $data['program'][] = array(
                 'title' => $item['title'],
                 'duration' => $item['duration'],
-                'assigned' => ['', ''],
+                'assigned' => array('', ''),
                 'section' => $section
-            ];
+            );
         }
 
         return $data;
@@ -241,13 +242,13 @@ class MeetingDataManager {
         }
 
         // 기존 프로그램 항목을 제목으로 매핑
-        $oldProgramMap = [];
+        $oldProgramMap = array();
         foreach ($oldData['program'] as $item) {
             $oldProgramMap[$item['title']] = $item['assigned'];
         }
 
         // 새 데이터에 기존 배정 정보 병합
-        foreach ($newData['program'] as &$item) {
+        foreach ($newData['program'] as $index => $item) {
             if (isset($oldProgramMap[$item['title']])) {
                 $oldAssigned = $oldProgramMap[$item['title']];
                 // 배열인지 확인하고, 값이 있는지 체크
@@ -260,20 +261,24 @@ class MeetingDataManager {
                         }
                     }
                     if ($hasValue) {
-                        $item['assigned'] = $oldAssigned;
+                        $newData['program'][$index]['assigned'] = $oldAssigned;
                     }
                 } elseif (!empty($oldAssigned)) {
                     // 하위 호환성: 문자열인 경우 배열로 변환
-                    $item['assigned'] = [$oldAssigned, ''];
+                    $newData['program'][$index]['assigned'] = array($oldAssigned, '');
                 }
             }
         }
 
         // 기본 배정 정보도 유지
         if (isset($oldData['assignments'])) {
-            $newData['assignments'] = array_merge($newData['assignments'], array_filter($oldData['assignments'], function($v) {
-                return !empty($v);
-            }));
+            $filteredAssignments = array();
+            foreach ($oldData['assignments'] as $key => $val) {
+                if (!empty($val)) {
+                    $filteredAssignments[$key] = $val;
+                }
+            }
+            $newData['assignments'] = array_merge($newData['assignments'], $filteredAssignments);
         }
 
         return $newData;
@@ -284,7 +289,7 @@ class MeetingDataManager {
      */
     public function getAvailableWeeks() {
         $files = glob($this->dataDir . '/*.json');
-        $weeks = [];
+        $weeks = array();
 
         foreach ($files as $file) {
             $filename = basename($file, '.json');
@@ -296,36 +301,41 @@ class MeetingDataManager {
                 // 파일 내용 읽어서 배정없음 정보 확인
                 $data = $this->load($year, $week);
                 $noMeeting = !empty($data['no_meeting']) && $data['no_meeting'];
-                $noMeetingTitle = $noMeeting ? ($data['no_meeting_title'] ?? '') : '';
-                $noMeetingReason = $noMeeting ? ($data['no_meeting_reason'] ?? '') : '';
+                $noMeetingTitle = $noMeeting ? (isset($data['no_meeting_title']) ? $data['no_meeting_title'] : '') : '';
+                $noMeetingReason = $noMeeting ? (isset($data['no_meeting_reason']) ? $data['no_meeting_reason'] : '') : '';
 
-                $weeks[] = [
+                $weeks[] = array(
                     'year' => $year,
                     'week' => $week,
                     'filename' => $filename,
                     'no_meeting' => $noMeeting,
                     'no_meeting_title' => $noMeetingTitle,
                     'no_meeting_reason' => $noMeetingReason
-                ];
+                );
             }
         }
 
         // 연도와 주차로 정렬
-        usort($weeks, function($a, $b) {
-            if ($a['year'] !== $b['year']) {
-                return $b['year'] - $a['year']; // 연도 내림차순
-            }
-            return $b['week'] - $a['week']; // 주차 내림차순
-        });
+        usort($weeks, array($this, 'compareWeeks'));
 
         return $weeks;
+    }
+
+    /**
+     * 주차 정렬을 위한 비교 함수
+     */
+    private function compareWeeks($a, $b) {
+        if ($a['year'] !== $b['year']) {
+            return $b['year'] - $a['year']; // 연도 내림차순
+        }
+        return $b['week'] - $a['week']; // 주차 내림차순
     }
 
     /**
      * 빈 데이터 구조 생성
      */
     public function createEmpty($year, $week) {
-        return [
+        return array(
             'year' => $year,
             'week' => $week,
             'url' => '',
@@ -334,68 +344,68 @@ class MeetingDataManager {
             'no_meeting' => false,
             'no_meeting_title' => '',
             'no_meeting_reason' => '',
-            'sections' => [
+            'sections' => array(
                 'treasures' => '성경에 담긴 보물',
                 'ministry' => '야외 봉사에 힘쓰십시오',
                 'living' => '그리스도인 생활'
-            ],
-            'program' => [
-                [
+            ),
+            'program' => array(
+                array(
                     'title' => '1. ',
                     'duration' => '10분',
-                    'assigned' => ['', ''],
+                    'assigned' => array('', ''),
                     'section' => 'treasures'
-                ],
-                [
+                ),
+                array(
                     'title' => '2. 영적 보물 찾기',
                     'duration' => '10분',
-                    'assigned' => ['', ''],
+                    'assigned' => array('', ''),
                     'section' => 'treasures'
-                ],
-                [
+                ),
+                array(
                     'title' => '3. 성경 낭독',
                     'duration' => '4분',
-                    'assigned' => ['', ''],
+                    'assigned' => array('', ''),
                     'section' => 'treasures'
-                ],
-                [
+                ),
+                array(
                     'title' => '4. ',
                     'duration' => '3분',
-                    'assigned' => ['', ''],
+                    'assigned' => array('', ''),
                     'section' => 'ministry'
-                ],
-                [
+                ),
+                array(
                     'title' => '5. ',
                     'duration' => '4분',
-                    'assigned' => ['', ''],
+                    'assigned' => array('', ''),
                     'section' => 'ministry'
-                ],
-                [
+                ),
+                array(
                     'title' => '6. ',
                     'duration' => '5분',
-                    'assigned' => ['', ''],
+                    'assigned' => array('', ''),
                     'section' => 'ministry'
-                ],
-                [
+                ),
+                array(
                     'title' => '7. ',
                     'duration' => '15분',
-                    'assigned' => ['', ''],
+                    'assigned' => array('', ''),
                     'section' => 'living'
-                ],
-                [
+                ),
+                array(
                     'title' => '8. 회중 성서연구',
                     'duration' => '30분',
-                    'assigned' => ['', ''],
+                    'assigned' => array('', ''),
                     'section' => 'living'
-                ]
-            ],
-            'assignments' => [
+                )
+            ),
+            'assignments' => array(
                 'opening_remarks' => '',
                 'closing_remarks' => '',
                 'opening_prayer' => '',
                 'closing_prayer' => ''
-            ]
-        ];
+            )
+        );
     }
 
     /**
@@ -447,7 +457,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $data = $manager->createEmpty($year, $week);
             }
 
-            echo json_encode(['success' => true, 'data' => $data]);
+            echo json_encode(array('success' => true, 'data' => $data));
             break;
 
         case 'save':
@@ -456,7 +466,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $data = json_decode($_POST['data'], true);
 
             $success = $manager->save($year, $week, $data);
-            echo json_encode(['success' => $success]);
+            echo json_encode(array('success' => $success));
             break;
 
         case 'refresh':
@@ -465,9 +475,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $data = $manager->getData($year, $week, true);
 
             if ($data === null) {
-                echo json_encode(['success' => false, 'error' => '데이터를 가져올 수 없습니다.']);
+                echo json_encode(array('success' => false, 'error' => '데이터를 가져올 수 없습니다.'));
             } else {
-                echo json_encode(['success' => true, 'data' => $data]);
+                echo json_encode(array('success' => true, 'data' => $data));
             }
             break;
 
@@ -479,7 +489,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $data = $manager->fetchFromWeb($year, $week);
 
             if ($data === null) {
-                echo json_encode(['success' => false, 'error' => '웹에서 데이터를 가져올 수 없습니다.']);
+                echo json_encode(array('success' => false, 'error' => '웹에서 데이터를 가져올 수 없습니다.'));
             } else {
                 // 기존 배정 정보와 병합
                 $data = $manager->mergeAssignments($year, $week, $data);
@@ -487,13 +497,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 // 임시 파일에 저장
                 $manager->saveTempData($year, $week, $data);
 
-                echo json_encode(['success' => true, 'data' => $data]);
+                echo json_encode(array('success' => true, 'data' => $data));
             }
             break;
 
         case 'list_weeks':
             $weeks = $manager->getAvailableWeeks();
-            echo json_encode(['success' => true, 'weeks' => $weeks]);
+            echo json_encode(array('success' => true, 'weeks' => $weeks));
             break;
 
         case 'delete':
@@ -502,14 +512,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $success = $manager->delete($year, $week);
 
             if ($success) {
-                echo json_encode(['success' => true]);
+                echo json_encode(array('success' => true));
             } else {
-                echo json_encode(['success' => false, 'error' => '삭제에 실패했습니다.']);
+                echo json_encode(array('success' => false, 'error' => '삭제에 실패했습니다.'));
             }
             break;
 
         default:
-            echo json_encode(['success' => false, 'error' => 'Invalid action']);
+            echo json_encode(array('success' => false, 'error' => 'Invalid action'));
     }
     exit;
 }
