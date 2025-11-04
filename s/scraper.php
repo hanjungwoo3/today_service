@@ -141,7 +141,7 @@ class MeetingLinkScraper {
             }
 
             // 큰따옴표, 불필요한 문자 제거 (숫자는 유지)
-            $title = str_replace(['"', '"', '|', '및 기도'], '', $text);
+            $title = str_replace(array('"', '"', '|', '및 기도'), '', $text);
             $title = trim($title);
 
             // 빈 제목이나 시간이 없으면 건너뛰기
