@@ -296,6 +296,25 @@ if (!empty($loggedInUserName)) {
             $myUpcomingAssignments[] = $assignment;
         }
     }
+
+    // 날짜별로 그룹화
+    $groupedByDate = array();
+    foreach ($myUpcomingAssignments as $assignment) {
+        $dateKey = $assignment['dateRange'];
+        if (!isset($groupedByDate[$dateKey])) {
+            $groupedByDate[$dateKey] = array(
+                'year' => $assignment['year'],
+                'week' => $assignment['week'],
+                'dateRange' => $dateKey,
+                'items' => array()
+            );
+        }
+        $groupedByDate[$dateKey]['items'][] = array(
+            'section' => $assignment['section'],
+            'title' => $assignment['title']
+        );
+    }
+    $myUpcomingAssignments = array_values($groupedByDate);
 }
 
 // 배정 순서 정렬을 위한 비교 함수
@@ -602,6 +621,14 @@ function filterAssignedNames($v) {
 
         .my-assignment-content {
             padding-left: 12px;
+        }
+
+        .my-assignment-line {
+            margin-bottom: 3px;
+        }
+
+        .my-assignment-line:last-child {
+            margin-bottom: 0;
         }
 
         .my-assignment-section {
@@ -1079,14 +1106,18 @@ function filterAssignedNames($v) {
             <?php if (!empty($myUpcomingAssignments)): ?>
             <div class="my-assignments-section">
                 <div class="my-assignments-title">📋 이번 주 이후 나에게 배정된 특권</div>
-                <?php foreach ($myUpcomingAssignments as $assignment): ?>
-                <a href="view.php?year=<?php echo $assignment['year']; ?>&week=<?php echo $assignment['week']; ?>" class="my-assignment-item">
-                    <div class="my-assignment-date"><?php echo htmlspecialchars($assignment['dateRange']); ?></div>
+                <?php foreach ($myUpcomingAssignments as $dateGroup): ?>
+                <a href="view.php?year=<?php echo $dateGroup['year']; ?>&week=<?php echo $dateGroup['week']; ?>" class="my-assignment-item">
+                    <div class="my-assignment-date"><?php echo htmlspecialchars($dateGroup['dateRange']); ?></div>
                     <div class="my-assignment-content">
-                        <?php if (!empty($assignment['section'])): ?>
-                        <span class="my-assignment-section"><?php echo htmlspecialchars($assignment['section']); ?></span>
-                        <?php endif; ?>
-                        <span class="my-assignment-title"><?php echo htmlspecialchars($assignment['title']); ?></span>
+                        <?php foreach ($dateGroup['items'] as $item): ?>
+                        <div class="my-assignment-line">
+                            <?php if (!empty($item['section'])): ?>
+                            <span class="my-assignment-section"><?php echo htmlspecialchars($item['section']); ?></span>
+                            <?php endif; ?>
+                            <span class="my-assignment-title"><?php echo htmlspecialchars($item['title']); ?></span>
+                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </a>
                 <?php endforeach; ?>
