@@ -671,10 +671,12 @@ $categorized = categorizePrograms($data['program']);
         }
 
         .week-selector-year {
-            font-size: 18px;
-            font-weight: 600;
-            color: #667eea;
-            margin: 15px 0 10px 0;
+            background: #f5f5f5;
+            padding: 8px 10px;
+            font-weight: 700;
+            color: #333;
+            border-top: 1px solid #ddd;
+            font-size: 13px;
         }
 
         .week-grid {
@@ -685,17 +687,17 @@ $categorized = categorizePrograms($data['program']);
         }
 
         .week-item {
-            padding: 10px 6px;
+            padding: 8px 4px;
             background: #f5f5f5;
             border: 2px solid transparent;
-            border-radius: 8px;
+            border-radius: 6px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 14px;
+            font-size: 12px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
         }
 
         .week-item:hover {
@@ -724,12 +726,12 @@ $categorized = categorizePrograms($data['program']);
         .week-number {
             font-weight: 400;
             display: block;
-            font-size: 13px;
+            font-size: 11px;
             color: #999;
         }
 
         .week-date {
-            font-size: 15px;
+            font-size: 12px;
             font-weight: 700;
             color: #333;
             line-height: 1.2;
