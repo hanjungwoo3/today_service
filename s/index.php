@@ -791,7 +791,7 @@ $categorized = categorizePrograms($data['program']);
             <div class="nav-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
                 <a href="?year=<?php echo $prevYear; ?>&week=<?php echo $prevWeek; ?>" class="nav-button" style="background: #667eea;">◀ 이전</a>
                 <a href="?year=<?php echo $currentYear; ?>&week=<?php echo $currentWeek; ?>" class="nav-button" style="background: #4CAF50;">📅 이번주</a>
-                <button onclick="showWeekSelector()" class="action-button" style="background: #FF9800;">📆 주차선택</button>
+                <button onclick="showWeekSelector()" class="action-button" style="background: #FF9800;">📆 선택</button>
                 <a href="?year=<?php echo $nextYear; ?>&week=<?php echo $nextWeek; ?>" class="nav-button" style="background: #667eea;">다음 ▶</a>
             </div>
 

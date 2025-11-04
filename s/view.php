@@ -844,7 +844,7 @@ function filterAssignedNames($v) {
                     <a href="?year=<?php echo $prevWeekData['year']; ?>&week=<?php echo $prevWeekData['week']; ?>" class="nav-button" style="background: #667eea;">◀ 이전</a>
                 <?php endif; ?>
                 <a href="?year=<?php echo $currentYear; ?>&week=<?php echo $currentWeek; ?>" class="nav-button" style="background: #4CAF50;">📅 이번주</a>
-                <button onclick="showWeekSelector()" class="nav-button" style="background: #FF9800;">📆 주차선택</button>
+                <button onclick="showWeekSelector()" class="nav-button" style="background: #FF9800;">📆 선택</button>
                 <?php if ($nextWeekData !== null): ?>
                     <a href="?year=<?php echo $nextWeekData['year']; ?>&week=<?php echo $nextWeekData['week']; ?>" class="nav-button" style="background: #667eea;">다음 ▶</a>
                 <?php endif; ?>
