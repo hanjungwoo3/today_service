@@ -137,7 +137,7 @@ $categorized = categorizePrograms($data['program']);
             background: white;
             padding: 2px;
             min-height: 100vh;
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .container {
@@ -158,13 +158,13 @@ $categorized = categorizePrograms($data['program']);
 
         .header h1 {
             color: #333;
-            font-size: 16px;
+            font-size: 17px;
             margin-bottom: 3px;
         }
 
         .header .subtitle {
             color: #666;
-            font-size: 12px;
+            font-size: 13px;
             margin-bottom: 4px;
         }
 
@@ -173,7 +173,7 @@ $categorized = categorizePrograms($data['program']);
             padding: 8px;
             border: 2px solid #e0e0e0;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 13px;
             margin-bottom: 10px;
             transition: border-color 0.3s;
         }
@@ -206,7 +206,7 @@ $categorized = categorizePrograms($data['program']);
             font-weight: 600;
             cursor: pointer;
             transition: background 0.3s;
-            font-size: 12px;
+            font-size: 13px;
             white-space: nowrap;
             flex: 1;
         }
@@ -246,7 +246,7 @@ $categorized = categorizePrograms($data['program']);
             padding: 8px;
             border: 2px solid #e0e0e0;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 13px;
             margin-bottom: 10px;
             transition: border-color 0.3s;
         }
@@ -268,7 +268,7 @@ $categorized = categorizePrograms($data['program']);
             display: flex;
             align-items: center;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 13px;
             color: #666;
             cursor: pointer;
             margin-bottom: 8px;
@@ -286,7 +286,7 @@ $categorized = categorizePrograms($data['program']);
             padding: 10px;
             border: 2px solid #ffc107;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 14px;
             font-family: inherit;
             background: white;
             resize: vertical;
@@ -303,7 +303,7 @@ $categorized = categorizePrograms($data['program']);
             padding: 10px;
             border: 2px solid #ffc107;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 14px;
             font-family: inherit;
             background: white;
             margin-bottom: 8px;
@@ -345,7 +345,7 @@ $categorized = categorizePrograms($data['program']);
 
         .assignment-label {
             font-weight: 600;
-            font-size: 11px;
+            font-size: 12px;
             color: #555;
             white-space: nowrap;
         }
@@ -355,7 +355,7 @@ $categorized = categorizePrograms($data['program']);
             padding: 4px 5px;
             border: 2px solid #e0e0e0;
             border-radius: 6px;
-            font-size: 11px;
+            font-size: 12px;
             transition: border-color 0.3s;
         }
 
@@ -377,7 +377,7 @@ $categorized = categorizePrograms($data['program']);
             color: white;
             padding: 5px 8px;
             border-radius: 4px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
             margin-bottom: 4px;
             display: flex;
@@ -398,14 +398,14 @@ $categorized = categorizePrograms($data['program']);
         }
 
         .section-icon {
-            font-size: 15px;
+            font-size: 16px;
         }
 
         .section-title-edit {
             background: transparent;
             border: none;
             color: white;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
             flex: 1;
             padding: 0;
@@ -458,7 +458,7 @@ $categorized = categorizePrograms($data['program']);
             padding: 4px 6px;
             border: 2px solid #e0e0e0;
             border-radius: 3px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
         }
 
@@ -467,7 +467,7 @@ $categorized = categorizePrograms($data['program']);
             padding: 4px;
             border: 2px solid #e0e0e0;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 12px;
             color: #888;
         }
 
@@ -492,7 +492,7 @@ $categorized = categorizePrograms($data['program']);
         .program-assigned-label {
             font-weight: 600;
             color: #555;
-            font-size: 10px;
+            font-size: 11px;
             white-space: nowrap;
         }
 
@@ -500,7 +500,7 @@ $categorized = categorizePrograms($data['program']);
             padding: 4px 5px;
             border: 2px solid #e0e0e0;
             border-radius: 6px;
-            font-size: 11px;
+            font-size: 12px;
             width: 45px;
             transition: border-color 0.3s;
         }
@@ -517,7 +517,7 @@ $categorized = categorizePrograms($data['program']);
             padding: 3px 6px;
             border-radius: 3px;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 700;
             line-height: 1;
             min-width: 24px;
@@ -539,7 +539,7 @@ $categorized = categorizePrograms($data['program']);
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             margin-top: 6px;
         }
@@ -596,7 +596,7 @@ $categorized = categorizePrograms($data['program']);
 
         .loading-text {
             color: white;
-            font-size: 21px;
+            font-size: 22px;
             font-weight: 600;
             text-align: center;
             white-space: pre-line;
@@ -641,7 +641,7 @@ $categorized = categorizePrograms($data['program']);
         }
 
         .week-selector-title {
-            font-size: 19px;
+            font-size: 20px;
             font-weight: 700;
             color: #333;
         }
@@ -654,12 +654,12 @@ $categorized = categorizePrograms($data['program']);
             height: 32px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 19px;
+            font-size: 20px;
             font-weight: bold;
         }
 
         .week-selector-year {
-            font-size: 17px;
+            font-size: 18px;
             font-weight: 600;
             color: #667eea;
             margin: 15px 0 10px 0;
@@ -680,7 +680,7 @@ $categorized = categorizePrograms($data['program']);
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 13px;
+            font-size: 14px;
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -712,12 +712,12 @@ $categorized = categorizePrograms($data['program']);
         .week-number {
             font-weight: 400;
             display: block;
-            font-size: 12px;
+            font-size: 13px;
             color: #999;
         }
 
         .week-date {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 700;
             color: #333;
             line-height: 1.2;
@@ -741,10 +741,10 @@ $categorized = categorizePrograms($data['program']);
             }
             .week-item {
                 padding: 12px 8px;
-                font-size: 14px;
+                font-size: 15px;
             }
             .week-date {
-                font-size: 11px;
+                font-size: 12px;
             }
         }
 
@@ -803,11 +803,11 @@ $categorized = categorizePrograms($data['program']);
         <!-- 프로그램 입력 영역 -->
         <div id="program-content" style="<?php echo (!empty($data['no_meeting']) && $data['no_meeting']) ? 'display:none;' : ''; ?>">
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-            <span style="font-weight: 600; font-size: 12px; color: #555; white-space: nowrap;">날짜</span>
+            <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">날짜</span>
             <input type="text" class="date-edit" id="date" value="<?php echo htmlspecialchars($data['date']); ?>" placeholder="날짜 입력 (예: 11월 3-9일)" style="flex: 1;">
         </div>
         <div class="bible-reading" style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-weight: 600; font-size: 12px; color: #555; white-space: nowrap;">성구</span>
+            <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">성구</span>
             <input type="text" class="bible-edit" id="bible_reading" value="<?php echo htmlspecialchars($data['bible_reading']); ?>" placeholder="성경 읽기 범위 입력 (예: 솔로몬의 노래 1-2장)" style="flex: 1;">
         </div>
 
@@ -916,7 +916,7 @@ $categorized = categorizePrograms($data['program']);
         </div>
 
         <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-            <span style="font-weight: 600; font-size: 12px; color: #555; white-space: nowrap;">WOL</span>
+            <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">WOL</span>
             <input type="text" class="url-edit" id="url" value="<?php echo htmlspecialchars($data['url']); ?>" placeholder="URL 입력 (예: https://wol.jw.org/...)" style="flex: 1;">
         </div>
         </div><!-- 프로그램 입력 영역 끝 -->
@@ -927,7 +927,7 @@ $categorized = categorizePrograms($data['program']);
                 <input type="checkbox" id="no_meeting" <?php echo (!empty($data['no_meeting']) && $data['no_meeting']) ? 'checked' : ''; ?>>
                 <span>배정없음</span>
             </label>
-            <p style="font-size: 11px; color: #666; margin: 0 0 8px 0; line-height: 1.4;">
+            <p style="font-size: 12px; color: #666; margin: 0 0 8px 0; line-height: 1.4;">
                 대회, 순회 방문, 기념식 주간 등 정규 집회가 없는 경우에 사용하세요.
             </p>
             <input type="text" class="no-meeting-title" id="no_meeting_title" placeholder="제목 입력 (예: 대회)" value="<?php echo htmlspecialchars(isset($data['no_meeting_title']) ? $data['no_meeting_title'] : ''); ?>" style="<?php echo (empty($data['no_meeting']) || !$data['no_meeting']) ? 'display:none;' : ''; ?>">
@@ -941,9 +941,9 @@ $categorized = categorizePrograms($data['program']);
         <div id="web-fetch-section" style="margin-top: 20px; border-top: 1px solid #e0e0e0; padding-top: 15px;<?php echo (!empty($data['no_meeting']) && $data['no_meeting']) ? ' display:none;' : ''; ?>">
             <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                    <span style="font-weight: 600; font-size: 13px; color: #333;">웹에서 가져오기</span>
+                    <span style="font-weight: 600; font-size: 14px; color: #333;">웹에서 가져오기</span>
                 </div>
-                <p style="font-size: 11px; color: #666; margin-bottom: 8px; line-height: 1.4;">
+                <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">
                     공식 웹사이트에서 이번 주차의 프로그램 데이터를 가져옵니다. 기존 배정 정보는 유지되며, 가져온 후 "저장하기" 버튼을 눌러야 적용됩니다.
                 </p>
                 <button onclick="fetchFromWeb()" class="action-button refresh" style="width: 100%; margin: 0;">🌐 웹에서 가져오기</button>
@@ -951,9 +951,9 @@ $categorized = categorizePrograms($data['program']);
 
             <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                    <span style="font-weight: 600; font-size: 13px; color: #333;">사용자모드로 보기</span>
+                    <span style="font-weight: 600; font-size: 14px; color: #333;">사용자모드로 보기</span>
                 </div>
-                <p style="font-size: 11px; color: #666; margin-bottom: 8px; line-height: 1.4;">
+                <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">
                     현재 입력한 내용을 사용자 화면에서 확인할 수 있습니다. 저장되지 않은 내용은 반영되지 않으니, 저장 후 확인하세요.
                 </p>
                 <a href="view.php?year=<?php echo $year; ?>&week=<?php echo $week; ?>" class="action-button preview" style="width: 100%; margin: 0; display: block; text-align: center; text-decoration: none;">👁️ 사용자모드로 보기</a>
@@ -961,12 +961,12 @@ $categorized = categorizePrograms($data['program']);
 
             <div style="background: #fff5f5; border: 1px solid #ffcccc; border-radius: 6px; padding: 10px; margin-top: 10px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                    <span style="font-weight: 600; font-size: 13px; color: #d32f2f;">⚠️ 위험: 데이터 삭제</span>
+                    <span style="font-weight: 600; font-size: 14px; color: #d32f2f;">⚠️ 위험: 데이터 삭제</span>
                 </div>
-                <p style="font-size: 11px; color: #666; margin-bottom: 8px; line-height: 1.4;">
+                <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">
                     현재 주차의 데이터를 영구 삭제합니다. 삭제된 데이터는 백업 폴더에 보관되지만, 복구를 위해서는 관리자에게 문의해야 합니다. 신중히 사용하세요.
                 </p>
-                <button onclick="deleteData()" style="padding: 4px 8px; font-size: 11px; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; display: inline-block;">🗑️ 삭제</button>
+                <button onclick="deleteData()" style="padding: 4px 8px; font-size: 12px; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; display: inline-block;">🗑️ 삭제</button>
             </div>
         </div>
     </div>
@@ -1355,21 +1355,21 @@ $categorized = categorizePrograms($data['program']);
 
                     html += '<div class="' + classes.join(' ') + '" onclick="selectWeek(' + weekData.year + ', ' + weekData.week + ')">';
                     if (weekData.noMeeting) {
-                        html += '<span class="week-date" style="color: #ff9800; font-weight: bold; font-size: 11px; display: block;">배정없음</span>';
+                        html += '<span class="week-date" style="color: #ff9800; font-weight: bold; font-size: 12px; display: block;">배정없음</span>';
                         if (weekData.noMeetingTitle) {
                             // 제목만 표시
-                            html += '<span class="week-date" style="color: #666; font-size: 10px; display: block; margin-top: 2px;">' + weekData.noMeetingTitle + '</span>';
+                            html += '<span class="week-date" style="color: #666; font-size: 11px; display: block; margin-top: 2px;">' + weekData.noMeetingTitle + '</span>';
                         } else if (weekData.noMeetingReason) {
                             // 제목이 없으면 상세 사유의 처음 2줄만 표시
                             var lines = weekData.noMeetingReason.split('\n');
                             var displayText = lines.slice(0, 2).join(' ');
                             if (lines.length > 2) displayText += '...';
-                            html += '<span class="week-date" style="color: #666; font-size: 10px; display: block; margin-top: 2px;">' + displayText + '</span>';
+                            html += '<span class="week-date" style="color: #666; font-size: 11px; display: block; margin-top: 2px;">' + displayText + '</span>';
                         }
                     } else {
                         html += '<span class="week-date">' + dateRange + '</span>';
                         if (weekData.hasData) {
-                            html += '<span class="week-date" style="color: #4CAF50; font-weight: normal; font-size: 12px; display: block;">✓</span>';
+                            html += '<span class="week-date" style="color: #4CAF50; font-weight: normal; font-size: 13px; display: block;">✓</span>';
                         }
                     }
                     html += '<span class="week-number">' + weekData.week + '주</span>';

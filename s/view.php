@@ -327,7 +327,7 @@ function filterAssignedNames($v) {
             background: white;
             padding: 2px;
             min-height: 100vh;
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .container {
@@ -348,13 +348,13 @@ function filterAssignedNames($v) {
 
         .header h1 {
             color: #333;
-            font-size: 16px;
+            font-size: 17px;
             margin-bottom: 3px;
         }
 
         .header .date {
             color: #667eea;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
         }
 
@@ -379,7 +379,7 @@ function filterAssignedNames($v) {
             transition: background 0.3s;
             border: none;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
         }
 
         .nav-button:hover {
@@ -430,14 +430,14 @@ function filterAssignedNames($v) {
 
         .week-selector-title {
             font-weight: 700;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .week-selector-close {
             background: rgba(255,255,255,0.2);
             border: none;
             color: white;
-            font-size: 19px;
+            font-size: 20px;
             width: 26px;
             height: 26px;
             border-radius: 50%;
@@ -459,7 +459,7 @@ function filterAssignedNames($v) {
             font-weight: 700;
             color: #333;
             border-top: 1px solid #ddd;
-            font-size: 12px;
+            font-size: 13px;
         }
 
         .week-grid {
@@ -477,7 +477,7 @@ function filterAssignedNames($v) {
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 11px;
+            font-size: 12px;
             display: flex;
             flex-direction: column;
             gap: 3px;
@@ -509,12 +509,12 @@ function filterAssignedNames($v) {
         .week-number {
             font-weight: 400;
             display: block;
-            font-size: 10px;
+            font-size: 11px;
             color: #999;
         }
 
         .week-date {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             color: #333;
             line-height: 1.2;
@@ -541,7 +541,7 @@ function filterAssignedNames($v) {
             color: #667eea;
             text-decoration: none;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 13px;
             word-break: break-all;
         }
 
@@ -557,7 +557,7 @@ function filterAssignedNames($v) {
         }
 
         .my-assignments-title {
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 700;
             color: #666;
             margin-bottom: 12px;
@@ -569,7 +569,7 @@ function filterAssignedNames($v) {
             margin-bottom: 6px;
             background: #f9f9f9;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 14px;
             line-height: 1.5;
             text-decoration: none;
             color: inherit;
@@ -598,7 +598,7 @@ function filterAssignedNames($v) {
 
         .bible-reading {
             text-align: center;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             color: #555;
             margin-bottom: 6px;
@@ -615,7 +615,7 @@ function filterAssignedNames($v) {
             color: white;
             padding: 5px 8px;
             border-radius: 4px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
             margin-bottom: 4px;
             display: flex;
@@ -636,7 +636,7 @@ function filterAssignedNames($v) {
         }
 
         .section-icon {
-            font-size: 15px;
+            font-size: 16px;
         }
 
         .program-item {
@@ -671,13 +671,13 @@ function filterAssignedNames($v) {
 
         .program-title {
             font-weight: 600;
-            font-size: 12px;
+            font-size: 13px;
             color: #333;
         }
 
         .program-duration {
             color: #888;
-            font-size: 11px;
+            font-size: 12px;
         }
 
         .program-assigned {
@@ -685,7 +685,7 @@ function filterAssignedNames($v) {
             color: #333;
             padding: 4px 8px;
             border-radius: 10px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             min-width: 60px;
             text-align: center;
@@ -721,7 +721,7 @@ function filterAssignedNames($v) {
 
         .assignment-label {
             font-weight: 600;
-            font-size: 11px;
+            font-size: 12px;
             color: #555;
         }
 
@@ -731,7 +731,7 @@ function filterAssignedNames($v) {
             padding: 3px 8px;
             border-radius: 10px;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 14px;
             min-width: 50px;
             text-align: center;
         }
@@ -758,7 +758,7 @@ function filterAssignedNames($v) {
             text-align: center;
             color: #999;
             font-style: italic;
-            font-size: 12px;
+            font-size: 13px;
             padding: 12px;
         }
 
@@ -824,7 +824,7 @@ function filterAssignedNames($v) {
                 </div>
                 <?php if (!empty($data['no_meeting_reason'])): ?>
                 <div style="background: white; padding: 20px; border-radius: 8px; width: 100%; margin: 0 auto;">
-                    <div style="font-size: 17px; color: #333; font-weight: 600; white-space: pre-line; text-align: left;"><?php echo htmlspecialchars($data['no_meeting_reason']); ?></div>
+                    <div style="font-size: 18px; color: #333; font-weight: 600; white-space: pre-line; text-align: left;"><?php echo htmlspecialchars($data['no_meeting_reason']); ?></div>
                 </div>
                 <?php endif; ?>
             </div>
@@ -1077,7 +1077,7 @@ function filterAssignedNames($v) {
                     text-decoration: none;
                     border-radius: 6px;
                     font-weight: 400;
-                    font-size: 14px;
+                    font-size: 15px;
                     border: 1px solid #e2e8f0;
                     box-shadow: none;
                     transition: all 0.2s ease;">
@@ -1238,21 +1238,21 @@ function filterAssignedNames($v) {
 
                     html += '<div class="' + classes.join(' ') + '" onclick="selectWeek(' + weekData.year + ', ' + weekData.week + ')">';
                     if (weekData.noMeeting) {
-                        html += '<span class="week-date" style="color: #ff9800; font-weight: bold; font-size: 11px; display: block;">배정없음</span>';
+                        html += '<span class="week-date" style="color: #ff9800; font-weight: bold; font-size: 12px; display: block;">배정없음</span>';
                         if (weekData.noMeetingTitle) {
                             // 제목만 표시
-                            html += '<span class="week-date" style="color: #666; font-size: 10px; display: block; margin-top: 2px;">' + weekData.noMeetingTitle + '</span>';
+                            html += '<span class="week-date" style="color: #666; font-size: 11px; display: block; margin-top: 2px;">' + weekData.noMeetingTitle + '</span>';
                         } else if (weekData.noMeetingReason) {
                             // 제목이 없으면 상세 사유의 처음 2줄만 표시
                             var lines = weekData.noMeetingReason.split('\n');
                             var displayText = lines.slice(0, 2).join(' ');
                             if (lines.length > 2) displayText += '...';
-                            html += '<span class="week-date" style="color: #666; font-size: 10px; display: block; margin-top: 2px;">' + displayText + '</span>';
+                            html += '<span class="week-date" style="color: #666; font-size: 11px; display: block; margin-top: 2px;">' + displayText + '</span>';
                         }
                     } else {
                         html += '<span class="week-date">' + dateRange + '</span>';
                         if (weekData.hasData) {
-                            html += '<span class="week-date" style="color: #4CAF50; font-weight: normal; font-size: 12px; display: block;">✓</span>';
+                            html += '<span class="week-date" style="color: #4CAF50; font-weight: normal; font-size: 13px; display: block;">✓</span>';
                         }
                     }
                     html += '<span class="week-number">' + weekData.week + '주</span>';
