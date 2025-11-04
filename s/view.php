@@ -208,13 +208,17 @@ if (!empty($loggedInUserName)) {
 
                     if (is_array($item['assigned'])) {
                         foreach ($item['assigned'] as $assignedName) {
-                            if (!empty(trim($assignedName)) && trim($assignedName) === $loggedInUserName) {
+                            $trimmedAssignedName = trim($assignedName);
+                            if (!empty($trimmedAssignedName) && $trimmedAssignedName === $loggedInUserName) {
                                 $isAssigned = true;
                                 break;
                             }
                         }
-                    } elseif (!empty($item['assigned']) && trim($item['assigned']) === $loggedInUserName) {
-                        $isAssigned = true;
+                    } elseif (!empty($item['assigned'])) {
+                        $trimmedAssigned = trim($item['assigned']);
+                        if ($trimmedAssigned === $loggedInUserName) {
+                            $isAssigned = true;
+                        }
                     }
 
                     if ($isAssigned) {
@@ -301,7 +305,8 @@ function compareAssignmentOrder($a, $b) {
 
 // 배정명 필터링을 위한 함수
 function filterAssignedNames($v) {
-    return !empty(trim($v));
+    $trimmed = trim($v);
+    return !empty($trimmed);
 }
 ?>
 <!DOCTYPE html>
