@@ -583,7 +583,7 @@ function filterAssignedNames($v) {
 
         .my-assignments-section {
             margin-top: 20px;
-            padding: 15px;
+            padding: 0;
             background: white;
             border-radius: 8px;
         }
@@ -592,15 +592,16 @@ function filterAssignedNames($v) {
             font-size: 15px;
             font-weight: 700;
             color: #666;
-            margin-bottom: 12px;
+            margin-bottom: 4px;
+            padding: 5px 6px;
         }
 
         .my-assignment-item {
             display: block;
-            padding: 8px 10px;
-            margin-bottom: 6px;
+            padding: 5px 6px;
+            margin-bottom: 4px;
             background: #f9f9f9;
-            border-radius: 6px;
+            border-radius: 4px;
             font-size: 13px;
             line-height: 1.5;
             text-decoration: none;
@@ -616,11 +617,11 @@ function filterAssignedNames($v) {
             font-weight: 600;
             color: #666;
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .my-assignment-line {
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
         .my-assignment-line:last-child {
