@@ -619,10 +619,6 @@ function filterAssignedNames($v) {
             margin-bottom: 4px;
         }
 
-        .my-assignment-content {
-            padding-left: 12px;
-        }
-
         .my-assignment-line {
             margin-bottom: 3px;
         }
