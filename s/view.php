@@ -696,6 +696,7 @@ function filterAssignedNames($v) {
             font-size: 12px;
             flex-shrink: 0;
             white-space: nowrap;
+            margin-right: 8px;
         }
 
         .program-assigned {
