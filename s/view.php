@@ -589,7 +589,7 @@ function filterAssignedNames($v) {
         }
 
         .my-assignments-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: #666;
             margin-bottom: 12px;
@@ -601,7 +601,7 @@ function filterAssignedNames($v) {
             margin-bottom: 6px;
             background: #f9f9f9;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 13px;
             line-height: 1.5;
             text-decoration: none;
             color: inherit;
