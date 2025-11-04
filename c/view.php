@@ -118,19 +118,7 @@ $today = new DateTime('now');
         grid-template-columns: repeat(7, 1fr);
         background: #f1f5f9;
         border-bottom: 1px solid #e2e8f0;
-        padding-right: 35px;
         position: relative;
-      }
-      
-      .weekdays::after {
-        content: '';
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: 35px;
-        height: 100%;
-        background: #fff;
-        border-bottom: 1px solid #e2e8f0;
       }
 
       .weekday {
@@ -150,18 +138,6 @@ $today = new DateTime('now');
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         position: relative;
-        padding-right: 35px;
-      }
-      
-      .calendar::after {
-        content: '';
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: 35px;
-        height: 100%;
-        background: #fff;
-        pointer-events: none;
       }
 
       .day {
@@ -177,28 +153,6 @@ $today = new DateTime('now');
 
       .day:nth-child(7n) {
         border-right: none;
-      }
-
-      .time-labels {
-        position: absolute;
-        top: 24px;
-        right: -28px;
-        display: flex;
-        flex-direction: column;
-        gap: 1px;
-        z-index: 10;
-      }
-
-      .time-label {
-        font-size: 13px;
-        font-weight: 400;
-        color: #d1d5db;
-        padding: 0;
-        line-height: 1.3;
-        height: 14.3px;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
       }
 
       .day.outside {
@@ -626,13 +580,6 @@ $today = new DateTime('now');
                     ?>
                     <div class="<?php echo $nameClass; ?>"><?php echo htmlspecialchars($trimmedName, ENT_QUOTES); ?></div>
                   <?php endforeach; ?>
-                </div>
-              <?php endif; ?>
-              <?php if ($isSaturday): ?>
-                <div class="time-labels">
-                  <div class="time-label">오전</div>
-                  <div class="time-label">오후</div>
-                  <div class="time-label">저녁</div>
                 </div>
               <?php endif; ?>
             </div>
