@@ -312,7 +312,7 @@ $categorized = categorizePrograms($data['program']);
         .no-meeting-reason {
             width: 100%;
             padding: 10px;
-            border: 2px solid #ffc107;
+            border: 2px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
             font-family: inherit;
@@ -323,13 +323,13 @@ $categorized = categorizePrograms($data['program']);
 
         .no-meeting-reason:focus {
             outline: none;
-            border-color: #ff9800;
+            border-color: #999;
         }
 
         .no-meeting-title {
             width: 100%;
             padding: 10px;
-            border: 2px solid #ffc107;
+            border: 2px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
             font-family: inherit;
@@ -339,7 +339,7 @@ $categorized = categorizePrograms($data['program']);
 
         .no-meeting-title:focus {
             outline: none;
-            border-color: #ff9800;
+            border-color: #999;
         }
 
         .bible-reading {
