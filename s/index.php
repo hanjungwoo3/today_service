@@ -990,7 +990,7 @@ $categorized = categorizePrograms($data['program']);
         </div>
 
         <div style="margin-top: 20px; border-top: 1px solid #e0e0e0; padding-top: 15px;">
-            <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px;">
+            <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                     <span style="font-weight: 600; font-size: 14px; color: #333;">사용자모드로 보기</span>
                 </div>
@@ -999,17 +999,17 @@ $categorized = categorizePrograms($data['program']);
                 </p>
                 <a href="view.php?year=<?php echo $year; ?>&week=<?php echo $week; ?>" class="action-button preview" style="width: 100%; margin: 0; display: block; text-align: center; text-decoration: none;">👁️ 사용자모드로 보기</a>
             </div>
-        </div>
 
-        <div id="web-fetch-section" style="margin-top: 10px;<?php echo (!empty($data['no_meeting']) && $data['no_meeting']) ? ' display:none;' : ''; ?>">
-            <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                    <span style="font-weight: 600; font-size: 14px; color: #333;">웹에서 가져오기</span>
+            <div id="web-fetch-section" style="<?php echo (!empty($data['no_meeting']) && $data['no_meeting']) ? 'display:none;' : ''; ?>">
+                <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-weight: 600; font-size: 14px; color: #333;">웹에서 가져오기</span>
+                    </div>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">
+                        공식 웹사이트에서 이번 주차의 프로그램 데이터를 가져옵니다. 기존 배정 정보는 유지되며, 가져온 후 "저장하기" 버튼을 눌러야 적용됩니다.
+                    </p>
+                    <button onclick="fetchFromWeb()" class="action-button refresh" style="width: 100%; margin: 0;">🌐 웹에서 가져오기</button>
                 </div>
-                <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">
-                    공식 웹사이트에서 이번 주차의 프로그램 데이터를 가져옵니다. 기존 배정 정보는 유지되며, 가져온 후 "저장하기" 버튼을 눌러야 적용됩니다.
-                </p>
-                <button onclick="fetchFromWeb()" class="action-button refresh" style="width: 100%; margin: 0;">🌐 웹에서 가져오기</button>
             </div>
 
             <div style="background: #fff5f5; border: 1px solid #ffcccc; border-radius: 6px; padding: 10px;">
