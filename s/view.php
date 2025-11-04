@@ -677,21 +677,26 @@ function filterAssignedNames($v) {
 
         .program-info {
             flex: 1;
-            word-break: break-word;
-            overflow-wrap: break-word;
-            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .program-title {
             font-weight: 600;
             font-size: 13px;
             color: #333;
+            flex: 1;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         .program-duration {
             color: #888;
             font-size: 12px;
-            margin-left: 6px;
+            flex-shrink: 0;
+            white-space: nowrap;
+            margin-right: 8px;
         }
 
         .program-assigned {
