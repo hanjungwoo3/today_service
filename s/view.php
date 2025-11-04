@@ -596,7 +596,12 @@ function filterAssignedNames($v) {
         .my-assignment-date {
             font-weight: 600;
             color: #666;
-            margin-right: 8px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .my-assignment-content {
+            padding-left: 12px;
         }
 
         .my-assignment-section {
@@ -1076,11 +1081,13 @@ function filterAssignedNames($v) {
                 <div class="my-assignments-title">📋 이번 주 이후 나에게 배정된 특권</div>
                 <?php foreach ($myUpcomingAssignments as $assignment): ?>
                 <a href="view.php?year=<?php echo $assignment['year']; ?>&week=<?php echo $assignment['week']; ?>" class="my-assignment-item">
-                    <span class="my-assignment-date"><?php echo htmlspecialchars($assignment['dateRange']); ?></span>
-                    <?php if (!empty($assignment['section'])): ?>
-                    <span class="my-assignment-section"><?php echo htmlspecialchars($assignment['section']); ?></span>
-                    <?php endif; ?>
-                    <span class="my-assignment-title"><?php echo htmlspecialchars($assignment['title']); ?></span>
+                    <div class="my-assignment-date"><?php echo htmlspecialchars($assignment['dateRange']); ?></div>
+                    <div class="my-assignment-content">
+                        <?php if (!empty($assignment['section'])): ?>
+                        <span class="my-assignment-section"><?php echo htmlspecialchars($assignment['section']); ?></span>
+                        <?php endif; ?>
+                        <span class="my-assignment-title"><?php echo htmlspecialchars($assignment['title']); ?></span>
+                    </div>
                 </a>
                 <?php endforeach; ?>
             </div>
