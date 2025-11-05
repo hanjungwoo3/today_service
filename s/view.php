@@ -334,6 +334,7 @@ function filterAssignedNames($v) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>생활과 봉사 집회 - <?php echo $data['date']; ?></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * {
             margin: 0;
@@ -504,7 +505,7 @@ function filterAssignedNames($v) {
         .week-item {
             padding: 8px 4px;
             background: #f5f5f5;
-            border: 2px solid transparent;
+            border: 1px solid #ddd;
             border-radius: 6px;
             text-align: center;
             cursor: pointer;
@@ -513,6 +514,7 @@ function filterAssignedNames($v) {
             display: flex;
             flex-direction: column;
             gap: 3px;
+            position: relative;
         }
 
         .week-item:hover {
@@ -521,7 +523,7 @@ function filterAssignedNames($v) {
         }
 
         .week-item.has-data {
-            background: #e8f5e9;
+            background: white;
         }
 
         .week-item.today {
@@ -553,11 +555,11 @@ function filterAssignedNames($v) {
         }
 
         .week-item.has-data .week-date {
-            color: #2e7d32;
+            color: #333;
         }
 
         .week-item.today .week-date {
-            color: #1565c0;
+            color: #f44336;
         }
 
         .week-item .week-number {
@@ -1157,6 +1159,20 @@ function filterAssignedNames($v) {
     </div>
 
     <script>
+        // 로그인한 사용자의 배정이 있는 주차 목록
+        var myAssignedWeeks = <?php
+            $assignedWeeks = array();
+            if (!empty($myUpcomingAssignments)) {
+                foreach ($myUpcomingAssignments as $assignment) {
+                    $weekKey = $assignment['year'] . '_' . $assignment['week'];
+                    if (!in_array($weekKey, $assignedWeeks)) {
+                        $assignedWeeks[] = $weekKey;
+                    }
+                }
+            }
+            echo json_encode($assignedWeeks);
+        ?>;
+
         // 데이터 없음 경고 표시
         <?php if ($showNoDataAlert): ?>
         window.onload = function() {
@@ -1205,32 +1221,7 @@ function filterAssignedNames($v) {
             var selectedYear = <?php echo $year; ?>;
             var selectedWeek = <?php echo $week; ?>;
 
-            // 저장된 주차를 맵으로 변환
-            var weekMap = {};
-            var maxYear = currentYear;
-            var maxWeek = currentWeek;
-
-            for (var i = 0; i < availableWeeks.length; i++) {
-                var w = availableWeeks[i];
-                var key = w.year + '_' + w.week;
-                weekMap[key] = true;
-
-                // 가장 마지막 주차 찾기
-                if (w.year > maxYear || (w.year === maxYear && w.week > maxWeek)) {
-                    maxYear = w.year;
-                    maxWeek = w.week;
-                }
-            }
-
-            // 마지막 주차 + 1
-            var endYear = maxYear;
-            var endWeek = maxWeek + 1;
-            if (endWeek > 52) {
-                endWeek = 1;
-                endYear++;
-            }
-
-            // 연도별로 그룹화 (JSON 파일이 있는 주차만)
+            // JSON 파일이 있는 주차만 필터링 (현재 주차 이후)
             var yearGroups = {};
             var years = [];
 
@@ -1239,6 +1230,11 @@ function filterAssignedNames($v) {
                 var year = w.year;
                 var week = w.week;
 
+                // 현재 주차 이후만 표시
+                if (year < currentYear || (year === currentYear && week < currentWeek)) {
+                    continue;
+                }
+
                 if (!yearGroups[year]) {
                     years.push(year);
                     yearGroups[year] = [];
@@ -1246,13 +1242,12 @@ function filterAssignedNames($v) {
 
                 var isCurrent = (year === selectedYear && week === selectedWeek);
                 var isToday = (year === currentYear && week === currentWeek);
-
                 var noMeeting = w.no_meeting || false;
 
                 yearGroups[year].push({
                     year: year,
                     week: week,
-                    hasData: !noMeeting,  // 배정없음이면 hasData는 false
+                    hasData: !noMeeting,
                     isCurrent: isCurrent,
                     isToday: isToday,
                     noMeeting: noMeeting,
@@ -1291,23 +1286,23 @@ function filterAssignedNames($v) {
 
                     var dateRange = getWeekDateRange(weekData.year, weekData.week);
 
+                    // 사용자 배정 여부 체크
+                    var weekKey = weekData.year + '_' + weekData.week;
+                    var isMyAssignment = myAssignedWeeks.indexOf(weekKey) !== -1;
+
                     html += '<div class="' + classes.join(' ') + '" onclick="selectWeek(' + weekData.year + ', ' + weekData.week + ')">';
                     if (weekData.noMeeting) {
-                        html += '<span class="week-date" style="color: #ff9800; font-weight: bold; font-size: 12px; display: block;">배정없음</span>';
+                        // 배정없음일 경우 제목 표시 (제목이 없으면 날짜)
                         if (weekData.noMeetingTitle) {
-                            // 제목만 표시
-                            html += '<span class="week-date" style="color: #666; font-size: 11px; display: block; margin-top: 2px;">' + weekData.noMeetingTitle + '</span>';
-                        } else if (weekData.noMeetingReason) {
-                            // 제목이 없으면 상세 사유의 처음 2줄만 표시
-                            var lines = weekData.noMeetingReason.split('\n');
-                            var displayText = lines.slice(0, 2).join(' ');
-                            if (lines.length > 2) displayText += '...';
-                            html += '<span class="week-date" style="color: #666; font-size: 11px; display: block; margin-top: 2px;">' + displayText + '</span>';
+                            html += '<span class="week-date" style="font-size: 12px; color: #ff9800;">' + weekData.noMeetingTitle + '</span>';
+                        } else {
+                            html += '<span class="week-date" style="color: #ff9800;">' + dateRange + '</span>';
                         }
                     } else {
                         html += '<span class="week-date">' + dateRange + '</span>';
-                        if (weekData.hasData) {
-                            html += '<span class="week-date" style="color: #4CAF50; font-weight: normal; font-size: 13px; display: block;">✓</span>';
+                        // 사용자 배정이 있는 주차에 아이콘 표시 (절대 위치)
+                        if (isMyAssignment) {
+                            html += '<i class="bi bi-person-check-fill" style="position: absolute; bottom: 5px; right: 5px; font-size: 16px; color: #4CAF50; line-height: 1;"></i>';
                         }
                     }
                     html += '<span class="week-number">' + weekData.week + '주</span>';

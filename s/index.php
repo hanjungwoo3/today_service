@@ -5,11 +5,20 @@ if (file_exists($localConfigFile)) {
     require_once $localConfigFile;
 }
 
+// 로그인한 사용자 정보 가져오기
+$loggedInUserName = '';
+$is_admin = false;
+
 // 로컬 모드가 아닐 때만 관리자 권한 체크
 if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
-    $is_admin = false;
     if (file_exists(dirname(__FILE__) . '/../config.php')) {
         require_once dirname(__FILE__) . '/../config.php';
+        if (function_exists('mb_id') && function_exists('get_member_name')) {
+            $mbId = mb_id();
+            if (!empty($mbId)) {
+                $loggedInUserName = get_member_name($mbId);
+            }
+        }
         if (function_exists('mb_id') && function_exists('is_admin')) {
             $is_admin = is_admin(mb_id());
         }
@@ -20,6 +29,16 @@ if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
         header('Location: view.php' . (isset($_GET['year']) && isset($_GET['week']) ? '?year='.$_GET['year'].'&week='.$_GET['week'] : ''));
         exit;
     }
+} else {
+    // 로컬 개발 환경에서는 테스트용 사용자 설정
+    if (defined('USER')) {
+        $userName = constant('USER');
+        if (!empty($userName)) {
+            $loggedInUserName = $userName;
+        }
+    }
+    // 로컬 모드일 때는 관리자로 설정
+    $is_admin = true;
 }
 
 require_once 'api.php';
@@ -145,6 +164,65 @@ function categorizePrograms($programs) {
 }
 
 $categorized = categorizePrograms($data['program']);
+
+// 로그인한 사용자의 배정된 주차 수집
+$myAssignedWeeks = array();
+if (!empty($loggedInUserName)) {
+    // 실제 현재 날짜 기준 주차 계산
+    $currentYearNow = (int)date('Y');
+    $currentWeekNow = (int)date('W');
+
+    $allWeeks = $manager->getAvailableWeeks();
+
+    foreach ($allWeeks as $weekInfo) {
+        // 실제 이번 주 포함 미래인 경우 확인
+        if ($weekInfo['year'] > $currentYearNow || ($weekInfo['year'] == $currentYearNow && $weekInfo['week'] >= $currentWeekNow)) {
+            $weekData = $manager->load($weekInfo['year'], $weekInfo['week']);
+
+            if (!$weekData || !empty($weekData['no_meeting'])) {
+                continue;
+            }
+
+            $isAssigned = false;
+
+            // 기본 배정 확인 (소개말, 시작기도, 맺음말, 마치는기도)
+            if (!empty($weekData['assignments'])) {
+                $basicAssignments = array('opening_remarks', 'opening_prayer', 'closing_remarks', 'closing_prayer');
+                foreach ($basicAssignments as $key) {
+                    if (!empty($weekData['assignments'][$key]) && trim($weekData['assignments'][$key]) === $loggedInUserName) {
+                        $isAssigned = true;
+                        break;
+                    }
+                }
+            }
+
+            // 프로그램 항목 확인
+            if (!$isAssigned && !empty($weekData['program'])) {
+                foreach ($weekData['program'] as $item) {
+                    if (is_array($item['assigned'])) {
+                        foreach ($item['assigned'] as $assignedName) {
+                            $trimmedAssignedName = trim($assignedName);
+                            if (!empty($trimmedAssignedName) && $trimmedAssignedName === $loggedInUserName) {
+                                $isAssigned = true;
+                                break 2;
+                            }
+                        }
+                    } elseif (!empty($item['assigned'])) {
+                        $trimmedAssigned = trim($item['assigned']);
+                        if ($trimmedAssigned === $loggedInUserName) {
+                            $isAssigned = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if ($isAssigned) {
+                $myAssignedWeeks[] = $weekInfo['year'] . '_' . $weekInfo['week'];
+            }
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="ko">
@@ -152,6 +230,7 @@ $categorized = categorizePrograms($data['program']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>집회 프로그램 관리자 - <?php echo $data['date']; ?></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * {
             margin: 0;
@@ -686,15 +765,23 @@ $categorized = categorizePrograms($data['program']);
         }
 
         .week-selector-close {
-            background: #f44336;
-            color: white;
+            background: #f0f0f0;
             border: none;
-            width: 32px;
-            height: 32px;
+            color: #666;
+            font-size: 20px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 20px;
-            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .week-selector-close:hover {
+            background: #e0e0e0;
         }
 
         .week-selector-year {
@@ -716,7 +803,7 @@ $categorized = categorizePrograms($data['program']);
         .week-item {
             padding: 8px 4px;
             background: #f5f5f5;
-            border: 2px solid transparent;
+            border: 1px solid #ddd;
             border-radius: 6px;
             text-align: center;
             cursor: pointer;
@@ -725,6 +812,7 @@ $categorized = categorizePrograms($data['program']);
             display: flex;
             flex-direction: column;
             gap: 3px;
+            position: relative;
         }
 
         .week-item:hover {
@@ -733,7 +821,7 @@ $categorized = categorizePrograms($data['program']);
         }
 
         .week-item.has-data {
-            background: #e8f5e9;
+            background: white;
         }
 
         .week-item.today {
@@ -765,11 +853,11 @@ $categorized = categorizePrograms($data['program']);
         }
 
         .week-item.has-data .week-date {
-            color: #2e7d32;
+            color: #333;
         }
 
         .week-item.today .week-date {
-            color: #1565c0;
+            color: #f44336;
         }
 
         .week-item .week-number {
@@ -779,13 +867,6 @@ $categorized = categorizePrograms($data['program']);
         @media (min-width: 768px) {
             .week-grid {
                 grid-template-columns: repeat(3, 1fr);
-            }
-            .week-item {
-                padding: 12px 8px;
-                font-size: 15px;
-            }
-            .week-date {
-                font-size: 12px;
             }
         }
 
@@ -1026,6 +1107,9 @@ $categorized = categorizePrograms($data['program']);
 
     <script>
         var programIndex = <?php echo count($data['program']); ?>;
+
+        // 로그인한 사용자의 배정이 있는 주차 목록
+        var myAssignedWeeks = <?php echo json_encode($myAssignedWeeks); ?>;
 
         // 로딩 오버레이 제어
         function showLoading(text) {
@@ -1408,23 +1492,23 @@ $categorized = categorizePrograms($data['program']);
 
                     var dateRange = getWeekDateRange(weekData.year, weekData.week);
 
+                    // 사용자 배정 여부 체크
+                    var weekKey = weekData.year + '_' + weekData.week;
+                    var isMyAssignment = myAssignedWeeks.indexOf(weekKey) !== -1;
+
                     html += '<div class="' + classes.join(' ') + '" onclick="selectWeek(' + weekData.year + ', ' + weekData.week + ')">';
                     if (weekData.noMeeting) {
-                        html += '<span class="week-date" style="color: #ff9800; font-weight: bold; font-size: 12px; display: block;">배정없음</span>';
+                        // 배정없음일 경우 제목 표시 (제목이 없으면 날짜)
                         if (weekData.noMeetingTitle) {
-                            // 제목만 표시
-                            html += '<span class="week-date" style="color: #666; font-size: 11px; display: block; margin-top: 2px;">' + weekData.noMeetingTitle + '</span>';
-                        } else if (weekData.noMeetingReason) {
-                            // 제목이 없으면 상세 사유의 처음 2줄만 표시
-                            var lines = weekData.noMeetingReason.split('\n');
-                            var displayText = lines.slice(0, 2).join(' ');
-                            if (lines.length > 2) displayText += '...';
-                            html += '<span class="week-date" style="color: #666; font-size: 11px; display: block; margin-top: 2px;">' + displayText + '</span>';
+                            html += '<span class="week-date" style="font-size: 12px; color: #ff9800;">' + weekData.noMeetingTitle + '</span>';
+                        } else {
+                            html += '<span class="week-date" style="color: #ff9800;">' + dateRange + '</span>';
                         }
                     } else {
                         html += '<span class="week-date">' + dateRange + '</span>';
-                        if (weekData.hasData) {
-                            html += '<span class="week-date" style="color: #4CAF50; font-weight: normal; font-size: 13px; display: block;">✓</span>';
+                        // 사용자 배정이 있는 주차에 아이콘 표시 (절대 위치)
+                        if (isMyAssignment) {
+                            html += '<i class="bi bi-person-check-fill" style="position: absolute; bottom: 5px; right: 5px; font-size: 16px; color: #4CAF50; line-height: 1;"></i>';
                         }
                     }
                     html += '<span class="week-number">' + weekData.week + '주</span>';

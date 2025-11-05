@@ -191,7 +191,14 @@ class MeetingDataManager {
         $data['week'] = $week;
 
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        return file_put_contents($filePath, $json) !== false;
+        $result = file_put_contents($filePath, $json) !== false;
+
+        // 저장 성공 시 오래된 주차 자동 아카이빙
+        if ($result) {
+            $this->archiveOldWeeks();
+        }
+
+        return $result;
     }
 
     /**
@@ -407,6 +414,72 @@ class MeetingDataManager {
                 'closing_prayer' => ''
             )
         );
+    }
+
+    /**
+     * 오래된 주차 파일 아카이빙
+     * 현재 주차 기준 2주 이전 파일들을 archive 폴더로 이동
+     */
+    public function archiveOldWeeks() {
+        $currentYear = $this->getCurrentYear();
+        $currentWeek = $this->getCurrentWeek();
+
+        // archive 디렉토리 생성
+        $archiveDir = $this->dataDir . '/archive';
+        if (!is_dir($archiveDir)) {
+            mkdir($archiveDir, 0755, true);
+        }
+
+        $files = glob($this->dataDir . '/*.json');
+        $archivedCount = 0;
+
+        foreach ($files as $file) {
+            $filename = basename($file, '.json');
+
+            // 형식: YYYYWW (예: 202545)
+            if (preg_match('/^(\d{4})(\d{2})$/', $filename, $matches)) {
+                $fileYear = (int)$matches[1];
+                $fileWeek = (int)$matches[2];
+
+                // 현재 주차 기준 2주 이전인지 확인
+                if ($this->isOlderThanWeeks($fileYear, $fileWeek, $currentYear, $currentWeek, 2)) {
+                    // archive 폴더로 이동
+                    $archivePath = $archiveDir . '/' . basename($file);
+                    if (rename($file, $archivePath)) {
+                        $archivedCount++;
+                    }
+                }
+            }
+        }
+
+        return $archivedCount;
+    }
+
+    /**
+     * 특정 주차가 현재 주차보다 N주 이전인지 확인
+     */
+    private function isOlderThanWeeks($fileYear, $fileWeek, $currentYear, $currentWeek, $weeksAgo) {
+        // ISO 8601 주차 기준으로 날짜 계산
+        $fileDate = $this->getDateFromWeek($fileYear, $fileWeek);
+        $currentDate = $this->getDateFromWeek($currentYear, $currentWeek);
+
+        // 2주 전 날짜 계산
+        $cutoffDate = clone $currentDate;
+        $cutoffDate->modify('-' . $weeksAgo . ' weeks');
+
+        return $fileDate < $cutoffDate;
+    }
+
+    /**
+     * 연도와 주차로부터 DateTime 객체 생성 (ISO 8601)
+     */
+    private function getDateFromWeek($year, $week) {
+        $jan4 = new DateTime($year . '-01-04');
+        $jan4Day = (int)$jan4->format('N');
+        $weekStart = clone $jan4;
+        $weekStart->modify('-' . ($jan4Day - 1) . ' days');
+        $weekStart->modify('+' . (($week - 1) * 7) . ' days');
+        return $weekStart;
     }
 
     /**
