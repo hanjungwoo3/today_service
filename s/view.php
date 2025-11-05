@@ -352,7 +352,7 @@ function filterAssignedNames($v) {
         }
 
         .container {
-            max-width: 340px;
+            max-width: 380px;
             min-width: 340px;
             margin: 0;
             background: white;
@@ -434,7 +434,7 @@ function filterAssignedNames($v) {
             margin-top: 8px;
             z-index: 1000;
             width: 100%;
-            max-width: 340px;
+            max-width: 380px;
             display: block;
         }
 

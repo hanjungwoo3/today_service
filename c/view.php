@@ -67,7 +67,7 @@ $today = new DateTime('now');
       }
 
       .container {
-        max-width: 340px;
+        max-width: 380px;
         min-width: 340px;
         margin: 0;
         background: #fff;
