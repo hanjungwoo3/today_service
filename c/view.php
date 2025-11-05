@@ -63,11 +63,13 @@ $today = new DateTime('now');
         color: #1e293b;
         line-height: 1.3;
         padding: 4px;
+        overflow-x: auto;
       }
 
       .container {
         max-width: 380px;
-        margin: 0 auto;
+        min-width: 380px;
+        margin: 0;
         background: #fff;
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
@@ -385,7 +387,7 @@ $today = new DateTime('now');
 
         .container {
           border-radius: 8px;
-          max-width: 100%;
+          /* min-width: 380px 유지하여 가로 스크롤 발생 */
         }
 
         .header {

@@ -348,11 +348,13 @@ function filterAssignedNames($v) {
             padding: 2px;
             min-height: 100vh;
             font-size: 14px;
+            overflow-x: auto;
         }
 
         .container {
             max-width: 380px;
-            margin: 0 auto;
+            min-width: 380px;
+            margin: 0;
             background: white;
             border-radius: 6px;
             padding: 8px;
