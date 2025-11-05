@@ -205,7 +205,7 @@ if ($status === 'saved') {
 
           <div class="utility-button-group">
             <div class="link-copy-row">
-              <button type="button" id="copyViewLink" class="utility-btn">달력보기 링크 복사</button>
+              <button type="button" id="copyViewLink" class="utility-btn">사용자모드로 보기 링크 복사</button>
               <?php
                 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
                 $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
@@ -216,7 +216,7 @@ if ($status === 'saved') {
               <input type="text" id="viewLinkInput" class="link-input" readonly value="<?php echo htmlspecialchars($viewUrl, ENT_QUOTES); ?>" />
               <a href="view.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>" id="viewCalendarBtn" class="utility-btn view-calendar-btn" style="text-decoration: none;"><span id="viewCalendarBtnText">사용자모드로 보기</span></a>
             </div>
-            <p class="utility-description">현재 달력을 읽기 전용으로 볼 수 있는 링크를 클립보드에 복사합니다. 다른 사람들과 공유할 때 사용하세요.</p>
+            <p class="utility-description">사용자모드로 볼 수 있는 링크를 클립보드에 복사합니다. 다른 사람들과 공유할 때 사용하세요.</p>
           </div>
         </div>
       </form>
@@ -231,7 +231,7 @@ if ($status === 'saved') {
         }
       });
       
-      // 달력보기 링크 input box 클릭 시 전체 선택
+      // 사용자모드로 보기 링크 input box 클릭 시 전체 선택
       var viewLinkInput = document.getElementById('viewLinkInput');
       if (viewLinkInput) {
         viewLinkInput.addEventListener('click', function() {
@@ -239,7 +239,7 @@ if ($status === 'saved') {
         });
       }
       
-      // 달력보기 링크 복사 버튼
+      // 사용자모드로 보기 링크 복사 버튼
       document.getElementById('copyViewLink').addEventListener('click', function() {
         var viewLinkInput = document.getElementById('viewLinkInput');
         var viewUrl = viewLinkInput.value;
@@ -291,7 +291,7 @@ if ($status === 'saved') {
         document.body.removeChild(textArea);
       }
       
-      // iframe 안에서만 달력보기 버튼 새창으로 열기
+      // iframe 안에서만 사용자모드로 보기 버튼 새창으로 열기
       (function() {
         const isInIframe = window.self !== window.top;
         const viewCalendarBtn = document.getElementById('viewCalendarBtn');
