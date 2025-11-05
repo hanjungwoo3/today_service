@@ -67,8 +67,8 @@ $today = new DateTime('now');
       }
 
       .container {
-        max-width: 380px;
-        min-width: 380px;
+        max-width: 360px;
+        min-width: 360px;
         margin: 0;
         background: #fff;
         border-radius: 12px;
@@ -387,7 +387,7 @@ $today = new DateTime('now');
 
         .container {
           border-radius: 8px;
-          /* min-width: 380px 유지하여 가로 스크롤 발생 */
+          /* min-width: 360px 유지하여 가로 스크롤 발생 */
         }
 
         .header {
