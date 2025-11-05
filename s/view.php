@@ -1122,8 +1122,8 @@ function filterAssignedNames($v) {
             </div>
             <?php endif; ?>
         <?php endif; ?>
-        <?php if ($is_admin): ?>
         <div style="text-align: center; margin-top: 10px; padding: 10px 20px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+          <?php if ($is_admin): ?>
           <a href="index.php?year=<?php echo $year; ?>&week=<?php echo $week; ?>"
              id="adminBtn"
              class="admin-btn"
@@ -1140,6 +1140,7 @@ function filterAssignedNames($v) {
                     transition: all 0.2s ease;">
             <span id="adminBtnText">관리자모드로 보기</span>
           </a>
+          <?php endif; ?>
           <a href="#"
              id="newWindowBtn"
              style="display: none;
@@ -1161,15 +1162,17 @@ function filterAssignedNames($v) {
           (function() {
             const isInIframe = window.self !== window.top;
             const adminBtn = document.getElementById('adminBtn');
-            const adminBtnText = document.getElementById('adminBtnText');
             const newWindowBtn = document.getElementById('newWindowBtn');
 
             if (isInIframe) {
+              <?php if ($is_admin): ?>
+              const adminBtnText = document.getElementById('adminBtnText');
               adminBtnText.textContent = '관리자모드로 보기 ↗';
               adminBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 window.open(this.href, '_blank', 'noopener,noreferrer');
               });
+              <?php endif; ?>
 
               // 새창으로 보기 버튼 표시
               newWindowBtn.style.display = 'inline-block';
@@ -1180,7 +1183,6 @@ function filterAssignedNames($v) {
             }
           })();
         </script>
-        <?php endif; ?>
     </div>
 
     <script>

@@ -636,8 +636,8 @@ $today = new DateTime('now');
         </table>
       </div>
       
-      <?php if ($is_admin): ?>
-        <div style="text-align: center; margin-top: 30px; padding: 20px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+      <div style="text-align: center; margin-top: 30px; padding: 20px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+        <?php if ($is_admin): ?>
           <a href="index.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>"
              id="adminBtn"
              class="admin-btn"
@@ -654,47 +654,49 @@ $today = new DateTime('now');
                     transition: all 0.2s ease;">
             <span id="adminBtnText">관리자모드로 보기</span>
           </a>
-          <a href="#"
-             id="newWindowBtn"
-             style="display: none;
-                    padding: 8px 16px;
-                    background: #f1f5f9;
-                    color: #94a3b8;
-                    text-decoration: none;
-                    border-radius: 6px;
-                    font-weight: 400;
-                    font-size: 13px;
-                    border: 1px solid #e2e8f0;
-                    box-shadow: none;
-                    transition: all 0.2s ease;">
-            새창으로 보기 ↗
-          </a>
-        </div>
-        <script>
-          // iframe 안에서만 새창으로 열기
-          (function() {
-            const isInIframe = window.self !== window.top;
-            const adminBtn = document.getElementById('adminBtn');
+        <?php endif; ?>
+        <a href="#"
+           id="newWindowBtn"
+           style="display: none;
+                  padding: 8px 16px;
+                  background: #f1f5f9;
+                  color: #94a3b8;
+                  text-decoration: none;
+                  border-radius: 6px;
+                  font-weight: 400;
+                  font-size: 13px;
+                  border: 1px solid #e2e8f0;
+                  box-shadow: none;
+                  transition: all 0.2s ease;">
+          새창으로 보기 ↗
+        </a>
+      </div>
+      <script>
+        // iframe 안에서만 새창으로 열기
+        (function() {
+          const isInIframe = window.self !== window.top;
+          const adminBtn = document.getElementById('adminBtn');
+          const newWindowBtn = document.getElementById('newWindowBtn');
+
+          if (isInIframe) {
+            <?php if ($is_admin): ?>
             const adminBtnText = document.getElementById('adminBtnText');
-            const newWindowBtn = document.getElementById('newWindowBtn');
+            adminBtnText.textContent = '관리자모드로 보기 ↗';
+            adminBtn.addEventListener('click', function(e) {
+              e.preventDefault();
+              window.open(this.href, '_blank', 'noopener,noreferrer');
+            });
+            <?php endif; ?>
 
-            if (isInIframe) {
-              adminBtnText.textContent = '관리자모드로 보기 ↗';
-              adminBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.open(this.href, '_blank', 'noopener,noreferrer');
-              });
-
-              // 새창으로 보기 버튼 표시
-              newWindowBtn.style.display = 'inline-block';
-              newWindowBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.open(window.location.href, '_blank', 'noopener,noreferrer');
-              });
-            }
-          })();
-        </script>
-      <?php endif; ?>
+            // 새창으로 보기 버튼 표시
+            newWindowBtn.style.display = 'inline-block';
+            newWindowBtn.addEventListener('click', function(e) {
+              e.preventDefault();
+              window.open(window.location.href, '_blank', 'noopener,noreferrer');
+            });
+          }
+        })();
+      </script>
     </div>
   </body>
 </html>
