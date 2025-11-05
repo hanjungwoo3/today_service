@@ -214,7 +214,7 @@ if ($status === 'saved') {
                 $viewUrl = $baseUrl . '/view.php?year=' . $year . '&month=' . $month;
               ?>
               <input type="text" id="viewLinkInput" class="link-input" readonly value="<?php echo htmlspecialchars($viewUrl, ENT_QUOTES); ?>" />
-              <a href="view.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>" id="viewCalendarBtn" class="utility-btn view-calendar-btn" style="text-decoration: none;"><span id="viewCalendarBtnText">달력보기</span></a>
+              <a href="view.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>" id="viewCalendarBtn" class="utility-btn view-calendar-btn" style="text-decoration: none;"><span id="viewCalendarBtnText">사용자모드로 보기</span></a>
             </div>
             <p class="utility-description">현재 달력을 읽기 전용으로 볼 수 있는 링크를 클립보드에 복사합니다. 다른 사람들과 공유할 때 사용하세요.</p>
           </div>
@@ -298,7 +298,7 @@ if ($status === 'saved') {
         const viewCalendarBtnText = document.getElementById('viewCalendarBtnText');
         
         if (isInIframe && viewCalendarBtn) {
-          viewCalendarBtnText.textContent = '달력보기 ↗';
+          viewCalendarBtnText.textContent = '사용자모드로 보기 ↗';
           viewCalendarBtn.addEventListener('click', function(e) {
             e.preventDefault();
             window.open(this.href, '_blank', 'noopener,noreferrer');

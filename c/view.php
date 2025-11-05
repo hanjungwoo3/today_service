@@ -652,7 +652,7 @@ $today = new DateTime('now');
                     border: 1px solid #e2e8f0;
                     box-shadow: none;
                     transition: all 0.2s ease;">
-            <span id="adminBtnText">일정관리</span>
+            <span id="adminBtnText">관리자모드로 보기</span>
           </a>
           <a href="#"
              id="newWindowBtn"
@@ -679,7 +679,7 @@ $today = new DateTime('now');
             const newWindowBtn = document.getElementById('newWindowBtn');
 
             if (isInIframe) {
-              adminBtnText.textContent = '일정관리 ↗';
+              adminBtnText.textContent = '관리자모드로 보기 ↗';
               adminBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 window.open(this.href, '_blank', 'noopener,noreferrer');
