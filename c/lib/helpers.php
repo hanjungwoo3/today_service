@@ -241,7 +241,7 @@ function isHoliday($date)
 function getDayNumberClass($date, $today, $isCurrentMonth)
 {
     if (!$isCurrentMonth) {
-        return 'default';
+        return 'other-month';
     }
 
     $dateStr = $date->format('Y-m-d');

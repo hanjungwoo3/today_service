@@ -213,7 +213,7 @@ if ($status === 'saved') {
                 $viewUrl = $baseUrl . '/view.php?year=' . $year . '&month=' . $month;
               ?>
               <a href="view.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>" id="viewCalendarBtn" class="utility-btn view-calendar-btn" style="text-decoration: none;"><span id="viewCalendarBtnText">사용자모드로 보기</span></a>
-              <button type="button" id="copyViewLink" class="utility-btn" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" data-url="<?php echo htmlspecialchars($viewUrl, ENT_QUOTES); ?>"><?php echo htmlspecialchars($viewUrl, ENT_QUOTES); ?> 복사</button>
+              <button type="button" id="copyViewLink" class="utility-btn" data-url="<?php echo htmlspecialchars($viewUrl, ENT_QUOTES); ?>">사용자모드 URL 복사</button>
             </div>
             <p class="utility-description">사용자모드로 볼 수 있는 링크를 클립보드에 복사합니다. 다른 사람들과 공유할 때 사용하세요.</p>
           </div>
