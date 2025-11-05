@@ -637,22 +637,37 @@ $today = new DateTime('now');
       </div>
       
       <?php if ($is_admin): ?>
-        <div style="text-align: center; margin-top: 30px; padding: 20px;">
-          <a href="index.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>" 
+        <div style="text-align: center; margin-top: 30px; padding: 20px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+          <a href="index.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>"
              id="adminBtn"
              class="admin-btn"
-             style="display: inline-block; 
-                    padding: 8px 16px; 
-                    background: #f1f5f9; 
-                    color: #94a3b8; 
-                    text-decoration: none; 
-                    border-radius: 6px; 
-                    font-weight: 400; 
+             style="display: inline-block;
+                    padding: 8px 16px;
+                    background: #f1f5f9;
+                    color: #94a3b8;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    font-weight: 400;
                     font-size: 13px;
                     border: 1px solid #e2e8f0;
                     box-shadow: none;
                     transition: all 0.2s ease;">
             <span id="adminBtnText">일정관리</span>
+          </a>
+          <a href="#"
+             id="newWindowBtn"
+             style="display: none;
+                    padding: 8px 16px;
+                    background: #f1f5f9;
+                    color: #94a3b8;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    font-weight: 400;
+                    font-size: 13px;
+                    border: 1px solid #e2e8f0;
+                    box-shadow: none;
+                    transition: all 0.2s ease;">
+            새창으로 보기 ↗
           </a>
         </div>
         <script>
@@ -661,12 +676,20 @@ $today = new DateTime('now');
             const isInIframe = window.self !== window.top;
             const adminBtn = document.getElementById('adminBtn');
             const adminBtnText = document.getElementById('adminBtnText');
-            
+            const newWindowBtn = document.getElementById('newWindowBtn');
+
             if (isInIframe) {
               adminBtnText.textContent = '일정관리 ↗';
               adminBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 window.open(this.href, '_blank', 'noopener,noreferrer');
+              });
+
+              // 새창으로 보기 버튼 표시
+              newWindowBtn.style.display = 'inline-block';
+              newWindowBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.open(window.location.href, '_blank', 'noopener,noreferrer');
               });
             }
           })();
