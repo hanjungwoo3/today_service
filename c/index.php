@@ -205,7 +205,6 @@ if ($status === 'saved') {
 
           <div class="utility-button-group">
             <div class="link-copy-row">
-              <button type="button" id="copyViewLink" class="utility-btn">사용자모드로 보기 링크 복사</button>
               <?php
                 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
                 $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
@@ -213,8 +212,8 @@ if ($status === 'saved') {
                 $baseUrl = $protocol . '://' . $host . dirname($scriptName);
                 $viewUrl = $baseUrl . '/view.php?year=' . $year . '&month=' . $month;
               ?>
-              <input type="text" id="viewLinkInput" class="link-input" readonly value="<?php echo htmlspecialchars($viewUrl, ENT_QUOTES); ?>" />
               <a href="view.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>" id="viewCalendarBtn" class="utility-btn view-calendar-btn" style="text-decoration: none;"><span id="viewCalendarBtnText">사용자모드로 보기</span></a>
+              <button type="button" id="copyViewLink" class="utility-btn" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" data-url="<?php echo htmlspecialchars($viewUrl, ENT_QUOTES); ?>"><?php echo htmlspecialchars($viewUrl, ENT_QUOTES); ?> 복사</button>
             </div>
             <p class="utility-description">사용자모드로 볼 수 있는 링크를 클립보드에 복사합니다. 다른 사람들과 공유할 때 사용하세요.</p>
           </div>
@@ -231,22 +230,10 @@ if ($status === 'saved') {
         }
       });
       
-      // 사용자모드로 보기 링크 input box 클릭 시 전체 선택
-      var viewLinkInput = document.getElementById('viewLinkInput');
-      if (viewLinkInput) {
-        viewLinkInput.addEventListener('click', function() {
-          this.select();
-        });
-      }
-      
       // 사용자모드로 보기 링크 복사 버튼
       document.getElementById('copyViewLink').addEventListener('click', function() {
-        var viewLinkInput = document.getElementById('viewLinkInput');
-        var viewUrl = viewLinkInput.value;
-        
-        // input box 전체 선택
-        viewLinkInput.select();
-        
+        var viewUrl = this.getAttribute('data-url');
+
         // 클립보드 복사
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(viewUrl).then(function() {
