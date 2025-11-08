@@ -344,6 +344,11 @@ class MeetingDataManager {
             $newData['assignments'] = array_merge($newData['assignments'], $filteredAssignments);
         }
 
+        // 기존 날짜 유지 (웹에서 가져온 날짜로 덮어쓰지 않음)
+        if (isset($oldData['date']) && !empty($oldData['date'])) {
+            $newData['date'] = $oldData['date'];
+        }
+
         return $newData;
     }
 
@@ -397,7 +402,7 @@ class MeetingDataManager {
     }
 
     /**
-     * 특정 주차의 평일집회 요일 날짜를 계산 (형식: n월j일-j일)
+     * 특정 주차의 평일집회 요일 날짜를 계산 (형식: n월j일)
      */
     public function getMeetingDateForWeek($year, $week) {
         $meetingWeekday = $this->getMeetingWeekday();
@@ -418,11 +423,7 @@ class MeetingDataManager {
         $meetingDate = clone $weekStart;
         $meetingDate->modify('+' . $daysToAdd . ' days');
 
-        // 주 끝 날짜
-        $weekEnd = clone $weekStart;
-        $weekEnd->modify('+6 days');
-
-        return $meetingDate->format('n월j일') . '-' . $weekEnd->format('j일');
+        return $meetingDate->format('n월j일');
     }
 
     /**

@@ -1607,7 +1607,7 @@ if (!empty($loggedInUserName)) {
             window.location.href = '?year=' + year + '&week=' + week;
         }
 
-        // 주차 번호를 날짜 범위로 변환 (집회 요일 기준)
+        // 주차 번호를 날짜로 변환 (평일집회 요일 날짜)
         function getWeekDateRange(year, week) {
             // ISO 8601 주차 계산
             var jan4 = new Date(year, 0, 4);
@@ -1624,15 +1624,10 @@ if (!empty($loggedInUserName)) {
             var meetingDate = new Date(weekStart);
             meetingDate.setDate(weekStart.getDate() + daysToAdd);
 
-            var weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekStart.getDate() + 6);
-
             var meetingMonth = meetingDate.getMonth() + 1;
             var meetingDay = meetingDate.getDate();
-            var endMonth = weekEnd.getMonth() + 1;
-            var endDate = weekEnd.getDate();
 
-            return meetingMonth + '월' + meetingDay + '일-' + endDate + '일';
+            return meetingMonth + '월' + meetingDay + '일';
         }
     </script>
 </body>
