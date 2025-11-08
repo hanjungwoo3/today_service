@@ -137,7 +137,7 @@ class MeetingDataManager {
             'year' => $year,
             'week' => $week,
             'url' => $linkData['url'],
-            'date' => '', // 웹에서 가져온 날짜는 사용하지 않음 (사용자 입력 날짜 유지)
+            'date' => $this->getMeetingDateForWeek($year, $week), // 평일집회 요일 날짜 (기존 날짜가 있으면 mergeAssignments에서 유지됨)
             'bible_reading' => $program['bible_reading'],
             'sections' => array(
                 'treasures' => '성경에 담긴 보물',
