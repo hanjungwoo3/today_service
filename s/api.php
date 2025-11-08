@@ -328,11 +328,13 @@ class MeetingDataManager {
                 $noMeeting = !empty($data['no_meeting']) && $data['no_meeting'];
                 $noMeetingTitle = $noMeeting ? (isset($data['no_meeting_title']) ? $data['no_meeting_title'] : '') : '';
                 $noMeetingReason = $noMeeting ? (isset($data['no_meeting_reason']) ? $data['no_meeting_reason'] : '') : '';
+                $date = isset($data['date']) ? $data['date'] : '';
 
                 $weeks[] = array(
                     'year' => $year,
                     'week' => $week,
                     'filename' => $filename,
+                    'date' => $date,
                     'no_meeting' => $noMeeting,
                     'no_meeting_title' => $noMeetingTitle,
                     'no_meeting_reason' => $noMeetingReason

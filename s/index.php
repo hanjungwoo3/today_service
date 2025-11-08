@@ -1416,6 +1416,7 @@ if (!empty($loggedInUserName)) {
                 var key = w.year + '_' + w.week;
                 weekMap[key] = true;
                 weekInfoMap[key] = {
+                    date: w.date || '',
                     noMeeting: w.no_meeting || false,
                     noMeetingTitle: w.no_meeting_title || '',
                     noMeetingReason: w.no_meeting_reason || ''
@@ -1455,7 +1456,7 @@ if (!empty($loggedInUserName)) {
                     var hasData = weekMap[key] || false;
                     var isCurrent = (year === selectedYear && week === selectedWeek);
                     var isToday = (year === currentYear && week === currentWeek);
-                    var weekInfo = weekInfoMap[key] || {noMeeting: false, noMeetingTitle: '', noMeetingReason: ''};
+                    var weekInfo = weekInfoMap[key] || {date: '', noMeeting: false, noMeetingTitle: '', noMeetingReason: ''};
 
                     // 배정없음이면 hasData를 false로
                     if (weekInfo.noMeeting) {
@@ -1465,6 +1466,7 @@ if (!empty($loggedInUserName)) {
                     yearGroups[year].push({
                         year: year,
                         week: week,
+                        date: weekInfo.date,
                         hasData: hasData,
                         isCurrent: isCurrent,
                         isToday: isToday,
@@ -1490,7 +1492,8 @@ if (!empty($loggedInUserName)) {
                     if (weekData.isCurrent) classes.push('current');
                     if (weekData.isToday) classes.push('today');
 
-                    var dateRange = getWeekDateRange(weekData.year, weekData.week);
+                    // 입력한 날짜가 있으면 사용, 없으면 주간 날짜 계산
+                    var displayDate = weekData.date ? weekData.date : getWeekDateRange(weekData.year, weekData.week);
 
                     // 사용자 배정 여부 체크
                     var weekKey = weekData.year + '_' + weekData.week;
@@ -1502,10 +1505,10 @@ if (!empty($loggedInUserName)) {
                         if (weekData.noMeetingTitle) {
                             html += '<span class="week-date" style="font-size: 12px; color: #ff9800;">' + weekData.noMeetingTitle + '</span>';
                         } else {
-                            html += '<span class="week-date" style="color: #ff9800;">' + dateRange + '</span>';
+                            html += '<span class="week-date" style="color: #ff9800;">' + displayDate + '</span>';
                         }
                     } else {
-                        html += '<span class="week-date">' + dateRange + '</span>';
+                        html += '<span class="week-date">' + displayDate + '</span>';
                         // 사용자 배정이 있는 주차에 아이콘 표시 (절대 위치)
                         if (isMyAssignment) {
                             html += '<i class="bi bi-person-check-fill" style="position: absolute; bottom: 5px; right: 5px; font-size: 16px; color: #4CAF50; line-height: 1;"></i>';

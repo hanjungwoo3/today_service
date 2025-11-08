@@ -1270,10 +1270,12 @@ function filterAssignedNames($v) {
                 var isCurrent = (year === selectedYear && week === selectedWeek);
                 var isToday = (year === currentYear && week === currentWeek);
                 var noMeeting = w.no_meeting || false;
+                var date = w.date || '';
 
                 yearGroups[year].push({
                     year: year,
                     week: week,
+                    date: date,
                     hasData: !noMeeting,
                     isCurrent: isCurrent,
                     isToday: isToday,
@@ -1311,7 +1313,8 @@ function filterAssignedNames($v) {
                     if (weekData.isCurrent) classes.push('current');
                     if (weekData.isToday) classes.push('today');
 
-                    var dateRange = getWeekDateRange(weekData.year, weekData.week);
+                    // 입력한 날짜가 있으면 사용, 없으면 주간 날짜 계산
+                    var displayDate = weekData.date ? weekData.date : getWeekDateRange(weekData.year, weekData.week);
 
                     // 사용자 배정 여부 체크
                     var weekKey = weekData.year + '_' + weekData.week;
@@ -1323,10 +1326,10 @@ function filterAssignedNames($v) {
                         if (weekData.noMeetingTitle) {
                             html += '<span class="week-date" style="font-size: 12px; color: #ff9800;">' + weekData.noMeetingTitle + '</span>';
                         } else {
-                            html += '<span class="week-date" style="color: #ff9800;">' + dateRange + '</span>';
+                            html += '<span class="week-date" style="color: #ff9800;">' + displayDate + '</span>';
                         }
                     } else {
-                        html += '<span class="week-date">' + dateRange + '</span>';
+                        html += '<span class="week-date">' + displayDate + '</span>';
                         // 사용자 배정이 있는 주차에 아이콘 표시 (절대 위치)
                         if (isMyAssignment) {
                             html += '<i class="bi bi-person-check-fill" style="position: absolute; bottom: 5px; right: 5px; font-size: 16px; color: #4CAF50; line-height: 1;"></i>';
