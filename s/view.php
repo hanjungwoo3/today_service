@@ -152,14 +152,26 @@ $categorized = categorizePrograms($data['program']);
 $myUpcomingAssignments = array();
 if (!empty($loggedInUserName)) {
     // 실제 현재 날짜 기준 주차 계산
-    $currentYear = (int)date('Y');
-    $currentWeek = (int)date('W');
+    $currentDate = new DateTime();
+    $currentYear = (int)$currentDate->format('Y');
+    $currentWeek = (int)$currentDate->format('W');
+    $dayOfWeek = (int)$currentDate->format('N'); // 1(월) ~ 7(일)
+
+    // 목요일(4) 이상이면 이번 주는 제외하고 다음 주부터 표시
+    $displayStartYear = $currentYear;
+    $displayStartWeek = $currentWeek;
+    if ($dayOfWeek >= 4) {
+        $nextWeekDate = clone $currentDate;
+        $nextWeekDate->modify('+1 week');
+        $displayStartYear = (int)$nextWeekDate->format('o'); // ISO 8601 연도
+        $displayStartWeek = (int)$nextWeekDate->format('W');
+    }
 
     $allWeeks = $manager->getAvailableWeeks();
 
     foreach ($allWeeks as $weekInfo) {
-        // 실제 이번 주 포함 미래인 경우 확인 (availableWeeks는 내림차순)
-        if ($weekInfo['year'] > $currentYear || ($weekInfo['year'] == $currentYear && $weekInfo['week'] >= $currentWeek)) {
+        // 표시 시작 주차 이후만 확인
+        if ($weekInfo['year'] > $displayStartYear || ($weekInfo['year'] == $displayStartYear && $weekInfo['week'] >= $displayStartWeek)) {
             $weekData = $manager->load($weekInfo['year'], $weekInfo['week']);
 
             if (!$weekData || !empty($weekData['no_meeting'])) {
