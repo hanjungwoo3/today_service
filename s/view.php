@@ -166,15 +166,19 @@ if (!empty($loggedInUserName)) {
                 continue;
             }
 
-            // 날짜 범위 계산 (ISO 8601)
-            $jan4 = new DateTime($weekInfo['year'] . '-01-04');
-            $jan4Day = $jan4->format('N');
-            $weekStart = clone $jan4;
-            $weekStart->modify('-' . ($jan4Day - 1) . ' days');
-            $weekStart->modify('+' . (($weekInfo['week'] - 1) * 7) . ' days');
-            $weekEnd = clone $weekStart;
-            $weekEnd->modify('+6 days');
-            $dateRange = $weekStart->format('n월j일') . '-' . $weekEnd->format('j일');
+            // 날짜 범위: 입력한 날짜 우선, 없으면 ISO 8601로 계산
+            if (!empty($weekData['date'])) {
+                $dateRange = $weekData['date'];
+            } else {
+                $jan4 = new DateTime($weekInfo['year'] . '-01-04');
+                $jan4Day = $jan4->format('N');
+                $weekStart = clone $jan4;
+                $weekStart->modify('-' . ($jan4Day - 1) . ' days');
+                $weekStart->modify('+' . (($weekInfo['week'] - 1) * 7) . ' days');
+                $weekEnd = clone $weekStart;
+                $weekEnd->modify('+6 days');
+                $dateRange = $weekStart->format('n월j일') . '-' . $weekEnd->format('j일');
+            }
 
             // 해당 주차의 배정 임시 저장
             $weekAssignments = array();
@@ -625,7 +629,7 @@ function filterAssignedNames($v) {
         }
 
         .my-assignment-line {
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .my-assignment-line:last-child {
@@ -634,12 +638,16 @@ function filterAssignedNames($v) {
 
         .my-assignment-section {
             color: #999;
-            margin-right: 4px;
+            font-size: 12px;
+            margin-bottom: 2px;
         }
 
         .my-assignment-title {
             color: #333;
             font-weight: 600;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+            line-height: 1.4;
         }
 
         .bible-reading {
@@ -1111,9 +1119,9 @@ function filterAssignedNames($v) {
                         <?php foreach ($dateGroup['items'] as $item): ?>
                         <div class="my-assignment-line">
                             <?php if (!empty($item['section'])): ?>
-                            <span class="my-assignment-section"><?php echo htmlspecialchars($item['section']); ?></span>
+                            <div class="my-assignment-section"><?php echo htmlspecialchars($item['section']); ?></div>
                             <?php endif; ?>
-                            <span class="my-assignment-title"><?php echo htmlspecialchars($item['title']); ?></span>
+                            <div class="my-assignment-title"><?php echo htmlspecialchars($item['title']); ?></div>
                         </div>
                         <?php endforeach; ?>
                     </div>
