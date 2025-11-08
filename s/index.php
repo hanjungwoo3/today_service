@@ -1627,7 +1627,7 @@ if (!empty($loggedInUserName)) {
             var meetingMonth = meetingDate.getMonth() + 1;
             var meetingDay = meetingDate.getDate();
 
-            return meetingMonth + '월' + meetingDay + '일';
+            return meetingMonth + '월 ' + meetingDay + '일';
         }
     </script>
 </body>

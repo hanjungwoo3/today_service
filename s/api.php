@@ -402,7 +402,7 @@ class MeetingDataManager {
     }
 
     /**
-     * 특정 주차의 평일집회 요일 날짜를 계산 (형식: n월j일)
+     * 특정 주차의 평일집회 요일 날짜를 계산 (형식: n월 j일)
      */
     public function getMeetingDateForWeek($year, $week) {
         $meetingWeekday = $this->getMeetingWeekday();
@@ -423,7 +423,7 @@ class MeetingDataManager {
         $meetingDate = clone $weekStart;
         $meetingDate->modify('+' . $daysToAdd . ' days');
 
-        return $meetingDate->format('n월j일');
+        return $meetingDate->format('n월 j일');
     }
 
     /**
