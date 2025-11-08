@@ -1398,7 +1398,7 @@ function filterAssignedNames($v) {
             var endMonth = weekEnd.getMonth() + 1;
             var endDate = weekEnd.getDate();
 
-            return meetingMonth + '/' + meetingDay + '~' + endMonth + '/' + endDate;
+            return meetingMonth + '월' + meetingDay + '일-' + endDate + '일';
         }
     </script>
 </body>
