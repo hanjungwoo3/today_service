@@ -23,17 +23,34 @@ class MeetingDataManager {
 
     /**
      * 현재 주차 번호 가져오기
+     * 목요일부터는 다음 주를 반환
      */
     public function getCurrentWeek() {
         $date = new DateTime();
+        $dayOfWeek = (int)$date->format('N'); // 1(월) ~ 7(일)
+
+        // 목요일(4) 이상이면 다음 주로 이동
+        if ($dayOfWeek >= 4) {
+            $date->modify('+1 week');
+        }
+
         return (int)$date->format('W');
     }
 
     /**
      * 현재 연도 가져오기
+     * 목요일부터는 다음 주 기준 연도 반환
      */
     public function getCurrentYear() {
-        return (int)date('Y');
+        $date = new DateTime();
+        $dayOfWeek = (int)$date->format('N'); // 1(월) ~ 7(일)
+
+        // 목요일(4) 이상이면 다음 주로 이동
+        if ($dayOfWeek >= 4) {
+            $date->modify('+1 week');
+        }
+
+        return (int)$date->format('o'); // 'o'는 ISO 8601 연도 (주차 기준)
     }
 
     /**
