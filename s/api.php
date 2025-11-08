@@ -22,15 +22,52 @@ class MeetingDataManager {
     }
 
     /**
+     * 평일집회 요일 설정 파일 경로
+     */
+    private function getWeekdayFile() {
+        return $this->dataDir . '/weekday.json';
+    }
+
+    /**
+     * 평일집회 요일 가져오기 (1=월요일 ~ 7=일요일)
+     * 기본값: 3 (수요일)
+     */
+    public function getMeetingWeekday() {
+        $file = $this->getWeekdayFile();
+        if (file_exists($file)) {
+            $content = file_get_contents($file);
+            $data = json_decode($content, true);
+            if (isset($data['weekday']) && $data['weekday'] >= 1 && $data['weekday'] <= 7) {
+                return (int)$data['weekday'];
+            }
+        }
+        return 3; // 기본값: 수요일
+    }
+
+    /**
+     * 평일집회 요일 저장하기
+     */
+    public function setMeetingWeekday($weekday) {
+        $weekday = (int)$weekday;
+        if ($weekday < 1 || $weekday > 7) {
+            return false;
+        }
+        $data = array('weekday' => $weekday);
+        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        return file_put_contents($this->getWeekdayFile(), $json) !== false;
+    }
+
+    /**
      * 현재 주차 번호 가져오기
-     * 목요일부터는 다음 주를 반환
+     * 평일집회 요일이 지나면 다음 주를 반환
      */
     public function getCurrentWeek() {
         $date = new DateTime();
         $dayOfWeek = (int)$date->format('N'); // 1(월) ~ 7(일)
+        $meetingWeekday = $this->getMeetingWeekday();
 
-        // 목요일(4) 이상이면 다음 주로 이동
-        if ($dayOfWeek >= 4) {
+        // 평일집회 요일이 지나면 다음 주로 이동
+        if ($dayOfWeek > $meetingWeekday) {
             $date->modify('+1 week');
         }
 
@@ -39,14 +76,15 @@ class MeetingDataManager {
 
     /**
      * 현재 연도 가져오기
-     * 목요일부터는 다음 주 기준 연도 반환
+     * 평일집회 요일이 지나면 다음 주 기준 연도 반환
      */
     public function getCurrentYear() {
         $date = new DateTime();
         $dayOfWeek = (int)$date->format('N'); // 1(월) ~ 7(일)
+        $meetingWeekday = $this->getMeetingWeekday();
 
-        // 목요일(4) 이상이면 다음 주로 이동
-        if ($dayOfWeek >= 4) {
+        // 평일집회 요일이 지나면 다음 주로 이동
+        if ($dayOfWeek > $meetingWeekday) {
             $date->modify('+1 week');
         }
 
@@ -359,14 +397,46 @@ class MeetingDataManager {
     }
 
     /**
+     * 특정 주차의 평일집회 요일 날짜를 계산 (형식: n월j일-j일)
+     */
+    public function getMeetingDateForWeek($year, $week) {
+        $meetingWeekday = $this->getMeetingWeekday();
+
+        // ISO 8601 주차 계산
+        $jan4 = new DateTime($year . '-01-04');
+        $jan4Day = (int)$jan4->format('N');
+        $weekStart = clone $jan4;
+        $weekStart->modify('-' . ($jan4Day - 1) . ' days');
+        $weekStart->modify('+' . (($week - 1) * 7) . ' days');
+
+        // 집회 요일로 이동 (월요일=1 기준)
+        $currentDay = (int)$weekStart->format('N');
+        $daysToAdd = $meetingWeekday - $currentDay;
+        if ($daysToAdd < 0) {
+            $daysToAdd += 7;
+        }
+        $meetingDate = clone $weekStart;
+        $meetingDate->modify('+' . $daysToAdd . ' days');
+
+        // 주 끝 날짜
+        $weekEnd = clone $weekStart;
+        $weekEnd->modify('+6 days');
+
+        return $meetingDate->format('n월j일') . '-' . $weekEnd->format('j일');
+    }
+
+    /**
      * 빈 데이터 구조 생성
      */
     public function createEmpty($year, $week) {
+        // 집회 요일 기준 날짜 계산
+        $defaultDate = $this->getMeetingDateForWeek($year, $week);
+
         return array(
             'year' => $year,
             'week' => $week,
             'url' => '',
-            'date' => '',
+            'date' => $defaultDate,
             'bible_reading' => '',
             'no_meeting' => false,
             'no_meeting_title' => '',
@@ -609,6 +679,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             } else {
                 echo json_encode(array('success' => false, 'error' => '삭제에 실패했습니다.'));
             }
+            break;
+
+        case 'get_weekday':
+            $weekday = $manager->getMeetingWeekday();
+            echo json_encode(array('success' => true, 'weekday' => $weekday));
+            break;
+
+        case 'set_weekday':
+            $weekday = (int)$_POST['weekday'];
+            $success = $manager->setMeetingWeekday($weekday);
+            echo json_encode(array('success' => $success));
             break;
 
         default:

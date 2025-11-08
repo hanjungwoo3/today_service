@@ -1066,6 +1066,32 @@ if (!empty($loggedInUserName)) {
             <textarea class="no-meeting-reason" id="no_meeting_reason" placeholder="상세 사유 입력 (예: 지역대회 주간)" rows="10" style="<?php echo (empty($data['no_meeting']) || !$data['no_meeting']) ? 'display:none;' : ''; ?>"><?php echo htmlspecialchars(isset($data['no_meeting_reason']) ? $data['no_meeting_reason'] : ''); ?></textarea>
         </div>
 
+        <!-- 평일집회 요일 설정 -->
+        <div style="background: #fffbf0; border: 2px solid #ffd966; border-radius: 6px; padding: 12px; margin-bottom: 15px;">
+            <div style="font-weight: 600; font-size: 14px; color: #333; margin-bottom: 8px;">📅 평일집회 요일 설정</div>
+            <p style="font-size: 12px; color: #666; margin-bottom: 10px; line-height: 1.4;">
+                평일집회 요일을 선택하세요. 이 요일이 지나면 자동으로 다음 주 프로그램이 표시됩니다.
+            </p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <label style="display: flex; align-items: center; padding: 6px 12px; background: white; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 13px;">
+                    <input type="radio" name="meeting_weekday" value="2" style="margin-right: 6px;">
+                    <span>화요일</span>
+                </label>
+                <label style="display: flex; align-items: center; padding: 6px 12px; background: white; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 13px;">
+                    <input type="radio" name="meeting_weekday" value="3" style="margin-right: 6px;" checked>
+                    <span>수요일</span>
+                </label>
+                <label style="display: flex; align-items: center; padding: 6px 12px; background: white; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 13px;">
+                    <input type="radio" name="meeting_weekday" value="4" style="margin-right: 6px;">
+                    <span>목요일</span>
+                </label>
+                <label style="display: flex; align-items: center; padding: 6px 12px; background: white; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 13px;">
+                    <input type="radio" name="meeting_weekday" value="5" style="margin-right: 6px;">
+                    <span>금요일</span>
+                </label>
+            </div>
+        </div>
+
         <div class="actions">
             <button onclick="saveData()" class="action-button save">💾 저장하기</button>
         </div>
@@ -1108,6 +1134,9 @@ if (!empty($loggedInUserName)) {
     <script>
         var programIndex = <?php echo count($data['program']); ?>;
 
+        // 평일집회 요일 (1=월요일 ~ 7=일요일)
+        var meetingWeekday = <?php echo $manager->getMeetingWeekday(); ?>;
+
         // 로그인한 사용자의 배정이 있는 주차 목록
         var myAssignedWeeks = <?php echo json_encode($myAssignedWeeks); ?>;
 
@@ -1124,6 +1153,34 @@ if (!empty($loggedInUserName)) {
 
         // 즉시 로딩 오버레이 숨기기
         hideLoading();
+
+        // 평일집회 요일 로드
+        function loadMeetingWeekday() {
+            var formData = new FormData();
+            formData.append('action', 'get_weekday');
+
+            fetch('api.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(result) {
+                if (result.success && result.weekday) {
+                    var radio = document.querySelector('input[name="meeting_weekday"][value="' + result.weekday + '"]');
+                    if (radio) {
+                        radio.checked = true;
+                    }
+                }
+            })
+            .catch(function(error) {
+                console.error('평일집회 요일 로드 실패:', error);
+            });
+        }
+
+        // 페이지 로드 시 평일집회 요일 로드
+        loadMeetingWeekday();
 
         // 배정없음 체크박스 이벤트
         document.getElementById('no_meeting').addEventListener('change', function() {
@@ -1232,6 +1289,10 @@ if (!empty($loggedInUserName)) {
             var data = collectData();
             console.log('Saving data:', data);
 
+            // 평일집회 요일 가져오기
+            var weekdayRadio = document.querySelector('input[name="meeting_weekday"]:checked');
+            var weekday = weekdayRadio ? parseInt(weekdayRadio.value) : 3;
+
             var formData = new FormData();
             formData.append('action', 'save');
             formData.append('year', data.year);
@@ -1241,6 +1302,7 @@ if (!empty($loggedInUserName)) {
             // 로딩 오버레이 표시
             showLoading('저장 중입니다...');
 
+            // 프로그램 데이터 저장
             fetch('api.php', {
                 method: 'POST',
                 body: formData
@@ -1252,21 +1314,38 @@ if (!empty($loggedInUserName)) {
             .then(function(result) {
                 console.log('Result:', result);
                 if (result.success) {
-                    // 성공 메시지 표시
-                    showLoading('✓ 저장되었습니다!');
-                    // 1.5초 후 오버레이 숨김
-                    setTimeout(function() {
-                        hideLoading();
-                    }, 1500);
+                    // 평일집회 요일 저장
+                    var weekdayFormData = new FormData();
+                    weekdayFormData.append('action', 'set_weekday');
+                    weekdayFormData.append('weekday', weekday);
+
+                    return fetch('api.php', {
+                        method: 'POST',
+                        body: weekdayFormData
+                    });
                 } else {
                     hideLoading();
                     alert('저장에 실패했습니다: ' + (result.error || '알 수 없는 오류'));
+                    throw new Error('Save failed');
                 }
             })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(result) {
+                // 성공 메시지 표시
+                showLoading('✓ 저장되었습니다!');
+                // 1.5초 후 오버레이 숨김
+                setTimeout(function() {
+                    hideLoading();
+                }, 1500);
+            })
             .catch(function(error) {
-                console.error('Error:', error);
-                hideLoading();
-                alert('저장 중 오류가 발생했습니다: ' + error.message);
+                if (error.message !== 'Save failed') {
+                    console.error('Error:', error);
+                    hideLoading();
+                    alert('저장 중 오류가 발생했습니다: ' + error.message);
+                }
             });
         }
 
@@ -1528,7 +1607,7 @@ if (!empty($loggedInUserName)) {
             window.location.href = '?year=' + year + '&week=' + week;
         }
 
-        // 주차 번호를 날짜 범위로 변환
+        // 주차 번호를 날짜 범위로 변환 (집회 요일 기준)
         function getWeekDateRange(year, week) {
             // ISO 8601 주차 계산
             var jan4 = new Date(year, 0, 4);
@@ -1536,15 +1615,24 @@ if (!empty($loggedInUserName)) {
             var weekStart = new Date(jan4);
             weekStart.setDate(jan4.getDate() - jan4Day + 1 + (week - 1) * 7);
 
+            // 집회 요일로 이동 (월요일=1 기준)
+            var currentDay = weekStart.getDay() || 7;
+            var daysToAdd = meetingWeekday - currentDay;
+            if (daysToAdd < 0) {
+                daysToAdd += 7;
+            }
+            var meetingDate = new Date(weekStart);
+            meetingDate.setDate(weekStart.getDate() + daysToAdd);
+
             var weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 6);
 
-            var startMonth = weekStart.getMonth() + 1;
-            var startDate = weekStart.getDate();
+            var meetingMonth = meetingDate.getMonth() + 1;
+            var meetingDay = meetingDate.getDate();
             var endMonth = weekEnd.getMonth() + 1;
             var endDate = weekEnd.getDate();
 
-            return startMonth + '/' + startDate + '~' + endMonth + '/' + endDate;
+            return meetingMonth + '/' + meetingDay + '~' + endMonth + '/' + endDate;
         }
     </script>
 </body>

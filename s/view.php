@@ -156,11 +156,12 @@ if (!empty($loggedInUserName)) {
     $currentYear = (int)$currentDate->format('Y');
     $currentWeek = (int)$currentDate->format('W');
     $dayOfWeek = (int)$currentDate->format('N'); // 1(월) ~ 7(일)
+    $meetingWeekday = $manager->getMeetingWeekday(); // 평일집회 요일 가져오기
 
-    // 목요일(4) 이상이면 이번 주는 제외하고 다음 주부터 표시
+    // 평일집회 요일이 지나면 이번 주는 제외하고 다음 주부터 표시
     $displayStartYear = $currentYear;
     $displayStartWeek = $currentWeek;
-    if ($dayOfWeek >= 4) {
+    if ($dayOfWeek > $meetingWeekday) {
         $nextWeekDate = clone $currentDate;
         $nextWeekDate->modify('+1 week');
         $displayStartYear = (int)$nextWeekDate->format('o'); // ISO 8601 연도
@@ -1206,6 +1207,9 @@ function filterAssignedNames($v) {
     </div>
 
     <script>
+        // 평일집회 요일 (1=월요일 ~ 7=일요일)
+        var meetingWeekday = <?php echo $manager->getMeetingWeekday(); ?>;
+
         // 로그인한 사용자의 배정이 있는 주차 목록
         var myAssignedWeeks = <?php
             $assignedWeeks = array();
@@ -1369,7 +1373,7 @@ function filterAssignedNames($v) {
             window.location.href = '?year=' + year + '&week=' + week;
         }
 
-        // 주차 번호를 날짜 범위로 변환
+        // 주차 번호를 날짜 범위로 변환 (집회 요일 기준)
         function getWeekDateRange(year, week) {
             // ISO 8601 주차 계산
             var jan4 = new Date(year, 0, 4);
@@ -1377,15 +1381,24 @@ function filterAssignedNames($v) {
             var weekStart = new Date(jan4);
             weekStart.setDate(jan4.getDate() - jan4Day + 1 + (week - 1) * 7);
 
+            // 집회 요일로 이동 (월요일=1 기준)
+            var currentDay = weekStart.getDay() || 7;
+            var daysToAdd = meetingWeekday - currentDay;
+            if (daysToAdd < 0) {
+                daysToAdd += 7;
+            }
+            var meetingDate = new Date(weekStart);
+            meetingDate.setDate(weekStart.getDate() + daysToAdd);
+
             var weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 6);
 
-            var startMonth = weekStart.getMonth() + 1;
-            var startDate = weekStart.getDate();
+            var meetingMonth = meetingDate.getMonth() + 1;
+            var meetingDay = meetingDate.getDate();
             var endMonth = weekEnd.getMonth() + 1;
             var endDate = weekEnd.getDate();
 
-            return startMonth + '/' + startDate + '~' + endMonth + '/' + endDate;
+            return meetingMonth + '/' + meetingDay + '~' + endMonth + '/' + endDate;
         }
     </script>
 </body>
