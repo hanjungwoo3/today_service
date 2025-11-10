@@ -21,6 +21,9 @@ if (!$settings) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($settings['title']) ?> - 타이머</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=<?= filemtime('style.css') ?>">
     <style>
         @keyframes pulse {
@@ -912,7 +915,6 @@ if (!$settings) {
             // 제목만 표시 (큰 크기로 표시)
             const timerTitle = document.querySelector('.timer-title');
             timerTitle.style.display = 'block';
-            timerTitle.style.fontSize = 'clamp(40px, 9vw, 108px)'; // 2배 크기로 설정
             timerTitle.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
             
             // 제목 클릭 이벤트 리스너 추가 (스페이스키와 동일한 기능)

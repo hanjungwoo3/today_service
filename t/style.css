@@ -306,8 +306,9 @@ kbd {
 }
 
 .timer-title {
-    font-size: clamp(40px, 9vw, 108px); /* 폰트 크기를 2배로 증가 */
-    font-weight: bold;
+    font-size: clamp(36px, 8.1vw, 97px); /* 대기 상태 크기 10% 감소 */
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 600; /* SemiBold */
     color: #ffffff;
     text-align: center; /* 가운데 정렬 */
     margin-bottom: 20px;
@@ -332,10 +333,10 @@ kbd {
 /* 타이머 실행 중일 때 제목 스타일 */
 .timer-container.timer-running .timer-title {
     position: fixed; /* 고정 위치 유지 */
-    top: 15vh; /* 상단에서 15% 위치 */
+    top: 10vh; /* 상단에서 10% 위치로 조정 */
     left: 50%;
     transform: translateX(-50%); /* 가로 중앙 정렬만 유지 */
-    font-size: clamp(24px, 6vw, 72px); /* 타이머 실행 중 더 작은 크기 */
+    font-size: clamp(36px, 8.1vw, 97px); /* 대기 상태와 동일한 크기로 통일 */
     margin-bottom: 0; /* 마진 제거 */
     z-index: 10; /* 타이머보다 높은 z-index */
 }
@@ -884,7 +885,8 @@ select option {
     padding: 15px 20px;
     color: #ffffff; /* 투명도 없이 순백색 */
     font-size: clamp(48px, 9vw, 72px); /* 폰트 크기 조금 줄임 */
-    font-weight: normal;
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 600; /* SemiBold */
     text-align: center;
     z-index: 1000;
     background: transparent;
