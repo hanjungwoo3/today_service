@@ -51,10 +51,14 @@ if (!$settings) {
                 <g class="progress-ring-ticks"></g>
             </svg>
                            <div class="timer-display" id="timerDisplay">
-                               <div class="timer-number">
-                                   <?= sprintf('%02d:%02d', $settings['minutes'], isset($settings['seconds']) ? $settings['seconds'] : 0) ?>
+                               <div class="flip-timer">
+                                   <div class="flip-digit" id="minute-tens">0</div>
+                                   <div class="flip-digit" id="minute-ones">0</div>
+                                   <div class="flip-colon">:</div>
+                                   <div class="flip-digit" id="second-tens">0</div>
+                                   <div class="flip-digit" id="second-ones">0</div>
                                </div>
-                               
+
                                <!-- 가로줄 진행바 -->
                                <div class="horizontal-progress-container">
                                    <div class="horizontal-progress-bar" id="horizontalProgressBar"></div>
@@ -194,7 +198,6 @@ if (!$settings) {
         
         // DOM 요소
         const timerDisplay = document.getElementById('timerDisplay');
-        const timerNumber = document.querySelector('.timer-number');
         const guideMessage = document.getElementById('guideMessage');
         const progressRing = document.querySelector('.progress-ring-circle');
         
@@ -282,19 +285,52 @@ if (!$settings) {
             }
         }
         
+        // Flip 숫자 업데이트 함수
+        function updateFlipDigit(digitId, newValue) {
+            const digit = document.getElementById(digitId);
+            if (!digit) return;
+
+            const currentValue = digit.textContent;
+
+            // 값이 변경되지 않으면 애니메이션 안 함
+            if (currentValue === newValue.toString()) return;
+
+            // Flip 애니메이션 시작
+            digit.classList.add('flipping');
+
+            // 애니메이션 중간(0.3초)에 숫자 변경
+            setTimeout(() => {
+                digit.textContent = newValue;
+            }, 300);
+
+            // 애니메이션 완료 후 클래스 제거
+            setTimeout(() => {
+                digit.classList.remove('flipping');
+            }, 600);
+        }
+
         // 타이머 디스플레이 업데이트
         function updateDisplay() {
             const minutes = Math.floor(remainingSeconds / 60);
             const seconds = remainingSeconds % 60;
-            if (timerNumber) {
-                timerNumber.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
-            
+
+            // 각 자리수 계산
+            const minuteTens = Math.floor(minutes / 10);
+            const minuteOnes = minutes % 10;
+            const secondTens = Math.floor(seconds / 10);
+            const secondOnes = seconds % 10;
+
+            // 각 숫자 업데이트
+            updateFlipDigit('minute-tens', minuteTens);
+            updateFlipDigit('minute-ones', minuteOnes);
+            updateFlipDigit('second-tens', secondTens);
+            updateFlipDigit('second-ones', secondOnes);
+
             // 진행률 계산 및 업데이트
             const progress = (remainingSeconds / TOTAL_SECONDS) * 100;
             console.log(`남은시간: ${remainingSeconds}초, 전체시간: ${TOTAL_SECONDS}초, 진행률: ${progress.toFixed(1)}%`);
             setProgress(progress);
-            
+
             // 깜빡임 애니메이션
             if (isRunning && !isPaused) {
                 startBlinkAnimation();
@@ -1016,31 +1052,30 @@ if (!$settings) {
                 
                 // 컨트롤 버튼들이 삭제되어 표시할 필요 없음
                 
-                // 타이머 화면에서 클릭 기능 추가 (제목, 타이머 숫자, 진행바)
+                // 타이머 화면에서 클릭 기능 추가 (제목, 타이머, 진행바)
                 const timerTitle = document.querySelector('.timer-title');
-                const timerDisplay = document.querySelector('.timer-display');
-                const timerNumber = document.querySelector('.timer-number');
+                const timerDisplayElement = document.querySelector('.timer-display');
+                const flipTimer = document.querySelector('.flip-timer');
                 const circularProgress = document.querySelector('.circular-progress');
-                
+
                 if (timerTitle) {
                     timerTitle.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
                     // 기존 이벤트 리스너 제거 후 새로운 기능 추가
                     timerTitle.removeEventListener('click', handleReadyStateClick);
                     timerTitle.addEventListener('click', handleTimerStateClick);
                 }
-                
-                if (timerDisplay) {
-                    timerDisplay.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
-                    timerDisplay.style.pointerEvents = 'auto'; // 클릭 이벤트 활성화
-                    timerDisplay.addEventListener('click', handleTimerStateClick);
+
+                if (timerDisplayElement) {
+                    timerDisplayElement.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
+                    timerDisplayElement.style.pointerEvents = 'auto'; // 클릭 이벤트 활성화
+                    timerDisplayElement.addEventListener('click', handleTimerStateClick);
                 }
-                
-                if (timerNumber) {
-                    timerNumber.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
-                    timerNumber.style.pointerEvents = 'auto'; // 클릭 이벤트 활성화
-                    timerNumber.addEventListener('click', handleTimerStateClick);
+
+                if (flipTimer) {
+                    flipTimer.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
+                    flipTimer.addEventListener('click', handleTimerStateClick);
                 }
-                
+
                 if (circularProgress) {
                     circularProgress.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
                     circularProgress.addEventListener('click', handleTimerStateClick);
@@ -1065,8 +1100,26 @@ if (!$settings) {
             }, 800); // 0.8초 후 실행
         }
         
+        // Flip 숫자 초기화
+        function initFlipDigits() {
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+
+            const minuteTens = Math.floor(minutes / 10);
+            const minuteOnes = minutes % 10;
+            const secondTens = Math.floor(seconds / 10);
+            const secondOnes = seconds % 10;
+
+            // 초기값 설정 (애니메이션 없이)
+            document.getElementById('minute-tens').textContent = minuteTens;
+            document.getElementById('minute-ones').textContent = minuteOnes;
+            document.getElementById('second-tens').textContent = secondTens;
+            document.getElementById('second-ones').textContent = secondOnes;
+        }
+
         // 즉시 초기화 (스크립트가 body 끝에 있으므로 DOM 요소들이 이미 로드됨)
         setTimeout(() => {
+            initFlipDigits(); // Flip 숫자 초기화
             showReadyState(); // 준비 상태로 시작
         }, 100); // 약간의 지연을 두어 확실히 DOM이 준비되도록
         
