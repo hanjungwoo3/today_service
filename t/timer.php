@@ -21,11 +21,16 @@ if (!$settings) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($settings['title']) ?> - 타이머</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=<?= filemtime('style.css') ?>">
     <style>
+        @font-face {
+            font-family: 'WTBaeumMyungjo';
+            src: url('https://b.jw-cdn.org/fonts/wt-baeum-myungjo/1.000/Wt-BaeumMyungjo-Regular.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
         @keyframes pulse {
             0% { opacity: 0.6; transform: translateX(-50%) scale(1); }
             50% { opacity: 1; transform: translateX(-50%) scale(1.05); }

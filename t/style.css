@@ -307,10 +307,11 @@ kbd {
 
 .timer-title {
     font-size: clamp(36px, 8.1vw, 97px); /* 대기 상태 크기 10% 감소 */
-    font-family: 'Noto Serif KR', serif;
-    font-weight: 600; /* SemiBold */
+    font-family: 'WTBaeumMyungjo', serif;
+    font-weight: bold;
     color: #ffffff;
     text-align: center; /* 가운데 정렬 */
+    line-height: 1.5; /* 줄간격 */
     margin-bottom: 20px;
     width: 100%; /* 전체 너비 사용 */
     max-width: none; /* 최대 너비 제한 제거 */
@@ -885,8 +886,8 @@ select option {
     padding: 15px 20px;
     color: #ffffff; /* 투명도 없이 순백색 */
     font-size: clamp(48px, 9vw, 72px); /* 폰트 크기 조금 줄임 */
-    font-family: 'Noto Serif KR', serif;
-    font-weight: 600; /* SemiBold */
+    font-family: 'WTBaeumMyungjo', serif;
+    font-weight: bold;
     text-align: center;
     z-index: 1000;
     background: transparent;
