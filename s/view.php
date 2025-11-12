@@ -1133,43 +1133,43 @@ function filterAssignedNames($v) {
                 <a href="<?php echo htmlspecialchars($data['url']); ?>" target="_blank"><?php echo htmlspecialchars($data['url']); ?></a>
             </div>
             <?php endif; ?>
+        <?php endif; ?>
 
-            <?php if (!empty($myUpcomingAssignments)): ?>
-            <div class="my-assignments-section">
-                <div class="my-assignments-title">📋 이번 주 이후 나에게 배정된 특권</div>
-                <?php foreach ($myUpcomingAssignments as $dateGroup): ?>
-                <a href="view.php?year=<?php echo $dateGroup['year']; ?>&week=<?php echo $dateGroup['week']; ?>" class="my-assignment-item">
-                    <div class="my-assignment-content">
-                        <?php
-                        $firstItem = true;
-                        $firstItemHasSection = !empty($dateGroup['items'][0]['section']);
-                        ?>
-                        <?php foreach ($dateGroup['items'] as $item): ?>
-                        <div class="my-assignment-line">
-                            <?php if ($firstItem && !empty($item['section'])): ?>
-                                <span class="my-assignment-date"><?php echo htmlspecialchars($dateGroup['dateRange']); ?> </span>
-                                <div class="my-assignment-section"><?php echo htmlspecialchars($item['section']); ?></div>
-                                <div class="my-assignment-title"><?php echo htmlspecialchars($item['title']); ?></div>
-                                <?php $firstItem = false; ?>
-                            <?php elseif ($firstItem && empty($item['section'])): ?>
-                                <div class="my-assignment-date" style="display: block; margin-bottom: 2px;"><?php echo htmlspecialchars($dateGroup['dateRange']); ?></div>
-                                <div class="my-assignment-section"><?php echo htmlspecialchars($item['title']); ?></div>
-                                <?php $firstItem = false; ?>
+        <?php if (!empty($myUpcomingAssignments)): ?>
+        <div class="my-assignments-section">
+            <div class="my-assignments-title">📋 이번 주 이후 나에게 배정된 특권</div>
+            <?php foreach ($myUpcomingAssignments as $dateGroup): ?>
+            <a href="view.php?year=<?php echo $dateGroup['year']; ?>&week=<?php echo $dateGroup['week']; ?>" class="my-assignment-item">
+                <div class="my-assignment-content">
+                    <?php
+                    $firstItem = true;
+                    $firstItemHasSection = !empty($dateGroup['items'][0]['section']);
+                    ?>
+                    <?php foreach ($dateGroup['items'] as $item): ?>
+                    <div class="my-assignment-line">
+                        <?php if ($firstItem && !empty($item['section'])): ?>
+                            <span class="my-assignment-date"><?php echo htmlspecialchars($dateGroup['dateRange']); ?> </span>
+                            <div class="my-assignment-section"><?php echo htmlspecialchars($item['section']); ?></div>
+                            <div class="my-assignment-title"><?php echo htmlspecialchars($item['title']); ?></div>
+                            <?php $firstItem = false; ?>
+                        <?php elseif ($firstItem && empty($item['section'])): ?>
+                            <div class="my-assignment-date" style="display: block; margin-bottom: 2px;"><?php echo htmlspecialchars($dateGroup['dateRange']); ?></div>
+                            <div class="my-assignment-section"><?php echo htmlspecialchars($item['title']); ?></div>
+                            <?php $firstItem = false; ?>
+                        <?php else: ?>
+                            <?php if (!empty($item['section'])): ?>
+                            <div class="my-assignment-section"><?php echo htmlspecialchars($item['section']); ?></div>
+                            <div class="my-assignment-title"><?php echo htmlspecialchars($item['title']); ?></div>
                             <?php else: ?>
-                                <?php if (!empty($item['section'])): ?>
-                                <div class="my-assignment-section"><?php echo htmlspecialchars($item['section']); ?></div>
-                                <div class="my-assignment-title"><?php echo htmlspecialchars($item['title']); ?></div>
-                                <?php else: ?>
-                                <div class="my-assignment-section"><?php echo htmlspecialchars($item['title']); ?></div>
-                                <?php endif; ?>
+                            <div class="my-assignment-section"><?php echo htmlspecialchars($item['title']); ?></div>
                             <?php endif; ?>
-                        </div>
-                        <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
-                </a>
-                <?php endforeach; ?>
-            </div>
-            <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            </a>
+            <?php endforeach; ?>
+        </div>
         <?php endif; ?>
         <div style="text-align: center; margin-top: 10px; padding: 10px 20px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
           <?php if ($is_admin): ?>
