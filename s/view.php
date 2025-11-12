@@ -623,6 +623,7 @@ function filterAssignedNames($v) {
             margin-bottom: 4px;
             background: #f9f9f9;
             border-radius: 4px;
+            border: 1px solid #ddd;
             font-size: 13px;
             line-height: 1.5;
             text-decoration: none;
@@ -637,8 +638,11 @@ function filterAssignedNames($v) {
         .my-assignment-date {
             font-weight: 600;
             color: #666;
+            display: inline;
+        }
+
+        .my-assignment-content {
             display: block;
-            margin-bottom: 2px;
         }
 
         .my-assignment-line {
@@ -655,9 +659,17 @@ function filterAssignedNames($v) {
             margin-bottom: 2px;
         }
 
+        .my-assignment-line:first-child .my-assignment-section {
+            display: inline;
+        }
+
+        .my-assignment-line:first-child .my-assignment-title {
+            display: block;
+        }
+
         .my-assignment-title {
             color: #333;
-            font-weight: 600;
+            font-size: 12px;
             word-break: keep-all;
             overflow-wrap: break-word;
             line-height: 1.4;
@@ -1127,14 +1139,30 @@ function filterAssignedNames($v) {
                 <div class="my-assignments-title">📋 이번 주 이후 나에게 배정된 특권</div>
                 <?php foreach ($myUpcomingAssignments as $dateGroup): ?>
                 <a href="view.php?year=<?php echo $dateGroup['year']; ?>&week=<?php echo $dateGroup['week']; ?>" class="my-assignment-item">
-                    <div class="my-assignment-date"><?php echo htmlspecialchars($dateGroup['dateRange']); ?></div>
                     <div class="my-assignment-content">
+                        <?php
+                        $firstItem = true;
+                        $firstItemHasSection = !empty($dateGroup['items'][0]['section']);
+                        ?>
                         <?php foreach ($dateGroup['items'] as $item): ?>
                         <div class="my-assignment-line">
-                            <?php if (!empty($item['section'])): ?>
-                            <div class="my-assignment-section"><?php echo htmlspecialchars($item['section']); ?></div>
+                            <?php if ($firstItem && !empty($item['section'])): ?>
+                                <span class="my-assignment-date"><?php echo htmlspecialchars($dateGroup['dateRange']); ?> </span>
+                                <div class="my-assignment-section"><?php echo htmlspecialchars($item['section']); ?></div>
+                                <div class="my-assignment-title"><?php echo htmlspecialchars($item['title']); ?></div>
+                                <?php $firstItem = false; ?>
+                            <?php elseif ($firstItem && empty($item['section'])): ?>
+                                <div class="my-assignment-date" style="display: block; margin-bottom: 2px;"><?php echo htmlspecialchars($dateGroup['dateRange']); ?></div>
+                                <div class="my-assignment-section"><?php echo htmlspecialchars($item['title']); ?></div>
+                                <?php $firstItem = false; ?>
+                            <?php else: ?>
+                                <?php if (!empty($item['section'])): ?>
+                                <div class="my-assignment-section"><?php echo htmlspecialchars($item['section']); ?></div>
+                                <div class="my-assignment-title"><?php echo htmlspecialchars($item['title']); ?></div>
+                                <?php else: ?>
+                                <div class="my-assignment-section"><?php echo htmlspecialchars($item['title']); ?></div>
+                                <?php endif; ?>
                             <?php endif; ?>
-                            <div class="my-assignment-title"><?php echo htmlspecialchars($item['title']); ?></div>
                         </div>
                         <?php endforeach; ?>
                     </div>

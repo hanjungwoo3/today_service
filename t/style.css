@@ -306,9 +306,9 @@ kbd {
 }
 
 .timer-title {
-    font-size: clamp(36px, 8.1vw, 97px); /* 대기 상태 크기 10% 감소 */
+    font-size: clamp(32px, 7vw, 80px); /* 폰트 크기 약 15-20% 감소 */
     font-family: 'WTBaeumMyungjo', serif;
-    font-weight: bold;
+    font-weight: normal;
     color: #ffffff;
     text-align: center; /* 가운데 정렬 */
     line-height: 1.5; /* 줄간격 */
@@ -337,7 +337,7 @@ kbd {
     top: 10vh; /* 상단에서 10% 위치로 조정 */
     left: 50%;
     transform: translateX(-50%); /* 가로 중앙 정렬만 유지 */
-    font-size: clamp(36px, 8.1vw, 97px); /* 대기 상태와 동일한 크기로 통일 */
+    font-size: clamp(32px, 7vw, 80px); /* 대기 상태와 동일한 크기로 통일 */
     margin-bottom: 0; /* 마진 제거 */
     z-index: 10; /* 타이머보다 높은 z-index */
 }
@@ -941,7 +941,7 @@ select option {
     color: #ffffff; /* 투명도 없이 순백색 */
     font-size: clamp(48px, 9vw, 72px); /* 폰트 크기 조금 줄임 */
     font-family: 'WTBaeumMyungjo', serif;
-    font-weight: bold;
+    font-weight: normal;
     text-align: center;
     z-index: 1000;
     background: transparent;
