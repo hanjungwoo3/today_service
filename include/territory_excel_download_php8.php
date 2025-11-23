@@ -148,8 +148,13 @@ while($rs=$result->fetch_assoc()){
 	$h_address1 = upload_filter($rs['h_address1']);
 	$h_address2 = upload_filter($rs['h_address2']);
 	$h_address3 = upload_filter($rs['h_address3']);
-	$h_address4 = upload_filter($rs['h_address4']);
-	$h_address5 = upload_filter($rs['h_address5']);
+    $h_address4 = upload_filter($rs['h_address4']);
+    $h_address5 = upload_filter($rs['h_address5']);
+    // 특정 구역 유형(type_2: 아파트, type_3: 빌라, type_8: 추가2)은 F/G 컬럼 미사용 → 비움
+    if(in_array($territory_type, array('아파트','빌라','추가2'))){
+        $h_address4 = '';
+        $h_address5 = '';
+    }
 	$h_order = $rs['h_order'];
 	$h_visit = $rs['h_visit'];
 	$h_condition = $rs['h_condition'];

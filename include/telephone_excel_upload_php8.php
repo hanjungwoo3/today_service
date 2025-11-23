@@ -49,10 +49,11 @@ try {
     for ($i = 2 ; $i <= $maxRow ; $i++) {
 		$nud			= $worksheet->getCell('A' . $i)->getValue(); // A열
 		$tph_id			= $worksheet->getCell('B' . $i)->getValue(); // B열
-		$tph_number		= $worksheet->getCell('C' . $i)->getValue(); // C열
+		// 전화번호/주소는 포맷된 표시 문자열로 읽어 하이픈 등이 보존되도록 처리
+		$tph_number		= $worksheet->getCell('C' . $i)->getFormattedValue(); // C열
 		$tph_type		= $worksheet->getCell('D' . $i)->getValue(); // D열
 		$tph_name		= $worksheet->getCell('E' . $i)->getValue(); // E열
-        $tph_address	= $worksheet->getCell('F' . $i)->getValue(); // F열
+        $tph_address	= $worksheet->getCell('F' . $i)->getFormattedValue(); // F열
 		$tph_order		= $worksheet->getCell('G' . $i)->getValue(); // G열
 
         // 특수문자 제거
@@ -141,4 +142,4 @@ try {
     echo 'error 엑셀파일을 읽는도중 오류가 발생하였습니다.';
 }
 
-​?>
+?>

@@ -52,11 +52,12 @@ try {
     for ($i = 2 ; $i <= $maxRow ; $i++) {
 		$nud			= $worksheet->getCell('A' . $i)->getValue(); // A열
 		$h_id			= $worksheet->getCell('B' . $i)->getValue(); // B열
-		$h_address1		= $worksheet->getCell('C' . $i)->getValue(); // C열
-		$h_address2		= $worksheet->getCell('D' . $i)->getValue(); // D열
-		$h_address3		= $worksheet->getCell('E' . $i)->getValue(); // E열
-        $h_address4		= $worksheet->getCell('F' . $i)->getValue(); // F열
-        $h_address5		= $worksheet->getCell('G' . $i)->getValue(); // G열
+		// 주소/건물번호 컬럼은 포맷된 표시 문자열로 읽어 하이픈 등이 보존되도록 처리
+		$h_address1		= $worksheet->getCell('C' . $i)->getFormattedValue(); // C열
+		$h_address2		= $worksheet->getCell('D' . $i)->getFormattedValue(); // D열
+		$h_address3		= $worksheet->getCell('E' . $i)->getFormattedValue(); // E열
+        $h_address4		= $worksheet->getCell('F' . $i)->getFormattedValue(); // F열
+        $h_address5		= $worksheet->getCell('G' . $i)->getFormattedValue(); // G열
 		$h_order		= $worksheet->getCell('H' . $i)->getValue(); // H열
 		$h_visit		= $worksheet->getCell('I' . $i)->getValue(); // I열
 		$h_condition	= $worksheet->getCell('J' . $i)->getValue(); // J열
@@ -159,4 +160,4 @@ try {
 	print_r($e);
     echo 'error 엑셀파일을 읽는도중 오류가 발생하였습니다.';
 }
-​?>
+?>

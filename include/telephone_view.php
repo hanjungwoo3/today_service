@@ -118,23 +118,22 @@ function telephone_view_update(){
   timeout = setTimeout(telephone_view_update,20000);
 }
 
-$(document).ready(function(){
-  telephone_view_update();
-
+function recalcTelephoneBodyTop(){
   var height = $('.telephone-view-header').outerHeight();
   $('.telephone-view-body').css('top', height+'px');
+}
+
+$(document).ready(function(){
+  telephone_view_update();
+  recalcTelephoneBodyTop();
 
   $( window ).bind("resize", function(){
-    var height = $('.telephone-view-header').outerHeight();
-    $('.telephone-view-body').css('top', height+'px');
+    recalcTelephoneBodyTop();
   });
 
-  $('#collapseView').on('shown.bs.collapse', function () {
-    $('.telephone-view-body').addClass('collapsed');
-  });
-
-  $('#collapseView').on('hidden.bs.collapse', function () {
-    $('.telephone-view-body').removeClass('collapsed');
+  $('#collapseView').on('shown.bs.collapse hidden.bs.collapse', function () {
+    $('.telephone-view-body').toggleClass('collapsed');
+    recalcTelephoneBodyTop();
   });
 
   $('#collapseView').on('show.bs.collapse', function () {

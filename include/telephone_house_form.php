@@ -87,5 +87,108 @@ $result = $mysqli->query($sql);
             $(this.cells[0]).removeClass('showDragHandle');
             $(this.cells[9]).removeClass('showDragHandle');
       });
+
+    // 모바일 키보드 문제 해결 - 모달 완전 고정 방법
+    let scrollPosition = 0;
+    
+    // 모달이 열릴 때 스크롤 위치 저장
+    $('#popup-modal').on('show.bs.modal', function() {
+      scrollPosition = $(window).scrollTop();
+    });
+    
+    // input 필드 포커스 시
+    $('#telephone_house_form input[type="text"]').on('focus', function() {
+      // 모달을 완전히 고정
+      $('#popup-modal').css({
+        'position': 'fixed',
+        'top': '0',
+        'left': '0',
+        'right': '0',
+        'bottom': '0',
+        'z-index': '9999'
+      });
+      
+      // 모달 높이를 현재 뷰포트에 맞춤
+      const currentHeight = window.innerHeight;
+      $('#popup-modal .modal-dialog').css({
+        'max-height': currentHeight + 'px',
+        'height': currentHeight + 'px',
+        'position': 'fixed',
+        'top': '0',
+        'left': '0',
+        'right': '0',
+        'bottom': '0',
+        'margin': '0'
+      });
+      $('#popup-modal .modal-content').css({
+        'max-height': currentHeight + 'px',
+        'height': currentHeight + 'px',
+        'overflow-y': 'auto',
+        'border-radius': '0'
+      });
+      
+      // input 필드가 보이도록 스크롤
+      setTimeout(function() {
+        $(this).scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }.bind(this), 100);
+    });
+    
+    // input 필드 블러 시
+    $('#telephone_house_form input[type="text"]').on('blur', function() {
+      // 키보드가 닫힐 때까지 잠시 대기
+      setTimeout(function() {
+        // 모달 스타일을 원래대로 복원
+        $('#popup-modal .modal-dialog').css({
+          'max-height': '',
+          'height': '',
+          'position': '',
+          'top': '',
+          'left': '',
+          'right': '',
+          'bottom': '',
+          'margin': ''
+        });
+        $('#popup-modal .modal-content').css({
+          'max-height': '',
+          'height': '',
+          'overflow-y': '',
+          'border-radius': ''
+        });
+      }, 300);
+    });
+    
+    // 모달이 닫힐 때 완전한 복원
+    $('#popup-modal').on('hidden.bs.modal', function() {
+      // 모달 스타일 완전 초기화
+      $('#popup-modal').css({
+        'position': '',
+        'top': '',
+        'left': '',
+        'right': '',
+        'bottom': '',
+        'z-index': ''
+      });
+      $('#popup-modal .modal-dialog').css({
+        'max-height': '',
+        'height': '',
+        'position': '',
+        'top': '',
+        'left': '',
+        'right': '',
+        'bottom': '',
+        'margin': ''
+      });
+      $('#popup-modal .modal-content').css({
+        'max-height': '',
+        'height': '',
+        'overflow-y': '',
+        'border-radius': ''
+      });
+      
+      // 스크롤 위치 복원
+      setTimeout(function() {
+        $(window).scrollTop(scrollPosition);
+      }, 100);
+    });
   });
 </script>

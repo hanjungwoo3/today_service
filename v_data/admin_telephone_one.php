@@ -122,6 +122,16 @@ if($result->num_rows > 0){
       }
       $recent_start_date = !empty_date($start_date)?date('y.m.d', strtotime($start_date)):'';
 
+      $latest_assigned_date = '';
+      if($row['tp_assigned'] && !empty_date($row['tp_assigned_date'])){
+        $latest_assigned_date = !empty_date($row['tp_assigned_date'])?date('y.m.d', strtotime($row['tp_assigned_date'])):'';
+      }else{
+        $latest_record = get_latest_record('telephone', $tp_id);
+        if(!empty($latest_record)){
+          $latest_assigned_date = date('y.m.d', strtotime($latest_record['tpr_assigned_date']));
+        }
+      }
+
       switch ($row['tp_ms_all']) {
         case '1': $ms_id_text = '호별'; break;
         case '2': $ms_id_text = '전시대'; break;
@@ -142,6 +152,7 @@ if($result->num_rows > 0){
         'status' => $status,
         'status_text' => $status_text,
         'status_detail' => $status_detail,
+        'latest_assigned_date' => $latest_assigned_date,
         'start_date' => $recent_start_date,
         'progress' => $progress_percent,
         'progress_date' => $progress_date,

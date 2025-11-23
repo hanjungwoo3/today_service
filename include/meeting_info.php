@@ -11,8 +11,8 @@ COALESCE(m.ms_time,ms.ms_time) AS ms_time,
 COALESCE(m.mp_name,mp.mp_name) AS mp_name, 
 mp.mp_address, 
 COALESCE(m.ms_type,ms.ms_type) AS ms_type, 
-ms.ms_start_time, 
-ms.ms_finish_time, 
+COALESCE(m.m_start_time,ms.ms_start_time) AS ms_start_time,  
+COALESCE(m.m_finish_time,ms.ms_finish_time) AS ms_finish_time, 
 ms.g_id, 
 ms.ms_limit 
 FROM 
@@ -74,9 +74,7 @@ if($member_string){
   <div class="">
     <?=get_datetime_text($s_date.' '.$row['ms_time']);?>
     <br>
-    <?php if(!(($row['ms_start_time'] == $row['ms_finish_time']) && ($row['ms_start_time'] == '00:00:00'))): ?>
     <small><?='('.get_datetime_text($row['ms_start_time']).' ~ '.get_datetime_text($row['ms_finish_time']).')'?></small>
-    <?php endif; ?>
   </div>
 </div>
 <div class="mb-3">

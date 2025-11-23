@@ -122,6 +122,16 @@ if($result->num_rows > 0){
     }
     $recent_start_date = !empty_date($start_date)?date('y.m.d', strtotime($start_date)):'';
 
+    $latest_assigned_date = '';
+    if($row['tt_assigned'] && !empty_date($row['tt_assigned_date'])){
+      $latest_assigned_date = !empty_date($row['tt_assigned_date'])?date('y.m.d', strtotime($row['tt_assigned_date'])):'';
+    }else{
+      $latest_record = get_latest_record('territory', $tt_id);
+      if(!empty($latest_record)){
+        $latest_assigned_date = date('y.m.d', strtotime($latest_record['ttr_assigned_date']));
+      }
+    }
+
     switch ($row['tt_ms_all']) {
       case '1': $ms_id_text = get_meeting_schedule_type_text(1); break;
       case '2': $ms_id_text = get_meeting_schedule_type_text(2); break;
@@ -142,6 +152,7 @@ if($result->num_rows > 0){
       'status' => $status,
       'status_text' => $status_text,
       'status_detail' => $status_detail,
+      'latest_assigned_date' => $latest_assigned_date,
       'progress_date' => $progress_date,
       'start_date' => $recent_start_date,
       'progress' => $progress_percent,

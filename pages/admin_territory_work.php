@@ -66,6 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $updateData = array();
       
       $i = 1;
+      // tt_id -> tt_type 캐시로 중복 조회 최소화
+      $ttTypeCache = array();
       foreach ($data as $key => $value) {
           $tt_id = isset($value['tt_id']) ? $value['tt_id'] : '';
           if (!empty($tt_id)) {
@@ -75,6 +77,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               $h_address3 = isset($value['h_address3']) ? upload_filter($value['h_address3']) : '';
               $h_address4 = isset($value['h_address4']) ? upload_filter($value['h_address4']) : '';
               $h_address5 = isset($value['h_address5']) ? upload_filter($value['h_address5']) : '';
+
+              // 구역 유형 조회 (캐시 사용)
+              $tt_type = '';
+              if(isset($ttTypeCache[$tt_id])){
+                  $tt_type = $ttTypeCache[$tt_id];
+              }else{
+                  $tt_row = $mysqli->query("SELECT tt_type FROM ".TERRITORY_TABLE." WHERE tt_id = {$tt_id}")->fetch_assoc();
+                  $tt_type = $tt_row ? $tt_row['tt_type'] : '';
+                  $ttTypeCache[$tt_id] = $tt_type;
+              }
+
+              // 특정 유형(type_2: 아파트, type_3: 빌라, type_8: 추가2)은 h_address4/5 미사용 -> 강제 비움
+              if(in_array($tt_type, array('아파트','빌라','추가2'))){
+                  $h_address4 = '';
+                  $h_address5 = '';
+              }
 
               if (isset($value['add']) && $value['add'] == 'add') { 
                   // 추가 작업 배열에 저장
