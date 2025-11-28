@@ -1,6 +1,6 @@
 <?php
 // 로컬 개발 모드 체크
-$localConfigFile = __DIR__ . '/../c/config.php';
+$localConfigFile = dirname(__FILE__) . '/../c/config.php';
 if (file_exists($localConfigFile)) {
     require_once $localConfigFile;
 }
@@ -107,7 +107,7 @@ foreach ($targetWeeks as $weekInfo) {
     }
 
     // 프로그램 분류
-    $categorized = array('treasures' => [], 'ministry' => [], 'living' => []);
+    $categorized = array('treasures' => array(), 'ministry' => array(), 'living' => array());
     if (!empty($wData['program'])) {
         foreach ($wData['program'] as $item) {
             if (isset($item['section'])) {
