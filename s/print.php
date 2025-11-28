@@ -373,7 +373,8 @@ foreach ($targetWeeks as $weekInfo) {
             color: #333;
             margin-left: 15px;
             text-align: left;
-            width: 100px;
+            min-width: 100px;
+            white-space: nowrap;
         }
 
         .no-meeting-msg {
@@ -487,7 +488,8 @@ foreach ($targetWeeks as $weekInfo) {
                 font-size: 12px;
                 margin-left: 12px;
                 text-align: left;
-                width: 90px;
+                min-width: 90px;
+                white-space: nowrap;
             }
         }
     </style>
