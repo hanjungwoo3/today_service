@@ -26,7 +26,7 @@ if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
 
     // 관리자가 아니면 view.php로 리다이렉트
     if (!$is_admin) {
-        header('Location: view.php' . (isset($_GET['year']) && isset($_GET['week']) ? '?year='.$_GET['year'].'&week='.$_GET['week'] : ''));
+        header('Location: view.php' . (isset($_GET['year']) && isset($_GET['week']) ? '?year=' . $_GET['year'] . '&week=' . $_GET['week'] : ''));
         exit;
     }
 } else {
@@ -120,7 +120,8 @@ if ($data === null) {
 }
 
 // 프로그램을 섹션별로 분류
-function categorizePrograms($programs) {
+function categorizePrograms($programs)
+{
     $treasures = array();
     $ministry = array();
     $living = array();
@@ -226,6 +227,7 @@ if (!empty($loggedInUserName)) {
 ?>
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -252,7 +254,7 @@ if (!empty($loggedInUserName)) {
             background: white;
             border-radius: 6px;
             padding: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
 
         .header {
@@ -303,7 +305,8 @@ if (!empty($loggedInUserName)) {
             gap: 4px;
         }
 
-        .nav-button, .action-button {
+        .nav-button,
+        .action-button {
             padding: 5px 6px;
             background: #667eea;
             color: white;
@@ -318,7 +321,8 @@ if (!empty($loggedInUserName)) {
             flex: 1;
         }
 
-        .nav-button:hover, .action-button:hover {
+        .nav-button:hover,
+        .action-button:hover {
             background: #5568d3;
         }
 
@@ -348,7 +352,8 @@ if (!empty($loggedInUserName)) {
             background: #d0d0d0;
         }
 
-        .url-edit, .bible-edit {
+        .url-edit,
+        .bible-edit {
             width: 100%;
             padding: 8px;
             border: 2px solid #e0e0e0;
@@ -358,7 +363,8 @@ if (!empty($loggedInUserName)) {
             transition: border-color 0.3s;
         }
 
-        .url-edit:focus, .bible-edit:focus {
+        .url-edit:focus,
+        .bible-edit:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -481,7 +487,7 @@ if (!empty($loggedInUserName)) {
         }
 
         .section-header {
-            color: white;
+            background: white;
             padding: 5px 8px;
             border-radius: 4px;
             font-size: 14px;
@@ -493,25 +499,46 @@ if (!empty($loggedInUserName)) {
         }
 
         .section-header.treasures {
-            background: #4A919E;
+            color: #00796B;
         }
 
         .section-header.ministry {
-            background: #E87722;
+            color: #A86500;
         }
 
         .section-header.living {
-            background: #942926;
+            color: #8E201D;
         }
 
         .section-icon {
-            font-size: 16px;
+            font-size: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* WOL-style icons */
+        .dc-icon--gem {
+            background-image: url('../icons/icon-gem.png');
+        }
+
+        .dc-icon--wheat {
+            background-image: url('../icons/icon-wheat.png');
+        }
+
+        .dc-icon--sheep {
+            background-image: url('../icons/icon-sheep.png');
         }
 
         .section-title-edit {
             background: transparent;
             border: none;
-            color: white;
+            color: inherit;
             font-size: 14px;
             font-weight: 700;
             flex: 1;
@@ -520,7 +547,7 @@ if (!empty($loggedInUserName)) {
 
         .section-title-edit:focus {
             outline: none;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 3px 6px;
             border-radius: 3px;
         }
@@ -530,20 +557,9 @@ if (!empty($loggedInUserName)) {
             margin-bottom: 4px;
             background: #f9f9f9;
             border-radius: 4px;
-            border-left: 3px solid #ddd;
         }
 
-        .section-treasures .program-item {
-            border-left-color: #8DB9C4;
-        }
 
-        .section-ministry .program-item {
-            border-left-color: #F0A366;
-        }
-
-        .section-living .program-item {
-            border-left-color: #C16B6D;
-        }
 
         .program-header {
             display: flex;
@@ -567,6 +583,20 @@ if (!empty($loggedInUserName)) {
             border-radius: 3px;
             font-size: 13px;
             font-weight: 600;
+            color: #333;
+            /* Default color */
+        }
+
+        .section-treasures .program-title-edit {
+            color: #00796B;
+        }
+
+        .section-ministry .program-title-edit {
+            color: #A86500;
+        }
+
+        .section-living .program-title-edit {
+            color: #8E201D;
         }
 
         .program-duration-edit {
@@ -578,7 +608,8 @@ if (!empty($loggedInUserName)) {
             color: #888;
         }
 
-        .program-title-edit:focus, .program-duration-edit:focus {
+        .program-title-edit:focus,
+        .program-duration-edit:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -675,7 +706,8 @@ if (!empty($loggedInUserName)) {
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.7);
-            display: none; /* 기본적으로 숨김 */
+            display: none;
+            /* 기본적으로 숨김 */
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -683,7 +715,8 @@ if (!empty($loggedInUserName)) {
         }
 
         .loading-overlay:not(.hidden) {
-            display: flex; /* hidden 클래스가 없을 때만 표시 */
+            display: flex;
+            /* hidden 클래스가 없을 때만 표시 */
         }
 
         .loading-spinner {
@@ -697,8 +730,13 @@ if (!empty($loggedInUserName)) {
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .loading-text {
@@ -748,7 +786,7 @@ if (!empty($loggedInUserName)) {
             width: 100%;
             max-height: 600px;
             overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
 
         .week-selector-header {
@@ -881,12 +919,15 @@ if (!empty($loggedInUserName)) {
                 padding: 20px;
             }
 
-            .navigation, .actions, .btn-remove {
+            .navigation,
+            .actions,
+            .btn-remove {
                 display: none;
             }
         }
     </style>
 </head>
+
 <body>
     <!-- 로딩 오버레이 -->
     <div id="loadingOverlay" class="loading-overlay hidden">
@@ -934,123 +975,123 @@ if (!empty($loggedInUserName)) {
 
         <!-- 프로그램 입력 영역 -->
         <div id="program-content" style="<?php echo (!empty($data['no_meeting']) && $data['no_meeting']) ? 'display:none;' : ''; ?>">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-            <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">날짜</span>
-            <input type="text" class="date-edit" id="date" value="<?php echo htmlspecialchars($data['date']); ?>" placeholder="날짜 입력 (예: 11월 3-9일)" style="flex: 1;">
-        </div>
-        <div class="bible-reading" style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">성구</span>
-            <input type="text" class="bible-edit" id="bible_reading" value="<?php echo htmlspecialchars($data['bible_reading']); ?>" placeholder="성경 읽기 범위 입력 (예: 솔로몬의 노래 1-2장)" style="flex: 1;">
-        </div>
-
-        <div class="assignments-section">
-            <div class="assignment-row">
-                <div class="assignment-item">
-                    <span class="assignment-label">소개말</span>
-                    <input type="text" class="assignment-input" id="opening_remarks" value="<?php echo htmlspecialchars($data['assignments']['opening_remarks']); ?>" placeholder="이름">
-                </div>
-                <div class="assignment-item">
-                    <span class="assignment-label">시작 기도</span>
-                    <input type="text" class="assignment-input" id="opening_prayer" value="<?php echo htmlspecialchars($data['assignments']['opening_prayer']); ?>" placeholder="이름">
-                </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">날짜</span>
+                <input type="text" class="date-edit" id="date" value="<?php echo htmlspecialchars($data['date']); ?>" placeholder="날짜 입력 (예: 11월 3-9일)" style="flex: 1;">
             </div>
-        </div>
-
-        <!-- 성경에 담긴 보물 -->
-        <div class="section section-treasures">
-            <div class="section-header treasures">
-                <span class="section-icon">💎</span>
-                <input type="text" class="section-title-edit" id="section_treasures" value="<?php echo htmlspecialchars($data['sections']['treasures']); ?>">
+            <div class="bible-reading" style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">성구</span>
+                <input type="text" class="bible-edit" id="bible_reading" value="<?php echo htmlspecialchars($data['bible_reading']); ?>" placeholder="성경 읽기 범위 입력 (예: 솔로몬의 노래 1-2장)" style="flex: 1;">
             </div>
-            <div id="treasuresContainer">
-                <?php foreach ($categorized['treasures'] as $index => $item): ?>
-                <div class="program-item" data-section="treasures" data-index="<?php echo $index; ?>">
-                    <div class="program-header">
-                        <div class="program-title-container">
-                            <input type="text" class="program-title-edit" value="<?php echo htmlspecialchars($item['title']); ?>" placeholder="제목">
-                            <input type="text" class="program-duration-edit" value="<?php echo htmlspecialchars($item['duration']); ?>" placeholder="시간">
-                        </div>
-                        <div class="program-assigned-container">
-                            <input type="text" class="program-assigned-edit" value="<?php echo htmlspecialchars(is_array($item['assigned']) ? $item['assigned'][0] : $item['assigned']); ?>" placeholder="이름">
-                            <input type="text" class="program-assigned-edit" value="<?php echo htmlspecialchars(is_array($item['assigned']) && isset($item['assigned'][1]) ? $item['assigned'][1] : ''); ?>" placeholder="이름">
-                        </div>
-                        <button type="button" class="btn-remove" onclick="removeProgram(this)">×</button>
+
+            <div class="assignments-section">
+                <div class="assignment-row">
+                    <div class="assignment-item">
+                        <span class="assignment-label">소개말</span>
+                        <input type="text" class="assignment-input" id="opening_remarks" value="<?php echo htmlspecialchars($data['assignments']['opening_remarks']); ?>" placeholder="이름">
+                    </div>
+                    <div class="assignment-item">
+                        <span class="assignment-label">시작 기도</span>
+                        <input type="text" class="assignment-input" id="opening_prayer" value="<?php echo htmlspecialchars($data['assignments']['opening_prayer']); ?>" placeholder="이름">
                     </div>
                 </div>
-                <?php endforeach; ?>
             </div>
-            <button type="button" class="btn-add" onclick="addProgram('treasures')">+ 항목 추가</button>
-        </div>
 
-        <!-- 야외 봉사에 힘쓰십시오 -->
-        <div class="section section-ministry">
-            <div class="section-header ministry">
-                <span class="section-icon">🌾</span>
-                <input type="text" class="section-title-edit" id="section_ministry" value="<?php echo htmlspecialchars($data['sections']['ministry']); ?>">
+            <!-- 성경에 담긴 보물 -->
+            <div class="section section-treasures">
+                <div class="section-header treasures">
+                    <span class="section-icon dc-icon--gem"></span>
+                    <input type="text" class="section-title-edit" id="section_treasures" name="sections[treasures]" value="<?php echo htmlspecialchars($data['sections']['treasures']); ?>" placeholder="섹션 제목">
+                </div>
+                <div id="treasuresContainer">
+                    <?php foreach ($categorized['treasures'] as $index => $item): ?>
+                        <div class="program-item" data-section="treasures" data-index="<?php echo $index; ?>">
+                            <div class="program-header">
+                                <div class="program-title-container">
+                                    <input type="text" class="program-title-edit" value="<?php echo htmlspecialchars($item['title']); ?>" placeholder="제목">
+                                    <input type="text" class="program-duration-edit" value="<?php echo htmlspecialchars($item['duration']); ?>" placeholder="시간">
+                                </div>
+                                <div class="program-assigned-container">
+                                    <input type="text" class="program-assigned-edit" value="<?php echo htmlspecialchars(is_array($item['assigned']) ? $item['assigned'][0] : $item['assigned']); ?>" placeholder="이름">
+                                    <input type="text" class="program-assigned-edit" value="<?php echo htmlspecialchars(is_array($item['assigned']) && isset($item['assigned'][1]) ? $item['assigned'][1] : ''); ?>" placeholder="이름">
+                                </div>
+                                <button type="button" class="btn-remove" onclick="removeProgram(this)">×</button>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <button type="button" class="btn-add" onclick="addProgram('treasures')">+ 항목 추가</button>
             </div>
-            <div id="ministryContainer">
-                <?php foreach ($categorized['ministry'] as $index => $item): ?>
-                <div class="program-item" data-section="ministry" data-index="<?php echo $index; ?>">
-                    <div class="program-header">
-                        <div class="program-title-container">
-                            <input type="text" class="program-title-edit" value="<?php echo htmlspecialchars($item['title']); ?>" placeholder="제목">
-                            <input type="text" class="program-duration-edit" value="<?php echo htmlspecialchars($item['duration']); ?>" placeholder="시간">
+
+            <!-- 야외 봉사에 힘쓰십시오 -->
+            <div class="section section-ministry">
+                <div class="section-header ministry">
+                    <span class="section-icon dc-icon--wheat"></span>
+                    <input type="text" class="section-title-edit" id="section_ministry" name="sections[ministry]" value="<?php echo htmlspecialchars($data['sections']['ministry']); ?>" placeholder="섹션 제목">
+                </div>
+                <div id="ministryContainer">
+                    <?php foreach ($categorized['ministry'] as $index => $item): ?>
+                        <div class="program-item" data-section="ministry" data-index="<?php echo $index; ?>">
+                            <div class="program-header">
+                                <div class="program-title-container">
+                                    <input type="text" class="program-title-edit" value="<?php echo htmlspecialchars($item['title']); ?>" placeholder="제목">
+                                    <input type="text" class="program-duration-edit" value="<?php echo htmlspecialchars($item['duration']); ?>" placeholder="시간">
+                                </div>
+                                <div class="program-assigned-container">
+                                    <input type="text" class="program-assigned-edit" value="<?php echo htmlspecialchars(is_array($item['assigned']) ? $item['assigned'][0] : $item['assigned']); ?>" placeholder="이름">
+                                    <input type="text" class="program-assigned-edit" value="<?php echo htmlspecialchars(is_array($item['assigned']) && isset($item['assigned'][1]) ? $item['assigned'][1] : ''); ?>" placeholder="이름">
+                                </div>
+                                <button type="button" class="btn-remove" onclick="removeProgram(this)">×</button>
+                            </div>
                         </div>
-                        <div class="program-assigned-container">
-                            <input type="text" class="program-assigned-edit" value="<?php echo htmlspecialchars(is_array($item['assigned']) ? $item['assigned'][0] : $item['assigned']); ?>" placeholder="이름">
-                            <input type="text" class="program-assigned-edit" value="<?php echo htmlspecialchars(is_array($item['assigned']) && isset($item['assigned'][1]) ? $item['assigned'][1] : ''); ?>" placeholder="이름">
+                    <?php endforeach; ?>
+                </div>
+                <button type="button" class="btn-add" onclick="addProgram('ministry')">+ 항목 추가</button>
+            </div>
+
+            <!-- 그리스도인 생활 -->
+            <div class="section section-living">
+                <div class="section-header living">
+                    <span class="section-icon dc-icon--sheep"></span>
+                    <input type="text" class="section-title-edit" id="section_living" name="sections[living]" value="<?php echo htmlspecialchars($data['sections']['living']); ?>" placeholder="섹션 제목">
+                </div>
+                <div id="livingContainer">
+                    <?php foreach ($categorized['living'] as $index => $item): ?>
+                        <div class="program-item" data-section="living" data-index="<?php echo $index; ?>">
+                            <div class="program-header">
+                                <div class="program-title-container">
+                                    <input type="text" class="program-title-edit" value="<?php echo htmlspecialchars($item['title']); ?>" placeholder="제목">
+                                    <input type="text" class="program-duration-edit" value="<?php echo htmlspecialchars($item['duration']); ?>" placeholder="시간">
+                                </div>
+                                <div class="program-assigned-container">
+                                    <input type="text" class="program-assigned-edit" value="<?php echo htmlspecialchars(is_array($item['assigned']) ? $item['assigned'][0] : $item['assigned']); ?>" placeholder="이름">
+                                    <input type="text" class="program-assigned-edit" value="<?php echo htmlspecialchars(is_array($item['assigned']) && isset($item['assigned'][1]) ? $item['assigned'][1] : ''); ?>" placeholder="이름">
+                                </div>
+                                <button type="button" class="btn-remove" onclick="removeProgram(this)">×</button>
+                            </div>
                         </div>
-                        <button type="button" class="btn-remove" onclick="removeProgram(this)">×</button>
+                    <?php endforeach; ?>
+                </div>
+                <button type="button" class="btn-add" onclick="addProgram('living')">+ 항목 추가</button>
+            </div>
+
+            <div class="assignments-section">
+                <div class="assignment-row">
+                    <div class="assignment-item">
+                        <span class="assignment-label">맺음말</span>
+                        <input type="text" class="assignment-input" id="closing_remarks" value="<?php echo htmlspecialchars($data['assignments']['closing_remarks']); ?>" placeholder="이름">
+                    </div>
+                    <div class="assignment-item">
+                        <span class="assignment-label">마치는 기도</span>
+                        <input type="text" class="assignment-input" id="closing_prayer" value="<?php echo htmlspecialchars($data['assignments']['closing_prayer']); ?>" placeholder="이름">
                     </div>
                 </div>
-                <?php endforeach; ?>
             </div>
-            <button type="button" class="btn-add" onclick="addProgram('ministry')">+ 항목 추가</button>
-        </div>
 
-        <!-- 그리스도인 생활 -->
-        <div class="section section-living">
-            <div class="section-header living">
-                <span class="section-icon">🐑</span>
-                <input type="text" class="section-title-edit" id="section_living" value="<?php echo htmlspecialchars($data['sections']['living']); ?>">
+            <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">WOL</span>
+                <input type="text" class="url-edit" id="url" value="<?php echo htmlspecialchars($data['url']); ?>" placeholder="URL 입력 (예: https://wol.jw.org/...)" style="flex: 1;">
             </div>
-            <div id="livingContainer">
-                <?php foreach ($categorized['living'] as $index => $item): ?>
-                <div class="program-item" data-section="living" data-index="<?php echo $index; ?>">
-                    <div class="program-header">
-                        <div class="program-title-container">
-                            <input type="text" class="program-title-edit" value="<?php echo htmlspecialchars($item['title']); ?>" placeholder="제목">
-                            <input type="text" class="program-duration-edit" value="<?php echo htmlspecialchars($item['duration']); ?>" placeholder="시간">
-                        </div>
-                        <div class="program-assigned-container">
-                            <input type="text" class="program-assigned-edit" value="<?php echo htmlspecialchars(is_array($item['assigned']) ? $item['assigned'][0] : $item['assigned']); ?>" placeholder="이름">
-                            <input type="text" class="program-assigned-edit" value="<?php echo htmlspecialchars(is_array($item['assigned']) && isset($item['assigned'][1]) ? $item['assigned'][1] : ''); ?>" placeholder="이름">
-                        </div>
-                        <button type="button" class="btn-remove" onclick="removeProgram(this)">×</button>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-            <button type="button" class="btn-add" onclick="addProgram('living')">+ 항목 추가</button>
-        </div>
-
-        <div class="assignments-section">
-            <div class="assignment-row">
-                <div class="assignment-item">
-                    <span class="assignment-label">맺음말</span>
-                    <input type="text" class="assignment-input" id="closing_remarks" value="<?php echo htmlspecialchars($data['assignments']['closing_remarks']); ?>" placeholder="이름">
-                </div>
-                <div class="assignment-item">
-                    <span class="assignment-label">마치는 기도</span>
-                    <input type="text" class="assignment-input" id="closing_prayer" value="<?php echo htmlspecialchars($data['assignments']['closing_prayer']); ?>" placeholder="이름">
-                </div>
-            </div>
-        </div>
-
-        <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
-            <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">WOL</span>
-            <input type="text" class="url-edit" id="url" value="<?php echo htmlspecialchars($data['url']); ?>" placeholder="URL 입력 (예: https://wol.jw.org/...)" style="flex: 1;">
-        </div>
         </div><!-- 프로그램 입력 영역 끝 -->
 
         <!-- 배정없음 섹션 -->
@@ -1160,23 +1201,23 @@ if (!empty($loggedInUserName)) {
             formData.append('action', 'get_weekday');
 
             fetch('api.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(result) {
-                if (result.success && result.weekday) {
-                    var radio = document.querySelector('input[name="meeting_weekday"][value="' + result.weekday + '"]');
-                    if (radio) {
-                        radio.checked = true;
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(result) {
+                    if (result.success && result.weekday) {
+                        var radio = document.querySelector('input[name="meeting_weekday"][value="' + result.weekday + '"]');
+                        if (radio) {
+                            radio.checked = true;
+                        }
                     }
-                }
-            })
-            .catch(function(error) {
-                console.error('평일집회 요일 로드 실패:', error);
-            });
+                })
+                .catch(function(error) {
+                    console.error('평일집회 요일 로드 실패:', error);
+                });
         }
 
         // 페이지 로드 시 평일집회 요일 로드
@@ -1304,49 +1345,49 @@ if (!empty($loggedInUserName)) {
 
             // 프로그램 데이터 저장
             fetch('api.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(function(response) {
-                console.log('Response status:', response.status);
-                return response.json();
-            })
-            .then(function(result) {
-                console.log('Result:', result);
-                if (result.success) {
-                    // 평일집회 요일 저장
-                    var weekdayFormData = new FormData();
-                    weekdayFormData.append('action', 'set_weekday');
-                    weekdayFormData.append('weekday', weekday);
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(response) {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(function(result) {
+                    console.log('Result:', result);
+                    if (result.success) {
+                        // 평일집회 요일 저장
+                        var weekdayFormData = new FormData();
+                        weekdayFormData.append('action', 'set_weekday');
+                        weekdayFormData.append('weekday', weekday);
 
-                    return fetch('api.php', {
-                        method: 'POST',
-                        body: weekdayFormData
-                    });
-                } else {
-                    hideLoading();
-                    alert('저장에 실패했습니다: ' + (result.error || '알 수 없는 오류'));
-                    throw new Error('Save failed');
-                }
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(result) {
-                // 성공 메시지 표시
-                showLoading('✓ 저장되었습니다!');
-                // 1.5초 후 오버레이 숨김
-                setTimeout(function() {
-                    hideLoading();
-                }, 1500);
-            })
-            .catch(function(error) {
-                if (error.message !== 'Save failed') {
-                    console.error('Error:', error);
-                    hideLoading();
-                    alert('저장 중 오류가 발생했습니다: ' + error.message);
-                }
-            });
+                        return fetch('api.php', {
+                            method: 'POST',
+                            body: weekdayFormData
+                        });
+                    } else {
+                        hideLoading();
+                        alert('저장에 실패했습니다: ' + (result.error || '알 수 없는 오류'));
+                        throw new Error('Save failed');
+                    }
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(result) {
+                    // 성공 메시지 표시
+                    showLoading('✓ 저장되었습니다!');
+                    // 1.5초 후 오버레이 숨김
+                    setTimeout(function() {
+                        hideLoading();
+                    }, 1500);
+                })
+                .catch(function(error) {
+                    if (error.message !== 'Save failed') {
+                        console.error('Error:', error);
+                        hideLoading();
+                        alert('저장 중 오류가 발생했습니다: ' + error.message);
+                    }
+                });
         }
 
         function deleteData() {
@@ -1366,26 +1407,26 @@ if (!empty($loggedInUserName)) {
             showLoading('삭제 중입니다...');
 
             fetch('api.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(result) {
-                hideLoading();
-                if (result.success) {
-                    alert('삭제되었습니다.');
-                    // 주차 선택 모달 표시
-                    showWeekSelector();
-                } else {
-                    alert('삭제에 실패했습니다: ' + (result.error || '알 수 없는 오류'));
-                }
-            })
-            .catch(function(error) {
-                hideLoading();
-                alert('삭제 중 오류가 발생했습니다: ' + error.message);
-            });
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(result) {
+                    hideLoading();
+                    if (result.success) {
+                        alert('삭제되었습니다.');
+                        // 주차 선택 모달 표시
+                        showWeekSelector();
+                    } else {
+                        alert('삭제에 실패했습니다: ' + (result.error || '알 수 없는 오류'));
+                    }
+                })
+                .catch(function(error) {
+                    hideLoading();
+                    alert('삭제 중 오류가 발생했습니다: ' + error.message);
+                });
         }
 
         function fetchFromWeb() {
@@ -1405,32 +1446,32 @@ if (!empty($loggedInUserName)) {
             formData.append('week', week);
 
             fetch('api.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(function(response) {
-                console.log('Fetch response status:', response.status);
-                return response.json();
-            })
-            .then(function(result) {
-                console.log('Fetch result:', result);
-                if (result.success) {
-                    // 성공 메시지로 업데이트
-                    showLoading('데이터를 가져왔습니다!\n페이지를 새로고침합니다...');
-                    // 페이지 새로고침 (임시 파일이 로드됨)
-                    setTimeout(function() {
-                        window.location.href = window.location.href;
-                    }, 800);
-                } else {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(response) {
+                    console.log('Fetch response status:', response.status);
+                    return response.json();
+                })
+                .then(function(result) {
+                    console.log('Fetch result:', result);
+                    if (result.success) {
+                        // 성공 메시지로 업데이트
+                        showLoading('데이터를 가져왔습니다!\n페이지를 새로고침합니다...');
+                        // 페이지 새로고침 (임시 파일이 로드됨)
+                        setTimeout(function() {
+                            window.location.href = window.location.href;
+                        }, 800);
+                    } else {
+                        hideLoading();
+                        alert('웹에서 데이터를 가져올 수 없습니다: ' + (result.error || '알 수 없는 오류'));
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error:', error);
                     hideLoading();
-                    alert('웹에서 데이터를 가져올 수 없습니다: ' + (result.error || '알 수 없는 오류'));
-                }
-            })
-            .catch(function(error) {
-                console.error('Error:', error);
-                hideLoading();
-                alert('웹에서 데이터를 가져오는 중 오류가 발생했습니다: ' + error.message);
-            });
+                    alert('웹에서 데이터를 가져오는 중 오류가 발생했습니다: ' + error.message);
+                });
         }
 
         // 자동 저장 (선택사항)
@@ -1451,26 +1492,26 @@ if (!empty($loggedInUserName)) {
             formData.append('action', 'list_weeks');
 
             fetch('api.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(result) {
-                hideLoading();
-                if (result.success) {
-                    renderWeekSelector(result.weeks);
-                    document.getElementById('weekSelectorModal').classList.remove('hidden');
-                    document.getElementById('weekSelectorOverlay').classList.add('active');
-                } else {
-                    alert('주차 목록을 불러올 수 없습니다.');
-                }
-            })
-            .catch(function(error) {
-                hideLoading();
-                alert('오류가 발생했습니다: ' + error.message);
-            });
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(result) {
+                    hideLoading();
+                    if (result.success) {
+                        renderWeekSelector(result.weeks);
+                        document.getElementById('weekSelectorModal').classList.remove('hidden');
+                        document.getElementById('weekSelectorOverlay').classList.add('active');
+                    } else {
+                        alert('주차 목록을 불러올 수 없습니다.');
+                    }
+                })
+                .catch(function(error) {
+                    hideLoading();
+                    alert('오류가 발생했습니다: ' + error.message);
+                });
         }
 
         function hideWeekSelector() {
@@ -1535,7 +1576,12 @@ if (!empty($loggedInUserName)) {
                     var hasData = weekMap[key] || false;
                     var isCurrent = (year === selectedYear && week === selectedWeek);
                     var isToday = (year === currentYear && week === currentWeek);
-                    var weekInfo = weekInfoMap[key] || {date: '', noMeeting: false, noMeetingTitle: '', noMeetingReason: ''};
+                    var weekInfo = weekInfoMap[key] || {
+                        date: '',
+                        noMeeting: false,
+                        noMeetingTitle: '',
+                        noMeetingReason: ''
+                    };
 
                     // 배정없음이면 hasData를 false로
                     if (weekInfo.noMeeting) {
@@ -1631,4 +1677,5 @@ if (!empty($loggedInUserName)) {
         }
     </script>
 </body>
+
 </html>
