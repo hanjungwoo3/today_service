@@ -529,19 +529,19 @@ foreach ($targetWeeks as $weekInfo) {
                     <div class="assignments-grid">
                         <div class="assignment-box">
                             <div class="assignment-label">사회자</div>
-                            <div class="assignment-value"><?php echo htmlspecialchars($data['assignments']['opening_remarks'] ?? '-'); ?></div>
+                            <div class="assignment-value"><?php echo htmlspecialchars(isset($data['assignments']['opening_remarks']) ? $data['assignments']['opening_remarks'] : '-'); ?></div>
                         </div>
                         <div class="assignment-box">
                             <div class="assignment-label">시작 기도</div>
-                            <div class="assignment-value"><?php echo htmlspecialchars($data['assignments']['opening_prayer'] ?? '-'); ?></div>
+                            <div class="assignment-value"><?php echo htmlspecialchars(isset($data['assignments']['opening_prayer']) ? $data['assignments']['opening_prayer'] : '-'); ?></div>
                         </div>
                         <div class="assignment-box">
                             <div class="assignment-label">맺음말</div>
-                            <div class="assignment-value"><?php echo htmlspecialchars($data['assignments']['closing_remarks'] ?? '-'); ?></div>
+                            <div class="assignment-value"><?php echo htmlspecialchars(isset($data['assignments']['closing_remarks']) ? $data['assignments']['closing_remarks'] : '-'); ?></div>
                         </div>
                         <div class="assignment-box">
                             <div class="assignment-label">마치는 기도</div>
-                            <div class="assignment-value"><?php echo htmlspecialchars($data['assignments']['closing_prayer'] ?? '-'); ?></div>
+                            <div class="assignment-value"><?php echo htmlspecialchars(isset($data['assignments']['closing_prayer']) ? $data['assignments']['closing_prayer'] : '-'); ?></div>
                         </div>
                     </div>
 
