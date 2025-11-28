@@ -103,7 +103,8 @@ if ($currentIndex > 0) {
 }
 
 // 프로그램을 섹션별로 분류
-function categorizePrograms($programs) {
+function categorizePrograms($programs)
+{
     $treasures = array();
     $ministry = array();
     $living = array();
@@ -255,6 +256,7 @@ if (!empty($loggedInUserName)) {
                             'week' => $weekInfo['week'],
                             'dateRange' => $dateRange,
                             'section' => $sectionName,
+                            'sectionType' => isset($item['section']) ? $item['section'] : '',
                             'title' => $item['title'],
                             'order' => 2 + $programIndex
                         );
@@ -328,6 +330,7 @@ if (!empty($loggedInUserName)) {
         }
         $groupedByDate[$dateKey]['items'][] = array(
             'section' => $assignment['section'],
+            'sectionType' => isset($assignment['sectionType']) ? $assignment['sectionType'] : '',
             'title' => $assignment['title']
         );
     }
@@ -335,18 +338,21 @@ if (!empty($loggedInUserName)) {
 }
 
 // 배정 순서 정렬을 위한 비교 함수
-function compareAssignmentOrder($a, $b) {
+function compareAssignmentOrder($a, $b)
+{
     return $a['order'] - $b['order'];
 }
 
 // 배정명 필터링을 위한 함수
-function filterAssignedNames($v) {
+function filterAssignedNames($v)
+{
     $trimmed = trim($v);
     return !empty($trimmed);
 }
 ?>
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -375,7 +381,7 @@ function filterAssignedNames($v) {
             background: white;
             border-radius: 6px;
             padding: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
 
         .header {
@@ -465,7 +471,7 @@ function filterAssignedNames($v) {
             width: 100%;
             max-height: 600px;
             overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
 
         .week-selector-header {
@@ -675,6 +681,36 @@ function filterAssignedNames($v) {
             line-height: 1.4;
         }
 
+        .my-assignment-title.type-treasures {
+            color: #00796B;
+            font-weight: 700;
+        }
+
+        .my-assignment-title.type-ministry {
+            color: #A86500;
+            font-weight: 700;
+        }
+
+        .my-assignment-title.type-living {
+            color: #8E201D;
+            font-weight: 700;
+        }
+
+        .my-assignment-section.type-treasures {
+            color: #00796B;
+            font-weight: 700;
+        }
+
+        .my-assignment-section.type-ministry {
+            color: #A86500;
+            font-weight: 700;
+        }
+
+        .my-assignment-section.type-living {
+            color: #8E201D;
+            font-weight: 700;
+        }
+
         .bible-reading {
             text-align: center;
             font-size: 15px;
@@ -691,7 +727,7 @@ function filterAssignedNames($v) {
         }
 
         .section-header {
-            color: white;
+            background: white;
             padding: 5px 8px;
             border-radius: 4px;
             font-size: 14px;
@@ -703,19 +739,40 @@ function filterAssignedNames($v) {
         }
 
         .section-header.treasures {
-            background: #4A919E;
+            color: #00796B;
         }
 
         .section-header.ministry {
-            background: #E87722;
+            color: #A86500;
         }
 
         .section-header.living {
-            background: #942926;
+            color: #8E201D;
         }
 
         .section-icon {
-            font-size: 16px;
+            font-size: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* WOL-style icons */
+        .dc-icon--gem {
+            background-image: url('../icons/icon-gem.png');
+        }
+
+        .dc-icon--wheat {
+            background-image: url('../icons/icon-wheat.png');
+        }
+
+        .dc-icon--sheep {
+            background-image: url('../icons/icon-sheep.png');
         }
 
         .program-item {
@@ -723,23 +780,12 @@ function filterAssignedNames($v) {
             margin-bottom: 4px;
             background: #f9f9f9;
             border-radius: 4px;
-            border-left: 3px solid #ddd;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .section-treasures .program-item {
-            border-left-color: #8DB9C4;
-        }
 
-        .section-ministry .program-item {
-            border-left-color: #F0A366;
-        }
-
-        .section-living .program-item {
-            border-left-color: #C16B6D;
-        }
 
         .program-info {
             flex: 1;
@@ -755,6 +801,18 @@ function filterAssignedNames($v) {
             flex: 1;
             word-break: break-word;
             overflow-wrap: break-word;
+        }
+
+        .section-treasures .program-title {
+            color: #00796B;
+        }
+
+        .section-ministry .program-title {
+            color: #A86500;
+        }
+
+        .section-living .program-title {
+            color: #8E201D;
         }
 
         .program-duration {
@@ -864,6 +922,7 @@ function filterAssignedNames($v) {
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="navigation">
@@ -907,25 +966,25 @@ function filterAssignedNames($v) {
                     <?php echo !empty($data['no_meeting_title']) ? htmlspecialchars($data['no_meeting_title']) : '배정없음'; ?>
                 </div>
                 <?php if (!empty($data['no_meeting_reason'])): ?>
-                <div style="background: white; padding: 12px; border-radius: 8px; width: calc(100% - 10px); margin: 0 auto;">
-                    <div style="font-size: 16px; color: #333; font-weight: 600; white-space: pre-line; text-align: left;"><?php echo htmlspecialchars($data['no_meeting_reason']); ?></div>
-                </div>
+                    <div style="background: white; padding: 12px; border-radius: 8px; width: calc(100% - 10px); margin: 0 auto;">
+                        <div style="font-size: 16px; color: #333; font-weight: 600; white-space: pre-line; text-align: left;"><?php echo htmlspecialchars($data['no_meeting_reason']); ?></div>
+                    </div>
                 <?php endif; ?>
             </div>
         <?php else: ?>
             <!-- 일반 프로그램 표시 -->
             <?php if (!empty($data['bible_reading'])): ?>
-            <div class="bible-reading">
-                <?php echo htmlspecialchars($data['bible_reading']); ?>
-            </div>
+                <div class="bible-reading">
+                    <?php echo htmlspecialchars($data['bible_reading']); ?>
+                </div>
             <?php endif; ?>
 
 
-        <div class="assignments-section">
-            <div class="assignment-row">
-                <div class="assignment-item">
-                    <span class="assignment-label">소개말</span>
-                    <?php
+            <div class="assignments-section">
+                <div class="assignment-row">
+                    <div class="assignment-item">
+                        <span class="assignment-label">소개말</span>
+                        <?php
                         $openingRemarksName = isset($data['assignments']['opening_remarks']) ? trim($data['assignments']['opening_remarks']) : '';
                         $isMyOpeningRemarks = !empty($loggedInUserName) && !empty($openingRemarksName) && $loggedInUserName === $openingRemarksName;
                         $openingRemarksClass = 'assignment-name';
@@ -934,14 +993,14 @@ function filterAssignedNames($v) {
                         } elseif ($isMyOpeningRemarks) {
                             $openingRemarksClass .= ' my-name';
                         }
-                    ?>
-                    <span class="<?php echo $openingRemarksClass; ?>">
-                        <?php echo !empty($openingRemarksName) ? htmlspecialchars($openingRemarksName) : '미배정'; ?>
-                    </span>
-                </div>
-                <div class="assignment-item">
-                    <span class="assignment-label">시작 기도</span>
-                    <?php
+                        ?>
+                        <span class="<?php echo $openingRemarksClass; ?>">
+                            <?php echo !empty($openingRemarksName) ? htmlspecialchars($openingRemarksName) : '미배정'; ?>
+                        </span>
+                    </div>
+                    <div class="assignment-item">
+                        <span class="assignment-label">시작 기도</span>
+                        <?php
                         $openingPrayerName = isset($data['assignments']['opening_prayer']) ? trim($data['assignments']['opening_prayer']) : '';
                         $isMyOpeningPrayer = !empty($loggedInUserName) && !empty($openingPrayerName) && $loggedInUserName === $openingPrayerName;
                         $openingPrayerClass = 'assignment-name';
@@ -950,160 +1009,160 @@ function filterAssignedNames($v) {
                         } elseif ($isMyOpeningPrayer) {
                             $openingPrayerClass .= ' my-name';
                         }
-                    ?>
-                    <span class="<?php echo $openingPrayerClass; ?>">
-                        <?php echo !empty($openingPrayerName) ? htmlspecialchars($openingPrayerName) : '미배정'; ?>
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        <?php if (!empty($categorized['treasures'])): ?>
-        <div class="section section-treasures">
-            <div class="section-header treasures">
-                <span class="section-icon">💎</span>
-                <span><?php echo htmlspecialchars($data['sections']['treasures']); ?></span>
-            </div>
-            <?php foreach ($categorized['treasures'] as $item): ?>
-            <div class="program-item">
-                <div class="program-info">
-                    <span class="program-title"><?php echo htmlspecialchars($item['title']); ?></span>
-                    <span class="program-duration"><?php echo htmlspecialchars($item['duration']); ?></span>
-                </div>
-                <?php
-                    // assigned가 배열인 경우 빈 값 제외
-                    $assignedNames = array();
-                    if (is_array($item['assigned'])) {
-                        $assignedNames = array_filter($item['assigned'], 'filterAssignedNames');
-                    } elseif (!empty($item['assigned'])) {
-                        $assignedNames = array($item['assigned']);
-                    }
-                ?>
-                <?php if (empty($assignedNames)): ?>
-                    <div class="program-assigned empty">미배정</div>
-                <?php else: ?>
-                    <?php foreach ($assignedNames as $name): ?>
-                        <?php
-                            $trimmedName = trim($name);
-                            $isMyName = !empty($loggedInUserName) && !empty($trimmedName) && $loggedInUserName === $trimmedName;
-                            $assignedClass = 'program-assigned';
-                            if ($isMyName) {
-                                $assignedClass .= ' my-name';
-                            }
                         ?>
-                        <div class="<?php echo $assignedClass; ?>">
-                            <?php echo htmlspecialchars($trimmedName); ?>
+                        <span class="<?php echo $openingPrayerClass; ?>">
+                            <?php echo !empty($openingPrayerName) ? htmlspecialchars($openingPrayerName) : '미배정'; ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <?php if (!empty($categorized['treasures'])): ?>
+                <div class="section section-treasures">
+                    <div class="section-header treasures">
+                        <span class="section-icon dc-icon--gem"></span>
+                        <span><?php echo htmlspecialchars($data['sections']['treasures']); ?></span>
+                    </div>
+                    <?php foreach ($categorized['treasures'] as $item): ?>
+                        <div class="program-item">
+                            <div class="program-info">
+                                <span class="program-title"><?php echo htmlspecialchars($item['title']); ?></span>
+                                <span class="program-duration"><?php echo htmlspecialchars($item['duration']); ?></span>
+                            </div>
+                            <?php
+                            // assigned가 배열인 경우 빈 값 제외
+                            $assignedNames = array();
+                            if (is_array($item['assigned'])) {
+                                $assignedNames = array_filter($item['assigned'], 'filterAssignedNames');
+                            } elseif (!empty($item['assigned'])) {
+                                $assignedNames = array($item['assigned']);
+                            }
+                            ?>
+                            <?php if (empty($assignedNames)): ?>
+                                <div class="program-assigned empty">미배정</div>
+                            <?php else: ?>
+                                <?php foreach ($assignedNames as $name): ?>
+                                    <?php
+                                    $trimmedName = trim($name);
+                                    $isMyName = !empty($loggedInUserName) && !empty($trimmedName) && $loggedInUserName === $trimmedName;
+                                    $assignedClass = 'program-assigned';
+                                    if ($isMyName) {
+                                        $assignedClass .= ' my-name';
+                                    }
+                                    ?>
+                                    <div class="<?php echo $assignedClass; ?>">
+                                        <?php echo htmlspecialchars($trimmedName); ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-            <?php endforeach; ?>
-        </div>
-        <?php endif; ?>
-
-        <?php if (!empty($categorized['ministry'])): ?>
-        <div class="section section-ministry">
-            <div class="section-header ministry">
-                <span class="section-icon">🌾</span>
-                <span><?php echo htmlspecialchars($data['sections']['ministry']); ?></span>
-            </div>
-            <?php foreach ($categorized['ministry'] as $item): ?>
-            <div class="program-item">
-                <div class="program-info">
-                    <span class="program-title"><?php echo htmlspecialchars($item['title']); ?></span>
-                    <span class="program-duration"><?php echo htmlspecialchars($item['duration']); ?></span>
                 </div>
-                <?php
-                    // assigned가 배열인 경우 빈 값 제외
-                    $assignedNames = array();
-                    if (is_array($item['assigned'])) {
-                        $assignedNames = array_filter($item['assigned'], 'filterAssignedNames');
-                    } elseif (!empty($item['assigned'])) {
-                        $assignedNames = array($item['assigned']);
-                    }
-                ?>
-                <?php if (empty($assignedNames)): ?>
-                    <div class="program-assigned empty">미배정</div>
-                <?php else: ?>
-                    <?php foreach ($assignedNames as $name): ?>
-                        <?php
-                            $trimmedName = trim($name);
-                            $isMyName = !empty($loggedInUserName) && !empty($trimmedName) && $loggedInUserName === $trimmedName;
-                            $assignedClass = 'program-assigned';
-                            if ($isMyName) {
-                                $assignedClass .= ' my-name';
+            <?php endif; ?>
+
+            <?php if (!empty($categorized['ministry'])): ?>
+                <div class="section section-ministry">
+                    <div class="section-header ministry">
+                        <span class="section-icon dc-icon--wheat"></span>
+                        <span><?php echo htmlspecialchars($data['sections']['ministry']); ?></span>
+                    </div>
+                    <?php foreach ($categorized['ministry'] as $item): ?>
+                        <div class="program-item">
+                            <div class="program-info">
+                                <span class="program-title"><?php echo htmlspecialchars($item['title']); ?></span>
+                                <span class="program-duration"><?php echo htmlspecialchars($item['duration']); ?></span>
+                            </div>
+                            <?php
+                            // assigned가 배열인 경우 빈 값 제외
+                            $assignedNames = array();
+                            if (is_array($item['assigned'])) {
+                                $assignedNames = array_filter($item['assigned'], 'filterAssignedNames');
+                            } elseif (!empty($item['assigned'])) {
+                                $assignedNames = array($item['assigned']);
                             }
-                        ?>
-                        <div class="<?php echo $assignedClass; ?>">
-                            <?php echo htmlspecialchars($trimmedName); ?>
+                            ?>
+                            <?php if (empty($assignedNames)): ?>
+                                <div class="program-assigned empty">미배정</div>
+                            <?php else: ?>
+                                <?php foreach ($assignedNames as $name): ?>
+                                    <?php
+                                    $trimmedName = trim($name);
+                                    $isMyName = !empty($loggedInUserName) && !empty($trimmedName) && $loggedInUserName === $trimmedName;
+                                    $assignedClass = 'program-assigned';
+                                    if ($isMyName) {
+                                        $assignedClass .= ' my-name';
+                                    }
+                                    ?>
+                                    <div class="<?php echo $assignedClass; ?>">
+                                        <?php echo htmlspecialchars($trimmedName); ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-            <?php endforeach; ?>
-        </div>
-        <?php endif; ?>
-
-        <?php if (!empty($categorized['living'])): ?>
-        <div class="section section-living">
-            <div class="section-header living">
-                <span class="section-icon">🐑</span>
-                <span><?php echo htmlspecialchars($data['sections']['living']); ?></span>
-            </div>
-            <?php foreach ($categorized['living'] as $item): ?>
-            <div class="program-item">
-                <div class="program-info">
-                    <span class="program-title"><?php echo htmlspecialchars($item['title']); ?></span>
-                    <span class="program-duration"><?php echo htmlspecialchars($item['duration']); ?></span>
                 </div>
-                <?php
-                    // assigned가 배열인 경우 빈 값 제외
-                    $assignedNames = array();
-                    if (is_array($item['assigned'])) {
-                        $assignedNames = array_filter($item['assigned'], 'filterAssignedNames');
-                    } elseif (!empty($item['assigned'])) {
-                        $assignedNames = array($item['assigned']);
-                    }
-                ?>
-                <?php if (empty($assignedNames)): ?>
-                    <div class="program-assigned empty">미배정</div>
-                <?php else: ?>
-                    <?php foreach ($assignedNames as $name): ?>
-                        <?php
-                            $trimmedName = trim($name);
-                            $isMyName = !empty($loggedInUserName) && !empty($trimmedName) && $loggedInUserName === $trimmedName;
-                            $assignedClass = 'program-assigned';
-                            if ($isMyName) {
-                                $assignedClass .= ' my-name';
+            <?php endif; ?>
+
+            <?php if (!empty($categorized['living'])): ?>
+                <div class="section section-living">
+                    <div class="section-header living">
+                        <span class="section-icon dc-icon--sheep"></span>
+                        <span><?php echo htmlspecialchars($data['sections']['living']); ?></span>
+                    </div>
+                    <?php foreach ($categorized['living'] as $item): ?>
+                        <div class="program-item">
+                            <div class="program-info">
+                                <span class="program-title"><?php echo htmlspecialchars($item['title']); ?></span>
+                                <span class="program-duration"><?php echo htmlspecialchars($item['duration']); ?></span>
+                            </div>
+                            <?php
+                            // assigned가 배열인 경우 빈 값 제외
+                            $assignedNames = array();
+                            if (is_array($item['assigned'])) {
+                                $assignedNames = array_filter($item['assigned'], 'filterAssignedNames');
+                            } elseif (!empty($item['assigned'])) {
+                                $assignedNames = array($item['assigned']);
                             }
-                        ?>
-                        <div class="<?php echo $assignedClass; ?>">
-                            <?php echo htmlspecialchars($trimmedName); ?>
+                            ?>
+                            <?php if (empty($assignedNames)): ?>
+                                <div class="program-assigned empty">미배정</div>
+                            <?php else: ?>
+                                <?php foreach ($assignedNames as $name): ?>
+                                    <?php
+                                    $trimmedName = trim($name);
+                                    $isMyName = !empty($loggedInUserName) && !empty($trimmedName) && $loggedInUserName === $trimmedName;
+                                    $assignedClass = 'program-assigned';
+                                    if ($isMyName) {
+                                        $assignedClass .= ' my-name';
+                                    }
+                                    ?>
+                                    <div class="<?php echo $assignedClass; ?>">
+                                        <?php echo htmlspecialchars($trimmedName); ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-            <?php endforeach; ?>
-        </div>
-        <?php endif; ?>
+                </div>
+            <?php endif; ?>
 
-        <?php if (empty($data['program'])): ?>
-        <div class="no-data">배정 정보가 없습니다.</div>
-        <?php endif; ?>
+            <?php if (empty($data['program'])): ?>
+                <div class="no-data">배정 정보가 없습니다.</div>
+            <?php endif; ?>
 
             <div class="assignments-section">
                 <div class="assignment-row">
                     <div class="assignment-item">
                         <span class="assignment-label">맺음말</span>
                         <?php
-                            $closingRemarksName = isset($data['assignments']['closing_remarks']) ? trim($data['assignments']['closing_remarks']) : '';
-                            $isMyClosingRemarks = !empty($loggedInUserName) && !empty($closingRemarksName) && $loggedInUserName === $closingRemarksName;
-                            $closingRemarksClass = 'assignment-name';
-                            if (empty($closingRemarksName)) {
-                                $closingRemarksClass .= ' empty';
-                            } elseif ($isMyClosingRemarks) {
-                                $closingRemarksClass .= ' my-name';
-                            }
+                        $closingRemarksName = isset($data['assignments']['closing_remarks']) ? trim($data['assignments']['closing_remarks']) : '';
+                        $isMyClosingRemarks = !empty($loggedInUserName) && !empty($closingRemarksName) && $loggedInUserName === $closingRemarksName;
+                        $closingRemarksClass = 'assignment-name';
+                        if (empty($closingRemarksName)) {
+                            $closingRemarksClass .= ' empty';
+                        } elseif ($isMyClosingRemarks) {
+                            $closingRemarksClass .= ' my-name';
+                        }
                         ?>
                         <span class="<?php echo $closingRemarksClass; ?>">
                             <?php echo !empty($closingRemarksName) ? htmlspecialchars($closingRemarksName) : '미배정'; ?>
@@ -1112,14 +1171,14 @@ function filterAssignedNames($v) {
                     <div class="assignment-item">
                         <span class="assignment-label">마치는 기도</span>
                         <?php
-                            $closingPrayerName = isset($data['assignments']['closing_prayer']) ? trim($data['assignments']['closing_prayer']) : '';
-                            $isMyClosingPrayer = !empty($loggedInUserName) && !empty($closingPrayerName) && $loggedInUserName === $closingPrayerName;
-                            $closingPrayerClass = 'assignment-name';
-                            if (empty($closingPrayerName)) {
-                                $closingPrayerClass .= ' empty';
-                            } elseif ($isMyClosingPrayer) {
-                                $closingPrayerClass .= ' my-name';
-                            }
+                        $closingPrayerName = isset($data['assignments']['closing_prayer']) ? trim($data['assignments']['closing_prayer']) : '';
+                        $isMyClosingPrayer = !empty($loggedInUserName) && !empty($closingPrayerName) && $loggedInUserName === $closingPrayerName;
+                        $closingPrayerClass = 'assignment-name';
+                        if (empty($closingPrayerName)) {
+                            $closingPrayerClass .= ' empty';
+                        } elseif ($isMyClosingPrayer) {
+                            $closingPrayerClass .= ' my-name';
+                        }
                         ?>
                         <span class="<?php echo $closingPrayerClass; ?>">
                             <?php echo !empty($closingPrayerName) ? htmlspecialchars($closingPrayerName) : '미배정'; ?>
@@ -1129,54 +1188,74 @@ function filterAssignedNames($v) {
             </div>
 
             <?php if (!empty($data['url'])): ?>
-            <div class="url-link">
-                <a href="<?php echo htmlspecialchars($data['url']); ?>" target="_blank"><?php echo htmlspecialchars($data['url']); ?></a>
-            </div>
+                <div class="url-link">
+                    <a href="<?php echo htmlspecialchars($data['url']); ?>" target="_blank"><?php echo htmlspecialchars($data['url']); ?></a>
+                </div>
             <?php endif; ?>
         <?php endif; ?>
 
         <?php if (!empty($myUpcomingAssignments)): ?>
-        <div class="my-assignments-section">
-            <div class="my-assignments-title">📋 이번 주 이후 나에게 배정된 특권</div>
-            <?php foreach ($myUpcomingAssignments as $dateGroup): ?>
-            <a href="view.php?year=<?php echo $dateGroup['year']; ?>&week=<?php echo $dateGroup['week']; ?>" class="my-assignment-item">
-                <div class="my-assignment-content">
-                    <?php
-                    $firstItem = true;
-                    $firstItemHasSection = !empty($dateGroup['items'][0]['section']);
-                    ?>
-                    <?php foreach ($dateGroup['items'] as $item): ?>
-                    <div class="my-assignment-line">
-                        <?php if ($firstItem && !empty($item['section'])): ?>
-                            <span class="my-assignment-date"><?php echo htmlspecialchars($dateGroup['dateRange']); ?> </span>
-                            <div class="my-assignment-section"><?php echo htmlspecialchars($item['section']); ?></div>
-                            <div class="my-assignment-title"><?php echo htmlspecialchars($item['title']); ?></div>
-                            <?php $firstItem = false; ?>
-                        <?php elseif ($firstItem && empty($item['section'])): ?>
-                            <div class="my-assignment-date" style="display: block; margin-bottom: 2px;"><?php echo htmlspecialchars($dateGroup['dateRange']); ?></div>
-                            <div class="my-assignment-section"><?php echo htmlspecialchars($item['title']); ?></div>
-                            <?php $firstItem = false; ?>
-                        <?php else: ?>
-                            <?php if (!empty($item['section'])): ?>
-                            <div class="my-assignment-section"><?php echo htmlspecialchars($item['section']); ?></div>
-                            <div class="my-assignment-title"><?php echo htmlspecialchars($item['title']); ?></div>
-                            <?php else: ?>
-                            <div class="my-assignment-section"><?php echo htmlspecialchars($item['title']); ?></div>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </a>
-            <?php endforeach; ?>
-        </div>
+            <div class="my-assignments-section">
+                <div class="my-assignments-title">📋 이번 주 이후 나에게 배정된 특권</div>
+                <?php foreach ($myUpcomingAssignments as $dateGroup): ?>
+                    <a href="view.php?year=<?php echo $dateGroup['year']; ?>&week=<?php echo $dateGroup['week']; ?>" class="my-assignment-item">
+                        <div class="my-assignment-content">
+                            <?php
+                            $firstItem = true;
+                            $firstItemHasSection = !empty($dateGroup['items'][0]['section']);
+                            ?>
+                            <?php foreach ($dateGroup['items'] as $item): ?>
+                                <div class="my-assignment-line">
+                                    <?php if ($firstItem && !empty($item['section'])): ?>
+                                        <span class="my-assignment-date"><?php echo htmlspecialchars($dateGroup['dateRange']); ?> </span>
+                                        <?php
+                                        $sectionClass = 'my-assignment-section';
+                                        if (!empty($item['sectionType'])) {
+                                            $sectionClass .= ' type-' . $item['sectionType'];
+                                        }
+                                        ?>
+                                        <div class="<?php echo $sectionClass; ?>"><?php echo htmlspecialchars($item['section']); ?></div>
+                                        <?php
+                                        $titleClass = 'my-assignment-title';
+                                        if (!empty($item['sectionType'])) {
+                                            $titleClass .= ' type-' . $item['sectionType'];
+                                        }
+                                        ?>
+                                        <div class="<?php echo $titleClass; ?>"><?php echo htmlspecialchars($item['title']); ?></div>
+                                        <?php $firstItem = false; ?>
+                                    <?php elseif ($firstItem && empty($item['section'])): ?>
+                                        <div class="my-assignment-date" style="display: block; margin-bottom: 2px;"><?php echo htmlspecialchars($dateGroup['dateRange']); ?></div>
+                                        <div class="my-assignment-section"><?php echo htmlspecialchars($item['title']); ?></div>
+                                        <?php $firstItem = false; ?>
+                                    <?php else: ?>
+                                        <?php
+                                        $titleClass = 'my-assignment-title';
+                                        $sectionClass = 'my-assignment-section';
+                                        if (!empty($item['sectionType'])) {
+                                            $titleClass .= ' type-' . $item['sectionType'];
+                                            $sectionClass .= ' type-' . $item['sectionType'];
+                                        }
+                                        ?>
+                                        <?php if (!empty($item['section'])): ?>
+                                            <div class="<?php echo $sectionClass; ?>"><?php echo htmlspecialchars($item['section']); ?></div>
+                                            <div class="<?php echo $titleClass; ?>"><?php echo htmlspecialchars($item['title']); ?></div>
+                                        <?php else: ?>
+                                            <div class="<?php echo $sectionClass; ?>"><?php echo htmlspecialchars($item['title']); ?></div>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
         <?php endif; ?>
         <div style="text-align: center; margin-top: 10px; padding: 10px 20px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-          <?php if ($is_admin): ?>
-          <a href="index.php?year=<?php echo $year; ?>&week=<?php echo $week; ?>"
-             id="adminBtn"
-             class="admin-btn"
-             style="display: inline-block;
+            <?php if ($is_admin): ?>
+                <a href="index.php?year=<?php echo $year; ?>&week=<?php echo $week; ?>"
+                    id="adminBtn"
+                    class="admin-btn"
+                    style="display: inline-block;
                     padding: 8px 16px;
                     background: #f1f5f9;
                     color: #94a3b8;
@@ -1187,12 +1266,12 @@ function filterAssignedNames($v) {
                     border: 1px solid #e2e8f0;
                     box-shadow: none;
                     transition: all 0.2s ease;">
-            <span id="adminBtnText">관리자모드로 보기</span>
-          </a>
-          <?php endif; ?>
-          <a href="#"
-             id="newWindowBtn"
-             style="display: none;
+                    <span id="adminBtnText">관리자모드로 보기</span>
+                </a>
+            <?php endif; ?>
+            <a href="#"
+                id="newWindowBtn"
+                style="display: none;
                     padding: 8px 16px;
                     background: #f1f5f9;
                     color: #94a3b8;
@@ -1203,34 +1282,34 @@ function filterAssignedNames($v) {
                     border: 1px solid #e2e8f0;
                     box-shadow: none;
                     transition: all 0.2s ease;">
-            새창으로 보기 ↗
-          </a>
+                새창으로 보기 ↗
+            </a>
         </div>
         <script>
-          // iframe 안에서만 새창으로 열기
-          (function() {
-            const isInIframe = window.self !== window.top;
-            const adminBtn = document.getElementById('adminBtn');
-            const newWindowBtn = document.getElementById('newWindowBtn');
+            // iframe 안에서만 새창으로 열기
+            (function() {
+                const isInIframe = window.self !== window.top;
+                const adminBtn = document.getElementById('adminBtn');
+                const newWindowBtn = document.getElementById('newWindowBtn');
 
-            if (isInIframe) {
-              <?php if ($is_admin): ?>
-              const adminBtnText = document.getElementById('adminBtnText');
-              adminBtnText.textContent = '관리자모드로 보기 ↗';
-              adminBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.open(this.href, '_blank', 'noopener,noreferrer');
-              });
-              <?php endif; ?>
+                if (isInIframe) {
+                    <?php if ($is_admin): ?>
+                        const adminBtnText = document.getElementById('adminBtnText');
+                        adminBtnText.textContent = '관리자모드로 보기 ↗';
+                        adminBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            window.open(this.href, '_blank', 'noopener,noreferrer');
+                        });
+                    <?php endif; ?>
 
-              // 새창으로 보기 버튼 표시
-              newWindowBtn.style.display = 'inline-block';
-              newWindowBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.open(window.location.href, '_blank', 'noopener,noreferrer');
-              });
-            }
-          })();
+                    // 새창으로 보기 버튼 표시
+                    newWindowBtn.style.display = 'inline-block';
+                    newWindowBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        window.open(window.location.href, '_blank', 'noopener,noreferrer');
+                    });
+                }
+            })();
         </script>
     </div>
 
@@ -1240,27 +1319,27 @@ function filterAssignedNames($v) {
 
         // 로그인한 사용자의 배정이 있는 주차 목록
         var myAssignedWeeks = <?php
-            $assignedWeeks = array();
-            if (!empty($myUpcomingAssignments)) {
-                foreach ($myUpcomingAssignments as $assignment) {
-                    $weekKey = $assignment['year'] . '_' . $assignment['week'];
-                    if (!in_array($weekKey, $assignedWeeks)) {
-                        $assignedWeeks[] = $weekKey;
-                    }
-                }
-            }
-            echo json_encode($assignedWeeks);
-        ?>;
+                                $assignedWeeks = array();
+                                if (!empty($myUpcomingAssignments)) {
+                                    foreach ($myUpcomingAssignments as $assignment) {
+                                        $weekKey = $assignment['year'] . '_' . $assignment['week'];
+                                        if (!in_array($weekKey, $assignedWeeks)) {
+                                            $assignedWeeks[] = $weekKey;
+                                        }
+                                    }
+                                }
+                                echo json_encode($assignedWeeks);
+                                ?>;
 
         // 데이터 없음 경고 표시
         <?php if ($showNoDataAlert): ?>
-        window.onload = function() {
-            alert('해당 주차의 배정 정보가 없습니다. 이번 주차로 이동합니다.');
-            // URL에서 nodata 파라미터 제거
-            var url = new URL(window.location.href);
-            url.searchParams.delete('nodata');
-            window.history.replaceState({}, document.title, url.toString());
-        };
+            window.onload = function() {
+                alert('해당 주차의 배정 정보가 없습니다. 이번 주차로 이동합니다.');
+                // URL에서 nodata 파라미터 제거
+                var url = new URL(window.location.href);
+                url.searchParams.delete('nodata');
+                window.history.replaceState({}, document.title, url.toString());
+            };
         <?php endif; ?>
 
         // 주차 선택 모달 표시
@@ -1269,24 +1348,24 @@ function filterAssignedNames($v) {
             formData.append('action', 'list_weeks');
 
             fetch('api.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(result) {
-                if (result.success) {
-                    renderWeekSelector(result.weeks);
-                    document.getElementById('weekSelectorModal').classList.remove('hidden');
-                    document.getElementById('weekSelectorOverlay').classList.add('active');
-                } else {
-                    alert('주차 목록을 불러올 수 없습니다.');
-                }
-            })
-            .catch(function(error) {
-                alert('오류가 발생했습니다: ' + error.message);
-            });
+                    method: 'POST',
+                    body: formData
+                })
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(result) {
+                    if (result.success) {
+                        renderWeekSelector(result.weeks);
+                        document.getElementById('weekSelectorModal').classList.remove('hidden');
+                        document.getElementById('weekSelectorOverlay').classList.add('active');
+                    } else {
+                        alert('주차 목록을 불러올 수 없습니다.');
+                    }
+                })
+                .catch(function(error) {
+                    alert('오류가 발생했습니다: ' + error.message);
+                });
         }
 
         function hideWeekSelector() {
@@ -1425,4 +1504,5 @@ function filterAssignedNames($v) {
         }
     </script>
 </body>
+
 </html>
