@@ -490,9 +490,11 @@ foreach ($targetWeeks as $weekInfo) {
             /* 주요 배정 정보 (공통 스타일 상속) */
 
             .section-header {
-                padding: 3px 6px;
-                margin-bottom: 3px;
-                font-size: 12px;
+                padding: 4px 6px;
+                /* 여백 약간 확대 */
+                margin-bottom: 4px;
+                font-size: 14px;
+                /* 폰트 확대 (12px -> 14px) */
             }
 
             .section-icon {
@@ -502,8 +504,8 @@ foreach ($targetWeeks as $weekInfo) {
             }
 
             .program-item {
-                padding: 3px 0;
-                /* 인쇄 시 항목 간격 최적화 (2주 출력 위해) */
+                padding: 4px 0;
+                /* 간격 약간 확대 (3px -> 4px) */
                 margin-bottom: 2px;
                 border-bottom: 1px solid #f5f5f5;
             }
