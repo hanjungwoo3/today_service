@@ -150,6 +150,7 @@ foreach ($targetWeeks as $weekInfo) {
             margin: 0 auto;
         }
 
+        /* 컨트롤 박스 스타일 개선 */
         .controls {
             background: white;
             padding: 15px;
@@ -157,8 +158,23 @@ foreach ($targetWeeks as $weekInfo) {
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
+            gap: 15px;
+        }
+
+        .controls-row-1 {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .controls-row-2 {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
         .month-nav {
@@ -168,7 +184,6 @@ foreach ($targetWeeks as $weekInfo) {
             font-size: 18px;
             font-weight: bold;
             white-space: nowrap;
-            /* 날짜 줄바꿈 방지 */
         }
 
         .nav-btn {
@@ -238,30 +253,51 @@ foreach ($targetWeeks as $weekInfo) {
             border-radius: 4px;
         }
 
-        /* 주요 배정 정보 한 줄로 압축 및 중앙 정렬 (웹/인쇄 공통) */
+        /* 주요 배정 정보 (2줄 배치) */
         .assignments-grid {
             display: flex;
             justify-content: center;
-            /* 전체 박스들을 중앙으로 정렬 */
             flex-wrap: wrap;
             gap: 8px;
             margin-bottom: 15px;
-            /* 간격 확대 */
             background: transparent;
             padding: 0;
         }
 
         .assignment-box {
             display: flex;
+            flex-direction: column;
+            /* 세로 배치 */
             align-items: center;
             justify-content: center;
-            /* 박스 내부 텍스트 중앙 정렬 */
             border: 1px solid #eee;
-            padding: 4px 10px;
+            padding: 8px 12px;
             border-radius: 4px;
             background: #f9f9f9;
-            width: auto;
-            /* 내용물 크기에 맞춤 */
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .assignment-label {
+            font-size: 12px;
+            margin-bottom: 4px;
+            /* 간격 추가 */
+            margin-right: 0;
+            white-space: nowrap;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .assignment-label::after {
+            content: none;
+            /* 콜론 제거 */
+        }
+
+        .assignment-value {
+            font-size: 14px;
+            white-space: nowrap;
+            font-weight: bold;
+            color: #333;
         }
 
         /* WOL 스타일 적용 */
@@ -377,25 +413,6 @@ foreach ($targetWeeks as $weekInfo) {
             background: #fff3e0;
         }
 
-        /* 주요 배정 정보 (사회자 등) 폰트 확대 */
-        .assignment-label {
-            font-size: 14px;
-            /* 폰트 확대 */
-            margin-bottom: 0;
-            margin-right: 5px;
-            white-space: nowrap;
-            color: #555;
-            font-weight: normal;
-        }
-
-        .assignment-value {
-            font-size: 14px;
-            /* 폰트 확대 */
-            white-space: nowrap;
-            font-weight: bold;
-            color: #333;
-        }
-
         /* 제외된 주차 스타일 */
         .week-card.excluded {
             opacity: 0.4;
@@ -403,33 +420,177 @@ foreach ($targetWeeks as $weekInfo) {
             background: #e0e0e0;
         }
 
-        /* 주차 선택 체크박스 영역 */
-        .week-selectors {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin: 0 20px;
+        /* 멀티 셀렉트 드롭다운 스타일 */
+        .multi-select-container {
+            position: relative;
+            width: 200px;
+            /* 너비 고정 */
         }
 
-        .week-checkbox-label {
+        .select-box {
+            position: relative;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 5px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
-            /* 폰트 크기 축소 */
-            font-weight: 500;
-            user-select: none;
-            color: #666;
-            /* 회색으로 변경 */
+            font-size: 14px;
+            color: #555;
         }
 
-        .week-checkbox-label input {
+        .select-box:hover {
+            background: #e9ecef;
+        }
+
+        .select-box::after {
+            content: '';
+            border: 5px solid transparent;
+            border-top-color: #666;
+            margin-left: 10px;
+            margin-top: 4px;
+        }
+
+        .checkboxes {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 4px;
+        }
+
+        .checkboxes.show {
+            display: block;
+        }
+
+        .checkboxes label {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        .checkboxes label:last-child {
+            border-bottom: none;
+        }
+
+        .checkboxes label:hover {
+            background: #f5f5f5;
+        }
+
+        .checkboxes input {
+            margin-right: 10px;
             width: 16px;
             height: 16px;
-            cursor: pointer;
+        }
+
+        /* 주차 선택 영역 스타일 재정의 */
+        .week-selectors {
+            display: flex;
+            justify-content: center;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        /* 모바일 대응 미디어 쿼리 */
+        @media (max-width: 600px) {
+            .controls {
+                padding: 10px;
+            }
+
+            .controls-top {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .controls-row-2 {
+                flex-direction: row;
+                /* 가로 배치 유지 */
+                align-items: stretch;
+                /* 높이 맞춤 */
+                gap: 8px;
+            }
+
+            .month-nav {
+                font-size: 16px;
+                gap: 10px;
+            }
+
+            .week-selectors {
+                justify-content: flex-start;
+                gap: 8px;
+            }
+
+            .multi-select-container {
+                width: auto;
+                flex: 1;
+                /* 남은 공간 차지 */
+                max-width: none;
+            }
+
+            .print-btn {
+                width: auto;
+                /* 내용물 크기만큼만 */
+                white-space: nowrap;
+                padding: 0 12px;
+                /* 좌우 패딩 조정 */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* 모바일에서 배정 정보 한 줄로 유지 */
+            .week-card {
+                padding: 10px;
+                /* 카드 패딩 축소 */
+            }
+
+            .assignments-grid {
+                flex-wrap: nowrap;
+                /* 줄바꿈 방지 */
+                gap: 4px;
+                /* 간격 축소 */
+                overflow-x: auto;
+                /* 필요시 스크롤 */
+                justify-content: space-between;
+            }
+
+            .assignment-box {
+                padding: 6px 2px;
+                /* 박스 내부 패딩 축소 */
+                min-width: 0;
+                /* 최소 너비 제거 (수축 허용) */
+                flex: 1;
+                /* 균등 분할 */
+                width: auto;
+            }
+
+            .assignment-label {
+                font-size: 11px;
+                /* 라벨 폰트 약간 축소 */
+                white-space: nowrap;
+            }
+
+            .assignment-value {
+                font-size: 13px;
+                /* 이름 폰트 약간 축소 */
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
         }
 
         /* 인쇄 전용 스타일 */
@@ -488,6 +649,19 @@ foreach ($targetWeeks as $weekInfo) {
             }
 
             /* 주요 배정 정보 (공통 스타일 상속) */
+            /* 인쇄 시에도 주요 배정 정보 2줄 유지 */
+            .assignment-box {
+                padding: 6px 10px;
+            }
+
+            .assignment-label {
+                font-size: 12px;
+                margin-bottom: 2px;
+            }
+
+            .assignment-value {
+                font-size: 14px;
+            }
 
             .section-header {
                 padding: 4px 6px;
@@ -532,15 +706,6 @@ foreach ($targetWeeks as $weekInfo) {
                 min-width: 90px;
                 white-space: nowrap;
             }
-
-            /* 인쇄 시에도 주요 배정 정보 폰트 유지 */
-            .assignment-label {
-                font-size: 14px;
-            }
-
-            .assignment-value {
-                font-size: 14px;
-            }
         }
     </style>
 </head>
@@ -549,25 +714,35 @@ foreach ($targetWeeks as $weekInfo) {
     <div class="page-container">
         <!-- 상단 컨트롤 (인쇄 시 숨김) -->
         <div class="controls">
-            <div class="month-nav">
-                <a href="?year=<?php echo $prevYear; ?>&month=<?php echo $prevMonth; ?>" class="nav-btn"><i class="bi bi-chevron-left"></i></a>
-                <span><?php echo $year; ?>년 <?php echo $month; ?>월</span>
-                <a href="?year=<?php echo $nextYear; ?>&month=<?php echo $nextMonth; ?>" class="nav-btn"><i class="bi bi-chevron-right"></i></a>
+            <!-- 1행: 년월 선택 -->
+            <div class="controls-row-1">
+                <div class="month-nav">
+                    <a href="?year=<?php echo $prevYear; ?>&month=<?php echo $prevMonth; ?>" class="nav-btn"><i class="bi bi-chevron-left"></i></a>
+                    <span><?php echo $year; ?>년 <?php echo $month; ?>월</span>
+                    <a href="?year=<?php echo $nextYear; ?>&month=<?php echo $nextMonth; ?>" class="nav-btn"><i class="bi bi-chevron-right"></i></a>
+                </div>
             </div>
 
-            <!-- 주차 선택 체크박스 -->
-            <div class="week-selectors">
-                <?php foreach ($weeksData as $index => $data): ?>
-                    <label class="week-checkbox-label">
-                        <input type="checkbox" checked onchange="toggleWeek(<?php echo $index; ?>)">
-                        <?php echo $data['date']; ?>
-                    </label>
-                <?php endforeach; ?>
-            </div>
+            <!-- 2행: 멀티 셀렉트 + 인쇄 버튼 -->
+            <div class="controls-row-2">
+                <div class="multi-select-container">
+                    <div class="select-box" onclick="toggleCheckboxes()">
+                        <span id="select-text">모든 주차 선택됨</span>
+                    </div>
+                    <div class="checkboxes" id="checkboxes">
+                        <?php foreach ($weeksData as $index => $data): ?>
+                            <label for="week-check-<?php echo $index; ?>">
+                                <input type="checkbox" id="week-check-<?php echo $index; ?>" checked onchange="toggleWeek(<?php echo $index; ?>)">
+                                <?php echo $data['date']; ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
 
-            <button onclick="window.print()" class="print-btn">
-                <i class="bi bi-printer"></i> 인쇄하기
-            </button>
+                <button onclick="window.print()" class="print-btn">
+                    <i class="bi bi-printer"></i> 인쇄하기
+                </button>
+            </div>
         </div>
 
         <!-- 주차별 데이터 출력 -->
@@ -682,12 +857,52 @@ foreach ($targetWeeks as $weekInfo) {
     </div>
 
     <script>
+        let expanded = false;
+
+        function toggleCheckboxes() {
+            const checkboxes = document.getElementById("checkboxes");
+            if (!expanded) {
+                checkboxes.style.display = "block";
+                expanded = true;
+            } else {
+                checkboxes.style.display = "none";
+                expanded = false;
+            }
+        }
+
+        // 외부 클릭 시 닫기
+        document.addEventListener('click', function(e) {
+            const container = document.querySelector('.multi-select-container');
+            if (expanded && !container.contains(e.target)) {
+                document.getElementById("checkboxes").style.display = "none";
+                expanded = false;
+            }
+        });
+
         function toggleWeek(index) {
             const card = document.getElementById('week-card-' + index);
             if (card) {
                 card.classList.toggle('excluded');
             }
+            updateSelectText();
         }
+
+        function updateSelectText() {
+            const total = <?php echo count($weeksData); ?>;
+            const excluded = document.querySelectorAll('.week-card.excluded').length;
+            const selected = total - excluded;
+            const textSpan = document.getElementById('select-text');
+
+            if (selected === total) {
+                textSpan.textContent = "모든 주차 선택됨";
+            } else if (selected === 0) {
+                textSpan.textContent = "선택된 주차 없음";
+            } else {
+                textSpan.textContent = selected + "개 주차 선택됨";
+            }
+        }
+        // Initial update on page load
+        document.addEventListener('DOMContentLoaded', updateSelectText);
     </script>
 </body>
 
