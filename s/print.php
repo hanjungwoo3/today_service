@@ -60,25 +60,12 @@ if ($nextMonth > 12) {
 }
 
 // 해당 월에 포함된 주차 계산
-// 1. 해당 월의 1일이 속한 주차부터 시작
-// 2. 해당 월의 마지막 날이 속한 주차까지 포함
-
-// ISO-8601 주차 계산 로직 사용
 function getWeeksInMonth($year, $month)
 {
     $weeks = array();
-
-    // 해당 월의 1일
     $firstDay = new DateTime("$year-$month-01");
-    // 해당 월의 마지막 날
     $lastDay = new DateTime("$year-$month-" . $firstDay->format('t'));
 
-    // 시작 주차
-    $startWeek = (int)$firstDay->format('W');
-    // 1월인데 주차가 52나 53이면 전년도 마지막 주차임. 하지만 여기서는 단순화를 위해 처리 필요.
-    // PHP date('W')는 월요일 시작 기준 ISO-8601 주차 번호 반환.
-
-    // 간단하게 해당 월의 모든 날짜를 순회하며 주차 번호를 수집 (중복 제거)
     $current = clone $firstDay;
     while ($current <= $lastDay) {
         $w = (int)$current->format('W');
@@ -131,7 +118,6 @@ foreach ($targetWeeks as $weekInfo) {
     $wData['categorized'] = $categorized;
     $weeksData[] = $wData;
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="ko">
@@ -142,11 +128,10 @@ foreach ($targetWeeks as $weekInfo) {
     <title><?php echo $year; ?>년 <?php echo $month; ?>월 평일집회 계획표</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        /* 기본 스타일 (view.php와 동일하게 유지하되 인쇄용 조정) */
+        /* 기본 스타일 */
         * {
             box-sizing: border-box;
             -webkit-print-color-adjust: exact;
-            /* 크롬, 사파리 등에서 배경색 인쇄 강제 */
             print-color-adjust: exact;
         }
 
@@ -156,6 +141,8 @@ foreach ($targetWeeks as $weekInfo) {
             margin: 0;
             padding: 20px;
             color: #333;
+            line-height: 1.6;
+            /* 줄간격 확대 */
         }
 
         .page-container {
@@ -220,7 +207,6 @@ foreach ($targetWeeks as $weekInfo) {
             padding: 15px;
             margin-bottom: 20px;
             page-break-inside: avoid;
-            /* 인쇄 시 중간에 잘리지 않도록 */
             border: 1px solid #e0e0e0;
         }
 
@@ -228,6 +214,7 @@ foreach ($targetWeeks as $weekInfo) {
             border-bottom: 2px solid #eee;
             padding-bottom: 10px;
             margin-bottom: 15px;
+            /* 간격 확대 */
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -247,35 +234,30 @@ foreach ($targetWeeks as $weekInfo) {
             border-radius: 4px;
         }
 
+        /* 주요 배정 정보 한 줄로 압축 및 중앙 정렬 (웹/인쇄 공통) */
         .assignments-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            display: flex;
+            justify-content: center;
+            /* 전체 박스들을 중앙으로 정렬 */
+            flex-wrap: wrap;
+            gap: 8px;
             margin-bottom: 15px;
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 6px;
+            /* 간격 확대 */
+            background: transparent;
+            padding: 0;
         }
 
         .assignment-box {
-            text-align: center;
-        }
-
-        .assignment-label {
-            font-size: 11px;
-            color: #666;
-            margin-bottom: 2px;
-            font-weight: 600;
-        }
-
-        .assignment-value {
-            font-size: 13px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .section {
-            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* 박스 내부 텍스트 중앙 정렬 */
+            border: 1px solid #eee;
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: #f9f9f9;
+            width: auto;
+            /* 내용물 크기에 맞춤 */
         }
 
         /* WOL 스타일 적용 */
@@ -284,8 +266,10 @@ foreach ($targetWeeks as $weekInfo) {
             padding: 5px 8px;
             border-radius: 4px;
             font-size: 14px;
+            /* 폰트 확대 */
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            /* 간격 확대 */
             display: flex;
             align-items: center;
             gap: 6px;
@@ -329,7 +313,8 @@ foreach ($targetWeeks as $weekInfo) {
         }
 
         .program-item {
-            padding: 4px 0;
+            padding: 8px 0;
+            /* 항목 간격 확대 (4px -> 8px) */
             margin-bottom: 4px;
             display: flex;
             align-items: center;
@@ -343,7 +328,8 @@ foreach ($targetWeeks as $weekInfo) {
         .program-title {
             flex: 1;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 14px;
+            /* 폰트 확대 */
             color: #333;
         }
 
@@ -362,13 +348,15 @@ foreach ($targetWeeks as $weekInfo) {
 
         .program-duration {
             color: #888;
-            font-size: 12px;
-            width: 50px;
+            font-size: 13px;
+            /* 폰트 확대 */
+            width: 55px;
             text-align: right;
         }
 
         .program-assigned {
-            font-size: 13px;
+            font-size: 14px;
+            /* 폰트 확대 */
             font-weight: 600;
             color: #333;
             margin-left: 15px;
@@ -383,90 +371,95 @@ foreach ($targetWeeks as $weekInfo) {
             color: #666;
             font-size: 16px;
             background: #fff3e0;
-            border-radius: 8px;
+        }
+
+        /* 주요 배정 정보 (사회자 등) 폰트 확대 */
+        .assignment-label {
+            font-size: 14px;
+            /* 폰트 확대 */
+            margin-bottom: 0;
+            margin-right: 5px;
+            white-space: nowrap;
+            color: #555;
+            font-weight: normal;
+        }
+
+        .assignment-value {
+            font-size: 14px;
+            /* 폰트 확대 */
+            white-space: nowrap;
+            font-weight: bold;
+            color: #333;
         }
 
         /* 인쇄 전용 스타일 */
         @media print {
-            @page {
-                size: landscape;
-                /* 가로 모드 설정 */
-            }
-
             body {
                 background: white;
-                padding: 8mm;
+                padding: 0;
                 margin: 0;
-                font-size: 12px;
+                font-size: 14px;
+                /* 인쇄 시 폰트도 14px로 확대 */
                 -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
 
+            /* 인쇄 시 컨트롤 박스 숨김 */
             .controls {
-                display: none;
+                display: none !important;
             }
 
             .page-container {
                 max-width: 100%;
                 width: 100%;
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
+                display: block;
             }
 
             .week-card {
                 box-shadow: none;
                 border: 1px solid #ccc;
-                padding: 12px;
-                margin-bottom: 0;
+                padding: 10px;
+                /* 패딩 축소 */
+                margin-bottom: 10px;
+                /* 마진 축소 */
                 break-inside: avoid;
                 page-break-inside: avoid;
             }
 
             .week-header {
-                margin-bottom: 12px;
-                padding-bottom: 8px;
-                border-bottom: 2px solid #eee;
+                margin-bottom: 8px;
+                padding-bottom: 5px;
+                border-bottom: 1px solid #eee;
             }
 
             .week-title {
-                font-size: 16px;
+                font-size: 15px;
             }
 
             .week-bible {
-                font-size: 12px;
-            }
-
-            .assignments-grid {
-                gap: 8px;
-                padding: 8px;
-                margin-bottom: 12px;
-                background: #f8f9fa;
-            }
-
-            .assignment-label {
                 font-size: 11px;
+                padding: 2px 6px;
             }
 
-            .assignment-value {
-                font-size: 12px;
-            }
+            /* 주요 배정 정보 (공통 스타일 상속) */
 
             .section-header {
-                padding: 5px 8px;
-                margin-bottom: 5px;
-                font-size: 13px;
+                padding: 3px 6px;
+                margin-bottom: 3px;
+                font-size: 12px;
             }
 
             .section-icon {
-                width: 18px;
-                height: 18px;
-                font-size: 16px;
+                width: 16px;
+                height: 16px;
+                font-size: 14px;
             }
 
             .program-item {
-                padding: 4px 0;
-                margin-bottom: 4px;
-                border-bottom: 1px solid #f0f0f0;
+                padding: 6px 0;
+                /* 인쇄 시에도 간격 확대 (4px -> 6px) */
+                margin-bottom: 3px;
+                border-bottom: 1px solid #f5f5f5;
             }
 
             /* 링크 URL 출력 방지 */
@@ -475,21 +468,32 @@ foreach ($targetWeeks as $weekInfo) {
             }
 
             .program-title {
-                font-size: 12px;
+                font-size: 14px;
+                /* 인쇄 시 폰트 확대 */
             }
 
             .program-duration {
-                font-size: 11px;
+                font-size: 13px;
                 width: 45px;
                 text-align: right;
             }
 
             .program-assigned {
-                font-size: 12px;
-                margin-left: 12px;
+                font-size: 14px;
+                /* 인쇄 시 폰트 확대 */
+                margin-left: 10px;
                 text-align: left;
                 min-width: 90px;
                 white-space: nowrap;
+            }
+
+            /* 인쇄 시에도 주요 배정 정보 폰트 유지 */
+            .assignment-label {
+                font-size: 14px;
+            }
+
+            .assignment-value {
+                font-size: 14px;
             }
         }
     </style>
@@ -559,12 +563,12 @@ foreach ($targetWeeks as $weekInfo) {
                                     <span class="program-title"><?php echo htmlspecialchars($item['title']); ?></span>
                                     <span class="program-duration">(<?php echo htmlspecialchars($item['duration']); ?>)</span>
                                     <span class="program-assigned"><?php
-                                        if (is_array($item['assigned'])) {
-                                            echo htmlspecialchars(implode(', ', array_filter($item['assigned'])));
-                                        } else {
-                                            echo htmlspecialchars($item['assigned']);
-                                        }
-                                    ?></span>
+                                                                    if (is_array($item['assigned'])) {
+                                                                        echo htmlspecialchars(implode(', ', array_filter($item['assigned'])));
+                                                                    } else {
+                                                                        echo htmlspecialchars($item['assigned']);
+                                                                    }
+                                                                    ?></span>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -582,12 +586,12 @@ foreach ($targetWeeks as $weekInfo) {
                                     <span class="program-title"><?php echo htmlspecialchars($item['title']); ?></span>
                                     <span class="program-duration">(<?php echo htmlspecialchars($item['duration']); ?>)</span>
                                     <span class="program-assigned"><?php
-                                        if (is_array($item['assigned'])) {
-                                            echo htmlspecialchars(implode(', ', array_filter($item['assigned'])));
-                                        } else {
-                                            echo htmlspecialchars($item['assigned']);
-                                        }
-                                    ?></span>
+                                                                    if (is_array($item['assigned'])) {
+                                                                        echo htmlspecialchars(implode(', ', array_filter($item['assigned'])));
+                                                                    } else {
+                                                                        echo htmlspecialchars($item['assigned']);
+                                                                    }
+                                                                    ?></span>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -605,12 +609,12 @@ foreach ($targetWeeks as $weekInfo) {
                                     <span class="program-title"><?php echo htmlspecialchars($item['title']); ?></span>
                                     <span class="program-duration">(<?php echo htmlspecialchars($item['duration']); ?>)</span>
                                     <span class="program-assigned"><?php
-                                        if (is_array($item['assigned'])) {
-                                            echo htmlspecialchars(implode(', ', array_filter($item['assigned'])));
-                                        } else {
-                                            echo htmlspecialchars($item['assigned']);
-                                        }
-                                    ?></span>
+                                                                    if (is_array($item['assigned'])) {
+                                                                        echo htmlspecialchars(implode(', ', array_filter($item['assigned'])));
+                                                                    } else {
+                                                                        echo htmlspecialchars($item['assigned']);
+                                                                    }
+                                                                    ?></span>
                                 </div>
                             <?php endforeach; ?>
                         </div>
