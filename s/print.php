@@ -167,6 +167,8 @@ foreach ($targetWeeks as $weekInfo) {
             gap: 15px;
             font-size: 18px;
             font-weight: bold;
+            white-space: nowrap;
+            /* 날짜 줄바꿈 방지 */
         }
 
         .nav-btn {
@@ -193,6 +195,8 @@ foreach ($targetWeeks as $weekInfo) {
             display: flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
+            /* 버튼 텍스트 줄바꿈 방지 */
         }
 
         .print-btn:hover {
@@ -392,6 +396,42 @@ foreach ($targetWeeks as $weekInfo) {
             color: #333;
         }
 
+        /* 제외된 주차 스타일 */
+        .week-card.excluded {
+            opacity: 0.4;
+            filter: grayscale(100%);
+            background: #e0e0e0;
+        }
+
+        /* 주차 선택 체크박스 영역 */
+        .week-selectors {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 0 20px;
+        }
+
+        .week-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            /* 폰트 크기 축소 */
+            font-weight: 500;
+            user-select: none;
+            color: #666;
+            /* 회색으로 변경 */
+        }
+
+        .week-checkbox-label input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
         /* 인쇄 전용 스타일 */
         @media print {
             body {
@@ -409,6 +449,11 @@ foreach ($targetWeeks as $weekInfo) {
                 display: none !important;
             }
 
+            /* 제외된 주차는 인쇄하지 않음 */
+            .week-card.excluded {
+                display: none !important;
+            }
+
             .page-container {
                 max-width: 100%;
                 width: 100%;
@@ -418,16 +463,17 @@ foreach ($targetWeeks as $weekInfo) {
             .week-card {
                 box-shadow: none;
                 border: 1px solid #ccc;
-                padding: 10px;
-                /* 패딩 축소 */
-                margin-bottom: 10px;
-                /* 마진 축소 */
+                padding: 8px;
+                /* 인쇄 시 패딩 약간 축소 (공간 확보) */
+                margin-bottom: 5px;
+                /* 인쇄 시 마진 축소 */
                 break-inside: avoid;
                 page-break-inside: avoid;
             }
 
             .week-header {
-                margin-bottom: 8px;
+                margin-bottom: 5px;
+                /* 헤더 마진 축소 */
                 padding-bottom: 5px;
                 border-bottom: 1px solid #eee;
             }
@@ -456,9 +502,9 @@ foreach ($targetWeeks as $weekInfo) {
             }
 
             .program-item {
-                padding: 6px 0;
-                /* 인쇄 시에도 간격 확대 (4px -> 6px) */
-                margin-bottom: 3px;
+                padding: 3px 0;
+                /* 인쇄 시 항목 간격 최적화 (2주 출력 위해) */
+                margin-bottom: 2px;
                 border-bottom: 1px solid #f5f5f5;
             }
 
@@ -469,7 +515,6 @@ foreach ($targetWeeks as $weekInfo) {
 
             .program-title {
                 font-size: 14px;
-                /* 인쇄 시 폰트 확대 */
             }
 
             .program-duration {
@@ -480,7 +525,6 @@ foreach ($targetWeeks as $weekInfo) {
 
             .program-assigned {
                 font-size: 14px;
-                /* 인쇄 시 폰트 확대 */
                 margin-left: 10px;
                 text-align: left;
                 min-width: 90px;
@@ -508,14 +552,25 @@ foreach ($targetWeeks as $weekInfo) {
                 <span><?php echo $year; ?>년 <?php echo $month; ?>월</span>
                 <a href="?year=<?php echo $nextYear; ?>&month=<?php echo $nextMonth; ?>" class="nav-btn"><i class="bi bi-chevron-right"></i></a>
             </div>
+
+            <!-- 주차 선택 체크박스 -->
+            <div class="week-selectors">
+                <?php foreach ($weeksData as $index => $data): ?>
+                    <label class="week-checkbox-label">
+                        <input type="checkbox" checked onchange="toggleWeek(<?php echo $index; ?>)">
+                        <?php echo $data['date']; ?>
+                    </label>
+                <?php endforeach; ?>
+            </div>
+
             <button onclick="window.print()" class="print-btn">
                 <i class="bi bi-printer"></i> 인쇄하기
             </button>
         </div>
 
         <!-- 주차별 데이터 출력 -->
-        <?php foreach ($weeksData as $data): ?>
-            <div class="week-card">
+        <?php foreach ($weeksData as $index => $data): ?>
+            <div class="week-card" id="week-card-<?php echo $index; ?>">
                 <div class="week-header">
                     <div class="week-title"><?php echo $data['date']; ?></div>
                     <?php if (!empty($data['bible_reading'])): ?>
@@ -623,6 +678,15 @@ foreach ($targetWeeks as $weekInfo) {
             </div>
         <?php endforeach; ?>
     </div>
+
+    <script>
+        function toggleWeek(index) {
+            const card = document.getElementById('week-card-' + index);
+            if (card) {
+                card.classList.toggle('excluded');
+            }
+        }
+    </script>
 </body>
 
 </html>
