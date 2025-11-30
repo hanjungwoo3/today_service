@@ -6,12 +6,14 @@
 
 require_once 'scraper.php';
 
-class MeetingDataManager {
+class MeetingDataManager
+{
 
     private $dataDir;
     private $scraper;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->dataDir = dirname(__FILE__) . '/data';
         $this->scraper = new MeetingLinkScraper();
 
@@ -24,7 +26,8 @@ class MeetingDataManager {
     /**
      * 평일집회 요일 설정 파일 경로
      */
-    private function getWeekdayFile() {
+    private function getWeekdayFile()
+    {
         return $this->dataDir . '/weekday.json';
     }
 
@@ -32,7 +35,8 @@ class MeetingDataManager {
      * 평일집회 요일 가져오기 (1=월요일 ~ 7=일요일)
      * 기본값: 3 (수요일)
      */
-    public function getMeetingWeekday() {
+    public function getMeetingWeekday()
+    {
         $file = $this->getWeekdayFile();
         if (file_exists($file)) {
             $content = file_get_contents($file);
@@ -47,7 +51,8 @@ class MeetingDataManager {
     /**
      * 평일집회 요일 저장하기
      */
-    public function setMeetingWeekday($weekday) {
+    public function setMeetingWeekday($weekday)
+    {
         $weekday = (int)$weekday;
         if ($weekday < 1 || $weekday > 7) {
             return false;
@@ -61,7 +66,8 @@ class MeetingDataManager {
      * 현재 주차 번호 가져오기
      * 평일집회 요일이 지나면 다음 주를 반환
      */
-    public function getCurrentWeek() {
+    public function getCurrentWeek()
+    {
         $date = new DateTime();
         $dayOfWeek = (int)$date->format('N'); // 1(월) ~ 7(일)
         $meetingWeekday = $this->getMeetingWeekday();
@@ -78,7 +84,8 @@ class MeetingDataManager {
      * 현재 연도 가져오기
      * 평일집회 요일이 지나면 다음 주 기준 연도 반환
      */
-    public function getCurrentYear() {
+    public function getCurrentYear()
+    {
         $date = new DateTime();
         $dayOfWeek = (int)$date->format('N'); // 1(월) ~ 7(일)
         $meetingWeekday = $this->getMeetingWeekday();
@@ -94,7 +101,8 @@ class MeetingDataManager {
     /**
      * JSON 파일 경로 생성
      */
-    private function getFilePath($year, $week) {
+    private function getFilePath($year, $week)
+    {
         $weekStr = str_pad($week, 2, '0', STR_PAD_LEFT);
         return $this->dataDir . '/' . $year . $weekStr . '.json';
     }
@@ -102,7 +110,8 @@ class MeetingDataManager {
     /**
      * 임시 JSON 파일 경로 생성
      */
-    private function getTempFilePath($year, $week) {
+    private function getTempFilePath($year, $week)
+    {
         $weekStr = str_pad($week, 2, '0', STR_PAD_LEFT);
         return $this->dataDir . '/' . $year . $weekStr . '_temp.json';
     }
@@ -110,14 +119,16 @@ class MeetingDataManager {
     /**
      * JSON 파일 존재 여부 확인
      */
-    public function exists($year, $week) {
+    public function exists($year, $week)
+    {
         return file_exists($this->getFilePath($year, $week));
     }
 
     /**
      * 웹에서 데이터 스크래핑하여 가져오기
      */
-    public function fetchFromWeb($year, $week) {
+    public function fetchFromWeb($year, $week)
+    {
         // 1. 주차 링크 가져오기
         $linkData = $this->scraper->getWeeklyLink($year, $week);
 
@@ -184,7 +195,8 @@ class MeetingDataManager {
     /**
      * JSON 파일 로드 (임시 파일 우선)
      */
-    public function load($year, $week) {
+    public function load($year, $week)
+    {
         // 임시 파일이 있으면 우선 로드
         $tempFilePath = $this->getTempFilePath($year, $week);
         if (file_exists($tempFilePath)) {
@@ -205,7 +217,8 @@ class MeetingDataManager {
     /**
      * 실제 JSON 파일만 로드 (임시 파일 무시)
      */
-    private function loadActualFile($year, $week) {
+    private function loadActualFile($year, $week)
+    {
         $filePath = $this->getFilePath($year, $week);
         if (!file_exists($filePath)) {
             return null;
@@ -218,7 +231,8 @@ class MeetingDataManager {
     /**
      * JSON 파일 저장
      */
-    public function save($year, $week, $data) {
+    public function save($year, $week, $data)
+    {
         $filePath = $this->getFilePath($year, $week);
 
         // 백업 디렉토리 생성
@@ -259,7 +273,8 @@ class MeetingDataManager {
     /**
      * 웹에서 가져온 데이터를 임시 파일에 저장
      */
-    public function saveTempData($year, $week, $data) {
+    public function saveTempData($year, $week, $data)
+    {
         $tempFilePath = $this->getTempFilePath($year, $week);
 
         $data['year'] = $year;
@@ -272,7 +287,8 @@ class MeetingDataManager {
     /**
      * 데이터 가져오기 (없으면 웹에서 스크래핑)
      */
-    public function getData($year, $week, $forceRefresh = false) {
+    public function getData($year, $week, $forceRefresh = false)
+    {
         if (!$forceRefresh && $this->exists($year, $week)) {
             return $this->load($year, $week);
         }
@@ -295,7 +311,8 @@ class MeetingDataManager {
     /**
      * 기존 배정 정보를 새 데이터에 병합
      */
-    public function mergeAssignments($year, $week, $newData) {
+    public function mergeAssignments($year, $week, $newData)
+    {
         // 실제 저장된 파일만 로드 (임시 파일 무시)
         $oldData = $this->loadActualFile($year, $week);
 
@@ -303,17 +320,50 @@ class MeetingDataManager {
             return $newData;
         }
 
-        // 기존 프로그램 항목을 제목으로 매핑
+        // 기존 프로그램 항목을 제목과 섹션+인덱스로 매핑
         $oldProgramMap = array();
-        foreach ($oldData['program'] as $item) {
+        $oldProgramBySection = array();
+        foreach ($oldData['program'] as $idx => $item) {
             $oldProgramMap[$item['title']] = $item['assigned'];
+            // 섹션별 인덱스로도 매핑
+            $section = isset($item['section']) ? $item['section'] : 'living';
+            if (!isset($oldProgramBySection[$section])) {
+                $oldProgramBySection[$section] = array();
+            }
+            $oldProgramBySection[$section][] = $item['assigned'];
+        }
+
+        // 새 데이터를 섹션별로 인덱싱
+        $newProgramBySection = array();
+        foreach ($newData['program'] as $idx => $item) {
+            $section = isset($item['section']) ? $item['section'] : 'living';
+            if (!isset($newProgramBySection[$section])) {
+                $newProgramBySection[$section] = array();
+            }
+            $newProgramBySection[$section][] = $idx;
         }
 
         // 새 데이터에 기존 배정 정보 병합
         foreach ($newData['program'] as $index => $item) {
+            $oldAssigned = null;
+
+            // 1. 먼저 제목으로 매칭 시도
             if (isset($oldProgramMap[$item['title']])) {
                 $oldAssigned = $oldProgramMap[$item['title']];
-                // 배열인지 확인하고, 값이 있는지 체크
+            } else {
+                // 2. 제목이 다르면 섹션+순서로 매칭
+                $section = isset($item['section']) ? $item['section'] : 'living';
+                if (isset($newProgramBySection[$section]) && isset($oldProgramBySection[$section])) {
+                    // 해당 섹션에서 현재 항목의 순서 찾기
+                    $sectionIndex = array_search($index, $newProgramBySection[$section]);
+                    if ($sectionIndex !== false && isset($oldProgramBySection[$section][$sectionIndex])) {
+                        $oldAssigned = $oldProgramBySection[$section][$sectionIndex];
+                    }
+                }
+            }
+
+            // 배정 정보 적용
+            if ($oldAssigned !== null) {
                 if (is_array($oldAssigned)) {
                     $hasValue = false;
                     foreach ($oldAssigned as $val) {
@@ -355,7 +405,8 @@ class MeetingDataManager {
     /**
      * 저장된 주차 목록 가져오기
      */
-    public function getAvailableWeeks() {
+    public function getAvailableWeeks()
+    {
         $files = glob($this->dataDir . '/*.json');
         $weeks = array();
 
@@ -394,7 +445,8 @@ class MeetingDataManager {
     /**
      * 주차 정렬을 위한 비교 함수
      */
-    private function compareWeeks($a, $b) {
+    private function compareWeeks($a, $b)
+    {
         if ($a['year'] !== $b['year']) {
             return $b['year'] - $a['year']; // 연도 내림차순
         }
@@ -404,7 +456,8 @@ class MeetingDataManager {
     /**
      * 특정 주차의 평일집회 요일 날짜를 계산 (형식: n월 j일)
      */
-    public function getMeetingDateForWeek($year, $week) {
+    public function getMeetingDateForWeek($year, $week)
+    {
         $meetingWeekday = $this->getMeetingWeekday();
 
         // ISO 8601 주차 계산
@@ -429,7 +482,8 @@ class MeetingDataManager {
     /**
      * 빈 데이터 구조 생성
      */
-    public function createEmpty($year, $week) {
+    public function createEmpty($year, $week)
+    {
         // 집회 요일 기준 날짜 계산
         $defaultDate = $this->getMeetingDateForWeek($year, $week);
 
@@ -510,7 +564,8 @@ class MeetingDataManager {
      * 오래된 주차 파일 아카이빙
      * 현재 주차 기준 2주 이전 파일들을 archive 폴더로 이동
      */
-    public function archiveOldWeeks() {
+    public function archiveOldWeeks()
+    {
         $currentYear = $this->getCurrentYear();
         $currentWeek = $this->getCurrentWeek();
 
@@ -548,7 +603,8 @@ class MeetingDataManager {
     /**
      * 특정 주차가 현재 주차보다 N주 이전인지 확인
      */
-    private function isOlderThanWeeks($fileYear, $fileWeek, $currentYear, $currentWeek, $weeksAgo) {
+    private function isOlderThanWeeks($fileYear, $fileWeek, $currentYear, $currentWeek, $weeksAgo)
+    {
         // ISO 8601 주차 기준으로 날짜 계산
         $fileDate = $this->getDateFromWeek($fileYear, $fileWeek);
         $currentDate = $this->getDateFromWeek($currentYear, $currentWeek);
@@ -563,7 +619,8 @@ class MeetingDataManager {
     /**
      * 연도와 주차로부터 DateTime 객체 생성 (ISO 8601)
      */
-    private function getDateFromWeek($year, $week) {
+    private function getDateFromWeek($year, $week)
+    {
         $jan4 = new DateTime($year . '-01-04');
         $jan4Day = (int)$jan4->format('N');
         $weekStart = clone $jan4;
@@ -575,7 +632,8 @@ class MeetingDataManager {
     /**
      * JSON 파일 삭제 (백업 후)
      */
-    public function delete($year, $week) {
+    public function delete($year, $week)
+    {
         $filePath = $this->getFilePath($year, $week);
 
         // 파일이 없으면 성공으로 처리
@@ -658,9 +716,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 // 기존 배정 정보와 병합
                 $data = $manager->mergeAssignments($year, $week, $data);
 
-                // 임시 파일에 저장
-                $manager->saveTempData($year, $week, $data);
-
+                // 데이터만 반환 (저장하지 않음)
                 echo json_encode(array('success' => true, 'data' => $data));
             }
             break;
@@ -698,5 +754,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
     exit;
 }
-
-?>
