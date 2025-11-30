@@ -320,10 +320,14 @@ class MeetingDataManager
             return $newData;
         }
 
-        // 기존 프로그램 항목을 제목과 섹션+인덱스로 매핑
+        // 기존 프로그램 항목을 제목과 섹션+인덱스로 매핑 (노래 제외)
         $oldProgramMap = array();
         $oldProgramBySection = array();
         foreach ($oldData['program'] as $idx => $item) {
+            // 노래 항목은 제외
+            if (strpos($item['title'], '노래') !== false) {
+                continue;
+            }
             $oldProgramMap[$item['title']] = $item['assigned'];
             // 섹션별 인덱스로도 매핑
             $section = isset($item['section']) ? $item['section'] : 'living';
@@ -333,9 +337,13 @@ class MeetingDataManager
             $oldProgramBySection[$section][] = $item['assigned'];
         }
 
-        // 새 데이터를 섹션별로 인덱싱
+        // 새 데이터를 섹션별로 인덱싱 (노래 제외)
         $newProgramBySection = array();
         foreach ($newData['program'] as $idx => $item) {
+            // 노래 항목은 제외
+            if (strpos($item['title'], '노래') !== false) {
+                continue;
+            }
             $section = isset($item['section']) ? $item['section'] : 'living';
             if (!isset($newProgramBySection[$section])) {
                 $newProgramBySection[$section] = array();
@@ -345,6 +353,11 @@ class MeetingDataManager
 
         // 새 데이터에 기존 배정 정보 병합
         foreach ($newData['program'] as $index => $item) {
+            // 노래 항목은 건너뛰기
+            if (strpos($item['title'], '노래') !== false) {
+                continue;
+            }
+
             $oldAssigned = null;
 
             // 1. 먼저 제목으로 매칭 시도
