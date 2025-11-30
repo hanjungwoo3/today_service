@@ -1239,7 +1239,7 @@ if (!empty($loggedInUserName)) {
                     $weekDate->setISODate($year, $week);
                     $printMonth = (int)$weekDate->format('n');
                     ?>
-                    <a href="print.php?year=<?php echo $year; ?>&month=<?php echo $printMonth; ?>" target="_blank" class="action-button" style="width: 100%; margin: 0; display: block; text-align: center; text-decoration: none; background: #2196F3; color: white;">🖨️ 프린트하기</a>
+                    <a href="print.php?year=<?php echo $year; ?>&month=<?php echo $printMonth; ?>" target="_blank" class="action-button" style="width: 100%; margin: 0; display: block; text-align: center; text-decoration: none; background: #666; color: white;">🖨️ 프린트하기</a>
                 </div>
             </div>
 
