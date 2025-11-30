@@ -125,7 +125,7 @@ foreach ($targetWeeks as $weekInfo) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $year; ?>년 <?php echo $month; ?>월 평일집회 계획표</title>
+    <title>평일 집회 계획표</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         /* 기본 스타일 */
@@ -136,21 +136,17 @@ foreach ($targetWeeks as $weekInfo) {
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Malgun Gothic', 'Dotum', sans-serif;
+            /* 문서 느낌 폰트 */
             background: #f0f2f5;
             margin: 0;
             padding: 20px;
-            color: #333;
-            line-height: 1.6;
-            /* 줄간격 확대 */
+            color: #000;
+            font-size: 14px;
+            /* 기본 폰트 확대 (13px -> 15px) */
         }
 
-        .page-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* 컨트롤 박스 스타일 개선 */
+        /* 컨트롤 박스 스타일 */
         .controls {
             background: white;
             padding: 15px;
@@ -161,6 +157,10 @@ foreach ($targetWeeks as $weekInfo) {
             flex-direction: column;
             align-items: center;
             gap: 15px;
+            max-width: 800px;
+            /* 인쇄 미리보기 폭에 맞춤 */
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .controls-row-1 {
@@ -173,7 +173,7 @@ foreach ($targetWeeks as $weekInfo) {
             width: 100%;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: stretch;
             gap: 10px;
         }
 
@@ -209,222 +209,18 @@ foreach ($targetWeeks as $weekInfo) {
             font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
             white-space: nowrap;
-            /* 버튼 텍스트 줄바꿈 방지 */
         }
 
         .print-btn:hover {
             background: #45a049;
         }
 
-        /* 주차별 카드 스타일 */
-        .week-card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            padding: 15px;
-            margin-bottom: 20px;
-            page-break-inside: avoid;
-            border: 1px solid #e0e0e0;
-        }
-
-        .week-header {
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-            /* 간격 확대 */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .week-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .week-bible {
-            font-size: 14px;
-            color: #666;
-            background: #f5f5f5;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-
-        /* 주요 배정 정보 (2줄 배치) */
-        .assignments-grid {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 15px;
-            background: transparent;
-            padding: 0;
-        }
-
-        .assignment-box {
-            display: flex;
-            flex-direction: column;
-            /* 세로 배치 */
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #eee;
-            padding: 8px 12px;
-            border-radius: 4px;
-            background: #f9f9f9;
-            min-width: 80px;
-            text-align: center;
-        }
-
-        .assignment-label {
-            font-size: 12px;
-            margin-bottom: 4px;
-            /* 간격 추가 */
-            margin-right: 0;
-            white-space: nowrap;
-            color: #666;
-            font-weight: normal;
-        }
-
-        .assignment-label::after {
-            content: none;
-            /* 콜론 제거 */
-        }
-
-        .assignment-value {
-            font-size: 14px;
-            white-space: nowrap;
-            font-weight: bold;
-            color: #333;
-        }
-
-        /* WOL 스타일 적용 */
-        .section-header {
-            background: white;
-            padding: 5px 8px;
-            border-radius: 4px;
-            font-size: 14px;
-            /* 폰트 확대 */
-            font-weight: 700;
-            margin-bottom: 8px;
-            /* 간격 확대 */
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .section-header.treasures {
-            color: #00796B;
-        }
-
-        .section-header.ministry {
-            color: #A86500;
-        }
-
-        .section-header.living {
-            color: #8E201D;
-        }
-
-        .section-icon {
-            font-size: 18px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
-
-        .dc-icon--gem {
-            background-image: url('../icons/icon-gem.png');
-        }
-
-        .dc-icon--wheat {
-            background-image: url('../icons/icon-wheat.png');
-        }
-
-        .dc-icon--sheep {
-            background-image: url('../icons/icon-sheep.png');
-        }
-
-        .program-item {
-            padding: 8px 0;
-            /* 항목 간격 확대 (4px -> 8px) */
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .program-item:last-child {
-            border-bottom: none;
-        }
-
-        .program-title {
-            flex: 1;
-            font-weight: 600;
-            font-size: 14px;
-            /* 폰트 확대 */
-            color: #333;
-        }
-
-        /* 섹션별 프로그램 제목 색상 */
-        .section-treasures .program-title {
-            color: #00796B;
-        }
-
-        .section-ministry .program-title {
-            color: #A86500;
-        }
-
-        .section-living .program-title {
-            color: #8E201D;
-        }
-
-        .program-duration {
-            color: #888;
-            font-size: 13px;
-            /* 폰트 확대 */
-            width: 55px;
-            text-align: right;
-        }
-
-        .program-assigned {
-            font-size: 14px;
-            /* 폰트 확대 */
-            font-weight: 600;
-            color: #333;
-            margin-left: 15px;
-            text-align: left;
-            min-width: 100px;
-            white-space: nowrap;
-        }
-
-        .no-meeting-msg {
-            text-align: center;
-            padding: 30px;
-            color: #666;
-            font-size: 16px;
-            background: #fff3e0;
-        }
-
-        /* 제외된 주차 스타일 */
-        .week-card.excluded {
-            opacity: 0.4;
-            filter: grayscale(100%);
-            background: #e0e0e0;
-        }
-
-        /* 멀티 셀렉트 드롭다운 스타일 */
+        /* 멀티 셀렉트 드롭다운 */
         .multi-select-container {
             position: relative;
             width: 200px;
-            /* 너비 고정 */
         }
 
         .select-box {
@@ -439,6 +235,7 @@ foreach ($targetWeeks as $weekInfo) {
             cursor: pointer;
             font-size: 14px;
             color: #555;
+            height: 100%;
         }
 
         .select-box:hover {
@@ -493,103 +290,185 @@ foreach ($targetWeeks as $weekInfo) {
 
         .checkboxes input {
             margin-right: 10px;
-            width: 16px;
-            height: 16px;
         }
 
-        /* 주차 선택 영역 스타일 재정의 */
-        .week-selectors {
+        /* =========================================
+           문서 양식 스타일 (인쇄 및 웹 미리보기 공통)
+           ========================================= */
+        .page-container {
+            max-width: 210mm;
+            /* A4 폭 */
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .doc-header {
             display: flex;
-            justify-content: center;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 3px solid #333;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
         }
 
-        /* 모바일 대응 미디어 쿼리 */
+        .congregation-name {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .doc-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* 주차별 블록 */
+        .week-block {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+
+        .week-block.excluded {
+            opacity: 0.3;
+            filter: grayscale(100%);
+        }
+
+        /* 주차 헤더 (날짜 | 성경읽기 vs 사회자/기도) */
+        .week-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .week-left {
+            font-size: 16px;
+            /* 15px -> 17px */
+            font-weight: bold;
+        }
+
+        .week-right {
+            text-align: right;
+            font-size: 13px;
+            /* 12px -> 14px */
+            line-height: 1.4;
+        }
+
+        .role-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .role-label {
+            font-weight: bold;
+            color: #555;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .role-name {
+            min-width: 60px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        /* 프로그램 테이블 */
+        .program-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            /* 12px -> 14px */
+        }
+
+        .program-table td {
+            padding: 5px 5px;
+            /* 패딩 약간 확대 */
+            vertical-align: top;
+        }
+
+        /* 열 너비 조정 */
+        .col-time {
+            width: 45px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .col-content {}
+
+        .col-label {
+            width: 90px;
+            text-align: right;
+            color: #555;
+            font-size: 12px;
+        }
+
+        .col-assignee {
+            width: 130px;
+            font-weight: bold;
+        }
+
+        .col-aux {
+            width: 80px;
+            text-align: right;
+            color: #777;
+            font-size: 12px;
+        }
+
+        /* 보조교실 */
+
+        /* 섹션 헤더 띠지 */
+        .section-row td {
+            padding: 6px 10px;
+            font-weight: bold;
+            color: white;
+            font-size: 14px;
+            /* 13px -> 15px */
+        }
+
+        .bg-treasures {
+            background-color: #546E7A;
+        }
+
+        /* 성경에 담긴 보물 (청회색) */
+        .bg-ministry {
+            background-color: #C18C00;
+        }
+
+        /* 야외 봉사에 힘쓰십시오 (황토색) */
+        .bg-living {
+            background-color: #8E201D;
+        }
+
+        /* 그리스도인 생활 (자주색) */
+
+        .program-title {
+            font-weight: normal;
+        }
+
+        .bullet {
+            margin-right: 5px;
+            color: #333;
+        }
+
+        /* 모바일 대응 */
         @media (max-width: 600px) {
-            .controls {
-                padding: 10px;
-            }
-
-            .controls-top {
-                flex-direction: column;
-                gap: 10px;
-            }
-
             .controls-row-2 {
                 flex-direction: row;
-                /* 가로 배치 유지 */
-                align-items: stretch;
-                /* 높이 맞춤 */
-                gap: 8px;
-            }
-
-            .month-nav {
-                font-size: 16px;
-                gap: 10px;
-            }
-
-            .week-selectors {
-                justify-content: flex-start;
-                gap: 8px;
             }
 
             .multi-select-container {
                 width: auto;
                 flex: 1;
-                /* 남은 공간 차지 */
-                max-width: none;
             }
 
-            .print-btn {
-                width: auto;
-                /* 내용물 크기만큼만 */
-                white-space: nowrap;
-                padding: 0 12px;
-                /* 좌우 패딩 조정 */
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            /* 모바일에서 배정 정보 한 줄로 유지 */
-            .week-card {
+            .page-container {
                 padding: 10px;
-                /* 카드 패딩 축소 */
             }
 
-            .assignments-grid {
-                flex-wrap: nowrap;
-                /* 줄바꿈 방지 */
-                gap: 4px;
-                /* 간격 축소 */
-                overflow-x: auto;
-                /* 필요시 스크롤 */
-                justify-content: space-between;
-            }
-
-            .assignment-box {
-                padding: 6px 2px;
-                /* 박스 내부 패딩 축소 */
-                min-width: 0;
-                /* 최소 너비 제거 (수축 허용) */
-                flex: 1;
-                /* 균등 분할 */
-                width: auto;
-            }
-
-            .assignment-label {
-                font-size: 11px;
-                /* 라벨 폰트 약간 축소 */
-                white-space: nowrap;
-            }
-
-            .assignment-value {
-                font-size: 13px;
-                /* 이름 폰트 약간 축소 */
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                overflow: hidden;
+            .doc-title {
+                font-size: 20px;
             }
         }
 
@@ -600,260 +479,232 @@ foreach ($targetWeeks as $weekInfo) {
                 padding: 0;
                 margin: 0;
                 font-size: 14px;
-                /* 인쇄 시 폰트도 14px로 확대 */
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                /* 인쇄 시에도 15px 유지 */
             }
 
-            /* 인쇄 시 컨트롤 박스 숨김 */
             .controls {
                 display: none !important;
             }
 
-            /* 제외된 주차는 인쇄하지 않음 */
-            .week-card.excluded {
+            .week-block.excluded {
                 display: none !important;
             }
 
             .page-container {
-                max-width: 100%;
-                width: 100%;
-                display: block;
-            }
-
-            .week-card {
                 box-shadow: none;
-                border: 1px solid #ccc;
-                padding: 8px;
-                /* 인쇄 시 패딩 약간 축소 (공간 확보) */
-                margin-bottom: 5px;
-                /* 인쇄 시 마진 축소 */
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .week-block {
+                margin-bottom: 20px;
                 break-inside: avoid;
-                page-break-inside: avoid;
-            }
-
-            .week-header {
-                margin-bottom: 5px;
-                /* 헤더 마진 축소 */
-                padding-bottom: 5px;
-                border-bottom: 1px solid #eee;
-            }
-
-            .week-title {
-                font-size: 15px;
-            }
-
-            .week-bible {
-                font-size: 11px;
-                padding: 2px 6px;
-            }
-
-            /* 주요 배정 정보 (공통 스타일 상속) */
-            /* 인쇄 시에도 주요 배정 정보 2줄 유지 */
-            .assignment-box {
-                padding: 6px 10px;
-            }
-
-            .assignment-label {
-                font-size: 12px;
-                margin-bottom: 2px;
-            }
-
-            .assignment-value {
-                font-size: 14px;
-            }
-
-            .section-header {
-                padding: 4px 6px;
-                /* 여백 약간 확대 */
-                margin-bottom: 4px;
-                font-size: 14px;
-                /* 폰트 확대 (12px -> 14px) */
-            }
-
-            .section-icon {
-                width: 16px;
-                height: 16px;
-                font-size: 14px;
-            }
-
-            .program-item {
-                padding: 4px 0;
-                /* 간격 약간 확대 (3px -> 4px) */
-                margin-bottom: 2px;
-                border-bottom: 1px solid #f5f5f5;
-            }
-
-            /* 링크 URL 출력 방지 */
-            a[href]:after {
-                content: none !important;
-            }
-
-            .program-title {
-                font-size: 14px;
-            }
-
-            .program-duration {
-                font-size: 13px;
-                width: 45px;
-                text-align: right;
-            }
-
-            .program-assigned {
-                font-size: 14px;
-                margin-left: 10px;
-                text-align: left;
-                min-width: 90px;
-                white-space: nowrap;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="page-container">
-        <!-- 상단 컨트롤 (인쇄 시 숨김) -->
-        <div class="controls">
-            <!-- 1행: 년월 선택 -->
-            <div class="controls-row-1">
-                <div class="month-nav">
-                    <a href="?year=<?php echo $prevYear; ?>&month=<?php echo $prevMonth; ?>" class="nav-btn"><i class="bi bi-chevron-left"></i></a>
-                    <span><?php echo $year; ?>년 <?php echo $month; ?>월</span>
-                    <a href="?year=<?php echo $nextYear; ?>&month=<?php echo $nextMonth; ?>" class="nav-btn"><i class="bi bi-chevron-right"></i></a>
-                </div>
-            </div>
-
-            <!-- 2행: 멀티 셀렉트 + 인쇄 버튼 -->
-            <div class="controls-row-2">
-                <div class="multi-select-container">
-                    <div class="select-box" onclick="toggleCheckboxes()">
-                        <span id="select-text">모든 주차 선택됨</span>
-                    </div>
-                    <div class="checkboxes" id="checkboxes">
-                        <?php foreach ($weeksData as $index => $data): ?>
-                            <label for="week-check-<?php echo $index; ?>">
-                                <input type="checkbox" id="week-check-<?php echo $index; ?>" checked onchange="toggleWeek(<?php echo $index; ?>)">
-                                <?php echo $data['date']; ?>
-                            </label>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-
-                <button onclick="window.print()" class="print-btn">
-                    <i class="bi bi-printer"></i> 인쇄하기
-                </button>
+    <!-- 상단 컨트롤 -->
+    <div class="controls">
+        <div class="controls-row-1">
+            <div class="month-nav">
+                <a href="?year=<?php echo $prevYear; ?>&month=<?php echo $prevMonth; ?>" class="nav-btn"><i class="bi bi-chevron-left"></i></a>
+                <span><?php echo $year; ?>년 <?php echo $month; ?>월</span>
+                <a href="?year=<?php echo $nextYear; ?>&month=<?php echo $nextMonth; ?>" class="nav-btn"><i class="bi bi-chevron-right"></i></a>
             </div>
         </div>
-
-        <!-- 주차별 데이터 출력 -->
-        <?php foreach ($weeksData as $index => $data): ?>
-            <div class="week-card" id="week-card-<?php echo $index; ?>">
-                <div class="week-header">
-                    <div class="week-title"><?php echo $data['date']; ?></div>
-                    <?php if (!empty($data['bible_reading'])): ?>
-                        <div class="week-bible">성경 읽기: <?php echo htmlspecialchars($data['bible_reading']); ?></div>
-                    <?php endif; ?>
+        <div class="controls-row-2">
+            <div class="multi-select-container">
+                <div class="select-box" onclick="toggleCheckboxes()">
+                    <span id="select-text">모든 주차 선택됨</span>
                 </div>
-
-                <?php if (!empty($data['no_meeting'])): ?>
-                    <div class="no-meeting-msg">
-                        <strong><?php echo htmlspecialchars($data['no_meeting_title']); ?></strong>
-                        <?php if (!empty($data['no_meeting_reason'])): ?>
-                            <br><?php echo nl2br(htmlspecialchars($data['no_meeting_reason'])); ?>
-                        <?php endif; ?>
-                    </div>
-                <?php else: ?>
-                    <!-- 주요 배정 (사회자, 기도 등) -->
-                    <div class="assignments-grid">
-                        <div class="assignment-box">
-                            <div class="assignment-label">사회자</div>
-                            <div class="assignment-value"><?php echo htmlspecialchars(isset($data['assignments']['opening_remarks']) ? $data['assignments']['opening_remarks'] : '-'); ?></div>
-                        </div>
-                        <div class="assignment-box">
-                            <div class="assignment-label">시작 기도</div>
-                            <div class="assignment-value"><?php echo htmlspecialchars(isset($data['assignments']['opening_prayer']) ? $data['assignments']['opening_prayer'] : '-'); ?></div>
-                        </div>
-                        <div class="assignment-box">
-                            <div class="assignment-label">맺음말</div>
-                            <div class="assignment-value"><?php echo htmlspecialchars(isset($data['assignments']['closing_remarks']) ? $data['assignments']['closing_remarks'] : '-'); ?></div>
-                        </div>
-                        <div class="assignment-box">
-                            <div class="assignment-label">마치는 기도</div>
-                            <div class="assignment-value"><?php echo htmlspecialchars(isset($data['assignments']['closing_prayer']) ? $data['assignments']['closing_prayer'] : '-'); ?></div>
-                        </div>
-                    </div>
-
-                    <!-- 1. 성경에 담긴 보물 -->
-                    <?php if (!empty($data['categorized']['treasures'])): ?>
-                        <div class="section section-treasures">
-                            <div class="section-header treasures">
-                                <span class="section-icon dc-icon--gem"></span>
-                                <span><?php echo htmlspecialchars($data['sections']['treasures']); ?></span>
-                            </div>
-                            <?php foreach ($data['categorized']['treasures'] as $item): ?>
-                                <div class="program-item">
-                                    <span class="program-title"><?php echo htmlspecialchars($item['title']); ?></span>
-                                    <span class="program-duration">(<?php echo htmlspecialchars($item['duration']); ?>)</span>
-                                    <span class="program-assigned"><?php
-                                                                    if (is_array($item['assigned'])) {
-                                                                        echo htmlspecialchars(implode(', ', array_filter($item['assigned'])));
-                                                                    } else {
-                                                                        echo htmlspecialchars($item['assigned']);
-                                                                    }
-                                                                    ?></span>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <!-- 2. 야외 봉사에 힘쓰십시오 -->
-                    <?php if (!empty($data['categorized']['ministry'])): ?>
-                        <div class="section section-ministry">
-                            <div class="section-header ministry">
-                                <span class="section-icon dc-icon--wheat"></span>
-                                <span><?php echo htmlspecialchars($data['sections']['ministry']); ?></span>
-                            </div>
-                            <?php foreach ($data['categorized']['ministry'] as $item): ?>
-                                <div class="program-item">
-                                    <span class="program-title"><?php echo htmlspecialchars($item['title']); ?></span>
-                                    <span class="program-duration">(<?php echo htmlspecialchars($item['duration']); ?>)</span>
-                                    <span class="program-assigned"><?php
-                                                                    if (is_array($item['assigned'])) {
-                                                                        echo htmlspecialchars(implode(', ', array_filter($item['assigned'])));
-                                                                    } else {
-                                                                        echo htmlspecialchars($item['assigned']);
-                                                                    }
-                                                                    ?></span>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <!-- 3. 그리스도인 생활 -->
-                    <?php if (!empty($data['categorized']['living'])): ?>
-                        <div class="section section-living">
-                            <div class="section-header living">
-                                <span class="section-icon dc-icon--sheep"></span>
-                                <span><?php echo htmlspecialchars($data['sections']['living']); ?></span>
-                            </div>
-                            <?php foreach ($data['categorized']['living'] as $item): ?>
-                                <div class="program-item">
-                                    <span class="program-title"><?php echo htmlspecialchars($item['title']); ?></span>
-                                    <span class="program-duration">(<?php echo htmlspecialchars($item['duration']); ?>)</span>
-                                    <span class="program-assigned"><?php
-                                                                    if (is_array($item['assigned'])) {
-                                                                        echo htmlspecialchars(implode(', ', array_filter($item['assigned'])));
-                                                                    } else {
-                                                                        echo htmlspecialchars($item['assigned']);
-                                                                    }
-                                                                    ?></span>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-                <?php endif; ?>
+                <div class="checkboxes" id="checkboxes">
+                    <?php foreach ($weeksData as $index => $data): ?>
+                        <label for="week-check-<?php echo $index; ?>">
+                            <input type="checkbox" id="week-check-<?php echo $index; ?>" checked onchange="toggleWeek(<?php echo $index; ?>)">
+                            <?php echo $data['date']; ?>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
             </div>
-        <?php endforeach; ?>
+            <button onclick="window.print()" class="print-btn">
+                <i class="bi bi-printer"></i> 인쇄하기
+            </button>
+        </div>
+    </div>
+
+    <div class="page-container">
+        <!-- 인쇄 시 매 페이지마다 반복될 헤더를 위해 테이블 구조 사용 -->
+        <table style="width: 100%; border-collapse: collapse; border: none;">
+            <thead>
+                <tr>
+                    <td style="border: none; padding: 0;">
+                        <div class="doc-header">
+                            <div class="congregation-name">시흥장현회중</div>
+                            <div class="doc-title">평일 집회 계획표</div>
+                        </div>
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="border: none; padding: 0;">
+                        <?php foreach ($weeksData as $index => $data): ?>
+                            <?php
+                            // 노래 찾기
+                            $songs = [];
+                            if (!empty($data['program'])) {
+                                foreach ($data['program'] as $item) {
+                                    if (strpos($item['title'], '노래') !== false) {
+                                        $songs[] = $item['title'];
+                                    }
+                                }
+                            }
+                            $openingSong = isset($songs[0]) ? $songs[0] : '노래';
+                            $middleSong = isset($songs[1]) ? $songs[1] : '노래';
+                            $closingSong = isset($songs[2]) ? $songs[2] : '노래';
+                            ?>
+                            <div class="week-block" id="week-block-<?php echo $index; ?>">
+                                <!-- 주차 헤더 정보 -->
+                                <div class="week-info-header">
+                                    <div class="week-left">
+                                        <?php echo $data['date']; ?> | 주간 성경 읽기: <?php echo htmlspecialchars($data['bible_reading']); ?>
+                                    </div>
+                                    <div class="week-right">
+                                        <div class="role-row">
+                                            <span class="role-label">사회자:</span>
+                                            <span class="role-name"><?php echo htmlspecialchars($data['assignments']['opening_remarks'] ?? ''); ?></span>
+                                        </div>
+
+                                        <div class="role-row">
+                                            <span class="role-label">기도:</span>
+                                            <span class="role-name"><?php echo htmlspecialchars($data['assignments']['opening_prayer'] ?? ''); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <?php if (!empty($data['no_meeting'])): ?>
+                                    <div style="padding: 20px; text-align: center; background: #eee; border-radius: 4px;">
+                                        <strong><?php echo htmlspecialchars($data['no_meeting_title']); ?></strong>
+                                        <br><?php echo nl2br(htmlspecialchars($data['no_meeting_reason'])); ?>
+                                    </div>
+                                <?php else: ?>
+                                    <table class="program-table">
+                                        <!-- 노래 및 소개말 -->
+                                        <tr>
+                                            <td class="col-time">0:00</td>
+                                            <td class="col-content"><span class="bullet">●</span><?php echo htmlspecialchars($openingSong); ?></td>
+                                            <td class="col-label"></td>
+                                            <td class="col-assignee"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-time">0:05</td>
+                                            <td class="col-content"><span class="bullet">●</span>소개말 (1분)</td>
+                                            <td class="col-label"></td>
+                                            <td class="col-assignee"></td>
+                                        </tr>
+
+                                        <!-- 1. 성경에 담긴 보물 -->
+                                        <tr class="section-row">
+                                            <td colspan="5" class="bg-treasures">성경에 담긴 보물</td>
+                                        </tr>
+                                        <?php if (!empty($data['categorized']['treasures'])): ?>
+                                            <?php foreach ($data['categorized']['treasures'] as $item): ?>
+                                                <tr>
+                                                    <td class="col-time"></td>
+                                                    <td class="col-content">
+                                                        <?php echo htmlspecialchars($item['title']); ?>
+                                                        (<?php echo htmlspecialchars($item['duration']); ?>)
+                                                    </td>
+                                                    <td class="col-label">
+                                                        <?php if (strpos($item['title'], '성경 낭독') !== false) echo '학생:'; ?>
+                                                    </td>
+                                                    <td class="col-assignee">
+                                                        <?php
+                                                        if (is_array($item['assigned'])) echo htmlspecialchars(implode(', ', array_filter($item['assigned'])));
+                                                        else echo htmlspecialchars($item['assigned']);
+                                                        ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+
+                                        <!-- 2. 야외 봉사에 힘쓰십시오 -->
+                                        <tr class="section-row">
+                                            <td colspan="5" class="bg-ministry">야외 봉사에 힘쓰십시오</td>
+                                        </tr>
+                                        <?php if (!empty($data['categorized']['ministry'])): ?>
+                                            <?php foreach ($data['categorized']['ministry'] as $item): ?>
+                                                <tr>
+                                                    <td class="col-time"></td>
+                                                    <td class="col-content">
+                                                        <?php echo htmlspecialchars($item['title']); ?>
+                                                        (<?php echo htmlspecialchars($item['duration']); ?>)
+                                                    </td>
+                                                    <td class="col-label">학생/보조자:</td>
+                                                    <td class="col-assignee">
+                                                        <?php
+                                                        if (is_array($item['assigned'])) echo htmlspecialchars(implode(', ', array_filter($item['assigned'])));
+                                                        else echo htmlspecialchars($item['assigned']);
+                                                        ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+
+                                        <!-- 3. 그리스도인 생활 -->
+                                        <tr class="section-row">
+                                            <td colspan="5" class="bg-living">그리스도인 생활</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-time"></td>
+                                            <td class="col-content"><span class="bullet">●</span><?php echo htmlspecialchars($middleSong); ?></td>
+                                            <td class="col-label"></td>
+                                            <td class="col-assignee"></td>
+                                        </tr>
+                                        <?php if (!empty($data['categorized']['living'])): ?>
+                                            <?php foreach ($data['categorized']['living'] as $item): ?>
+                                                <tr>
+                                                    <td class="col-time"></td>
+                                                    <td class="col-content">
+                                                        <?php echo htmlspecialchars($item['title']); ?>
+                                                        (<?php echo htmlspecialchars($item['duration']); ?>)
+                                                    </td>
+                                                    <td class="col-label">
+                                                        <?php if (strpos($item['title'], '회중 성서 연구') !== false) echo '사회자/낭독자:'; ?>
+                                                    </td>
+                                                    <td class="col-assignee">
+                                                        <?php
+                                                        if (is_array($item['assigned'])) echo htmlspecialchars(implode(', ', array_filter($item['assigned'])));
+                                                        else echo htmlspecialchars($item['assigned']);
+                                                        ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                        <tr>
+                                            <td class="col-time"></td>
+                                            <td class="col-content"><span class="bullet">●</span>맺음말 (3분)</td>
+                                            <td class="col-label"></td>
+                                            <td class="col-assignee"><?php echo htmlspecialchars($data['assignments']['closing_remarks'] ?? ''); ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="col-time"></td>
+                                            <td class="col-content"><span class="bullet">●</span><?php echo htmlspecialchars($closingSong); ?></td>
+                                            <td class="col-label">기도:</td>
+                                            <td class="col-assignee"><?php echo htmlspecialchars($data['assignments']['closing_prayer'] ?? ''); ?></td>
+                                        </tr>
+                                    </table>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <script>
@@ -862,34 +713,33 @@ foreach ($targetWeeks as $weekInfo) {
         function toggleCheckboxes() {
             const checkboxes = document.getElementById("checkboxes");
             if (!expanded) {
-                checkboxes.style.display = "block";
+                checkboxes.classList.add('show');
                 expanded = true;
             } else {
-                checkboxes.style.display = "none";
+                checkboxes.classList.remove('show');
                 expanded = false;
             }
         }
 
-        // 외부 클릭 시 닫기
         document.addEventListener('click', function(e) {
             const container = document.querySelector('.multi-select-container');
             if (expanded && !container.contains(e.target)) {
-                document.getElementById("checkboxes").style.display = "none";
+                document.getElementById("checkboxes").classList.remove('show');
                 expanded = false;
             }
         });
 
         function toggleWeek(index) {
-            const card = document.getElementById('week-card-' + index);
-            if (card) {
-                card.classList.toggle('excluded');
+            const block = document.getElementById('week-block-' + index);
+            if (block) {
+                block.classList.toggle('excluded');
             }
             updateSelectText();
         }
 
         function updateSelectText() {
             const total = <?php echo count($weeksData); ?>;
-            const excluded = document.querySelectorAll('.week-card.excluded').length;
+            const excluded = document.querySelectorAll('.week-block.excluded').length;
             const selected = total - excluded;
             const textSpan = document.getElementById('select-text');
 
@@ -901,7 +751,6 @@ foreach ($targetWeeks as $weekInfo) {
                 textSpan.textContent = selected + "개 주차 선택됨";
             }
         }
-        // Initial update on page load
         document.addEventListener('DOMContentLoaded', updateSelectText);
     </script>
 </body>
