@@ -555,7 +555,7 @@ foreach ($targetWeeks as $weekInfo) {
                         <?php foreach ($weeksData as $index => $data): ?>
                             <?php
                             // 노래 찾기
-                            $songs = [];
+                            $songs = array();
                             if (!empty($data['program'])) {
                                 foreach ($data['program'] as $item) {
                                     if (strpos($item['title'], '노래') !== false) {
@@ -576,12 +576,12 @@ foreach ($targetWeeks as $weekInfo) {
                                     <div class="week-right">
                                         <div class="role-row">
                                             <span class="role-label">사회자:</span>
-                                            <span class="role-name"><?php echo htmlspecialchars($data['assignments']['opening_remarks'] ?? ''); ?></span>
+                                            <span class="role-name"><?php echo htmlspecialchars(isset($data['assignments']['opening_remarks']) ? $data['assignments']['opening_remarks'] : ''); ?></span>
                                         </div>
 
                                         <div class="role-row">
                                             <span class="role-label">기도:</span>
-                                            <span class="role-name"><?php echo htmlspecialchars($data['assignments']['opening_prayer'] ?? ''); ?></span>
+                                            <span class="role-name"><?php echo htmlspecialchars(isset($data['assignments']['opening_prayer']) ? $data['assignments']['opening_prayer'] : ''); ?></span>
                                         </div>
                                     </div>
                                 </div>
@@ -689,13 +689,13 @@ foreach ($targetWeeks as $weekInfo) {
                                             <td class="col-time"></td>
                                             <td class="col-content"><span class="bullet">●</span>맺음말 (3분)</td>
                                             <td class="col-label"></td>
-                                            <td class="col-assignee"><?php echo htmlspecialchars($data['assignments']['closing_remarks'] ?? ''); ?></td>
+                                            <td class="col-assignee"><?php echo htmlspecialchars(isset($data['assignments']['closing_remarks']) ? $data['assignments']['closing_remarks'] : ''); ?></td>
                                         </tr>
                                         <tr>
                                             <td class="col-time"></td>
                                             <td class="col-content"><span class="bullet">●</span><?php echo htmlspecialchars($closingSong); ?></td>
                                             <td class="col-label">기도:</td>
-                                            <td class="col-assignee"><?php echo htmlspecialchars($data['assignments']['closing_prayer'] ?? ''); ?></td>
+                                            <td class="col-assignee"><?php echo htmlspecialchars(isset($data['assignments']['closing_prayer']) ? $data['assignments']['closing_prayer'] : ''); ?></td>
                                         </tr>
                                     </table>
                                 <?php endif; ?>
