@@ -149,31 +149,29 @@ foreach ($targetWeeks as $weekInfo) {
         /* 컨트롤 박스 스타일 */
         .controls {
             background: white;
-            padding: 15px;
+            padding: 15px 20px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            max-width: 800px;
-            /* 인쇄 미리보기 폭에 맞춤 */
+            width: 210mm;
+            /* 너비 고정 */
+            min-width: 210mm;
+            /* 최소 너비 고정 */
             margin-left: auto;
             margin-right: auto;
         }
 
-        .controls-row-1 {
-            width: 100%;
+        .controls-row {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 20px;
         }
 
-        .controls-row-2 {
-            width: 100%;
+        .right-controls {
             display: flex;
-            justify-content: center;
-            align-items: stretch;
+            align-items: center;
             gap: 10px;
         }
 
@@ -296,12 +294,16 @@ foreach ($targetWeeks as $weekInfo) {
            문서 양식 스타일 (인쇄 및 웹 미리보기 공통)
            ========================================= */
         .page-container {
-            max-width: 210mm;
-            /* A4 폭 */
+            width: 210mm;
+            /* 고정 너비 설정 (약 794px) */
+            min-width: 210mm;
+            /* 최소 너비 고정 */
             margin: 0 auto;
             background: white;
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            /* 내부 컨텐츠 넘침 방지 */
         }
 
         .doc-header {
@@ -316,11 +318,15 @@ foreach ($targetWeeks as $weekInfo) {
         .congregation-name {
             font-size: 16px;
             font-weight: bold;
+            white-space: nowrap;
+            /* 줄바꿈 방지 */
         }
 
         .doc-title {
             font-size: 24px;
             font-weight: bold;
+            white-space: nowrap;
+            /* 줄바꿈 방지 */
         }
 
         /* 주차별 블록 */
@@ -346,6 +352,8 @@ foreach ($targetWeeks as $weekInfo) {
             font-size: 16px;
             /* 15px -> 17px */
             font-weight: bold;
+            white-space: nowrap;
+            /* 줄바꿈 방지 */
         }
 
         .week-right {
@@ -353,6 +361,8 @@ foreach ($targetWeeks as $weekInfo) {
             font-size: 13px;
             /* 12px -> 14px */
             line-height: 1.4;
+            white-space: nowrap;
+            /* 줄바꿈 방지 */
         }
 
         .role-row {
@@ -386,6 +396,8 @@ foreach ($targetWeeks as $weekInfo) {
             padding: 5px 5px;
             /* 패딩 약간 확대 */
             vertical-align: top;
+            white-space: nowrap;
+            /* 테이블 셀 내용 줄바꿈 방지 */
         }
 
         /* 열 너비 조정 */
@@ -395,7 +407,11 @@ foreach ($targetWeeks as $weekInfo) {
             font-weight: bold;
         }
 
-        .col-content {}
+        .col-content {
+            white-space: normal !important;
+        }
+
+        /* 내용 부분은 필요시 줄바꿈 허용할 수도 있으나 요청에 따라 일단 둠, 하지만 너무 길어질 수 있으므로 확인 필요. 요청은 '줄바꿈 안되도록'이므로 nowrap 유지하되, 너무 긴 경우만 normal로? 사용자는 '줄바꿈 안되도록'을 원함. */
 
         .col-label {
             width: 90px;
@@ -454,21 +470,23 @@ foreach ($targetWeeks as $weekInfo) {
 
         /* 모바일 대응 */
         @media (max-width: 600px) {
-            .controls-row-2 {
-                flex-direction: row;
-            }
 
-            .multi-select-container {
-                width: auto;
-                flex: 1;
-            }
-
-            .page-container {
-                padding: 10px;
+            /* 모바일에서도 page-container 및 controls 너비 유지 (가로 스크롤 발생) */
+            .page-container,
+            .controls {
+                padding: 20px;
+                /* 패딩 유지 */
             }
 
             .doc-title {
-                font-size: 20px;
+                font-size: 24px;
+            }
+
+            /* 폰트 크기 유지 */
+
+            /* 모바일에서 가로 스크롤을 위한 body 설정 */
+            body {
+                overflow-x: auto;
             }
         }
 
@@ -509,30 +527,36 @@ foreach ($targetWeeks as $weekInfo) {
 <body>
     <!-- 상단 컨트롤 -->
     <div class="controls">
-        <div class="controls-row-1">
+        <div class="controls-row">
+            <!-- 년월 선택 -->
             <div class="month-nav">
                 <a href="?year=<?php echo $prevYear; ?>&month=<?php echo $prevMonth; ?>" class="nav-btn"><i class="bi bi-chevron-left"></i></a>
-                <span><?php echo $year; ?>년 <?php echo $month; ?>월</span>
+                <span><?php echo $year; ?>. <?php echo str_pad($month, 2, '0', STR_PAD_LEFT); ?></span>
                 <a href="?year=<?php echo $nextYear; ?>&month=<?php echo $nextMonth; ?>" class="nav-btn"><i class="bi bi-chevron-right"></i></a>
             </div>
-        </div>
-        <div class="controls-row-2">
-            <div class="multi-select-container">
-                <div class="select-box" onclick="toggleCheckboxes()">
-                    <span id="select-text">모든 주차 선택됨</span>
+
+            <!-- 주차 선택 및 인쇄 버튼 그룹 -->
+            <div class="right-controls">
+                <!-- 멀티 셀렉트 -->
+                <div class="multi-select-container">
+                    <div class="select-box" onclick="toggleCheckboxes()">
+                        <span id="select-text">주차 선택</span>
+                    </div>
+                    <div class="checkboxes" id="checkboxes">
+                        <?php foreach ($weeksData as $index => $data): ?>
+                            <label>
+                                <input type="checkbox" checked onchange="toggleWeek(<?php echo $index; ?>)" />
+                                <?php echo $data['date']; ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-                <div class="checkboxes" id="checkboxes">
-                    <?php foreach ($weeksData as $index => $data): ?>
-                        <label for="week-check-<?php echo $index; ?>">
-                            <input type="checkbox" id="week-check-<?php echo $index; ?>" checked onchange="toggleWeek(<?php echo $index; ?>)">
-                            <?php echo $data['date']; ?>
-                        </label>
-                    <?php endforeach; ?>
-                </div>
+
+                <!-- 인쇄 버튼 -->
+                <button onclick="window.print()" class="print-btn">
+                    <i class="bi bi-printer"></i> 인쇄하기
+                </button>
             </div>
-            <button onclick="window.print()" class="print-btn">
-                <i class="bi bi-printer"></i> 인쇄하기
-            </button>
         </div>
     </div>
 
