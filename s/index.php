@@ -127,6 +127,11 @@ function categorizePrograms($programs)
     $living = array();
 
     foreach ($programs as $item) {
+        // 노래는 별도로 처리하므로 분류에서 제외
+        if (strpos($item['title'], '노래') !== false) {
+            continue;
+        }
+
         // section 정보가 있으면 그것을 사용
         if (isset($item['section'])) {
             $section = $item['section'];
@@ -165,6 +170,31 @@ function categorizePrograms($programs)
 }
 
 $categorized = categorizePrograms($data['program']);
+
+// 노래 찾기
+$songs = array();
+if (!empty($data['program'])) {
+    foreach ($data['program'] as $item) {
+        if (strpos($item['title'], '노래') !== false) {
+            $songs[] = $item['title'];
+        }
+    }
+}
+
+$openingSongNum = '';
+if (isset($songs[0]) && preg_match('/(\d+)/', $songs[0], $matches)) {
+    $openingSongNum = $matches[1];
+}
+
+$middleSongNum = '';
+if (isset($songs[1]) && preg_match('/(\d+)/', $songs[1], $matches)) {
+    $middleSongNum = $matches[1];
+}
+
+$closingSongNum = '';
+if (isset($songs[2]) && preg_match('/(\d+)/', $songs[2], $matches)) {
+    $closingSongNum = $matches[1];
+}
 
 // 로그인한 사용자의 배정된 주차 수집
 $myAssignedWeeks = array();
@@ -439,6 +469,12 @@ if (!empty($loggedInUserName)) {
             margin-bottom: 8px;
         }
 
+        .songs-section {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 8px;
+        }
+
         .assignment-row {
             display: flex;
             gap: 4px;
@@ -480,6 +516,21 @@ if (!empty($loggedInUserName)) {
         .assignment-input::placeholder {
             color: #d1d5db;
             opacity: 0.6;
+        }
+
+        .song-input {
+            width: 36px;
+            padding: 4px 2px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        .song-input:focus {
+            outline: none;
+            border-color: #f57f17;
         }
 
         .section {
@@ -975,15 +1026,31 @@ if (!empty($loggedInUserName)) {
 
         <!-- 프로그램 입력 영역 -->
         <div id="program-content" style="<?php echo (!empty($data['no_meeting']) && $data['no_meeting']) ? 'display:none;' : ''; ?>">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">날짜</span>
-                <input type="text" class="date-edit" id="date" value="<?php echo htmlspecialchars($data['date']); ?>" placeholder="날짜 입력 (예: 11월 3-9일)" style="flex: 1;">
-            </div>
-            <div class="bible-reading" style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">성구</span>
-                <input type="text" class="bible-edit" id="bible_reading" value="<?php echo htmlspecialchars($data['bible_reading']); ?>" placeholder="성경 읽기 범위 입력 (예: 솔로몬의 노래 1-2장)" style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                    <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">날짜</span>
+                    <input type="text" class="date-edit" id="date" value="<?php echo htmlspecialchars($data['date']); ?>" placeholder="날짜 입력 (예: 11월 3-9일)" style="flex: 1;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                    <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">성경 읽기</span>
+                    <input type="text" id="bible_reading" value="<?php echo htmlspecialchars($data['bible_reading']); ?>" class="bible-edit" placeholder="성경 읽기 범위" style="flex: 1;">
+                </div>
             </div>
 
+            <!-- 노래 정보 섹션 -->
+            <div class="songs-section">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-weight: 600; font-size: 13px; color: #555;">노래:</span>
+                    <span style="font-size: 13px; color: #666;">시작</span>
+                    <input type="text" id="song_opening" value="<?php echo htmlspecialchars($openingSongNum); ?>" class="song-input">
+                    <span style="font-size: 13px; color: #666;">중간</span>
+                    <input type="text" id="song_middle" value="<?php echo htmlspecialchars($middleSongNum); ?>" class="song-input">
+                    <span style="font-size: 13px; color: #666;">마침</span>
+                    <input type="text" id="song_closing" value="<?php echo htmlspecialchars($closingSongNum); ?>" class="song-input">
+                </div>
+            </div>
+
+            <!-- 배정 정보 섹션 -->
             <div class="assignments-section">
                 <div class="assignment-row">
                     <div class="assignment-item">
@@ -1158,6 +1225,22 @@ if (!empty($loggedInUserName)) {
                     </p>
                     <button onclick="fetchFromWeb()" class="action-button refresh" style="width: 100%; margin: 0;">🌐 웹에서 가져오기</button>
                 </div>
+
+                <div style="background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 6px; padding: 10px; margin-top: 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-weight: 600; font-size: 14px; color: #333;">프린트하기</span>
+                    </div>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">
+                        현재 주차가 속한 월의 모든 주차를 인쇄용 페이지로 확인합니다.
+                    </p>
+                    <?php
+                    // 현재 페이지의 주차에서 월 계산
+                    $weekDate = new DateTime();
+                    $weekDate->setISODate($year, $week);
+                    $printMonth = (int)$weekDate->format('n');
+                    ?>
+                    <a href="print.php?year=<?php echo $year; ?>&month=<?php echo $printMonth; ?>" target="_blank" class="action-button" style="width: 100%; margin: 0; display: block; text-align: center; text-decoration: none; background: #2196F3; color: white;">🖨️ 프린트하기</a>
+                </div>
             </div>
 
             <div style="background: #fff5f5; border: 1px solid #ffcccc; border-radius: 6px; padding: 10px;">
@@ -1274,10 +1357,36 @@ if (!empty($loggedInUserName)) {
         function collectData() {
             var program = [];
 
+            // 노래 정보 가져오기 (숫자만 입력됨)
+            var openingSongNum = document.getElementById('song_opening').value.trim();
+            var middleSongNum = document.getElementById('song_middle').value.trim();
+            var closingSongNum = document.getElementById('song_closing').value.trim();
+
+            // 시작 노래 추가
+            if (openingSongNum) {
+                program.push({
+                    title: '노래 ' + openingSongNum,
+                    duration: '',
+                    assigned: ['', ''],
+                    section: 'treasures'
+                });
+            }
+
             // 모든 섹션의 프로그램 수집 (섹션 정보 포함)
             var sections = ['treasures', 'ministry', 'living'];
             for (var i = 0; i < sections.length; i++) {
                 var section = sections[i];
+
+                // 중간 노래 추가 (봉사 섹션 다음)
+                if (section === 'living' && middleSongNum) {
+                    program.push({
+                        title: '노래 ' + middleSongNum,
+                        duration: '',
+                        assigned: ['', ''],
+                        section: 'living'
+                    });
+                }
+
                 var container = document.getElementById(section + 'Container');
                 var items = container.querySelectorAll('.program-item');
 
@@ -1300,6 +1409,16 @@ if (!empty($loggedInUserName)) {
                         });
                     }
                 }
+            }
+
+            // 마치는 노래 추가
+            if (closingSongNum) {
+                program.push({
+                    title: '노래 ' + closingSongNum,
+                    duration: '',
+                    assigned: ['', ''],
+                    section: 'living'
+                });
             }
 
             return {
@@ -1430,7 +1549,7 @@ if (!empty($loggedInUserName)) {
         }
 
         function fetchFromWeb() {
-            if (!confirm('웹에서 데이터를 가져오시겠습니까?\n현재 입력한 내용은 사라집니다.')) {
+            if (!confirm('웹에서 데이터를 가져오시겠습니까?\n가져온 데이터는 "저장하기" 버튼을 눌러야 실제로 저장됩니다.')) {
                 return;
             }
 
@@ -1456,12 +1575,11 @@ if (!empty($loggedInUserName)) {
                 .then(function(result) {
                     console.log('Fetch result:', result);
                     if (result.success) {
-                        // 성공 메시지로 업데이트
-                        showLoading('데이터를 가져왔습니다!\n페이지를 새로고침합니다...');
-                        // 페이지 새로고침 (임시 파일이 로드됨)
-                        setTimeout(function() {
-                            window.location.href = window.location.href;
-                        }, 800);
+                        // UI에 데이터 채우기
+                        populateUI(result.data);
+
+                        hideLoading();
+                        alert('데이터를 가져왔습니다!\n확인 후 "저장하기" 버튼을 눌러주세요.');
                     } else {
                         hideLoading();
                         alert('웹에서 데이터를 가져올 수 없습니다: ' + (result.error || '알 수 없는 오류'));
@@ -1472,6 +1590,92 @@ if (!empty($loggedInUserName)) {
                     hideLoading();
                     alert('웹에서 데이터를 가져오는 중 오류가 발생했습니다: ' + error.message);
                 });
+        }
+
+        // UI에 데이터 채우는 함수
+        function populateUI(data) {
+            // 기본 정보
+            document.getElementById('date').value = data.date || '';
+            document.getElementById('bible_reading').value = data.bible_reading || '';
+
+            // 노래 정보 추출
+            var songs = [];
+            if (data.program) {
+                for (var i = 0; i < data.program.length; i++) {
+                    if (data.program[i].title.indexOf('노래') !== -1) {
+                        songs.push(data.program[i].title);
+                    }
+                }
+            }
+
+            // 노래 번호만 추출하여 입력
+            if (songs[0]) {
+                var match = songs[0].match(/(\d+)/);
+                document.getElementById('song_opening').value = match ? match[1] : '';
+            }
+            if (songs[1]) {
+                var match = songs[1].match(/(\d+)/);
+                document.getElementById('song_middle').value = match ? match[1] : '';
+            }
+            if (songs[2]) {
+                var match = songs[2].match(/(\d+)/);
+                document.getElementById('song_closing').value = match ? match[1] : '';
+            }
+
+            // 섹션 제목
+            if (data.sections) {
+                document.getElementById('section_treasures').value = data.sections.treasures || '';
+                document.getElementById('section_ministry').value = data.sections.ministry || '';
+                document.getElementById('section_living').value = data.sections.living || '';
+            }
+
+            // 배정 정보
+            if (data.assignments) {
+                document.getElementById('opening_remarks').value = data.assignments.opening_remarks || '';
+                document.getElementById('opening_prayer').value = data.assignments.opening_prayer || '';
+                document.getElementById('closing_remarks').value = data.assignments.closing_remarks || '';
+                document.getElementById('closing_prayer').value = data.assignments.closing_prayer || '';
+            }
+
+            // 프로그램 항목 채우기 (노래 제외)
+            var sections = ['treasures', 'ministry', 'living'];
+            for (var s = 0; s < sections.length; s++) {
+                var section = sections[s];
+                var container = document.getElementById(section + 'Container');
+                container.innerHTML = ''; // 기존 항목 제거
+
+                if (data.program) {
+                    for (var i = 0; i < data.program.length; i++) {
+                        var item = data.program[i];
+                        // 노래 항목 제외
+                        if (item.title.indexOf('노래') !== -1) continue;
+                        // 해당 섹션만
+                        if (item.section !== section) continue;
+
+                        var div = document.createElement('div');
+                        div.className = 'program-item';
+                        div.setAttribute('data-section', section);
+                        div.setAttribute('data-index', programIndex++);
+
+                        var assigned1 = Array.isArray(item.assigned) ? (item.assigned[0] || '') : '';
+                        var assigned2 = Array.isArray(item.assigned) ? (item.assigned[1] || '') : '';
+
+                        div.innerHTML = '<div class="program-header">' +
+                            '<div class="program-title-container">' +
+                            '<input type="text" class="program-title-edit" value="' + (item.title || '') + '" placeholder="제목">' +
+                            '<input type="text" class="program-duration-edit" value="' + (item.duration || '') + '" placeholder="시간">' +
+                            '</div>' +
+                            '<div class="program-assigned-container">' +
+                            '<input type="text" class="program-assigned-edit" value="' + assigned1 + '" placeholder="이름">' +
+                            '<input type="text" class="program-assigned-edit" value="' + assigned2 + '" placeholder="이름">' +
+                            '</div>' +
+                            '<button type="button" class="btn-remove" onclick="removeProgram(this)">×</button>' +
+                            '</div>';
+
+                        container.appendChild(div);
+                    }
+                }
+            }
         }
 
         // 자동 저장 (선택사항)
