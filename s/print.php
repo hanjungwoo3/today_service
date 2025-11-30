@@ -407,9 +407,7 @@ foreach ($targetWeeks as $weekInfo) {
 
         /* 열 너비 조정 */
         .col-time {
-            width: 45px;
-            color: #555;
-            font-weight: bold;
+            display: none;
         }
 
         .col-content {
@@ -622,20 +620,6 @@ foreach ($targetWeeks as $weekInfo) {
                                     </div>
                                 <?php else: ?>
                                     <table class="program-table">
-                                        <!-- 노래 및 소개말 -->
-                                        <tr>
-                                            <td class="col-time">0:00</td>
-                                            <td class="col-content"><span class="bullet">●</span><?php echo htmlspecialchars($openingSong); ?></td>
-                                            <td class="col-label"></td>
-                                            <td class="col-assignee"></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="col-time">0:05</td>
-                                            <td class="col-content"><span class="bullet">●</span>소개말 (1분)</td>
-                                            <td class="col-label"></td>
-                                            <td class="col-assignee"></td>
-                                        </tr>
-
                                         <!-- 1. 성경에 담긴 보물 -->
                                         <tr class="section-row">
                                             <td colspan="5" class="bg-treasures">성경에 담긴 보물</td>
