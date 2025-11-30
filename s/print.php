@@ -97,6 +97,11 @@ foreach ($targetWeeks as $weekInfo) {
     $categorized = array('treasures' => array(), 'ministry' => array(), 'living' => array());
     if (!empty($wData['program'])) {
         foreach ($wData['program'] as $item) {
+            // 노래는 별도로 처리하므로 분류에서 제외
+            if (strpos($item['title'], '노래') !== false) {
+                continue;
+            }
+
             if (isset($item['section'])) {
                 $section = $item['section'];
                 if ($section === 'treasures') $categorized['treasures'][] = $item;

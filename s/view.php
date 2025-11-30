@@ -1037,23 +1037,28 @@ function filterAssignedNames($v)
                             } elseif (!empty($item['assigned'])) {
                                 $assignedNames = array($item['assigned']);
                             }
+
+                            // 노래 항목인지 확인
+                            $isSong = strpos($item['title'], '노래') !== false;
                             ?>
-                            <?php if (empty($assignedNames)): ?>
-                                <div class="program-assigned empty">미배정</div>
-                            <?php else: ?>
-                                <?php foreach ($assignedNames as $name): ?>
-                                    <?php
-                                    $trimmedName = trim($name);
-                                    $isMyName = !empty($loggedInUserName) && !empty($trimmedName) && $loggedInUserName === $trimmedName;
-                                    $assignedClass = 'program-assigned';
-                                    if ($isMyName) {
-                                        $assignedClass .= ' my-name';
-                                    }
-                                    ?>
-                                    <div class="<?php echo $assignedClass; ?>">
-                                        <?php echo htmlspecialchars($trimmedName); ?>
-                                    </div>
-                                <?php endforeach; ?>
+                            <?php if (!$isSong): ?>
+                                <?php if (empty($assignedNames)): ?>
+                                    <div class="program-assigned empty">미배정</div>
+                                <?php else: ?>
+                                    <?php foreach ($assignedNames as $name): ?>
+                                        <?php
+                                        $trimmedName = trim($name);
+                                        $isMyName = !empty($loggedInUserName) && !empty($trimmedName) && $loggedInUserName === $trimmedName;
+                                        $assignedClass = 'program-assigned';
+                                        if ($isMyName) {
+                                            $assignedClass .= ' my-name';
+                                        }
+                                        ?>
+                                        <div class="<?php echo $assignedClass; ?>">
+                                            <?php echo htmlspecialchars($trimmedName); ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
@@ -1080,23 +1085,28 @@ function filterAssignedNames($v)
                             } elseif (!empty($item['assigned'])) {
                                 $assignedNames = array($item['assigned']);
                             }
+
+                            // 노래 항목인지 확인
+                            $isSong = strpos($item['title'], '노래') !== false;
                             ?>
-                            <?php if (empty($assignedNames)): ?>
-                                <div class="program-assigned empty">미배정</div>
-                            <?php else: ?>
-                                <?php foreach ($assignedNames as $name): ?>
-                                    <?php
-                                    $trimmedName = trim($name);
-                                    $isMyName = !empty($loggedInUserName) && !empty($trimmedName) && $loggedInUserName === $trimmedName;
-                                    $assignedClass = 'program-assigned';
-                                    if ($isMyName) {
-                                        $assignedClass .= ' my-name';
-                                    }
-                                    ?>
-                                    <div class="<?php echo $assignedClass; ?>">
-                                        <?php echo htmlspecialchars($trimmedName); ?>
-                                    </div>
-                                <?php endforeach; ?>
+                            <?php if (!$isSong): ?>
+                                <?php if (empty($assignedNames)): ?>
+                                    <div class="program-assigned empty">미배정</div>
+                                <?php else: ?>
+                                    <?php foreach ($assignedNames as $name): ?>
+                                        <?php
+                                        $trimmedName = trim($name);
+                                        $isMyName = !empty($loggedInUserName) && !empty($trimmedName) && $loggedInUserName === $trimmedName;
+                                        $assignedClass = 'program-assigned';
+                                        if ($isMyName) {
+                                            $assignedClass .= ' my-name';
+                                        }
+                                        ?>
+                                        <div class="<?php echo $assignedClass; ?>">
+                                            <?php echo htmlspecialchars($trimmedName); ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
@@ -1123,23 +1133,28 @@ function filterAssignedNames($v)
                             } elseif (!empty($item['assigned'])) {
                                 $assignedNames = array($item['assigned']);
                             }
+
+                            // 노래 항목인지 확인
+                            $isSong = strpos($item['title'], '노래') !== false;
                             ?>
-                            <?php if (empty($assignedNames)): ?>
-                                <div class="program-assigned empty">미배정</div>
-                            <?php else: ?>
-                                <?php foreach ($assignedNames as $name): ?>
-                                    <?php
-                                    $trimmedName = trim($name);
-                                    $isMyName = !empty($loggedInUserName) && !empty($trimmedName) && $loggedInUserName === $trimmedName;
-                                    $assignedClass = 'program-assigned';
-                                    if ($isMyName) {
-                                        $assignedClass .= ' my-name';
-                                    }
-                                    ?>
-                                    <div class="<?php echo $assignedClass; ?>">
-                                        <?php echo htmlspecialchars($trimmedName); ?>
-                                    </div>
-                                <?php endforeach; ?>
+                            <?php if (!$isSong): ?>
+                                <?php if (empty($assignedNames)): ?>
+                                    <div class="program-assigned empty">미배정</div>
+                                <?php else: ?>
+                                    <?php foreach ($assignedNames as $name): ?>
+                                        <?php
+                                        $trimmedName = trim($name);
+                                        $isMyName = !empty($loggedInUserName) && !empty($trimmedName) && $loggedInUserName === $trimmedName;
+                                        $assignedClass = 'program-assigned';
+                                        if ($isMyName) {
+                                            $assignedClass .= ' my-name';
+                                        }
+                                        ?>
+                                        <div class="<?php echo $assignedClass; ?>">
+                                            <?php echo htmlspecialchars($trimmedName); ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     <?php endforeach; ?>

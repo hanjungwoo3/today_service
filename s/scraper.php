@@ -4,7 +4,8 @@
  * JW.ORG 생활과 봉사 집회 자료 링크 수집기
  */
 
-class MeetingLinkScraper {
+class MeetingLinkScraper
+{
 
     private $baseUrl = 'https://wol.jw.org';
 
@@ -15,7 +16,8 @@ class MeetingLinkScraper {
      * @param int $week 주차 (예: 45)
      * @return array|null
      */
-    public function getWeeklyLink($year, $week) {
+    public function getWeeklyLink($year, $week)
+    {
         $url = "{$this->baseUrl}/ko/wol/meetings/r8/lp-ko/{$year}/{$week}";
 
         // HTML 가져오기
@@ -44,8 +46,10 @@ class MeetingLinkScraper {
             // URL 패턴: /ko/wol/d/r8/lp-ko/202025401 형식
             if (preg_match('#/ko/wol/d/r8/lp-ko/(\d+)#', $href, $matches)) {
                 // 생활과 봉사 집회 자료로 보이는 경우
-                if (strpos($text, '생활과 봉사') !== false ||
-                    strpos($href, '/d/r8/lp-ko/') !== false) {
+                if (
+                    strpos($text, '생활과 봉사') !== false ||
+                    strpos($href, '/d/r8/lp-ko/') !== false
+                ) {
 
                     // 전체 URL 생성
                     $fullUrl = (strpos($href, 'http') === 0) ? $href : $this->baseUrl . $href;
@@ -71,7 +75,8 @@ class MeetingLinkScraper {
      * @param string $url 집회 자료 URL
      * @return array|null
      */
-    public function parseMeetingProgram($url) {
+    public function parseMeetingProgram($url)
+    {
         $html = $this->fetchHtml($url);
         if (!$html) {
             return null;
@@ -109,15 +114,15 @@ class MeetingLinkScraper {
         foreach ($h3Tags as $h3) {
             $text = trim($h3->textContent);
 
-            // 노래, 기도, 소개말, 맺음말 제외
-            if (strpos($text, '노래 ') !== false && strpos($text, '기도') === false) {
-                // 노래만 있는 경우 (예: "노래 46")
-                continue;
-            }
-            if (strpos($text, '노래') !== false && strpos($text, '및 기도') !== false) {
-                continue;
-            }
+            // 맺음말에서 노래 정보 추출
             if (strpos($text, '맺음말') !== false) {
+                // "노래 123" 패턴 찾기
+                if (preg_match('/노래\s*(\d+)/', $text, $songMatch)) {
+                    $result['program'][] = array(
+                        'title' => '노래 ' . $songMatch[1],
+                        'duration' => ''
+                    );
+                }
                 continue;
             }
 
@@ -144,8 +149,14 @@ class MeetingLinkScraper {
             $title = str_replace(array('"', '"', '|', '및 기도'), '', $text);
             $title = trim($title);
 
-            // 빈 제목이나 시간이 없으면 건너뛰기
-            if (empty($title) || empty($time)) {
+            // 빈 제목이면 건너뛰기
+            if (empty($title)) {
+                continue;
+            }
+
+            // 노래가 아닌데 시간이 없으면 건너뛰기
+            $isSong = (strpos($title, '노래') !== false);
+            if (!$isSong && empty($time)) {
                 continue;
             }
 
@@ -166,7 +177,8 @@ class MeetingLinkScraper {
      * @param int $endWeek 끝 주차
      * @return array
      */
-    public function getMultipleWeeks($year, $startWeek, $endWeek) {
+    public function getMultipleWeeks($year, $startWeek, $endWeek)
+    {
         $results = array();
 
         for ($week = $startWeek; $week <= $endWeek; $week++) {
@@ -194,7 +206,8 @@ class MeetingLinkScraper {
      * @param string $url
      * @return string|false
      */
-    private function fetchHtml($url) {
+    private function fetchHtml($url)
+    {
         // cURL 사용
         if (function_exists('curl_init')) {
             $ch = curl_init();
@@ -232,7 +245,8 @@ class MeetingLinkScraper {
      * @param array $results
      * @param string $format 'simple' | 'json' | 'csv'
      */
-    public function exportResults($results, $format = 'simple') {
+    public function exportResults($results, $format = 'simple')
+    {
         switch ($format) {
             case 'json':
                 echo json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
@@ -293,5 +307,3 @@ if (php_sapi_name() === 'cli') {
     echo "\n=== 최종 결과 ===\n";
     $scraper->exportResults($results, 'simple');
 }
-
-?>
