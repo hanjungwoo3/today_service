@@ -407,7 +407,9 @@ foreach ($targetWeeks as $weekInfo) {
 
         /* 열 너비 조정 */
         .col-time {
-            display: none;
+            width: 45px;
+            color: #555;
+            font-weight: bold;
         }
 
         .col-content {
