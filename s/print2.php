@@ -78,10 +78,59 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
         }
 
         .card {
-            border: 1px solid #000;
+            border: none;
             padding: 8mm;
             display: flex;
             flex-direction: column;
+            position: relative;
+        }
+
+        /* 자르기 표시 (모서리에만) */
+        .card::before,
+        .card::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-color: #000;
+            border-style: solid;
+        }
+
+        /* 왼쪽 상단 */
+        .card::before {
+            top: 0;
+            left: 0;
+            border-width: 1px 0 0 1px;
+        }
+
+        /* 오른쪽 상단 */
+        .card::after {
+            top: 0;
+            right: 0;
+            border-width: 1px 1px 0 0;
+        }
+
+        /* 추가 모서리 표시를 위한 내부 요소 */
+        .card .corner-bl,
+        .card .corner-br {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-color: #000;
+            border-style: solid;
+        }
+
+        .card .corner-bl {
+            bottom: 0;
+            left: 0;
+            border-width: 0 0 1px 1px;
+        }
+
+        .card .corner-br {
+            bottom: 0;
+            right: 0;
+            border-width: 0 1px 1px 0;
         }
 
         .card-title {
@@ -240,6 +289,8 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             $taskNumber = $item ? $item['title'] : '';
         ?>
         <div class="card">
+            <div class="corner-bl"></div>
+            <div class="corner-br"></div>
             <div class="card-title">
                 <span>그리스도인 생활과 봉사</span>
                 <span>집회 과제</span>
