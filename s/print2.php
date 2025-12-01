@@ -172,7 +172,7 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             }
 
             .no-print {
-                display: none;
+                display: none !important;
             }
         }
 
