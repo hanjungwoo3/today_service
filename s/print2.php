@@ -115,7 +115,7 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             flex: 1;
             border-bottom: 1px dotted #000;
             min-height: 18px;
-            padding-left: 3px;
+            padding-left: 18px;
         }
 
         .location-section {
