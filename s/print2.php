@@ -13,6 +13,22 @@ $manager = new MeetingDataManager();
 $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('o');
 $week = isset($_GET['week']) ? (int)$_GET['week'] : (int)date('W');
 
+// 이전/다음 주차 계산
+$prevWeek = $week - 1;
+$prevYear = $year;
+if ($prevWeek < 1) {
+    $prevYear--;
+    $prevWeek = (int)date('W', strtotime($prevYear . '-12-28'));
+}
+
+$nextWeek = $week + 1;
+$nextYear = $year;
+$maxWeek = (int)date('W', strtotime($year . '-12-28'));
+if ($nextWeek > $maxWeek) {
+    $nextYear++;
+    $nextWeek = 1;
+}
+
 // 데이터 로드
 $data = $manager->load($year, $week);
 
@@ -55,26 +71,26 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
 
         @page {
             size: A4 portrait;
-            margin: 10mm;
+            margin: 0;
         }
 
         body {
             font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
-            font-size: 13px;
+            font-size: 14px;
             line-height: 1.4;
             background: #f5f5f5;
         }
 
         .card {
             border: none;
-            padding: 10mm;
+            padding: 8mm;
             display: flex;
             flex-direction: column;
         }
 
         .card-title {
             text-align: center;
-            font-size: 17px;
+            font-size: 18px;
             font-weight: bold;
             margin-bottom: 6mm;
             line-height: 1.3;
@@ -136,7 +152,7 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
 
         .note {
             margin-top: 4mm;
-            font-size: 11px;
+            font-size: 12px;
             color: #333;
             line-height: 1.4;
         }
@@ -155,7 +171,7 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
 
             #printArea {
                 margin: 0;
-                padding: 5mm;
+                padding: 0;
             }
 
             .no-print {
@@ -184,10 +200,25 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
         }
 
         .controls .info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
             font-size: 18px;
             color: #333;
             font-weight: bold;
             white-space: nowrap;
+        }
+
+        .nav-btn {
+            text-decoration: none;
+            color: #667eea;
+            padding: 5px 10px;
+            border-radius: 4px;
+            background: #f0f2f5;
+        }
+
+        .nav-btn:hover {
+            background: #e0e2e5;
         }
 
         .right-controls {
@@ -333,8 +364,9 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
     <div class="controls no-print">
         <div class="controls-row">
             <div class="info">
-                <strong><?php echo $year; ?>년 <?php echo $week; ?>주차</strong> -
-                과제 <?php echo count($assignments); ?>개
+                <a href="?year=<?php echo $prevYear; ?>&week=<?php echo $prevWeek; ?>" class="nav-btn">&lt;</a>
+                <strong><?php echo $year; ?>년 <?php echo $week; ?>주차</strong>
+                <a href="?year=<?php echo $nextYear; ?>&week=<?php echo $nextWeek; ?>" class="nav-btn">&gt;</a>
             </div>
             <div class="right-controls">
                 <div class="multi-select-container">
