@@ -85,28 +85,9 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             flex-direction: column;
         }
 
-        /* 페이지 중앙 자르기 선 */
+        /* 페이지 중앙 자르기 선 - 화면에서는 숨김 */
         .crop-h, .crop-v {
-            position: absolute;
-            background: #000;
-        }
-
-        /* 가로 중앙선 */
-        .crop-h {
-            top: 50%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20mm;
-            height: 1px;
-        }
-
-        /* 세로 중앙선 */
-        .crop-v {
-            left: 50%;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 1px;
-            height: 20mm;
+            display: none;
         }
 
         .card-title {
@@ -198,6 +179,29 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
 
             .no-print {
                 display: none !important;
+            }
+
+            /* 인쇄 시 자르기 선 표시 */
+            .crop-h, .crop-v {
+                display: block;
+                position: absolute;
+                background: #000;
+            }
+
+            .crop-h {
+                top: 50%;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 20mm;
+                height: 1px;
+            }
+
+            .crop-v {
+                left: 50%;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 1px;
+                height: 20mm;
             }
         }
 
