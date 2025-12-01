@@ -165,63 +165,130 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
 
         /* 컨트롤 바 */
         .controls {
-            width: 100%;
-            max-width: 210mm;
+            width: 210mm;
+            min-width: 210mm;
             margin: 10px auto;
-            padding: 10px;
+            padding: 15px 20px;
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
             box-sizing: border-box;
-        }
-
-        .controls button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-
-        .controls button:hover {
-            background: #45a049;
-        }
-
-        .controls .info {
-            font-size: 14px;
-            color: #333;
-            font-weight: bold;
-        }
-
-        .controls select {
-            width: 100%;
-            padding: 8px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background: white;
-            box-sizing: border-box;
-        }
-
-        .controls select option {
-            padding: 5px;
         }
 
         .controls-row {
             display: flex;
-            align-items: stretch;
-            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
             width: 100%;
+            gap: 20px;
         }
 
-        .controls-row select {
-            flex: 1;
+        .controls .info {
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .right-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .print-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .print-btn:hover {
+            background: #45a049;
+        }
+
+        /* 멀티 셀렉트 드롭다운 */
+        .multi-select-container {
+            position: relative;
+            min-width: 280px;
+        }
+
+        .select-box {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .select-box:hover {
+            background: #e9ecef;
+        }
+
+        .select-box::after {
+            content: '';
+            border: 5px solid transparent;
+            border-top-color: #666;
+            margin-left: 10px;
+            margin-top: 4px;
+        }
+
+        .checkboxes {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            max-height: 250px;
+            overflow-y: auto;
+            margin-top: 4px;
+        }
+
+        .checkboxes.show {
+            display: block;
+        }
+
+        .checkboxes label {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .checkboxes label:last-child {
+            border-bottom: none;
+        }
+
+        .checkboxes label:hover {
+            background: #f5f5f5;
+        }
+
+        .checkboxes input {
+            margin-right: 10px;
         }
 
         #printArea {
@@ -256,28 +323,42 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             width: 0;
             border-left: 1px dashed #999;
         }
+
+        .card.excluded {
+            opacity: 0.3;
+        }
     </style>
 </head>
 <body>
     <div class="controls no-print">
-        <div class="info">
-            <strong><?php echo $year; ?>년 <?php echo $week; ?>주차</strong> -
-            과제 <?php echo count($assignments); ?>개
-        </div>
         <div class="controls-row">
-            <select id="assignmentSelect" multiple size="<?php echo min(count($assignments), 6); ?>">
-                <?php foreach ($assignments as $idx => $item):
-                    $name = '';
-                    if (is_array($item['assigned']) && !empty($item['assigned'][0])) {
-                        $name = $item['assigned'][0];
-                    }
-                    $displayName = $name ? $name : '(이름 없음)';
-                    $taskTitle = isset($item['title']) ? $item['title'] : '';
-                ?>
-                <option value="<?php echo $idx; ?>" selected><?php echo htmlspecialchars($displayName . ' - ' . $taskTitle); ?></option>
-                <?php endforeach; ?>
-            </select>
-            <button onclick="printSelected()">🖨️ 인쇄하기</button>
+            <div class="info">
+                <strong><?php echo $year; ?>년 <?php echo $week; ?>주차</strong> -
+                과제 <?php echo count($assignments); ?>개
+            </div>
+            <div class="right-controls">
+                <div class="multi-select-container">
+                    <div class="select-box" onclick="toggleCheckboxes()">
+                        <span id="select-text">전체 선택됨 (<?php echo count($assignments); ?>)</span>
+                    </div>
+                    <div class="checkboxes" id="checkboxes">
+                        <?php foreach ($assignments as $idx => $item):
+                            $name = '';
+                            if (is_array($item['assigned']) && !empty($item['assigned'][0])) {
+                                $name = $item['assigned'][0];
+                            }
+                            $displayName = $name ? $name : '(이름 없음)';
+                            $taskTitle = isset($item['title']) ? $item['title'] : '';
+                        ?>
+                        <label>
+                            <input type="checkbox" checked onchange="toggleCard(<?php echo $idx; ?>)" data-index="<?php echo $idx; ?>" />
+                            <?php echo htmlspecialchars($displayName . ' - ' . $taskTitle); ?>
+                        </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <button class="print-btn" onclick="printSelected()">🖨️ 인쇄하기</button>
+            </div>
         </div>
     </div>
 
@@ -352,36 +433,73 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
     <?php endif; ?>
 
     <script>
-    function printSelected() {
-        var select = document.getElementById('assignmentSelect');
-        var selectedValues = [];
-        for (var i = 0; i < select.options.length; i++) {
-            if (select.options[i].selected) {
-                selectedValues.push(select.options[i].value);
+    // 드롭다운 외부 클릭시 닫기
+    document.addEventListener('click', function(e) {
+        var container = document.querySelector('.multi-select-container');
+        var checkboxes = document.getElementById('checkboxes');
+        if (container && !container.contains(e.target)) {
+            checkboxes.classList.remove('show');
+        }
+    });
+
+    function toggleCheckboxes() {
+        var checkboxes = document.getElementById('checkboxes');
+        checkboxes.classList.toggle('show');
+    }
+
+    function toggleCard(index) {
+        var card = document.querySelector('.card[data-index="' + index + '"]');
+        if (card) {
+            card.classList.toggle('excluded');
+        }
+        updateSelectText();
+    }
+
+    function updateSelectText() {
+        var checkboxes = document.querySelectorAll('#checkboxes input[type="checkbox"]');
+        var checkedCount = 0;
+        var total = checkboxes.length;
+
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                checkedCount++;
             }
         }
 
-        // 모든 카드 숨기기
-        var cards = document.querySelectorAll('.card');
-        cards.forEach(function(card) {
-            card.style.display = 'none';
-        });
+        var selectText = document.getElementById('select-text');
+        if (checkedCount === total) {
+            selectText.textContent = '전체 선택됨 (' + total + ')';
+        } else if (checkedCount === 0) {
+            selectText.textContent = '선택 없음';
+        } else {
+            selectText.textContent = checkedCount + '개 선택됨';
+        }
+    }
 
-        // 선택된 카드만 표시
-        selectedValues.forEach(function(idx) {
-            var card = document.querySelector('.card[data-index="' + idx + '"]');
+    function printSelected() {
+        var checkboxes = document.querySelectorAll('#checkboxes input[type="checkbox"]');
+        var cards = document.querySelectorAll('.card');
+
+        // 선택되지 않은 카드 숨기기
+        for (var i = 0; i < checkboxes.length; i++) {
+            var index = checkboxes[i].getAttribute('data-index');
+            var card = document.querySelector('.card[data-index="' + index + '"]');
             if (card) {
-                card.style.display = 'flex';
+                if (checkboxes[i].checked) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
             }
-        });
+        }
 
         // 인쇄
         window.print();
 
-        // 인쇄 후 모든 카드 다시 표시
-        cards.forEach(function(card) {
-            card.style.display = 'flex';
-        });
+        // 인쇄 후 모든 카드 다시 표시 (excluded 클래스 유지)
+        for (var j = 0; j < cards.length; j++) {
+            cards[j].style.display = 'flex';
+        }
     }
     </script>
 </body>
