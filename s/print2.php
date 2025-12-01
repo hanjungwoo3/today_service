@@ -65,45 +65,11 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             background: #f5f5f5;
         }
 
-        .page {
-            width: 210mm;
-            min-height: 297mm;
-            margin: 0 auto;
-            background: white;
-            padding: 5mm;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 0;
-            position: relative;
-        }
-
         .card {
             border: none;
             padding: 10mm;
             display: flex;
             flex-direction: column;
-        }
-
-        /* 페이지 중앙 자르기 점선 */
-        .crop-h, .crop-v {
-            position: absolute;
-        }
-
-        .crop-h {
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 0;
-            border-top: 1px dashed #999;
-        }
-
-        .crop-v {
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 0;
-            border-left: 1px dashed #999;
         }
 
         .card-title {
@@ -187,10 +153,9 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
                 background: white;
             }
 
-            .page {
+            #printArea {
                 margin: 0;
                 padding: 5mm;
-                page-break-after: always;
             }
 
             .no-print {
@@ -229,6 +194,55 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             font-size: 14px;
             color: #333;
         }
+
+        .controls select {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            min-width: 200px;
+            max-width: 400px;
+            height: auto;
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #printArea {
+            width: 210mm;
+            margin: 0 auto;
+            background: white;
+            padding: 5mm;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 0;
+            position: relative;
+            min-height: 297mm;
+        }
+
+        #printArea .crop-h, #printArea .crop-v {
+            position: absolute;
+        }
+
+        #printArea .crop-h {
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 0;
+            border-top: 1px dashed #999;
+        }
+
+        #printArea .crop-v {
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            border-left: 1px dashed #999;
+        }
     </style>
 </head>
 <body>
@@ -237,33 +251,40 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             <strong><?php echo $year; ?>년 <?php echo $week; ?>주차</strong> -
             과제 <?php echo count($assignments); ?>개
         </div>
-        <button onclick="window.print()">🖨️ 인쇄하기</button>
+        <div class="controls-row">
+            <select id="assignmentSelect" multiple size="<?php echo min(count($assignments), 6); ?>">
+                <?php foreach ($assignments as $idx => $item):
+                    $name = '';
+                    if (is_array($item['assigned']) && !empty($item['assigned'][0])) {
+                        $name = $item['assigned'][0];
+                    }
+                    $displayName = $name ? $name : '(이름 없음)';
+                    $taskTitle = isset($item['title']) ? $item['title'] : '';
+                ?>
+                <option value="<?php echo $idx; ?>" selected><?php echo htmlspecialchars($displayName . ' - ' . $taskTitle); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <button onclick="printSelected()">🖨️ 인쇄하기</button>
+        </div>
     </div>
 
-    <?php
-    // 4개씩 페이지로 나누기
-    $chunks = array_chunk($assignments, 4);
-
-    foreach ($chunks as $pageAssignments):
-    ?>
-    <div class="page">
+    <div id="printArea">
         <div class="crop-h"></div>
         <div class="crop-v"></div>
-        <?php
-        // 4개 카드 출력 (빈 칸도 포함)
-        for ($i = 0; $i < 4; $i++):
-            $item = isset($pageAssignments[$i]) ? $pageAssignments[$i] : null;
-            $name = '';
-            $assistant = '';
+    <?php
+    // 각 과제에 인덱스 추가
+    foreach ($assignments as $idx => $item):
+        $name = '';
+        $assistant = '';
 
-            if ($item && is_array($item['assigned'])) {
-                $name = isset($item['assigned'][0]) ? $item['assigned'][0] : '';
-                $assistant = isset($item['assigned'][1]) ? $item['assigned'][1] : '';
-            }
+        if (is_array($item['assigned'])) {
+            $name = isset($item['assigned'][0]) ? $item['assigned'][0] : '';
+            $assistant = isset($item['assigned'][1]) ? $item['assigned'][1] : '';
+        }
 
-            $taskNumber = $item ? $item['title'] : '';
-        ?>
-        <div class="card">
+        $taskNumber = $item['title'];
+    ?>
+        <div class="card" data-index="<?php echo $idx; ?>">
             <div class="card-title">
                 <span>그리스도인 생활과 봉사</span>
                 <span>집회 과제</span>
@@ -308,16 +329,47 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
 
             <div class="form-number">S-89-KO 11/23</div>
         </div>
-        <?php endfor; ?>
-    </div>
     <?php endforeach; ?>
+    </div>
 
     <?php if (empty($assignments)): ?>
-    <div class="page">
-        <div style="grid-column: 1 / -1; grid-row: 1 / -1; display: flex; align-items: center; justify-content: center;">
-            <p style="font-size: 16px; color: #666;">이번 주차에 과제가 없습니다.</p>
-        </div>
+    <div id="printArea" style="display: flex; align-items: center; justify-content: center;">
+        <p style="font-size: 16px; color: #666;">이번 주차에 과제가 없습니다.</p>
     </div>
     <?php endif; ?>
+
+    <script>
+    function printSelected() {
+        var select = document.getElementById('assignmentSelect');
+        var selectedValues = [];
+        for (var i = 0; i < select.options.length; i++) {
+            if (select.options[i].selected) {
+                selectedValues.push(select.options[i].value);
+            }
+        }
+
+        // 모든 카드 숨기기
+        var cards = document.querySelectorAll('.card');
+        cards.forEach(function(card) {
+            card.style.display = 'none';
+        });
+
+        // 선택된 카드만 표시
+        selectedValues.forEach(function(idx) {
+            var card = document.querySelector('.card[data-index="' + idx + '"]');
+            if (card) {
+                card.style.display = 'flex';
+            }
+        });
+
+        // 인쇄
+        window.print();
+
+        // 인쇄 후 모든 카드 다시 표시
+        cards.forEach(function(card) {
+            card.style.display = 'flex';
+        });
+    }
+    </script>
 </body>
 </html>
