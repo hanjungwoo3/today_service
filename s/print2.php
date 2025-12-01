@@ -60,7 +60,7 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
 
         body {
             font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
-            font-size: 12px;
+            font-size: 13px;
             line-height: 1.4;
             background: #f5f5f5;
         }
@@ -70,17 +70,17 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             min-height: 297mm;
             margin: 0 auto;
             background: white;
-            padding: 10mm;
+            padding: 5mm;
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
-            gap: 5mm;
+            gap: 0;
             position: relative;
         }
 
         .card {
             border: none;
-            padding: 8mm;
+            padding: 10mm;
             display: flex;
             flex-direction: column;
         }
@@ -108,7 +108,7 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
 
         .card-title {
             text-align: center;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: bold;
             margin-bottom: 6mm;
             line-height: 1.3;
@@ -154,14 +154,14 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
         }
 
         .checkbox {
-            width: 12px;
-            height: 12px;
+            width: 13px;
+            height: 13px;
             border: 1px solid #000;
             margin-right: 5px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: 11px;
         }
 
         .checkbox.checked {
@@ -170,13 +170,13 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
 
         .note {
             margin-top: 4mm;
-            font-size: 10px;
+            font-size: 11px;
             color: #333;
             line-height: 1.4;
         }
 
         .form-number {
-            font-size: 9px;
+            font-size: 10px;
             color: #666;
             margin-top: 3mm;
         }
