@@ -181,27 +181,27 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
                 display: none !important;
             }
 
-            /* 인쇄 시 자르기 선 표시 */
+            /* 인쇄 시 자르기 점선 표시 */
             .crop-h, .crop-v {
                 display: block;
                 position: absolute;
-                background: #000;
+                background: none;
             }
 
             .crop-h {
                 top: 50%;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 20mm;
-                height: 1px;
+                left: 0;
+                right: 0;
+                height: 0;
+                border-top: 1px dashed #999;
             }
 
             .crop-v {
                 left: 50%;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 1px;
-                height: 20mm;
+                top: 0;
+                bottom: 0;
+                width: 0;
+                border-left: 1px dashed #999;
             }
         }
 
