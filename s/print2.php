@@ -136,7 +136,14 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             height: 12px;
             border: 1px solid #000;
             margin-right: 5px;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .checkbox.checked {
+            font-weight: bold;
         }
 
         .note {
@@ -261,7 +268,7 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             <div class="location-section">
                 <div class="location-title">과제를 수행할 장소:</div>
                 <div class="location-option">
-                    <span class="checkbox"></span> 회관
+                    <span class="checkbox checked">✓</span> 회관
                 </div>
                 <div class="location-option">
                     <span class="checkbox"></span> 보조 교실 1
