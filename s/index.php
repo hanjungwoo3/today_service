@@ -1241,6 +1241,16 @@ if (!empty($loggedInUserName)) {
                     ?>
                     <a href="print.php?year=<?php echo $year; ?>&month=<?php echo $printMonth; ?>" target="_blank" class="action-button refresh" style="width: 100%; margin: 0; display: block; text-align: center; text-decoration: none;">🖨️ 프린트하기</a>
                 </div>
+
+                <div style="background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 6px; padding: 10px; margin-top: 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-weight: 600; font-size: 14px; color: #333;">과제 프린트</span>
+                    </div>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">
+                        현재 주차의 학생 과제 용지(S-89)를 출력합니다.
+                    </p>
+                    <a href="print2.php?year=<?php echo $year; ?>&week=<?php echo $week; ?>" target="_blank" class="action-button refresh" style="width: 100%; margin: 0; display: block; text-align: center; text-decoration: none;">📝 과제 프린트</a>
+                </div>
             </div>
 
             <div style="background: #fff5f5; border: 1px solid #ffcccc; border-radius: 6px; padding: 10px;">
