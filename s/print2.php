@@ -75,6 +75,7 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
             gap: 5mm;
+            position: relative;
         }
 
         .card {
@@ -82,55 +83,32 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             padding: 8mm;
             display: flex;
             flex-direction: column;
-            position: relative;
         }
 
-        /* 자르기 표시 (모서리에만) */
-        .card::before,
-        .card::after {
+        /* 페이지 중앙 자르기 선 */
+        .page::before,
+        .page::after {
             content: '';
             position: absolute;
-            width: 10px;
-            height: 10px;
-            border-color: #000;
-            border-style: solid;
+            background: #000;
         }
 
-        /* 왼쪽 상단 */
-        .card::before {
-            top: 0;
-            left: 0;
-            border-width: 1px 0 0 1px;
+        /* 가로 중앙선 */
+        .page::before {
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20mm;
+            height: 1px;
         }
 
-        /* 오른쪽 상단 */
-        .card::after {
-            top: 0;
-            right: 0;
-            border-width: 1px 1px 0 0;
-        }
-
-        /* 추가 모서리 표시를 위한 내부 요소 */
-        .card .corner-bl,
-        .card .corner-br {
-            content: '';
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-color: #000;
-            border-style: solid;
-        }
-
-        .card .corner-bl {
-            bottom: 0;
-            left: 0;
-            border-width: 0 0 1px 1px;
-        }
-
-        .card .corner-br {
-            bottom: 0;
-            right: 0;
-            border-width: 0 1px 1px 0;
+        /* 세로 중앙선 */
+        .page::after {
+            left: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 20mm;
         }
 
         .card-title {
@@ -289,8 +267,6 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             $taskNumber = $item ? $item['title'] : '';
         ?>
         <div class="card">
-            <div class="corner-bl"></div>
-            <div class="corner-br"></div>
             <div class="card-title">
                 <span>그리스도인 생활과 봉사</span>
                 <span>집회 과제</span>
