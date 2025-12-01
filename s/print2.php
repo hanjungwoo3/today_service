@@ -86,15 +86,13 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
         }
 
         /* 페이지 중앙 자르기 선 */
-        .page::before,
-        .page::after {
-            content: '';
+        .crop-h, .crop-v {
             position: absolute;
             background: #000;
         }
 
         /* 가로 중앙선 */
-        .page::before {
+        .crop-h {
             top: 50%;
             left: 50%;
             transform: translateX(-50%);
@@ -103,7 +101,7 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
         }
 
         /* 세로 중앙선 */
-        .page::after {
+        .crop-v {
             left: 50%;
             top: 50%;
             transform: translateY(-50%);
@@ -252,6 +250,8 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
     foreach ($chunks as $pageAssignments):
     ?>
     <div class="page">
+        <div class="crop-h"></div>
+        <div class="crop-v"></div>
         <?php
         // 4개 카드 출력 (빈 칸도 포함)
         for ($i = 0; $i < 4; $i++):
