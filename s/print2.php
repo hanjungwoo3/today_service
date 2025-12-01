@@ -169,7 +169,7 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
         }
 
         .note {
-            margin-top: auto;
+            margin-top: 4mm;
             font-size: 10px;
             color: #333;
             line-height: 1.4;
