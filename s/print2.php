@@ -165,6 +165,7 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
 
         /* 컨트롤 바 */
         .controls {
+            width: 100%;
             max-width: 210mm;
             margin: 10px auto;
             padding: 10px;
@@ -172,18 +173,20 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            gap: 10px;
+            box-sizing: border-box;
         }
 
         .controls button {
             background: #4CAF50;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
+            white-space: nowrap;
         }
 
         .controls button:hover {
@@ -193,22 +196,32 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
         .controls .info {
             font-size: 14px;
             color: #333;
+            font-weight: bold;
         }
 
         .controls select {
+            width: 100%;
             padding: 8px;
             font-size: 14px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            min-width: 200px;
-            max-width: 400px;
-            height: auto;
+            background: white;
+            box-sizing: border-box;
+        }
+
+        .controls select option {
+            padding: 5px;
         }
 
         .controls-row {
             display: flex;
-            align-items: center;
+            align-items: stretch;
             gap: 10px;
+            width: 100%;
+        }
+
+        .controls-row select {
+            flex: 1;
         }
 
         #printArea {
