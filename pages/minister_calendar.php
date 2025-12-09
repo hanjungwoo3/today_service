@@ -14,7 +14,7 @@ $vol = array();
 
 //봉사자 개인 계획
 if(MINISTER_SCHEDULE_EVENT_USE == 'use'){
-  $me_sql = "SELECT me_date, me_date2, me_color FROM ".MINISTER_EVENT_TABLE." WHERE mb_id = '{$mb_id}'";
+  $me_sql = "SELECT me_date, me_date2, me_color FROM ".MINISTER_EVENT_TABLE." WHERE mb_id = '{$mb_id}' AND mb_id != 0 AND mb_id > 0";
   $me_result = $mysqli->query($me_sql);
   if($me_result->num_rows > 0){
     while($me = $me_result->fetch_assoc()){

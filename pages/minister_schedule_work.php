@@ -27,6 +27,16 @@ if($work == 'report'){
 
 }elseif($work == 'event'){
 
+  // mb_id 검증: 0이거나 없으면 현재 로그인한 사용자 ID 사용
+  if(empty($mb_id) || $mb_id == 0){
+    $mb_id = mb_id();
+  }
+  
+  // mb_id가 여전히 0이거나 없으면 오류 처리
+  if(empty($mb_id) || $mb_id == 0){
+    die('오류: 사용자 정보를 확인할 수 없습니다.');
+  }
+
   if(!isset($timeswitch)) $timeswitch = 0;
 
   if($timeswitch == '1'){

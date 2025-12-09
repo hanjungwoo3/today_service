@@ -335,17 +335,35 @@ function get_meeting_option(){
 function get_territory_progress($tt_id){
 	global $mysqli;
 
-	$sql = "SELECT count(*) FROM ".HOUSE_TABLE." WHERE tt_id = {$tt_id} AND h_condition = ''";
+	$sql = "SELECT count(*) FROM ".HOUSE_TABLE." WHERE tt_id = {$tt_id}";
 	$h_result = $mysqli->query($sql);
 	$h_row = $h_result->fetch_row();
 	$total_house = $h_row[0]; // 전체 집 수
 
-	$sql = "SELECT count(*) FROM ".HOUSE_TABLE." WHERE tt_id = {$tt_id} AND h_visit = 'Y' AND h_condition = ''";
+	// 만남 집 수: h_visit = 'Y'인 집 수
+	$sql = "SELECT count(*) FROM ".HOUSE_TABLE." WHERE tt_id = {$tt_id} AND h_visit = 'Y'";
 	$h_result = $mysqli->query($sql);
 	$h_row = $h_result->fetch_row();
-	$visit_house = $h_row[0]; // 만남 집 수
+	$visit_house = $h_row[0]; // 만남 체크된 집 수
 
-	$sql = "SELECT count(*) FROM ".HOUSE_TABLE." WHERE tt_id = {$tt_id} AND h_visit = 'N' AND h_condition = ''";
+	// 특이사항이 있는 집 수 (만남 체크 안 되어 있어도 만남으로 카운트)
+	// h_visit이 'Y'가 아닌 경우 (NULL, 빈 문자열, 'N' 모두 포함)
+	// h_condition이 NULL이 아니고, 빈 문자열이 아니고, '0'이 아닌 경우
+	$sql = "SELECT count(*) FROM ".HOUSE_TABLE." 
+		WHERE tt_id = {$tt_id} 
+		AND h_condition IS NOT NULL 
+		AND h_condition != '' 
+		AND h_condition != '0'
+		AND COALESCE(h_visit, '') != 'Y'";
+	$h_result = $mysqli->query($sql);
+	$h_row = $h_result->fetch_row();
+	$condition_house = $h_row[0]; // 특이사항만 있는 집 수
+
+	// 최종 만남 집 수 = 만남 체크된 집 + 특이사항만 있는 집
+	$visit_house = $visit_house + $condition_house;
+
+	// 부재 집 수: h_visit = 'N'이고 특이사항이 없는 경우만 (특이사항이 있으면 부재로 카운트하지 않음)
+	$sql = "SELECT count(*) FROM ".HOUSE_TABLE." WHERE tt_id = {$tt_id} AND h_visit = 'N' AND (h_condition IS NULL OR h_condition = '' OR h_condition = '0')";
 	$h_result = $mysqli->query($sql);
 	$h_row = $h_result->fetch_row();
 	$absence_house = $h_row[0]; // 부재 집 수
@@ -361,17 +379,35 @@ function get_territory_progress($tt_id){
 function get_telephone_progress($tp_id){
 	global $mysqli;
 
-	$sql = "SELECT count(*) FROM ".TELEPHONE_HOUSE_TABLE." WHERE tp_id = {$tp_id} AND tph_condition = ''";
+	$sql = "SELECT count(*) FROM ".TELEPHONE_HOUSE_TABLE." WHERE tp_id = {$tp_id}";
 	$tph_result = $mysqli->query($sql);
 	$tph_row = $tph_result->fetch_row();
 	$total_house = $tph_row[0]; // 전체 집 수
 
-	$sql = "SELECT count(*) FROM ".TELEPHONE_HOUSE_TABLE." WHERE tp_id = {$tp_id} AND tph_visit = 'Y' AND tph_condition = ''";
+	// 만남 집 수: tph_visit = 'Y'인 집 수
+	$sql = "SELECT count(*) FROM ".TELEPHONE_HOUSE_TABLE." WHERE tp_id = {$tp_id} AND tph_visit = 'Y'";
 	$tph_result = $mysqli->query($sql);
 	$tph_row = $tph_result->fetch_row();
-	$visit_house = $tph_row[0]; // 만남 집 수
+	$visit_house = $tph_row[0]; // 만남 체크된 집 수
 
-	$sql = "SELECT count(*) FROM ".TELEPHONE_HOUSE_TABLE." WHERE tp_id = {$tp_id} AND tph_visit = 'N' AND tph_condition = ''";
+	// 특이사항이 있는 집 수 (만남 체크 안 되어 있어도 만남으로 카운트)
+	// tph_visit이 'Y'가 아닌 경우 (NULL, 빈 문자열, 'N' 모두 포함)
+	// tph_condition이 NULL이 아니고, 빈 문자열이 아니고, '0'이 아닌 경우
+	$sql = "SELECT count(*) FROM ".TELEPHONE_HOUSE_TABLE." 
+		WHERE tp_id = {$tp_id} 
+		AND tph_condition IS NOT NULL 
+		AND tph_condition != '' 
+		AND tph_condition != '0'
+		AND COALESCE(tph_visit, '') != 'Y'";
+	$tph_result = $mysqli->query($sql);
+	$tph_row = $tph_result->fetch_row();
+	$condition_house = $tph_row[0]; // 특이사항만 있는 집 수
+
+	// 최종 만남 집 수 = 만남 체크된 집 + 특이사항만 있는 집
+	$visit_house = $visit_house + $condition_house;
+
+	// 부재 집 수: tph_visit = 'N'이고 특이사항이 없는 경우만 (특이사항이 있으면 부재로 카운트하지 않음)
+	$sql = "SELECT count(*) FROM ".TELEPHONE_HOUSE_TABLE." WHERE tp_id = {$tp_id} AND tph_visit = 'N' AND (tph_condition IS NULL OR tph_condition = '' OR tph_condition = '0')";
 	$tph_result = $mysqli->query($sql);
 	$tph_row = $tph_result->fetch_row();
 	$absence_house = $tph_row[0]; // 부재 집 수
@@ -1924,6 +1960,8 @@ function get_telephone_memo($tp_id){
 }
 
 // 호별 구역카드 리셋
+// 중요: 이 함수는 봉사기록(TERRITORY_RECORD_TABLE)을 삭제하지 않으며, 
+// 리셋 전의 봉사 정보를 봉사기록 테이블에 저장합니다.
 function territory_reset($tt_id,$new_status='',$record_m_id=0){
 	global $mysqli;
 
@@ -1954,6 +1992,7 @@ function territory_reset($tt_id,$new_status='',$record_m_id=0){
 			$m_id = $tt_row['m_id'];
 
 			// 봉사를 시작했을떄만 기록이 남도록
+			// 봉사기록은 TERRITORY_RECORD_TABLE에 저장되며, 리셋 후에도 보존됩니다.
 			if(!empty_date($tt_start_date)){
 
 				// 배정된 전도인 아이디를 이름으로 일괄 변경해서 변수에 담음
@@ -1972,44 +2011,53 @@ function territory_reset($tt_id,$new_status='',$record_m_id=0){
 				// 개인구역 전도인 아이디를 이름으로 변경
 				$ttr_mb_name = $tt_row['mb_id'] ? get_member_name($tt_row['mb_id']) : '';
 
-				// 중복 기록 방지: 동일 방문(핵심 필드 기준)이 이미 있는지 확인
-				$dup_sql = "SELECT COUNT(*) FROM ".TERRITORY_RECORD_TABLE." 
-					WHERE tt_id = ? 
-					AND ttr_assigned_num = ? 
-					AND ttr_assigned_date = ? 
-					AND ttr_assigned_group = ? 
-					AND ttr_start_date = ? 
-					AND ttr_end_date = ? 
-					AND ttr_status = ? 
-					AND m_id = ?";
-				if($stmt_dup = $mysqli->prepare($dup_sql)){
-					$assigned_num = $tt_row['tt_assigned'];
-					$stmt_dup->bind_param(
-						"sssssssi",
-						$tt_id,
-						$assigned_num,
-						$tt_assigned_date,
-						$tt_assigned_group,
-						$tt_start_date,
-						$tt_end_date,
-						$tt_status,
-						$m_id
-					);
-					$stmt_dup->execute();
-					$stmt_dup->bind_result($dup_count);
-					$stmt_dup->fetch();
-					$stmt_dup->close();
-				}else{
-					return false;
-				}
+				// 트랜잭션 시작하여 중복 저장 완전 방지
+				$mysqli->begin_transaction();
+				
+				try {
+					// 중복 기록 방지: 동일 방문(핵심 필드 기준)이 이미 있는지 확인
+					// record_m_id도 포함하여 더 엄격하게 체크
+					$dup_sql = "SELECT COUNT(*) FROM ".TERRITORY_RECORD_TABLE." 
+						WHERE tt_id = ? 
+						AND ttr_assigned_num = ? 
+						AND ttr_assigned_date = ? 
+						AND ttr_assigned_group = ? 
+						AND ttr_start_date = ? 
+						AND ttr_end_date = ? 
+						AND ttr_status = ? 
+						AND m_id = ? 
+						AND record_m_id = ?
+						FOR UPDATE";
+					if($stmt_dup = $mysqli->prepare($dup_sql)){
+						$assigned_num = $tt_row['tt_assigned'];
+						$stmt_dup->bind_param(
+							"sssssssii",
+							$tt_id,
+							$assigned_num,
+							$tt_assigned_date,
+							$tt_assigned_group,
+							$tt_start_date,
+							$tt_end_date,
+							$tt_status,
+							$m_id,
+							$record_m_id
+						);
+						$stmt_dup->execute();
+						$stmt_dup->bind_result($dup_count);
+						$stmt_dup->fetch();
+						$stmt_dup->close();
+					}else{
+						$mysqli->rollback();
+						return false;
+					}
 
-				if((int)$dup_count === 0){
-					// TERRITORY_RECORD_TABLE 에 기록 추가 (Prepared Statement)
-					$ins_sql = "INSERT INTO ".TERRITORY_RECORD_TABLE." 
-						(tt_id, ttr_assigned, ttr_assigned_num, ttr_assigned_date, ttr_assigned_group, create_datetime, update_datetime, ttr_start_date, ttr_end_date, ttr_status, ttr_mb_name, m_id, record_m_id)
-						VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-					if($stmt_ins = $mysqli->prepare($ins_sql)){
-													$stmt_ins->bind_param(
+					if((int)$dup_count === 0){
+						// TERRITORY_RECORD_TABLE 에 기록 추가 (Prepared Statement)
+						$ins_sql = "INSERT INTO ".TERRITORY_RECORD_TABLE." 
+							(tt_id, ttr_assigned, ttr_assigned_num, ttr_assigned_date, ttr_assigned_group, create_datetime, update_datetime, ttr_start_date, ttr_end_date, ttr_status, ttr_mb_name, m_id, record_m_id)
+							VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+						if($stmt_ins = $mysqli->prepare($ins_sql)){
+							$stmt_ins->bind_param(
 								"issssssssssii",
 								$tt_id,
 								$ttr_assigned,
@@ -2025,9 +2073,20 @@ function territory_reset($tt_id,$new_status='',$record_m_id=0){
 								$m_id,
 								$record_m_id
 							);
-						$stmt_ins->execute();
-						$stmt_ins->close();
+							$stmt_ins->execute();
+							$stmt_ins->close();
+						}else{
+							$mysqli->rollback();
+							return false;
+						}
 					}
+					
+					// 트랜잭션 커밋
+					$mysqli->commit();
+				} catch (Exception $e) {
+					// 에러 발생 시 롤백
+					$mysqli->rollback();
+					return false;
 				}
 
 			}
@@ -2067,19 +2126,64 @@ function territory_house_reset($tt_id){
 }
 
 // 호별구역카드 세대 방문정보 업데이트
-function territory_house_update($tt_id,$restore='',$new_status=''){
+function territory_house_update($tt_id,$restore='',$new_status='',$old_status=null,$is_completed=false){
 	global $mysqli;
 
 	// 세대 방문정보 복구하기 (이전으로 되돌려놓기)
 	if($restore == 'restore'){
-		$sql = "UPDATE ".HOUSE_TABLE." SET h_visit = h_visit_old, h_visit_old = '' WHERE tt_id = {$tt_id}";
+		// h_visit_old가 있는 경우에만 복구 (비어있으면 체크박스가 비워지지 않도록)
+		$sql = "UPDATE ".HOUSE_TABLE." SET h_visit = h_visit_old, h_visit_old = '' WHERE tt_id = {$tt_id} AND h_visit_old != ''";
 		$mysqli->query($sql);
 	}else{ // 세대 방문정보 업데이트
-		$sql = "UPDATE ".HOUSE_TABLE." SET h_visit_old = h_visit WHERE tt_id = {$tt_id}";
-		$mysqli->query($sql);
+		// 이전 상태가 전달되지 않은 경우(null)에만 DB에서 조회 (빈 문자열도 유효한 값)
+		if($old_status === null){
+			$sql = "SELECT tt_status FROM ".TERRITORY_TABLE." WHERE tt_id = {$tt_id}";
+			$result = $mysqli->query($sql);
+			if($result->num_rows > 0){
+				$row = $result->fetch_assoc();
+				$old_status = $row['tt_status'];
+			} else {
+				$old_status = '';
+			}
+		}
 		
-		// new_status에 'absence'가 포함되어 있으면 h_visit가 'N'인 세대들을 비움
-		if(!empty($new_status) && strpos($new_status, 'absence') !== false){
+		// 상태가 실제로 변경되었는지 확인
+		// $old_status가 빈 문자열이거나 'reassign'인 경우 absence가 아님
+		$old_is_absence = !empty($old_status) && strpos($old_status, 'absence') !== false;
+		$new_is_absence = !empty($new_status) && strpos($new_status, 'absence') !== false;
+		
+		// 완료 여부가 전달되지 않은 경우 DB에서 조회
+		if(func_num_args() < 5){
+			$sql = "SELECT tt_end_date FROM ".TERRITORY_TABLE." WHERE tt_id = {$tt_id}";
+			$result = $mysqli->query($sql);
+			$is_completed = false;
+			if($result->num_rows > 0){
+				$row = $result->fetch_assoc();
+				$is_completed = !empty($row['tt_end_date']) && $row['tt_end_date'] != '0000-00-00';
+			}
+		}
+		
+		// 전체(absence 없음) → 부재(absence 포함)로 변경된 경우
+		if(!$old_is_absence && $new_is_absence){
+			$sql = "UPDATE ".HOUSE_TABLE." SET h_visit_old = h_visit WHERE tt_id = {$tt_id}";
+			$mysqli->query($sql);
+			
+			// 전체에서 부재로 변경된 경우에만 부재 체크박스 비움
+			$sql = "UPDATE ".HOUSE_TABLE." SET h_visit = '' WHERE tt_id = {$tt_id} AND h_visit = 'N'";
+			$mysqli->query($sql);
+		}
+		// 부재 완료 상태에서 재배정하는 경우 (부재 → 부재 재배정, 완료 상태)
+		elseif($old_is_absence && $new_is_absence && $is_completed){
+			// 만남 집 비활성화: 전체일 때 만남(h_visit_old='Y') + 부재일 때 만남(h_visit='Y') 모두 포함
+			// h_visit='Y'이거나 h_visit_old='Y'인 경우 모두 h_visit_old='Y'로 설정
+			$sql = "UPDATE ".HOUSE_TABLE." SET h_visit_old = 'Y' WHERE tt_id = {$tt_id} AND (h_visit = 'Y' OR h_visit_old = 'Y')";
+			$mysqli->query($sql);
+			
+			// 부재 체크박스 비우기 전에 h_visit_old에 저장 (배정 취소 시 복구를 위해)
+			$sql = "UPDATE ".HOUSE_TABLE." SET h_visit_old = 'N' WHERE tt_id = {$tt_id} AND h_visit = 'N' AND (h_visit_old = '' OR h_visit_old IS NULL)";
+			$mysqli->query($sql);
+			
+			// 부재 체크박스 비우기 (다시 봉사할 수 있게)
 			$sql = "UPDATE ".HOUSE_TABLE." SET h_visit = '' WHERE tt_id = {$tt_id} AND h_visit = 'N'";
 			$mysqli->query($sql);
 		}
@@ -2088,6 +2192,9 @@ function territory_house_update($tt_id,$restore='',$new_status=''){
 }
 
 //전화 구역카드 리셋
+// 전화 구역카드 리셋
+// 중요: 이 함수는 봉사기록(TELEPHONE_RECORD_TABLE)을 삭제하지 않으며, 
+// 리셋 전의 봉사 정보를 봉사기록 테이블에 저장합니다.
 function telephone_reset($tp_id, $new_status='',$record_m_id=0){
 	global $mysqli;
 
@@ -2118,6 +2225,7 @@ function telephone_reset($tp_id, $new_status='',$record_m_id=0){
 			$m_id = $tp_row['m_id'];
 
 			// 봉사를 시작했을떄만 기록이 남도록
+			// 봉사기록은 TELEPHONE_RECORD_TABLE에 저장되며, 리셋 후에도 보존됩니다.
 			if(!empty_date($tp_start_date)){
 
 				// 배정된 전도인 아이디를 이름으로 일괄 변경해서 변수에 담음
@@ -2136,61 +2244,81 @@ function telephone_reset($tp_id, $new_status='',$record_m_id=0){
 				// 개인구역 전도인 아이디를 이름으로 변경
 				$tpr_mb_name = $tp_row['mb_id'] ? get_member_name($tp_row['mb_id']) : '';
 
-				// 중복 기록 방지: 동일 방문(핵심 필드 기준)이 이미 있는지 확인
-				$dup_sql = "SELECT COUNT(*) FROM ".TELEPHONE_RECORD_TABLE." 
-					WHERE tp_id = ? 
-					AND tpr_assigned_num = ? 
-					AND tpr_assigned_date = ? 
-					AND tpr_assigned_group = ? 
-					AND tpr_start_date = ? 
-					AND tpr_end_date = ? 
-					AND tpr_status = ? 
-					AND m_id = ?";
-				if($stmt_dup = $mysqli->prepare($dup_sql)){
-					$assigned_num = $tp_row['tp_assigned'];
-					$stmt_dup->bind_param(
-						"issssssi",
-						$tp_id,
-						$assigned_num,
-						$tp_assigned_date,
-						$tp_assigned_group,
-						$tp_start_date,
-						$tp_end_date,
-						$tp_status,
-						$m_id
-					);
-					$stmt_dup->execute();
-					$stmt_dup->bind_result($dup_count);
-					$stmt_dup->fetch();
-					$stmt_dup->close();
-				}else{
-					return false;
-				}
-
-				if((int)$dup_count === 0){
-					// TELEPHONE_RECORD_TABLE 에 기록 추가 (prepared statement 사용)
-					$sql = "INSERT INTO ".TELEPHONE_RECORD_TABLE." (tp_id, tpr_assigned, tpr_assigned_num, tpr_assigned_date, tpr_assigned_group, create_datetime, update_datetime, tpr_start_date, tpr_end_date, tpr_status, tpr_mb_name, m_id, record_m_id)
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-					$stmt2 = $mysqli->prepare($sql);
-					if($stmt2) {
-						$stmt2->bind_param("issssssssssii", 
-							$tp_id, 
-							$tpr_assigned, 
-							$tp_row['tp_assigned'], 
-							$tp_assigned_date, 
-							$tp_assigned_group, 
-							$current_datetime, 
-							$current_datetime,
+				// 트랜잭션 시작하여 중복 저장 완전 방지
+				$mysqli->begin_transaction();
+				
+				try {
+					// 중복 기록 방지: 동일 방문(핵심 필드 기준)이 이미 있는지 확인
+					// record_m_id도 포함하여 더 엄격하게 체크
+					$dup_sql = "SELECT COUNT(*) FROM ".TELEPHONE_RECORD_TABLE." 
+						WHERE tp_id = ? 
+						AND tpr_assigned_num = ? 
+						AND tpr_assigned_date = ? 
+						AND tpr_assigned_group = ? 
+						AND tpr_start_date = ? 
+						AND tpr_end_date = ? 
+						AND tpr_status = ? 
+						AND m_id = ? 
+						AND record_m_id = ?
+						FOR UPDATE";
+					if($stmt_dup = $mysqli->prepare($dup_sql)){
+						$assigned_num = $tp_row['tp_assigned'];
+						$stmt_dup->bind_param(
+							"issssssii",
+							$tp_id,
+							$assigned_num,
+							$tp_assigned_date,
+							$tp_assigned_group,
 							$tp_start_date,
 							$tp_end_date,
 							$tp_status,
-							$tpr_mb_name,
 							$m_id,
 							$record_m_id
 						);
-						$stmt2->execute();
-						$stmt2->close();
+						$stmt_dup->execute();
+						$stmt_dup->bind_result($dup_count);
+						$stmt_dup->fetch();
+						$stmt_dup->close();
+					}else{
+						$mysqli->rollback();
+						return false;
 					}
+
+					if((int)$dup_count === 0){
+						// TELEPHONE_RECORD_TABLE 에 기록 추가 (prepared statement 사용)
+						$sql = "INSERT INTO ".TELEPHONE_RECORD_TABLE." (tp_id, tpr_assigned, tpr_assigned_num, tpr_assigned_date, tpr_assigned_group, create_datetime, update_datetime, tpr_start_date, tpr_end_date, tpr_status, tpr_mb_name, m_id, record_m_id)
+					VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+						$stmt2 = $mysqli->prepare($sql);
+						if($stmt2) {
+							$stmt2->bind_param("issssssssssii", 
+								$tp_id, 
+								$tpr_assigned, 
+								$tp_row['tp_assigned'], 
+								$tp_assigned_date, 
+								$tp_assigned_group, 
+								$current_datetime, 
+								$current_datetime,
+								$tp_start_date,
+								$tp_end_date,
+								$tp_status,
+								$tpr_mb_name,
+								$m_id,
+								$record_m_id
+							);
+							$stmt2->execute();
+							$stmt2->close();
+						}else{
+							$mysqli->rollback();
+							return false;
+						}
+					}
+					
+					// 트랜잭션 커밋
+					$mysqli->commit();
+				} catch (Exception $e) {
+					// 에러 발생 시 롤백
+					$mysqli->rollback();
+					return false;
 				}
 			}
 
@@ -2228,19 +2356,63 @@ function telephone_house_reset($tp_id){
 }
 
 // 전화구역카드 세대 방문정보 업데이트
-function telephone_house_update($tp_id,$restore='',$new_status=''){
+function telephone_house_update($tp_id,$restore='',$new_status='',$old_status=null,$is_completed=false){
 	global $mysqli;
 
 	// 세대 방문정보 복구하기 (이전으로 되돌려놓기)
 	if($restore == 'restore'){
-		$sql = "UPDATE ".TELEPHONE_HOUSE_TABLE." SET tph_visit = tph_visit_old, tph_visit_old = '' WHERE tp_id = {$tp_id}";
+		// tph_visit_old가 있는 경우에만 복구 (비어있으면 체크박스가 비워지지 않도록)
+		$sql = "UPDATE ".TELEPHONE_HOUSE_TABLE." SET tph_visit = tph_visit_old, tph_visit_old = '' WHERE tp_id = {$tp_id} AND tph_visit_old != ''";
 		$mysqli->query($sql);
 	}else{ // 세대 방문정보 업데이트
-		$sql = "UPDATE ".TELEPHONE_HOUSE_TABLE." SET tph_visit_old = tph_visit WHERE tp_id = {$tp_id}";
-		$mysqli->query($sql);
+		// 이전 상태가 전달되지 않은 경우(null)에만 DB에서 조회 (빈 문자열도 유효한 값)
+		if($old_status === null){
+			$sql = "SELECT tp_status FROM ".TELEPHONE_TABLE." WHERE tp_id = {$tp_id}";
+			$result = $mysqli->query($sql);
+			if($result->num_rows > 0){
+				$row = $result->fetch_assoc();
+				$old_status = $row['tp_status'];
+			} else {
+				$old_status = '';
+			}
+		}
 		
-		// new_status에 'absence'가 포함되어 있으면 tph_visit가 'N'인 세대들을 비움
-		if($new_status && strpos($new_status, 'absence') !== false){
+		// 상태가 실제로 변경되었는지 확인
+		$old_is_absence = !empty($old_status) && strpos($old_status, 'absence') !== false;
+		$new_is_absence = !empty($new_status) && strpos($new_status, 'absence') !== false;
+		
+		// 완료 여부가 전달되지 않은 경우 DB에서 조회
+		if(func_num_args() < 5){
+			$sql = "SELECT tp_end_date FROM ".TELEPHONE_TABLE." WHERE tp_id = {$tp_id}";
+			$result = $mysqli->query($sql);
+			$is_completed = false;
+			if($result->num_rows > 0){
+				$row = $result->fetch_assoc();
+				$is_completed = !empty($row['tp_end_date']) && $row['tp_end_date'] != '0000-00-00';
+			}
+		}
+		
+		// 전체(absence 없음) → 부재(absence 포함)로 변경된 경우
+		if(!$old_is_absence && $new_is_absence){
+			$sql = "UPDATE ".TELEPHONE_HOUSE_TABLE." SET tph_visit_old = tph_visit WHERE tp_id = {$tp_id}";
+			$mysqli->query($sql);
+			
+			// 전체에서 부재로 변경된 경우에만 부재 체크박스 비움
+			$sql = "UPDATE ".TELEPHONE_HOUSE_TABLE." SET tph_visit = '' WHERE tp_id = {$tp_id} AND tph_visit = 'N'";
+			$mysqli->query($sql);
+		}
+		// 부재 완료 상태에서 재배정하는 경우 (부재 → 부재 재배정, 완료 상태)
+		elseif($old_is_absence && $new_is_absence && $is_completed){
+			// 만남 집 비활성화: 전체일 때 만남(tph_visit_old='Y') + 부재일 때 만남(tph_visit='Y') 모두 포함
+			// tph_visit='Y'이거나 tph_visit_old='Y'인 경우 모두 tph_visit_old='Y'로 설정
+			$sql = "UPDATE ".TELEPHONE_HOUSE_TABLE." SET tph_visit_old = 'Y' WHERE tp_id = {$tp_id} AND (tph_visit = 'Y' OR tph_visit_old = 'Y')";
+			$mysqli->query($sql);
+			
+			// 부재 체크박스 비우기 전에 tph_visit_old에 저장 (배정 취소 시 복구를 위해)
+			$sql = "UPDATE ".TELEPHONE_HOUSE_TABLE." SET tph_visit_old = 'N' WHERE tp_id = {$tp_id} AND tph_visit = 'N' AND (tph_visit_old = '' OR tph_visit_old IS NULL)";
+			$mysqli->query($sql);
+			
+			// 부재 체크박스 비우기 (다시 봉사할 수 있게)
 			$sql = "UPDATE ".TELEPHONE_HOUSE_TABLE." SET tph_visit = '' WHERE tp_id = {$tp_id} AND tph_visit = 'N'";
 			$mysqli->query($sql);
 		}

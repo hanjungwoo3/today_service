@@ -37,7 +37,8 @@ try {
 	$strNEW="";
     $strUPD="";
     $strDEL="";
-	$strComma="";
+    // 업데이트용 문자열 구분자 (쉼표와 충돌하지 않도록 특수 문자열 사용)
+    $updateDelimiter = '@@SEP@@';
 
 	$str_h_address1 = '';
 	$str_h_address2 = '';
@@ -90,21 +91,22 @@ try {
 		}elseif(strtoupper($nud ?? '')=="U"){
 
 			if ($intUPD>0){
-                $strComma=",";
                 $strUPD.=",";
+                $str_h_id .= ",";
 			}
 
 			$strUPD.=$h_id;
+			// h_id 목록은 쉼표(,)로만 구분하여 WHERE IN 절에서 사용한다.
+			$str_h_id .= $h_id;
 
-			$str_h_address1.=$strComma.$h_address1;
-			$str_h_address2.=$strComma.$h_address2;
-			$str_h_address3.=$strComma.$h_address3;
-            $str_h_address4.=$strComma.$h_address4;
-            $str_h_address5.=$strComma.$h_address5;
-			$str_h_condition.=$strComma.$h_condition;
-			$str_h_visit.=$strComma.$h_visit;
-			$str_h_order.=$strComma.$h_order;
-			$str_h_id.=$strComma.$h_id;
+			$str_h_address1 .= ($intUPD > 0 ? $updateDelimiter : '') . $h_address1;
+			$str_h_address2 .= ($intUPD > 0 ? $updateDelimiter : '') . $h_address2;
+			$str_h_address3 .= ($intUPD > 0 ? $updateDelimiter : '') . $h_address3;
+            $str_h_address4 .= ($intUPD > 0 ? $updateDelimiter : '') . $h_address4;
+            $str_h_address5 .= ($intUPD > 0 ? $updateDelimiter : '') . $h_address5;
+			$str_h_condition .= ($intUPD > 0 ? $updateDelimiter : '') . $h_condition;
+			$str_h_visit .= ($intUPD > 0 ? $updateDelimiter : '') . $h_visit;
+			$str_h_order .= ($intUPD > 0 ? $updateDelimiter : '') . $h_order;
 
 			$intUPD++;
 
@@ -125,15 +127,15 @@ try {
 	}
 
 	if ($strUPD){
-		$arr_h_id           =   explode(",",$str_h_id);
-		$arr_h_address1     =   explode(",",$str_h_address1);
-		$arr_h_address2     =   explode(",",$str_h_address2);
-		$arr_h_address3     =	explode(",",$str_h_address3);
-        $arr_h_address4     =	explode(",",$str_h_address4);
-        $arr_h_address5     =	explode(",",$str_h_address5);
-		$arr_h_condition    =	explode(",",$str_h_condition);
-		$arr_h_visit        =	explode(",",$str_h_visit);
-		$arr_h_order        =	explode(",",$str_h_order);
+		$arr_h_id           =   explode(",", $str_h_id);
+		$arr_h_address1     =   explode($updateDelimiter, $str_h_address1);
+		$arr_h_address2     =   explode($updateDelimiter, $str_h_address2);
+		$arr_h_address3     =	explode($updateDelimiter, $str_h_address3);
+        $arr_h_address4     =	explode($updateDelimiter, $str_h_address4);
+        $arr_h_address5     =	explode($updateDelimiter, $str_h_address5);
+		$arr_h_condition    =	explode($updateDelimiter, $str_h_condition);
+		$arr_h_visit        =	explode($updateDelimiter, $str_h_visit);
+		$arr_h_order        =	explode($updateDelimiter, $str_h_order);
 
 		$sql = " UPDATE ".HOUSE_TABLE." \r\n";
 		$sql .= "    SET \r\n";

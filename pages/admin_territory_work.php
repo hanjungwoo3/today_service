@@ -246,10 +246,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         break;
       case 'check_reset': // 선택한 구역들을 리셋
+        // 중요: territory_reset() 함수는 봉사기록(TERRITORY_RECORD_TABLE)을 삭제하지 않으며,
+        // 리셋 전의 봉사 정보를 봉사기록 테이블에 저장합니다.
         $tt_id = $postData['tt_id'];
         foreach ($tt_id as $key => $value) {
           territory_reset($value);
           territory_house_reset($value);
+          // 봉사기록은 territory_reset() 함수 내에서 자동으로 저장되며 삭제되지 않습니다.
         }
         insert_work_log('territory_reset_check');
         break;

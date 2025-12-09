@@ -26,7 +26,7 @@ if(isset($me['me_switch']) && $me['me_switch'] == 1){
 ?>
 
 <form id="minister_event_form">
-  <input type="hidden" name="mb_id" value="<?=$_SESSION['mb_id']?>">
+  <input type="hidden" name="mb_id" value="<?=mb_id()?>">
   <input type="hidden" name="me_id" value="<?=$me_id?>">
   <input type="hidden" name="work" value="event">
 

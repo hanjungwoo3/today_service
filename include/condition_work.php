@@ -12,6 +12,10 @@ if($work){
         $sql = "UPDATE ".HOUSE_TABLE." SET h_condition = {$condition} WHERE h_id = {$pid}";
         $mysqli->query($sql);
 
+        // 특이사항 추가 시 만남 자동 체크
+        $sql = "UPDATE ".HOUSE_TABLE." SET h_visit = 'Y' WHERE h_id = {$pid}";
+        $mysqli->query($sql);
+
         if(in_array($condition,array(1,2))){
 
           if($datetime){ // 재방 또는 연구일떄
@@ -36,6 +40,10 @@ if($work){
 
       if($mb_id && $pid && $condition){
         $sql = "UPDATE ".TELEPHONE_HOUSE_TABLE." SET tph_condition = {$condition} WHERE tph_id = {$pid}";
+        $mysqli->query($sql);
+
+        // 특이사항 추가 시 만남 자동 체크
+        $sql = "UPDATE ".TELEPHONE_HOUSE_TABLE." SET tph_visit = 'Y' WHERE tph_id = {$pid}";
         $mysqli->query($sql);
 
         if(in_array($condition,array(1,2))){ // 재방 또는 연구일떄

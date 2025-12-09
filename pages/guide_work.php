@@ -44,7 +44,12 @@ if($work){
 
               }else{ // 1차배정, 재배정, 부재자
 
-                if(!empty($row['tt_end_date']) && $row['tt_end_date'] != '0000-00-00'){ // 구역 완료
+                // 이전 상태 저장 (territory_reset 호출 전에)
+                $old_status = $row['tt_status'];
+                // 완료 여부 저장 (territory_reset 호출 전에)
+                $is_completed = !empty($row['tt_end_date']) && $row['tt_end_date'] != '0000-00-00';
+
+                if($is_completed){ // 구역 완료
                   $new_status = (ABSENCE_USE == 'use')?'absence':'reassign';
                 }else{ // 구역 미완료
                   if(ABSENCE_USE == 'use' && $row['tt_status'] == 'absence'){ // 부재자 였다면, 미완료 라도 부재자 그대로 봉사할 수 있도록...
@@ -66,7 +71,12 @@ if($work){
 
               }
 
-              territory_house_update($id,'',$new_status);
+              // 이전 상태와 완료 여부를 전달하여 체크박스 비우기 여부 결정
+              if(isset($old_status)){
+                territory_house_update($id,'',$new_status,$old_status,isset($is_completed)?$is_completed:false);
+              }else{
+                territory_house_update($id,'',$new_status);
+              }
 
             }
 
@@ -108,7 +118,12 @@ if($work){
 
               }else{ // 1차배정, 재배정, 부재자
 
-                if(!empty($row['tp_end_date']) && $row['tp_end_date'] != '0000-00-00'){ // 구역 완료
+                // 이전 상태 저장 (telephone_reset 호출 전에)
+                $old_status = $row['tp_status'];
+                // 완료 여부 저장 (telephone_reset 호출 전에)
+                $is_completed = !empty($row['tp_end_date']) && $row['tp_end_date'] != '0000-00-00';
+
+                if($is_completed){ // 구역 완료
                   $new_status = (ABSENCE_USE == 'use')?'absence':'reassign';
                 }else{ // 구역 미완료
                   if(ABSENCE_USE == 'use' && $row['tp_status'] == 'absence'){ // 부재자 였다면, 미완료 라도 부재자 그대로 봉사할 수 있도록...
@@ -130,7 +145,12 @@ if($work){
 
               }
 
-              telephone_house_update($id,'',$new_status);
+              // 이전 상태와 완료 여부를 전달하여 체크박스 비우기 여부 결정
+              if(isset($old_status)){
+                telephone_house_update($id,'',$new_status,$old_status,isset($is_completed)?$is_completed:false);
+              }else{
+                telephone_house_update($id,'',$new_status);
+              }
 
             }
 

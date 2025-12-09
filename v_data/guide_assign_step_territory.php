@@ -64,6 +64,25 @@ if($result->num_rows > 0){
 			$progress_status = $all_past_records[0]['progress'];
 		}
 		
+		// 최근 방문 기록의 시작 날짜 찾기
+		$latest_past_date = '';
+		if(!empty_date($row['tt_start_date'])){
+			// 현재 기록에 시작 날짜가 있으면 사용
+			$latest_past_date = $row['tt_start_date'];
+		}elseif(!empty($all_past_records)){
+			// 현재 기록이 없으면 과거 기록 중 가장 최근 시작 날짜 찾기
+			foreach($all_past_records as $visit_data){
+				if(isset($visit_data['records']) && is_array($visit_data['records'])){
+					foreach($visit_data['records'] as $record){
+						if(!empty_date($record['start_date'])){
+							$latest_past_date = $record['start_date'];
+							break 2; // 두 개의 루프 모두 종료
+						}
+					}
+				}
+			}
+		}
+		
 		// 현재 상태: $tt_status 기준으로 간단하게 계산
 		$current_status = (!empty($tt_status) && strpos($tt_status, 'absence') !== false) ? '1' : '0'; // 부재: 1, 전체: 0
 
@@ -92,6 +111,7 @@ if($result->num_rows > 0){
 			'assigned_group_name' => $assigned_group_name,
 			'current_status' => $current_status,
 			'progress_status' => $progress_status,
+			'latest_past_date' => $latest_past_date,
 			'all_past_records' => $all_past_records
 		);
 

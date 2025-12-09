@@ -156,6 +156,9 @@ $result = $mysqli->query($sql);
   <?php
   while ($row = $result->fetch_assoc()): 
 
+    // 전시대 참여 '불가능'한 전도인일 경우 전시대 모임 자체를 숨김
+    if($row['ms_type'] == 2 && get_member_display($mb_id) == 1) continue;
+
     $count = 0;
 
     // 봉사 시간 구하기

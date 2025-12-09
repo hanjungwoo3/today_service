@@ -37,7 +37,8 @@ try {
 	$strNEW="";
     $strUPD="";
     $strDEL="";
-	$strComma="";
+    // 업데이트용 문자열 구분자
+    $updateDelimiter = '@@SEP@@';
 
 	$str_tph_number = '';
 	$str_tph_type = '';
@@ -81,18 +82,19 @@ try {
 		}elseif(strtoupper($nud ?? '')=="U"){
 
 			if ($intUPD>0){
-                $strComma=",";
                 $strUPD.=",";
+                $str_tph_id .= ",";
 			}
 
 			$strUPD.=$tph_id;
+            $str_tph_id .= $tph_id;
 
-			$str_tph_number.=$strComma.$tph_number;
-			$str_tph_type.=$strComma.$tph_type;
-			$str_tph_name.=$strComma.$tph_name;
-            $str_tph_address.=$strComma.$tph_address;
-            $str_tph_order.=$strComma.$tph_order;
-            $str_tph_id.=$strComma.$tph_id;
+			$str_tph_number .= ($intUPD > 0 ? $updateDelimiter : '') . $tph_number;
+			$str_tph_type .= ($intUPD > 0 ? $updateDelimiter : '') . $tph_type;
+			$str_tph_name .= ($intUPD > 0 ? $updateDelimiter : '') . $tph_name;
+            $str_tph_address .= ($intUPD > 0 ? $updateDelimiter : '') . $tph_address;
+            $str_tph_order .= ($intUPD > 0 ? $updateDelimiter : '') . $tph_order;
+            $str_tph_id .= ($intUPD > 0 ? $updateDelimiter : '') . $tph_id;
 
 			$intUPD++;
 
@@ -113,12 +115,12 @@ try {
 	}
 
 	if ($strUPD){
-		$arr_tph_id         = explode(",",$str_tph_id);
-		$arr_tph_number     = explode(",",$str_tph_number);
-		$arr_tph_type       = explode(",",$str_tph_type);
-		$arr_tph_name       = explode(",",$str_tph_name);
-        $arr_tph_address    = explode(",",$str_tph_address);
-        $arr_tph_order      = explode(",",$str_tph_order);
+		$arr_tph_id         = explode(",", $str_tph_id);
+		$arr_tph_number     = explode($updateDelimiter, $str_tph_number);
+		$arr_tph_type       = explode($updateDelimiter, $str_tph_type);
+		$arr_tph_name       = explode($updateDelimiter, $str_tph_name);
+        $arr_tph_address    = explode($updateDelimiter, $str_tph_address);
+        $arr_tph_order      = explode($updateDelimiter, $str_tph_order);
 
 		$sql = " UPDATE ".TELEPHONE_HOUSE_TABLE." \r\n";
 		$sql .= "    SET \r\n";

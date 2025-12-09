@@ -64,7 +64,7 @@ if(!is_moveout($mb_id)){ // 전출전도인이 아닐때만 회중일정 볼 수
 
 // 지정된 날짜 내 개인일정
 if(MINISTER_SCHEDULE_EVENT_USE == 'use'){
-  $me_sql = "SELECT * FROM ".MINISTER_EVENT_TABLE." WHERE mb_id = '{$mb_id}' AND DATE(me_date) <= '{$s_date}' AND DATE(me_date2) >= '{$s_date}' ORDER BY me_date, me_date2";
+  $me_sql = "SELECT * FROM ".MINISTER_EVENT_TABLE." WHERE mb_id = '{$mb_id}' AND mb_id != 0 AND mb_id > 0 AND DATE(me_date) <= '{$s_date}' AND DATE(me_date2) >= '{$s_date}' ORDER BY me_date, me_date2";
   $me_result = $mysqli->query($me_sql);
   if($me_result->num_rows > 0){
     while($me = $me_result->fetch_assoc()){

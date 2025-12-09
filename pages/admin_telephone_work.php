@@ -223,10 +223,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         break;
       case 'check_reset': // 선택한 구역들을 리셋
+        // 중요: telephone_reset() 함수는 봉사기록(TELEPHONE_RECORD_TABLE)을 삭제하지 않으며,
+        // 리셋 전의 봉사 정보를 봉사기록 테이블에 저장합니다.
         $tp_id = $postData['tp_id'];
         foreach ($tp_id as $key => $value) {
           telephone_reset($value);
           telephone_house_reset($value);
+          // 봉사기록은 telephone_reset() 함수 내에서 자동으로 저장되며 삭제되지 않습니다.
         }
         insert_work_log('telephone_reset_check');
         break;

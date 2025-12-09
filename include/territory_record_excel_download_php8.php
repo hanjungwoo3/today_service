@@ -2,10 +2,6 @@
 ini_set('memory_limit','-1');
 set_time_limit(0);
 
-/** Error reporting */
-error_reporting(E_ALL);
-ini_set('display_errors', TRUE);
-ini_set('display_startup_errors', TRUE);
 date_default_timezone_set('Asia/Seoul');
 
 if (PHP_SAPI == 'cli')

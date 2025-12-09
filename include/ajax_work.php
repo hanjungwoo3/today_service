@@ -139,13 +139,15 @@ if($work){
 		$mysqli->query($sql);
 
   }elseif($work == 'territory_reset'){
-
+    // 중요: territory_reset() 함수는 봉사기록(TERRITORY_RECORD_TABLE)을 삭제하지 않으며,
+    // 리셋 전의 봉사 정보를 봉사기록 테이블에 저장합니다.
     territory_reset($tt_id);
     territory_house_reset($tt_id);
     insert_work_log('territory_reset:'.$tt_id);
 
   }elseif($work == 'telephone_reset'){
-
+    // 중요: telephone_reset() 함수는 봉사기록(TELEPHONE_RECORD_TABLE)을 삭제하지 않으며,
+    // 리셋 전의 봉사 정보를 봉사기록 테이블에 저장합니다.
     telephone_reset($tp_id);
     telephone_house_reset($tp_id);
     insert_work_log('telephone_reset:'.$tp_id);

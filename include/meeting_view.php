@@ -4,6 +4,7 @@
 $i = 0;
 $week = date('N', strtotime($s_date));
 $ma_id = get_addschedule_id($s_date);
+$mb_id = mb_id();
 
 // 당일 모임장소 출력
 $sql = "SELECT 
@@ -32,6 +33,10 @@ $result = $mysqli->query($sql);
 
 if($result->num_rows > 0):
   while($row = $result->fetch_assoc()):
+
+    // 전시대 참여 '불가능'한 전도인일 경우 전시대 모임 정보도 숨김
+    if($row['ms_type'] == 2 && get_member_display($mb_id) == 1) continue;
+
     $m = get_meeting_data(get_meeting_id($s_date, $row['ms_id']));
     if($m['m_cancle'] != 2):?>
       <div class="card bg-light mb-2">

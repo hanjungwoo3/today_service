@@ -252,7 +252,9 @@ body .nav-pills .nav-link.active, .nav-pills .show>.nav-link {background-color: 
 #territory-view-modal .territory-view-body {position: absolute;width: 100%;top: 200px;bottom: 0px;overflow-y: scroll;-webkit-overflow-scrolling:touch;}
 #territory-view-modal .territory-view-body.collapsed {top:385px;}
 #territory-view-modal .territory-view-body table {margin: 0;}
-#territory-view-modal .territory-view-body table tr td {vertical-align: middle;border-top:none;}
+#territory-view-modal .territory-view-body table tr td {vertical-align: middle;border-top:none;word-wrap: break-word;word-break: break-word;overflow-wrap: break-word;}
+#territory-view-modal .territory-view-body table tr td[rowspan] {position: relative;min-width: 50px;}
+#territory-view-modal .territory-view-body table tr td.text-center[rowspan] {min-width: 50px;width: 50px;}
 #territory-view-modal .territory-view-body table tr.gubun-odd td:nth-child(2),#territory-view-modal .territory-view-body table tr.gubun-odd td:nth-child(3),#territory-view-modal .territory-view-body table tr.gubun-odd td:nth-child(4) {border-bottom: 1px solid #dee2e6!important;}
 #territory-view-modal .territory-view-body table tr.gubun-even td:nth-child(1),#territory-view-modal .territory-view-body table tr.gubun-even td:nth-child(2),#territory-view-modal .territory-view-body table tr.gubun-even td:nth-child(3) {border-bottom: 1px solid #dee2e6!important;}
 #territory-view-modal .territory-view #fixed-head {margin-bottom:0;}

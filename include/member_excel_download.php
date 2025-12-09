@@ -1,9 +1,17 @@
 <?php include_once('../config.php');?>
 
 <?php
-if (version_compare(PHP_VERSION, '8.2.0', '>=')) {
-	require_once 'member_excel_download_php8.php';
+// PHP 버전 체크: 7.4 이상이면 PhpSpreadsheet 버전 사용 (Deprecated 경고 방지)
+// PHP 7.4부터 curly brace 인덱싱이 deprecated되어 PHPExcel에서 경고 발생
+$php_version_check = version_compare(PHP_VERSION, '7.4.0', '>=');
+$php8_file = __DIR__ . '/member_excel_download_php8.php';
+
+if ($php_version_check && file_exists($php8_file)) {
+	require_once $php8_file;
 	exit;
+} elseif ($php_version_check && !file_exists($php8_file)) {
+	// PHP 7.4 이상인데 php8 파일이 없으면 에러
+	die('Error: PHP ' . PHP_VERSION . ' requires member_excel_download_php8.php file, but it was not found.');
 }
 /**
  * PHPExcel
