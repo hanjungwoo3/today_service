@@ -8,6 +8,8 @@ $mb_id = mb_id();
 $mb_g_id = get_member_group($mb_id);
 $member_of_meeting = array();
 
+// 로컬 날짜 전달값 우선 사용해 서버 타임존 차이 방지
+// 클라이언트에서 넘어온 날짜를 우선 사용해 서버 타임존으로 하루 밀리는 문제 방지
 if(!empty($_POST['s_date'])){
   $s_date = $_POST['s_date'];
 }elseif(!empty($_GET['s_date'])){

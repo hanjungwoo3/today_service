@@ -3,9 +3,20 @@
 <?php
 $c_territory_type = unserialize(TERRITORY_TYPE);
 
+// tt_id 안전 조회
+$tt_id = isset($_POST['tt_id']) ? intval($_POST['tt_id']) : (isset($_GET['tt_id']) ? intval($_GET['tt_id']) : 0);
+if(!$tt_id){
+  echo '<div class="p-3 text-danger">잘못된 요청입니다. (tt_id 없음)</div>';
+  exit;
+}
+
 $sql = "SELECT * FROM ".TERRITORY_TABLE." WHERE tt_id = {$tt_id}";
 $result = $mysqli->query($sql);
 $row = $result->fetch_assoc();
+if(!$row){
+  echo '<div class="p-3 text-danger">구역 정보를 찾을 수 없습니다.</div>';
+  exit;
+}
 
 if( !empty_date($row['tt_assigned_date']) || $row['mb_id']){
   if($row['tt_assigned']){
@@ -162,7 +173,7 @@ if($row['tt_type'] == '아파트'){
 
 <script type="text/javascript">
 var timeout = '';
-function territory_view_update(){
+function territory_view_update(silent = false){
 
   var tt_type = '<?=$row['tt_type']?>';
   var tt_id = $('#territory-view-modal .territory-view').attr('tt_id');
@@ -175,17 +186,21 @@ function territory_view_update(){
     type: 'POST',
     dataType: 'html',
     beforeSend: function(xhr){
-      $('.territory-view .territory-view-body table tbody').css('opacity','0.5');
-      var h=($('.territory-view-body').height()/2)+$('.territory-view-body').scrollTop();
-      $(".loading_img").css({'top':h-30});
-      $('.loading_img').show();
+      if(!silent){
+        $('.territory-view .territory-view-body table tbody').css('opacity','0.5');
+        var h=($('.territory-view-body').height()/2)+$('.territory-view-body').scrollTop();
+        $(".loading_img").css({'top':h-30});
+        $('.loading_img').show();
+      }
     },
     success: function(result){
       $('.territory-view .territory-view-body table tbody').html(result);
     },
     complete: function(xhr, textStatus){
-      $('.loading_img').hide();
-      $('.territory-view table tbody').css('opacity','1');
+      if(!silent){
+        $('.loading_img').hide();
+        $('.territory-view table tbody').css('opacity','1');
+      }
     }
   });
   timeout = setTimeout(territory_view_update,20000);

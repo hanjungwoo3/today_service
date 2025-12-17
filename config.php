@@ -27,8 +27,8 @@ if ($base_path === '/') {
 define('BASE_PATH', $base_path);
 
 define('ICON', BASE_PATH.'/icons/icon-jw-n.png'); // 아이콘
-define('VERSION','2025120101'); // js, css 버전
-define('APP_VERSION','2.5.9'); // 앱 버전 (대규모변경).(보이는부분&기능추가).(보이지않는부분)
+define('VERSION','2025121412'); // js, css 버전
+define('APP_VERSION','2.5.10'); // 앱 버전 (대규모변경).(보이는부분&기능추가).(보이지않는부분)
 
 // 보안설정이나 프레임이 달라도 쿠키가 통하도록 설정
 header('P3P: CP="ALL CURa ADMa DEVa TAIa OUR BUS IND PHY ONL UNI PUR FIN COM NAV INT DEM CNT STA POL HEA PRE LOC OTC"');
@@ -77,6 +77,15 @@ $_REQUEST = array_map_deep('sql_escape_string',  $_REQUEST);
 @extract($_POST);
 @extract($_SERVER);
 
+// 세션 쿠키 보안 설정 (HTTPS 환경에서 secure, 기본 httponly/samesite=Lax)
+$secure_cookie = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+session_set_cookie_params([
+  'lifetime' => 3600, // 60분
+  'path'     => $base_path ?: '/',
+  'secure'   => $secure_cookie,
+  'httponly' => true,
+  'samesite' => 'Lax'
+]);
 session_cache_expire(60); // 60분으로 단축
 session_start();
 

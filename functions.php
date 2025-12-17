@@ -1588,9 +1588,9 @@ function footer_menu($active_page){
 	<footer class="footer nav-<?=$navclass?>">
 		<ul class="nav nav-tabs">
 			<li class="nav-item">
-				<a class="nav-link <?=get_active_text($active_page, '오늘의 봉사');?>" href="<?=BASE_PATH?>/">
+				<a class="nav-link <?=get_active_text($active_page, '오늘의 봉사');?>" href="<?=BASE_PATH?>/" title="홈" aria-label="홈">
 					<svg class="icon-home-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<title>001_off@3x</title>
+						<title>홈</title>
 						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
 							<g id="Artboard-Copy" transform="translate(-15.000000, -703.000000)">
 								<g id="001_off" transform="translate(15.000000, 703.000000)">
@@ -1606,10 +1606,10 @@ function footer_menu($active_page){
 						</g>
 					</svg>
 					<svg class="icon-home-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<title>001_on@3x</title>
+						<title>홈</title>
 						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
 							<g id="Artboard-Copy-2" transform="translate(-15.000000, -703.000000)">
-								<g id="001_on" transform="translate(15.000000, 703.000000)">
+								<g id="" transform="translate(15.000000, 703.000000)">
 									<rect id="Rectangle" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32" height="32"></rect>
 									<polygon id="Path-6" fill-opacity="0.2" fill="#C9DEFF" points="7 28.4977436 13 28.4977436 13 20 19 20 19 28.4977436 25 28.4977436 25 13.3811121 17.5047728 5.48374646 7 16"></polygon>
 									<g id="Group" transform="translate(3.000000, 4.000000)" stroke="#4A6DA7" stroke-linejoin="round" stroke-width="1.5">
@@ -1626,9 +1626,9 @@ function footer_menu($active_page){
 				</a>
 			</li>
 			<li class="nav-item">
-				<a class="nav-link <?=get_active_text($active_page, '봉사자');?>" href="<?=BASE_PATH?>/pages/minister_schedule.php">
+				<a class="nav-link <?=get_active_text($active_page, '봉사자');?>" href="<?=BASE_PATH?>/pages/minister_schedule.php" title="봉사자" aria-label="봉사자">
 					<svg class="icon-minister-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<title>002_off@3x</title>
+						<title>봉사자</title>
 						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
 							<g id="Artboard-Copy" transform="translate(-75.000000, -703.000000)">
 								<g id="icon" transform="translate(15.000000, 703.000000)">
@@ -1648,7 +1648,7 @@ function footer_menu($active_page){
 						</g>
 					</svg>
 					<svg class="icon-minister-on <?=get_active_text($active_page, '봉사자');?>" width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<title>002_on@3x</title>
+						<title>봉사자</title>
 						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
 							<g id="Artboard-Copy-2" transform="translate(-75.000000, -703.000000)">
 								<g id="icon" transform="translate(15.000000, 703.000000)">
@@ -1672,9 +1672,9 @@ function footer_menu($active_page){
 			<?php if(DISPLAY_USE == 'use'): // 전시대 사용 ?>
 				<?php if((get_member_display(mb_id()) == 0 || get_member_display(mb_id()) == '') && !is_moveout(mb_id())): // 전시대 참여가 가능하고,전출전도인이 아니면 ?>
 				<li class="nav-item">
-					<a class="nav-link <?=get_active_text($active_page, '전시대');?>" href="<?=BASE_PATH?>/pages/meeting.php">
+					<a class="nav-link <?=get_active_text($active_page, '전시대');?>" href="<?=BASE_PATH?>/pages/meeting.php" title="전시대" aria-label="전시대">
 						<svg class="icon-display-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<title>003_off@3x</title>
+							<title>전시대</title>
 							<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
 								<g id="Artboard-Copy" transform="translate(-135.000000, -703.000000)">
 									<g id="icon" transform="translate(15.000000, 703.000000)">
@@ -1696,7 +1696,7 @@ function footer_menu($active_page){
 							</g>
 						</svg>
 						<svg class="icon-display-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<title>003_on@3x</title>
+							<title>전시대</title>
 							<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
 								<g id="Artboard-Copy-2" transform="translate(-135.000000, -703.000000)">
 									<g id="icon" transform="translate(15.000000, 703.000000)">
@@ -1723,9 +1723,9 @@ function footer_menu($active_page){
 			<?php endif; ?>
 			<?php if(!is_moveout(mb_id())): // 전출전도인이 아니면 ?>
 			<li class="nav-item">
-				<a class="nav-link <?=get_active_text($active_page, '공지');?>" href="<?=BASE_PATH?>/pages/board.php">
+				<a class="nav-link <?=get_active_text($active_page, '공지');?>" href="<?=BASE_PATH?>/pages/board.php" title="공지사항" aria-label="공지사항">
 					<svg class="icon-board-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<title>004_off@3x</title>
+						<title>공지사항</title>
 						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
 							<g id="Artboard-Copy" transform="translate(-195.000000, -703.000000)">
 								<g id="icon" transform="translate(15.000000, 703.000000)">
@@ -1744,7 +1744,7 @@ function footer_menu($active_page){
 						</g>
 					</svg>
 					<svg class="icon-board-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<title>004_on@3x</title>
+						<title>공지사항</title>
 						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
 							<g id="Artboard-Copy-2" transform="translate(-195.000000, -703.000000)">
 								<g id="icon" transform="translate(15.000000, 703.000000)">
@@ -1771,9 +1771,9 @@ function footer_menu($active_page){
 			if((is_guide(mb_id()) || is_admin(mb_id())) && !is_moveout(mb_id())):
 			 ?>
 			<li class="nav-item">
-				<a class="nav-link <?=get_active_text($active_page, '인도자');?>" href="<?=BASE_PATH?>/pages/guide_history.php">
+				<a class="nav-link <?=get_active_text($active_page, '인도자');?>" href="<?=BASE_PATH?>/pages/guide_history.php" title="인도자" aria-label="인도자">
 					<svg class="icon-guide-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<title>005_off@3x</title>
+						<title>인도자</title>
 						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
 							<g id="Artboard-Copy" transform="translate(-255.000000, -703.000000)">
 								<g id="icon" transform="translate(15.000000, 703.000000)">
@@ -1788,7 +1788,7 @@ function footer_menu($active_page){
 						</g>
 					</svg>
 					<svg class="icon-guide-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<title>005_on@3x</title>
+						<title>인도자</title>
 						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
 							<g id="Artboard-Copy-2" transform="translate(-255.000000, -703.000000)">
 								<g id="icon" transform="translate(15.000000, 703.000000)">
@@ -1809,9 +1809,9 @@ function footer_menu($active_page){
 			<?php endif; ?>
 			<?php if(is_admin(mb_id()) && !is_moveout(mb_id())): ?>
 			<li class="nav-item">
-				<a class="nav-link <?=get_active_text($active_page, '관리자');?>" href="<?=BASE_PATH?>/pages/admin_member.php">
+				<a class="nav-link <?=get_active_text($active_page, '관리자');?>" href="<?=BASE_PATH?>/pages/admin_member.php" title="관리자" aria-label="관리자">
 					<svg class="icon-admin-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<title>006_off@3x</title>
+						<title>관리자</title>
 						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
 							<g id="Artboard-Copy" transform="translate(-315.000000, -703.000000)">
 								<g id="icon" transform="translate(15.000000, 703.000000)">
@@ -1827,7 +1827,7 @@ function footer_menu($active_page){
 						</g>
 					</svg>
 					<svg class="icon-admin-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<title>006_on@3x</title>
+						<title>관리자</title>
 						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
 							<g id="Artboard-Copy-2" transform="translate(-315.000000, -703.000000)">
 								<g id="icon" transform="translate(15.000000, 703.000000)">

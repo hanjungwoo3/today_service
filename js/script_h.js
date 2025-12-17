@@ -18,13 +18,34 @@ $(document).ready(function(){
 
   //달력 이전달 다음달 클릭시
   $('#container').on('click','.calendar .calendar_month', function(){
-    let calendar = $('.calendar').attr('calendar');
-    let list = $('.calendar').attr('list');
-    let toYear = $(this).attr('toYear');
-    let toMonth = $(this).attr('toMonth');
+    const calendar = $('.calendar').attr('calendar');
+    const list = $('.calendar').attr('list');
+    const toYear = $(this).attr('toYear');
+    const toMonth = $(this).attr('toMonth');
 
-    pageload_custom(BASE_PATH+'/pages/'+calendar+'.php?toYear='+toYear+'&toMonth='+toMonth,'#'+calendar);
-    pageload_custom(BASE_PATH+'/pages/'+list+'.php?toYear='+toYear+'&toMonth='+toMonth,'#'+list);
+    // 전환되는 달에 맞춰 s_date를 전달:
+    // - 목표 달이 로컬 오늘과 같으면 오늘 날짜
+    // - 아니면 해당 달 1일을 선택 상태로 전달 (달력에 빨간 선택 표시 유지)
+    const now = new Date();
+    const nowYear = now.getFullYear();
+    const nowMonth = now.getMonth() + 1;
+    const targetYear = parseInt(toYear, 10);
+    const targetMonth = parseInt(toMonth, 10);
+    const localYmd = [
+      nowYear,
+      String(nowMonth).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0')
+    ].join('-');
+
+    const sDateForTarget =
+      (targetYear === nowYear && targetMonth === nowMonth)
+        ? localYmd
+        : `${targetYear}-${String(targetMonth).padStart(2, '0')}-01`;
+
+    const commonQuery = `?toYear=${toYear}&toMonth=${toMonth}&s_date=${sDateForTarget}`;
+
+    pageload_custom(BASE_PATH+'/pages/'+calendar+'.php'+commonQuery,'#'+calendar);
+    pageload_custom(BASE_PATH+'/pages/'+list+'.php'+commonQuery,'#'+list);
 
     return false;
   });
@@ -1037,12 +1058,27 @@ function guide_meeting_work(work, ms_id, s_date, page){
          success: function(xhr, textStatus){
 
           if(page == 'home'){
-            pageload_custom(BASE_PATH+'/pages/today_service_list.php','#today-service-list');
+            // 로컬 날짜 기준으로 홈 봉사 목록 갱신
+            const now = new Date();
+            const today = [
+              now.getFullYear(),
+              String(now.getMonth() + 1).padStart(2, '0'),
+              String(now.getDate()).padStart(2, '0')
+            ].join('-');
+            pageload_custom(BASE_PATH+'/pages/today_service_list.php?s_date='+today,'#today-service-list');
             pageload_custom(BASE_PATH+'/pages/minister_calendar.php?s_date='+s_date+'&toYear='+toYear+'&toMonth='+toMonth,'#minister_calendar');
           }else if(page == 'minister'){
             pageload_custom(BASE_PATH+'/pages/minister_calendar_schedule.php?s_date='+s_date,'#minister_calendar_schedule');
           }else if(page == 'display'){
-            pageload_custom(BASE_PATH+'/pages/meeting_calendar_schedule.php?s_date='+s_date,'#meeting_calendar_schedule');
+            // 로컬 날짜 기준으로 전시대 달력/목록 갱신
+            const now = new Date();
+            const today = [
+              now.getFullYear(),
+              String(now.getMonth() + 1).padStart(2, '0'),
+              String(now.getDate()).padStart(2, '0')
+            ].join('-');
+            pageload_custom(BASE_PATH+'/pages/meeting_calendar.php?s_date='+today+'&toYear='+today.split('-')[0]+'&toMonth='+String(parseInt(today.split('-')[1],10)),'#meeting_calendar');
+            pageload_custom(BASE_PATH+'/pages/meeting_calendar_schedule.php?s_date='+today,'#meeting_calendar_schedule');
           }else if(page == 'guide'){
             pageload_custom(BASE_PATH+'/pages/guide_history_list.php?s_date='+s_date,'#guide_history_list');
           }else if(page == 'guide_assign'){

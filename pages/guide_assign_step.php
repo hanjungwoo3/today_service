@@ -1517,12 +1517,18 @@ $(document).ready(function(){
 
   v_guide_assign_step.init();
 
-  setInterval(() => v_guide_assign_step.listMembers(), 10000);
-  setInterval(() => v_guide_assign_step.listTerritory(), 10000);
-  setInterval(() => v_guide_assign_step.listTelephone(), 10000);
-  setInterval(() => v_guide_assign_step.listDisplay(), 10000);
-  setInterval(() => v_guide_assign_step.listAssignedData(), 10000);
-  setInterval(() => v_guide_assign_step.countAssignMember(), 10000);
+  // 폴링 시 트래픽 절감을 위해 비가시 상태에서는 스킵
+  const pollVisible = (fn) => {
+    if (document.hidden) return;
+    fn();
+  };
+
+  setInterval(() => pollVisible(() => v_guide_assign_step.listMembers()), 10000); // 참여자/전도인 정보: 10초
+  setInterval(() => pollVisible(() => v_guide_assign_step.listTerritory()), 60000);
+  setInterval(() => pollVisible(() => v_guide_assign_step.listTelephone()), 60000);
+  setInterval(() => pollVisible(() => v_guide_assign_step.listDisplay()), 60000);
+  setInterval(() => pollVisible(() => v_guide_assign_step.listAssignedData()), 60000);
+  setInterval(() => pollVisible(() => v_guide_assign_step.countAssignMember()), 10000); // 참여자 카운트: 10초
 
 </script>
 

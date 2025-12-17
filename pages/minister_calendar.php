@@ -2,7 +2,10 @@
 
 <?php
 $mb_id = mb_id();
-$today = date('Y-m-d');
+// 로컬 날짜(s_date)가 넘어오면 그것을 오늘로 사용해 서버 타임존 차이로 인한 하루 차이 방지
+$s_date_param = isset($_GET['s_date']) ? $_GET['s_date'] : '';
+$today_dt = DateTime::createFromFormat('Y-m-d', $s_date_param);
+$today = $today_dt ? $today_dt->format('Y-m-d') : date('Y-m-d');
 $today_time = date('H:i:s');
 $bgcolor = array('text-dark', 'text-primary', 'text-info', 'text-success', 'text-warning', 'text-danger', 'text-secondary');
 $events = array();
@@ -32,23 +35,25 @@ if(MINISTER_SCHEDULE_EVENT_USE == 'use'){
 
 /********** 입력값 **********/
 if(isset($_GET['toYear']) && isset($_GET['toMonth'])){
+  $year = (int)$_GET['toYear'];
+  $month = (int)$_GET['toMonth'];
+
   if(isset($_GET['s_date'])){
     $s_date = date('Y-m-d', strtotime($_GET['s_date']));
-    $year = date( "Y", strtotime($_GET['s_date']));
-    $month =  date( "n", strtotime($_GET['s_date']));
   }else{
-    $year = $_GET['toYear'];
-    $month = $_GET['toMonth'];
-    $s_date = (date('Y-m') == date('Y-m', mktime(0, 0, 0, $month, 1, $year)))?$today:date('Y-m-d', mktime(0, 0, 0, $month, 1, $year));
+    // 보여주는 달이 오늘 달이면 오늘, 아니면 그 달의 1일을 기본 선택
+    $s_date = (date('Y-m') == sprintf('%04d-%02d', $year, $month))
+      ? $today
+      : sprintf('%04d-%02d-01', $year, $month);
   }
 }elseif(isset($_GET['s_date'])){
   $s_date = date('Y-m-d', strtotime($_GET['s_date']));
-  $year = date( "Y", strtotime($_GET['s_date']));
-  $month =  date( "n", strtotime($_GET['s_date']));
+  $year = (int)date( "Y", strtotime($_GET['s_date']));
+  $month = (int)date( "n", strtotime($_GET['s_date']));
 }else{
   $s_date = $today;
-  $year = date( "Y" );
-  $month =  date( "n" );
+  $year = (int)date( "Y" );
+  $month = (int)date( "n" );
 }
 
 

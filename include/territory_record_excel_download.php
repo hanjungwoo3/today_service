@@ -54,15 +54,23 @@ require_once dirname(__FILE__) . '/../classes/PHPExcel.php';
 $objPHPExcel = new PHPExcel();
 $sheet = $objPHPExcel->getActiveSheet();
 
-$styleArray = array(
+$styleArray = array( // 외곽 두꺼운 선
   'borders' => array(
-    'allborders' => array(
+    'outline' => array(
+      'style' => PHPExcel_Style_Border::BORDER_THICK
+    )
+  )
+);
+
+$styleArray2 = array( // 외곽 중간 두께 (안쪽 영역 적용용)
+  'borders' => array(
+    'outline' => array(
       'style' => PHPExcel_Style_Border::BORDER_MEDIUM
     )
   )
 );
 
-$styleArray2 = array(
+$styleArray3 = array( // 내부 얇은 선
   'borders' => array(
     'inside' => array(
       'style' => PHPExcel_Style_Border::BORDER_THIN
@@ -75,6 +83,7 @@ $column_cnt = 'J'; // 컬럼명을 출력할 총 열
 $record_start_row = array(); // 구역기록 출력 시작 행
 $record_start_column = array(); // 구역기록 출력 시작 열
 $end_date = array(); // 마지막으로 완료한 날짜
+$max_row = 4; // 테두리 적용 범위 계산용 (헤더 이후부터)
 
 // 초기 세팅
 $where = (isset($tt_type) && $tt_type == '편지')?"tt_type = '편지'":"tt_type != '편지'";
@@ -93,6 +102,7 @@ while($row=$result->fetch_assoc()){
 
 	// 구역기록 출력 시작 행 세팅
 	$record_start_column[$tt_id] = $top_number;
+	$max_row = max($max_row, $bottom_number);
 
 	// 구역기록 출력 시작 열 세팅
 	$record_start_row[$tt_id] = 'C';
@@ -178,6 +188,7 @@ while($row=$result->fetch_assoc()){
 		// 구역기록 출력 시작 행 업데이트
 		$start_row++;
 		$record_start_row[$tt_id] = $start_row;
+		$max_row = max($max_row, $start_column + 1);
 	}
 
 }
@@ -247,8 +258,8 @@ while($row=$result->fetch_assoc()){
 		$record_start_row[$tt_id] = $start_row;
 
     if($column_cnt < $start_row) $column_cnt = $start_row;
+    $max_row = max($max_row, $start_column + 1);
 	}
-
 }
 
 // 마지막으로 완료한 날짜 계산 및 출력
@@ -316,9 +327,14 @@ $objPHPExcel->getActiveSheet()->duplicateStyleArray(
 );
 
 //전체 행 높이
-for($i = 1; $i <= $record_start_column[$tt_id]; $i ++) {
+for($i = 1; $i <= $max_row; $i ++) {
   $sheet->getRowDimension($i)->setRowHeight(16);
 }
+
+// 빈 칸 포함 전체 영역: 내부 얇은선 + 외곽 두꺼운선
+$sheet->getStyle('A3:'.$column_cnt.$max_row)->applyFromArray($styleArray3); // inside thin
+$sheet->getStyle('A3:'.$column_cnt.$max_row)->applyFromArray($styleArray);  // outline thick
+
 
 //폰트 스타일
 $sheet->getStyle("A1:C2")->getFont()->setBold(true);
@@ -330,6 +346,7 @@ $sheet->getStyle("A5:".$right_alpabet.$bottom_number)->getFont()->setSize(10);
 
 unset($styleArray);
 unset($styleArray2);
+unset($styleArray3);
 
 // Rename worksheet
 $objPHPExcel->getActiveSheet()->setTitle('구역임명기록('.$tt_sdate.'_'.$tt_fdate.')');

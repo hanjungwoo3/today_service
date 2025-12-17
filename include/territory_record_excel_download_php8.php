@@ -49,13 +49,21 @@ $activeWorksheet = $spreadsheet->getActiveSheet();
 
 $styleArray = [
     'borders' => [
-        'allBorders' => [
-            'borderStyle' => Border::BORDER_MEDIUM,
+        'outline' => [
+            'borderStyle' => Border::BORDER_THICK,
         ],
     ],
 ];
 
 $styleArray2 = [
+    'borders' => [
+        'outline' => [
+            'borderStyle' => Border::BORDER_MEDIUM,
+        ],
+    ],
+];
+
+$styleArray3 = [
     'borders' => [
         'inside' => [
             'borderStyle' => Border::BORDER_THIN,
@@ -68,6 +76,7 @@ $column_cnt = 'J'; // 컬럼명을 출력할 총 열
 $record_start_row = array(); // 구역기록 출력 시작 행
 $record_start_column = array(); // 구역기록 출력 시작 열
 $end_date = array(); // 마지막으로 완료한 날짜
+$max_row = 4; // 테두리 적용 범위 계산용 (헤더 이후부터)
 
 // 초기 세팅
 $where = (isset($tt_type) && $tt_type == '편지')?"tt_type = '편지'":"tt_type != '편지'";
@@ -91,6 +100,9 @@ while($row=$result->fetch_assoc()){
 	$record_start_row[$tt_id] = 'C';
 
 	$end_date[$tt_id] = '';
+
+    // 최대 행 갱신
+    $max_row = max($max_row, $bottom_number);
 
 	// 구역번호 입력
 	$activeWorksheet->setCellValue("A".$top_number, $tt_num);
@@ -167,12 +179,15 @@ while($row=$result->fetch_assoc()){
 		$activeWorksheet->mergeCells($left_alpabet.$start_column.':'.$right_alpabet.$start_column);
 
 		// 선 굵기
-		$activeWorksheet->getStyle($left_alpabet.$start_column.':'.$right_alpabet.($start_column+1))->applyFromArray($styleArray); // 테두리 진한선
-		$activeWorksheet->getStyle($left_alpabet.$start_column.':'.$right_alpabet.($start_column+1))->applyFromArray($styleArray2); // 내부 연한선
+		$activeWorksheet->getStyle($left_alpabet.$start_column.':'.$right_alpabet.($start_column+1))->applyFromArray($styleArray2); // 테두리 진한선
+		$activeWorksheet->getStyle($left_alpabet.$start_column.':'.$right_alpabet.($start_column+1))->applyFromArray($styleArray3); // 내부 연한선
 
 		// 구역기록 출력 시작 행 업데이트
 		$start_row++;
 		$record_start_row[$tt_id] = $start_row;
+
+        // 최대 행 갱신
+		$max_row = max($max_row, $start_column + 1);
 	}
 
 }
@@ -236,17 +251,23 @@ while($row=$result->fetch_assoc()){
 		$activeWorksheet->mergeCells($left_alpabet.$start_column.':'.$right_alpabet.$start_column);
 
 		// 선 굵기
-		$activeWorksheet->getStyle($left_alpabet.$start_column.':'.$right_alpabet.($start_column+1))->applyFromArray($styleArray); // 테두리 진한선
-		$activeWorksheet->getStyle($left_alpabet.$start_column.':'.$right_alpabet.($start_column+1))->applyFromArray($styleArray2); // 내부 연한선
+		$activeWorksheet->getStyle($left_alpabet.$start_column.':'.$right_alpabet.($start_column+1))->applyFromArray($styleArray2); // 테두리 진한선
+		$activeWorksheet->getStyle($left_alpabet.$start_column.':'.$right_alpabet.($start_column+1))->applyFromArray($styleArray3); // 내부 연한선
 
 		// 구역기록 출력 시작 행 업데이트
 		$start_row++;
 		$record_start_row[$tt_id] = $start_row;
 
     if($column_cnt < $start_row) $column_cnt = $start_row;
+
+		// 최대 행 갱신
+    $max_row = max($max_row, $start_column + 1);
 	}
 
 }
+
+
+
 
 // 마지막으로 완료한 날짜 계산 및 출력
 foreach ($end_date as $tt_id => $date) {
@@ -262,8 +283,9 @@ foreach ($end_date as $tt_id => $date) {
 	$activeWorksheet->setCellValue("B".$start_column, $formatted_date);
 
 	// 선 굵기
-	$activeWorksheet->getStyle("A".$start_column.':'."B".($start_column+1))->applyFromArray($styleArray);
-	$activeWorksheet->getStyle("A".$start_column.':'."B".($start_column+1))->applyFromArray($styleArray2); // 내부 연한선
+	
+	$activeWorksheet->getStyle("A".$start_column.':'."B".($start_column+1))->applyFromArray($styleArray2);
+	$activeWorksheet->getStyle("A".$start_column.':'."B".($start_column+1))->applyFromArray($styleArray3); // 내부 연한선
 
 }
 
@@ -284,8 +306,8 @@ $activeWorksheet->setCellValue('A1', '구역 배정 기록')
 ->setCellValue('A3', '구역 번호')
 ->setCellValue('B3', '마지막으로 완료한 날짜');
 
-$activeWorksheet->getStyle("A3:B4")->applyFromArray($styleArray); // 테두리 진한선
-$activeWorksheet->getStyle("A3:B4")->applyFromArray($styleArray2); // 내부 연한선
+$activeWorksheet->getStyle("A3:B4")->applyFromArray($styleArray2); // 테두리 진한선
+$activeWorksheet->getStyle("A3:B4")->applyFromArray($styleArray3); // 내부 연한선
 
 for ($i='C'; $i < $column_cnt; $i++) {
     $left_alpabet = $i;
@@ -300,8 +322,8 @@ for ($i='C'; $i < $column_cnt; $i++) {
     ->setCellValue($left_alpabet.'4', '배정 날짜')
     ->setCellValue($right_alpabet.'4', '완료 날짜');
 
-    $activeWorksheet->getStyle($left_alpabet.'3:'.$right_alpabet.'4')->applyFromArray($styleArray); // 테두리 진한선
-    $activeWorksheet->getStyle($left_alpabet.'3:'.$right_alpabet.'4')->applyFromArray($styleArray2); // 내부 연한선
+    $activeWorksheet->getStyle($left_alpabet.'3:'.$right_alpabet.'4')->applyFromArray($styleArray2); // 테두리 진한선
+    $activeWorksheet->getStyle($left_alpabet.'3:'.$right_alpabet.'4')->applyFromArray($styleArray3); // 내부 연한선
 }
 
 $activeWorksheet->getStyle('A1:' . $column_cnt . $number)->applyFromArray([
@@ -312,9 +334,13 @@ $activeWorksheet->getStyle('A1:' . $column_cnt . $number)->applyFromArray([
 ]);
 
 //전체 행 높이
-for($i = 1; $i <= $record_start_column[$tt_id]; $i ++) {
+for($i = 1; $i <= $max_row; $i ++) {
     $activeWorksheet->getRowDimension($i)->setRowHeight(16);
 }
+
+// 빈 칸 포함 전체 영역: 외곽 두꺼운 선 + 내부 얇은 선
+$activeWorksheet->getStyle('A3:'.$column_cnt.$max_row)->applyFromArray($styleArray3); // inside thin
+$activeWorksheet->getStyle('A3:'.$column_cnt.$max_row)->applyFromArray($styleArray); // inside thin
 
 //폰트 스타일
 $activeWorksheet->getStyle("A1:C2")->getFont()->setBold(true);
@@ -326,6 +352,7 @@ $activeWorksheet->getStyle("A5:".$right_alpabet.$bottom_number)->getFont()->setS
 
 unset($styleArray);
 unset($styleArray2);
+unset($styleArray3);
 
 // Rename worksheet
 $activeWorksheet->setTitle('구역임명기록('.$tt_sdate.'_'.$tt_fdate.')');

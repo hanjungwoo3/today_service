@@ -163,7 +163,7 @@ function returnvisit(table,work,pid){
             'table':table
           },
           type: 'POST',
-          async: false,
+          async: true,
           dataType: 'html',
           success: function(result){
             if(table == 'territory'){
@@ -186,7 +186,7 @@ function returnvisit(table,work,pid){
         'table':table
       },
       type: 'POST',
-      async: false,
+      async: true,
       dataType: 'html',
       success: function(result){
         $('#popup-min-modal .modal-body').html(result);
@@ -212,7 +212,7 @@ function delete_returnvisit(table,pid,rv_id){
           'table': table
         },
         type: 'POST',
-        async: false,
+        async: true,
         dataType: 'html',
         success: function(result){
           $('#returnvisitmemo_update .returnvisit_list[rv_index='+rv_id+']').hide();
@@ -237,7 +237,7 @@ function condition_delete(table, pid){
           'pid': pid
         },
         type: 'POST',
-        async: false,
+      async: true,
         dataType: 'html',
         success: function(result){
         },
@@ -310,8 +310,8 @@ function open_territory_view(tt_id, mode = 'view') {
       url: BASE_PATH+'/include/ajax_work.php',
       data: { 'work': 'territory_start', 'table': 'territory', 'id': tt_id }, 
       type: 'POST',
-      async: false,
-      dataType: 'json',
+      async: true,
+      dataType: 'text', // 빈 응답/경고에도 파싱 에러가 나지 않도록 텍스트 처리
       success: function(response) {
         console.log('Start service logged:', response);
       },
@@ -326,7 +326,7 @@ function open_territory_view(tt_id, mode = 'view') {
       'tt_id':tt_id,
     },
     type: 'POST',
-    async: false,
+    async: true,
     dataType: 'html',
     success: function(result){
       $('#territory-view-modal .modal-body').html(result);
@@ -344,6 +344,20 @@ function close_territory_view(tt_id){
   if(typeof v_admin_territory !== 'undefined'){
     v_admin_territory.updateTerritory(tt_id);
   }
+  // 인도자 배정 화면에서 구역 상세를 닫을 때, 해당 구역 정보만이라도 최신으로 반영되도록 전체 구역 리스트를 1회 갱신
+  if(typeof v_guide_assign_step !== 'undefined' && typeof v_guide_assign_step.listTerritory === 'function'){
+    v_guide_assign_step.listTerritory();
+  }
+  // 홈(오늘의 봉사) 화면이면 오늘 리스트를 1회 갱신
+  if($('#today-service-list').length){
+    const now = new Date();
+    const today = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0')
+    ].join('-');
+    pageload_custom(BASE_PATH+'/pages/today_service_list.php?s_date='+today,'#today-service-list');
+  }
 
   $('#territory-view-modal .modal-body').html('');
 
@@ -357,8 +371,8 @@ function open_telephone_view(tp_id, mode = 'view'){
       url: BASE_PATH+'/include/ajax_work.php',
       data: { 'work': 'territory_start', 'table': 'telephone', 'id': tp_id }, 
       type: 'POST',
-      async: false,
-      dataType: 'json',
+      async: true,
+      dataType: 'text', // 빈 응답/경고에도 파싱 에러가 나지 않도록 텍스트 처리
       success: function(response) {
         console.log('Start service logged:', response);
       },
@@ -373,7 +387,7 @@ function open_telephone_view(tp_id, mode = 'view'){
       'tp_id':tp_id,
     },
     type: 'POST',
-    async: false,
+    async: true,
     dataType: 'html',
     success: function(result){
       $('#telephone-view-modal .modal-body').html(result);
@@ -390,6 +404,16 @@ function close_telephone_view(tp_id){
 
   if(typeof v_admin_telephone !== 'undefined'){
     v_admin_telephone.updateTelephone(tp_id);
+  }
+  // 홈(오늘의 봉사) 화면이면 오늘 리스트를 1회 갱신
+  if($('#today-service-list').length){
+    const now = new Date();
+    const today = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0')
+    ].join('-');
+    pageload_custom(BASE_PATH+'/pages/today_service_list.php?s_date='+today,'#today-service-list');
   }
   $('#telephone-view-modal .modal-body').html('');
 
@@ -816,13 +840,26 @@ function memo_work(table,pid){
 
 // 부재 / 방문 클릭할떄마다 즉시 업데이트
 function visit_check(table, pid, e){
+  // 중복/겹침 방지 플래그
+  if(window.territory_visit_busy) return false;
+  window.territory_visit_busy = true;
 
-  $(e).parent().parent().parent().find('.visit-check').not($(e)).prop("checked",false);
+  // 같은 세대 다른 체크 해제 후 현재만 유지
+  $(e).closest('td').closest('tr').find('.visit-check').not($(e)).prop("checked",false);
 
   let visit = $(e).val();
   if(!$(e).is(":checked")){
     visit = '';
   }
+
+  // 클릭 중 재로딩 방지: 기존 타이머 클리어
+  if(typeof timeout !== 'undefined'){
+    clearTimeout(timeout);
+  }
+
+  // UI 잠금
+  const $rowChecks = $(e).closest('tr').find('.visit-check');
+  $rowChecks.prop('disabled', true);
 
   $.ajax({
     url: BASE_PATH+'/include/ajax_work.php',
@@ -833,11 +870,18 @@ function visit_check(table, pid, e){
       'visit': visit
     },
     type: 'POST',
-    async: false,
+    async: true,
     dataType: 'html',
-    success: function(result){
-    },
     complete: function(xhr, textStatus){
+      // 재로딩 재개 (한 번만, 로딩이미지 없이)
+      if(typeof territory_view_update === 'function'){
+        territory_view_update(true);
+      }else if(typeof timeout !== 'undefined'){
+        timeout = setTimeout(function(){ if(typeof territory_view_update==='function'){ territory_view_update(true); } }, 20000);
+      }
+      // UI 잠금 해제
+      $rowChecks.prop('disabled', false);
+      window.territory_visit_busy = false;
     }
   });
 
@@ -906,7 +950,17 @@ function attend_ministry(s_date, ms_id, el){
           }else{
             $('#toast').toastMessage( message+' 완료');
           }
-            pageload_custom(BASE_PATH+'/pages/today_service_list.php','#today-service-list');
+            // 로컬 날짜 기준으로 오늘 봉사 목록 갱신
+            const now = new Date();
+            const today = [
+              now.getFullYear(),
+              String(now.getMonth() + 1).padStart(2, '0'),
+              String(now.getDate()).padStart(2, '0')
+            ].join('-');
+            pageload_custom(BASE_PATH+'/pages/today_service_list.php?s_date='+today,'#today-service-list');
+            // 전시대 달력/목록도 로컬 날짜로 갱신
+            pageload_custom(BASE_PATH+'/pages/meeting_calendar.php?s_date='+today+'&toYear='+today.split('-')[0]+'&toMonth='+String(parseInt(today.split('-')[1],10)),'#meeting_calendar');
+            pageload_custom(BASE_PATH+'/pages/meeting_calendar_schedule.php?s_date='+today,'#meeting_calendar_schedule');
          }
        });
     }
@@ -1306,9 +1360,15 @@ $(document).ready(function(){
     return false;
   });
 
-  // 인도자 > 봉사모임 에서 '오늘 날짜로' 버튼 클릭시 
+  // 인도자 > 봉사모임 에서 '오늘 날짜로' 버튼 클릭시 (로컬 시간 기준)
   $('#container').on('click','#guide_history_date button', function(){
-    var today = new Date().toISOString().split('T')[0];  // 오늘 날짜를 ISO 형식으로 변환
+    const now = new Date();
+    const today = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0')
+    ].join('-'); // 로컬 타임존 기준 YYYY-MM-DD
+
     $('#guide_history_date input').val(today);  // input 필드에 값 설정
     pageload_custom(BASE_PATH+'/pages/guide_history_list.php?s_date='+today,'#guide_history_list');
   });
@@ -1865,5 +1925,6 @@ $('#container').on('click','button[name="territory_map_reset"]', function(){
     }
   });
 });
+
 
 });

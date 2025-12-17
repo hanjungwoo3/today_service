@@ -1,5 +1,15 @@
 <?php include_once('../config.php');?>
 
+<?php
+$type  = isset($_POST['type']) ? $_POST['type'] : (isset($_GET['type']) ? $_GET['type'] : '');
+$value = isset($_POST['value']) ? $_POST['value'] : (isset($_GET['value']) ? $_GET['value'] : '');
+
+if(!$type || !$value){
+  echo '<div class="p-3 text-danger">지도 정보를 표시할 수 없습니다. (type/value 누락)</div>';
+  exit;
+}
+?>
+
 <div id="map" style="width:100%;height:100%;position:absolute;display:none;"></div>
 
 <!-- 각 세대별 지도보기 -->

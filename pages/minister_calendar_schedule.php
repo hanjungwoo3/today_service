@@ -9,7 +9,14 @@ $video_sum = '0';
 $return_sum = '0';
 $study_sum = '0';
 $mb_id = mb_id();
-$today = date('Y-m-d');
+$s_date_param = '';
+if(isset($_POST['s_date'])){
+  $s_date_param = $_POST['s_date'];
+}elseif(isset($_GET['s_date'])){
+  $s_date_param = $_GET['s_date'];
+}
+$today_dt = DateTime::createFromFormat('Y-m-d', $s_date_param);
+$today = $today_dt ? $today_dt->format('Y-m-d') : date('Y-m-d');
 $mb_g_id = get_member_group($mb_id);
 $meeting_data = array();
 $moveoutDate = get_member_moveout_date($mb_id);
@@ -21,14 +28,22 @@ if(is_moveout($mb_id) && $moveoutDate < $s_date){
 }
 
 if(isset($_GET['toYear']) && isset($_GET['toMonth'])){
-  $st_month =  date('Y-m-d', mktime(0, 0, 0, $_GET['toMonth'], 1, $_GET['toYear']));
-  $fi_month =  date('Y-m-t', mktime(0, 0, 0, $_GET['toMonth'], 1, $_GET['toYear']));
-  $s_date = (date('Y-m') == date('Y-m', mktime(0, 0, 0, $_GET['toMonth'], 1, $_GET['toYear'])))? $today:$st_month;
+  $year = (int)$_GET['toYear'];
+  $month = (int)$_GET['toMonth'];
+
+  if(!empty($s_date_param)){
+    $s_date = date('Y-m-d', strtotime($s_date_param));
+  }else{
+    // 오늘 달이면 오늘, 아니면 그 달 1일
+    $s_date = (date('Y-m') == sprintf('%04d-%02d', $year, $month))
+      ? $today
+      : sprintf('%04d-%02d-01', $year, $month);
+  }
+  $st_month =  date('Y-m-d', mktime(0, 0, 0, $month, 1, $year));
+  $fi_month =  date('Y-m-t', mktime(0, 0, 0, $month, 1, $year));
 }else{
-  if(isset($_POST['s_date'])){
-    $s_date = date('Y-m-d', strtotime($_POST['s_date']));
-  }elseif(isset($_GET['s_date'])){
-    $s_date = date('Y-m-d', strtotime($_GET['s_date']));
+  if(!empty($s_date_param)){
+    $s_date = date('Y-m-d', strtotime($s_date_param));
   }else{
     $s_date = $today;
   }

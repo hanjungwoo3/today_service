@@ -3,7 +3,16 @@
 <?php
 $mb_id = mb_id();
 $mb_g_id = get_member_group($mb_id);
- 
+
+// 로컬 날짜(s_date)가 넘어오면 그것을 오늘로 사용해 서버 타임존 차이로 인한 하루 차이 방지
+$s_date_param = '';
+if (!empty($_POST['s_date'])) {
+  $s_date_param = $_POST['s_date'];
+} elseif (!empty($_GET['s_date'])) {
+  $s_date_param = $_GET['s_date'];
+}
+$today_dt = DateTime::createFromFormat('Y-m-d', $s_date_param);
+$today = $today_dt ? $today_dt->format('Y-m-d') : date('Y-m-d');
 //주에 일정이 몇 개 있는지
 $ms_week = array();
 $m_sql = "SELECT ms_week FROM ".MEETING_SCHEDULE_TABLE." WHERE ms_type = 2 AND ma_id = 0 AND (g_id = 0 OR g_id = '{$mb_g_id}')";
@@ -29,19 +38,33 @@ $sql = "SELECT m_date FROM ".MEETING_TABLE." WHERE ms_type = 2 AND FIND_IN_SET({
 $result = $mysqli->query($sql);
 while($row = $result->fetch_assoc()) $volunteered[] = $row['m_date'];
 
-/********** 사용자 설정값 **********/
-$today = date('Y-m-d');
-if(!empty($_POST['s_date'])){
-  $s_date = $_POST['s_date'];
-}elseif(!empty($_GET['s_date'])){
-  $s_date = $_GET['s_date'];
+/********** 사용자 설정값 + 입력값 **********/
+if(isset($_GET['toYear']) && isset($_GET['toMonth'])){
+  $year = (int)$_GET['toYear'];
+  $month = (int)$_GET['toMonth'];
+
+  if(!empty($_POST['s_date'])){
+    $s_date = $_POST['s_date'];
+  }elseif(!empty($_GET['s_date'])){
+    $s_date = $_GET['s_date'];
+  }else{
+    // 오늘 달이면 오늘, 아니면 그 달의 1일
+    $s_date = (date('Y-m') == sprintf('%04d-%02d', $year, $month))
+      ? $today
+      : sprintf('%04d-%02d-01', $year, $month);
+  }
 }else{
-  $s_date = $today;
+  if(!empty($_POST['s_date'])){
+    $s_date = $_POST['s_date'];
+  }elseif(!empty($_GET['s_date'])){
+    $s_date = $_GET['s_date'];
+  }else{
+    $s_date = $today;
+  }
+  $year = (int)date( "Y", strtotime($s_date) );
+  $month = (int)date( "n", strtotime($s_date) );
 }
 
-/********** 입력값 **********/
-$year = (!empty($_GET['toYear']))? $_GET['toYear'] : date( "Y" );
-$month = (!empty($_GET['toMonth']))? $_GET['toMonth'] : date( "n" );
 $hide = (!empty($_GET['toYear']) && !empty($_GET['toMonth']) && empty($_GET['s_date']))?'':'show';
 
 /********** 계산값 **********/

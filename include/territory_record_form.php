@@ -1,6 +1,12 @@
 <?php include_once('../config.php');?>
 
 <?php
+$tt_id = isset($_POST['tt_id']) ? intval($_POST['tt_id']) : (isset($_GET['tt_id']) ? intval($_GET['tt_id']) : 0);
+if(!$tt_id){
+  echo '<div class="p-3 text-danger">잘못된 요청입니다. (tt_id 없음)</div>';
+  exit;
+}
+
 $tt_data = get_territory_data($tt_id);
 
 // get_all_past_records 함수를 사용하여 방문 기록 가져오기

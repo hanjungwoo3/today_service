@@ -1,6 +1,9 @@
 <?php include_once('../config.php');?>
 
 <?php
+$tt_id = isset($_POST['tt_id']) ? intval($_POST['tt_id']) : (isset($_GET['tt_id']) ? intval($_GET['tt_id']) : 0);
+$tt_type = isset($_POST['tt_type']) ? $_POST['tt_type'] : (isset($_GET['tt_type']) ? $_GET['tt_type'] : '');
+
 if($tt_id):
 
   // tt_status 정보 가져오기

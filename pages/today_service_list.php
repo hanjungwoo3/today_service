@@ -3,8 +3,10 @@ include_once(__DIR__.'/../config.php');
 
 $mb_id = mb_id();
 $mb_g_id = get_member_group($mb_id);
-$today = date("Y-m-d");
-$week = date('N');
+$s_date_param = isset($_GET['s_date']) ? $_GET['s_date'] : '';
+$s_date_dt = DateTime::createFromFormat('Y-m-d', $s_date_param);
+$today = $s_date_dt ? $s_date_dt->format('Y-m-d') : date('Y-m-d'); // 기본은 서버 날짜, 가능하면 클라이언트 전달값 사용
+$week = date('N', strtotime($today));
 
 // 배정된 호별 구역 (오늘 배정받은 것만)
 $tt_sql = "SELECT t.*, m.m_date, ms.ms_time, mp.mp_name 
@@ -161,12 +163,12 @@ if($result->num_rows > 0){
             </div>
             <div class="align-self-center flex-shrink-0">
               <?php if($status == 'attend'): ?>
-                <button type="button" class="btn btn-outline-danger" onclick="attend_ministry('<?=date('Y-m-d')?>',<?=$row['ms_id']?>,this);">불참</button>
+                <button type="button" class="btn btn-outline-danger" onclick="attend_ministry('<?=$today?>',<?=$row['ms_id']?>,this);">불참</button>
               <?php else: ?>
                  <?php if( !empty($attend_limit) && $count >= $attend_limit): ?>
                  <button type="button" class="btn btn-outline-primary disabled" disabled>마감</button>
                  <?php else: ?>
-                 <button type="button" class="btn btn-outline-primary" onclick="attend_ministry('<?=date('Y-m-d')?>',<?=$row['ms_id']?>,this);">참석</button>
+                 <button type="button" class="btn btn-outline-primary" onclick="attend_ministry('<?=$today?>',<?=$row['ms_id']?>,this);">참석</button>
                  <?php endif;
                endif; ?>
             </div>

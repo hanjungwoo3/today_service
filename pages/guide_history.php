@@ -13,6 +13,7 @@
   <nav class="navbar navbar-light bg-light mb-2">
     <small class="float-right mb-1 mt-1 text-secondary">모임 일시와 장소를 확인해 주세요<br></small>
   </nav>
+
   <small class="text-secondary">날짜 선택</small>
   <div class="input-group mb-4" id="guide_history_date">
     <input type="date" class="form-control" id="dateInput">
@@ -22,7 +23,6 @@
   </div>
 
   <div id="guide_history_list">
-    <?php include_once('guide_history_list.php'); ?>
   </div>
 </div>
 
@@ -38,6 +38,9 @@
 
       const formattedDate = `${year}-${month}-${day}`;
       dateInput.value = formattedDate;
+
+      // 초기 로딩 시에도 로컬 날짜를 기준으로 리스트를 불러와 서버 타임존 차이로 하루 당겨지는 현상 방지
+      pageload_custom(BASE_PATH + '/pages/guide_history_list.php?s_date=' + formattedDate, '#guide_history_list');
 
     });
 
