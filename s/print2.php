@@ -322,7 +322,7 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             margin-right: 10px;
         }
 
-        #printArea {
+        .print-page {
             width: 210mm;
             margin: 0 auto;
             background: white;
@@ -333,13 +333,19 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             gap: 0;
             position: relative;
             min-height: 297mm;
+            box-sizing: border-box;
+            page-break-after: always;
         }
 
-        #printArea .crop-h, #printArea .crop-v {
+        .print-page:last-child {
+            page-break-after: auto;
+        }
+
+        .print-page .crop-h, .print-page .crop-v {
             position: absolute;
         }
 
-        #printArea .crop-h {
+        .print-page .crop-h {
             top: 50%;
             left: 0;
             right: 0;
@@ -347,7 +353,7 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
             border-top: 1px dashed #999;
         }
 
-        #printArea .crop-v {
+        .print-page .crop-v {
             left: 50%;
             top: 0;
             bottom: 0;
@@ -395,65 +401,72 @@ $meetingDate = isset($data['date']) ? $data['date'] : '';
     </div>
 
     <div id="printArea">
-        <div class="crop-h"></div>
-        <div class="crop-v"></div>
     <?php
-    // 각 과제에 인덱스 추가
-    foreach ($assignments as $idx => $item):
-        $name = '';
-        $assistant = '';
-
-        if (is_array($item['assigned'])) {
-            $name = isset($item['assigned'][0]) ? $item['assigned'][0] : '';
-            $assistant = isset($item['assigned'][1]) ? $item['assigned'][1] : '';
-        }
-
-        $taskNumber = $item['title'];
+    // 4개씩 페이지로 나누기
+    $chunks = array_chunk($assignments, 4, true);
+    foreach ($chunks as $pageIndex => $pageAssignments):
     ?>
-        <div class="card" data-index="<?php echo $idx; ?>">
-            <div class="card-title">
-                <span>그리스도인 생활과 봉사</span>
-                <span>집회 과제</span>
-            </div>
+        <div class="print-page" data-page="<?php echo $pageIndex; ?>">
+            <div class="crop-h"></div>
+            <div class="crop-v"></div>
+        <?php
+        foreach ($pageAssignments as $idx => $item):
+            $name = '';
+            $assistant = '';
 
-            <div class="field">
-                <span class="field-label">이름:</span>
-                <span class="field-value"><?php echo htmlspecialchars($name); ?></span>
-            </div>
+            if (is_array($item['assigned'])) {
+                $name = isset($item['assigned'][0]) ? $item['assigned'][0] : '';
+                $assistant = isset($item['assigned'][1]) ? $item['assigned'][1] : '';
+            }
 
-            <div class="field">
-                <span class="field-label">보조자:</span>
-                <span class="field-value"><?php echo htmlspecialchars($assistant); ?></span>
-            </div>
-
-            <div class="field">
-                <span class="field-label">일자:</span>
-                <span class="field-value"><?php echo htmlspecialchars($meetingDate); ?></span>
-            </div>
-
-            <div class="field">
-                <span class="field-label">과제 번호:</span>
-                <span class="field-value"><?php echo htmlspecialchars($taskNumber); ?></span>
-            </div>
-
-            <div class="location-section">
-                <div class="location-title">과제를 수행할 장소:</div>
-                <div class="location-option">
-                    <span class="checkbox checked">✓</span> 회관
+            $taskNumber = $item['title'];
+        ?>
+            <div class="card" data-index="<?php echo $idx; ?>">
+                <div class="card-title">
+                    <span>그리스도인 생활과 봉사</span>
+                    <span>집회 과제</span>
                 </div>
-                <div class="location-option">
-                    <span class="checkbox"></span> 보조 교실 1
-                </div>
-                <div class="location-option">
-                    <span class="checkbox"></span> 보조 교실 2
-                </div>
-            </div>
 
-            <div class="note">
-                <strong>학생이 유의할 점:</strong> 「생활과 봉사 집회 교재」에서 과제를 위한 근거 자료와 학습 요점을 찾아볼 수 있습니다. 과제에 대한 지침을 「그리스도인 생활과 봉사 집회 지침」(S-38)에서 살펴보시기 바랍니다.
-            </div>
+                <div class="field">
+                    <span class="field-label">이름:</span>
+                    <span class="field-value"><?php echo htmlspecialchars($name); ?></span>
+                </div>
 
-            <div class="form-number">S-89-KO 11/23</div>
+                <div class="field">
+                    <span class="field-label">보조자:</span>
+                    <span class="field-value"><?php echo htmlspecialchars($assistant); ?></span>
+                </div>
+
+                <div class="field">
+                    <span class="field-label">일자:</span>
+                    <span class="field-value"><?php echo htmlspecialchars($meetingDate); ?></span>
+                </div>
+
+                <div class="field">
+                    <span class="field-label">과제 번호:</span>
+                    <span class="field-value"><?php echo htmlspecialchars($taskNumber); ?></span>
+                </div>
+
+                <div class="location-section">
+                    <div class="location-title">과제를 수행할 장소:</div>
+                    <div class="location-option">
+                        <span class="checkbox checked">✓</span> 회관
+                    </div>
+                    <div class="location-option">
+                        <span class="checkbox"></span> 보조 교실 1
+                    </div>
+                    <div class="location-option">
+                        <span class="checkbox"></span> 보조 교실 2
+                    </div>
+                </div>
+
+                <div class="note">
+                    <strong>학생이 유의할 점:</strong> 「생활과 봉사 집회 교재」에서 과제를 위한 근거 자료와 학습 요점을 찾아볼 수 있습니다. 과제에 대한 지침을 「그리스도인 생활과 봉사 집회 지침」(S-38)에서 살펴보시기 바랍니다.
+                </div>
+
+                <div class="form-number">S-89-KO 11/23</div>
+            </div>
+        <?php endforeach; ?>
         </div>
     <?php endforeach; ?>
     </div>
