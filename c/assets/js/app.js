@@ -80,7 +80,7 @@
           if (noteMatch) {
             const [, date] = noteMatch
             if (!payload.entries[date]) {
-              payload.entries[date] = { note: '', names: ['', '', ''] }
+              payload.entries[date] = { note: '', names: ['', '', '', ''] }
             }
             payload.entries[date].note = typeof value === 'string' ? value : ''
             return
@@ -90,7 +90,7 @@
           if (nameMatch) {
             const [, date, index] = nameMatch
             if (!payload.entries[date]) {
-              payload.entries[date] = { note: '', names: ['', '', ''] }
+              payload.entries[date] = { note: '', names: ['', '', '', ''] }
             }
             payload.entries[date].names[Number(index)] = typeof value === 'string' ? value : ''
           }
@@ -350,7 +350,7 @@
         // 요일별 시간대 안내 복사
         if (prevData.schedule_guide) {
           const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-          const times = ['morning', 'afternoon', 'evening']
+          const times = ['dawn', 'morning', 'afternoon', 'evening']
           
           console.log('주간 일정 안내 복사 시작')
           

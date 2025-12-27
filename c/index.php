@@ -82,7 +82,7 @@ if ($status === 'saved') {
               <?php
                 $isCurrentMonth = (int)$date->format('n') === $month;
                 $dateKey = $date->format('Y-m-d');
-                $assignments = isset($calendarData['dates'][$dateKey]) ? $calendarData['dates'][$dateKey] : array('note' => '', 'names' => array('', '', ''));
+                $assignments = isset($calendarData['dates'][$dateKey]) ? $calendarData['dates'][$dateKey] : array('note' => '', 'names' => array('', '', '', ''));
                 $dayClass = getDayClass($date, $today, $isCurrentMonth);
                 $numberClass = getDayNumberClass($date, $today, $isCurrentMonth);
                 $colors = getScheduleColorForDay($calendarData['schedule_guide'], $date);
@@ -106,9 +106,9 @@ if ($status === 'saved') {
                     class="assignment-note"
                   />
                   <div class="assignments">
-                    <?php 
-                      $timePlaceholders = array('오전', '오후', '저녁');
-                      for ($i = 0; $i < 3; $i++): 
+                    <?php
+                      $timePlaceholders = array('새벽', '오전', '오후', '저녁');
+                      for ($i = 0; $i < 4; $i++):
                     ?>
                       <input
                         type="text"
@@ -128,10 +128,10 @@ if ($status === 'saved') {
         <div class="schedule-guide-section">
           <h2 class="guide-title">요일별 시간대 안내</h2>
           <div class="guide-grid">
-            <?php 
-              $dayLabels = array('월요일' => 'monday', '화요일' => 'tuesday', '수요일' => 'wednesday', 
+            <?php
+              $dayLabels = array('월요일' => 'monday', '화요일' => 'tuesday', '수요일' => 'wednesday',
                             '목요일' => 'thursday', '금요일' => 'friday', '토요일' => 'saturday', '일요일' => 'sunday');
-              $timeLabels = array('오전' => 'morning', '오후' => 'afternoon', '저녁' => 'evening');
+              $timeLabels = array('새벽' => 'dawn', '오전' => 'morning', '오후' => 'afternoon', '저녁' => 'evening');
               $scheduleGuide = $calendarData['schedule_guide'];
             ?>
             <?php foreach ($dayLabels as $dayLabel => $dayKey): ?>

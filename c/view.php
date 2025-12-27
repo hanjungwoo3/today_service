@@ -351,7 +351,7 @@ $today = new DateTime('now');
       }
 
       .schedule-table .schedule-cell {
-        font-size: 11px;
+        font-size: 9px;
         min-height: 30px;
       }
 
@@ -550,11 +550,11 @@ $today = new DateTime('now');
             <?php
               $isCurrentMonth = (int)$date->format('n') === $month;
               $dateKey = $date->format('Y-m-d');
-              $assignments = isset($calendarData['dates'][$dateKey]) ? $calendarData['dates'][$dateKey] : array('note' => '', 'names' => array('', '', ''));
+              $assignments = isset($calendarData['dates'][$dateKey]) ? $calendarData['dates'][$dateKey] : array('note' => '', 'names' => array('', '', '', ''));
               $dayClass = getDayClass($date, $today, $isCurrentMonth);
               $numberClass = getDayNumberClass($date, $today, $isCurrentMonth);
               $note = isset($assignments['note']) ? trim($assignments['note']) : '';
-              $names = isset($assignments['names']) ? $assignments['names'] : array('', '', '');
+              $names = isset($assignments['names']) ? $assignments['names'] : array('', '', '', '');
               $isSaturday = (int)$date->format('w') === 6;
               $colors = getScheduleColorForDay($calendarData['schedule_guide'], $date);
               
@@ -593,7 +593,8 @@ $today = new DateTime('now');
         <table class="schedule-table">
           <thead>
             <tr>
-              <th>요일</th>
+              <th></th>
+              <th>새벽</th>
               <th>오전</th>
               <th>오후</th>
               <th>저녁</th>
@@ -609,18 +610,22 @@ $today = new DateTime('now');
               $todayDayKey = $todayDayNames[$todayWeekday];
             ?>
             <?php foreach ($dayLabels as $dayLabel => $dayKey): ?>
-              <?php 
+              <?php
                 $isToday = $dayKey === $todayDayKey;
+                $dawnData = isset($scheduleGuide[$dayKey]['dawn']) ? $scheduleGuide[$dayKey]['dawn'] : array('text' => '', 'color' => 'white');
                 $morningData = isset($scheduleGuide[$dayKey]['morning']) ? $scheduleGuide[$dayKey]['morning'] : array('text' => '', 'color' => 'white');
                 $afternoonData = isset($scheduleGuide[$dayKey]['afternoon']) ? $scheduleGuide[$dayKey]['afternoon'] : array('text' => '', 'color' => 'white');
                 $eveningData = isset($scheduleGuide[$dayKey]['evening']) ? $scheduleGuide[$dayKey]['evening'] : array('text' => '', 'color' => 'white');
-                
-                $hasContent = !empty(trim($morningData['text'])) || !empty(trim($afternoonData['text'])) || !empty(trim($eveningData['text']));
-                
+
+                $hasContent = !empty(trim($dawnData['text'])) || !empty(trim($morningData['text'])) || !empty(trim($afternoonData['text'])) || !empty(trim($eveningData['text']));
+
                 if (!$hasContent) continue;
               ?>
               <tr class="<?php echo $isToday ? 'today-row' : ''; ?>">
                 <td class="day-label"><?php echo $dayLabel; ?></td>
+                <td class="schedule-cell color-<?php echo htmlspecialchars($dawnData['color'], ENT_QUOTES); ?>">
+                  <?php echo nl2br(htmlspecialchars($dawnData['text'], ENT_QUOTES)); ?>
+                </td>
                 <td class="schedule-cell color-<?php echo htmlspecialchars($morningData['color'], ENT_QUOTES); ?>">
                   <?php echo nl2br(htmlspecialchars($morningData['text'], ENT_QUOTES)); ?>
                 </td>

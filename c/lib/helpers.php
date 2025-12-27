@@ -84,16 +84,16 @@ function loadCalendarData($year, $month)
 function getDefaultScheduleGuide()
 {
     $days = array('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday');
-    $times = array('morning', 'afternoon', 'evening');
+    $times = array('dawn', 'morning', 'afternoon', 'evening');
     $guide = array();
-    
+
     foreach ($days as $day) {
         $guide[$day] = array();
         foreach ($times as $time) {
             $guide[$day][$time] = array('text' => '', 'color' => 'white');
         }
     }
-    
+
     return $guide;
 }
 
@@ -102,13 +102,14 @@ function getScheduleColorForDay($scheduleGuide, $date)
     $weekday = (int)$date->format('w');
     $dayNames = array('sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday');
     $dayName = $dayNames[$weekday];
-    
+
     if (!isset($scheduleGuide[$dayName])) {
-        return array('white', 'white', 'white');
+        return array('white', 'white', 'white', 'white');
     }
-    
+
     $daySchedule = $scheduleGuide[$dayName];
     return array(
+        isset($daySchedule['dawn']['color']) ? $daySchedule['dawn']['color'] : 'white',
         isset($daySchedule['morning']['color']) ? $daySchedule['morning']['color'] : 'white',
         isset($daySchedule['afternoon']['color']) ? $daySchedule['afternoon']['color'] : 'white',
         isset($daySchedule['evening']['color']) ? $daySchedule['evening']['color'] : 'white'
@@ -292,7 +293,7 @@ function isAssocArray($arr)
 function normalizeDayEntry($entry)
 {
     $note = '';
-    $names = array('', '', '');
+    $names = array('', '', '', '');
 
     if (is_array($entry)) {
         if (isAssocArray($entry)) {
@@ -319,6 +320,12 @@ function normalizeNamesArray($names)
     foreach ($names as $name) {
         $normalized[] = trim((string)$name);
     }
-    $normalized = array_slice($normalized, 0, 3);
-    return array_pad($normalized, 3, '');
+
+    // 기존 데이터 호환성: 3개 요소면 [오전,오후,저녁] -> [새벽='',오전,오후,저녁]
+    if (count($normalized) === 3) {
+        array_unshift($normalized, '');
+    }
+
+    $normalized = array_slice($normalized, 0, 4);
+    return array_pad($normalized, 4, '');
 }
