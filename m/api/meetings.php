@@ -8,11 +8,19 @@ if (file_exists($localConfigFile)) {
 }
 
 if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
+    $is_admin = false;
     if (file_exists(dirname(__FILE__) . '/../../config.php')) {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
         require_once dirname(__FILE__) . '/../../config.php';
+        if (function_exists('mb_id') && function_exists('is_admin')) {
+            $is_admin = is_admin(mb_id());
+        }
+    }
+    if (!$is_admin) {
+        echo json_encode(['error' => 'Unauthorized']);
+        exit;
     }
 } else {
     require_once dirname(__FILE__) . '/../../config.php';

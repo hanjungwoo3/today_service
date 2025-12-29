@@ -32,10 +32,8 @@ if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
         header('Location: ../index.php');
         exit;
     }
-} else {
-    // 로컬 모드일 때 DB 연결
-    require_once dirname(__FILE__) . '/../config.php';
 }
+// LOCAL_MODE일 때는 m/config.php → m/config_local.php에서 이미 DB 연결됨
 
 $selected_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $selected_period = isset($_GET['period']) ? $_GET['period'] : '6m';

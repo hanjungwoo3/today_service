@@ -11,6 +11,8 @@ c/storage/
 
 # Local development config
 c/config.php
+m/config.php
+m/config_local.php
 
 # meeting data directory
 s/data/
