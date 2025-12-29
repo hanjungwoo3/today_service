@@ -78,16 +78,19 @@ $_REQUEST = array_map_deep('sql_escape_string',  $_REQUEST);
 @extract($_SERVER);
 
 // 세션 쿠키 보안 설정 (HTTPS 환경에서 secure, 기본 httponly/samesite=Lax)
-$secure_cookie = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
-session_set_cookie_params([
-  'lifetime' => 3600, // 60분
-  'path'     => $base_path ?: '/',
-  'secure'   => $secure_cookie,
-  'httponly' => true,
-  'samesite' => 'Lax'
-]);
-session_cache_expire(60); // 60분으로 단축
-session_start();
+// 세션이 이미 시작되지 않은 경우에만 설정 및 시작
+if (session_status() === PHP_SESSION_NONE) {
+  $secure_cookie = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+  session_set_cookie_params([
+    'lifetime' => 3600, // 60분
+    'path'     => $base_path ?: '/',
+    'secure'   => $secure_cookie,
+    'httponly' => true,
+    'samesite' => 'Lax'
+  ]);
+  session_cache_expire(60); // 60분으로 단축
+  session_start();
+}
 
 $mysqli = new mysqli($host, $user, $password, $dbname);
 // 연결 오류 발생 시 스크립트 종료
