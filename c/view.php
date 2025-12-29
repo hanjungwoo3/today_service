@@ -16,6 +16,19 @@ $loggedInUserName = '';
 $is_admin = false;
 if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
   if (file_exists(dirname(__FILE__) . '/../config.php')) {
+    // PHP 8.x 호환: 상위 config.php를 로드하기 전에 세션 쿠키 path를 루트로 설정
+    // (config.php에서 SCRIPT_NAME 기반으로 path가 /c로 설정되는 문제 방지)
+    if (session_status() === PHP_SESSION_NONE) {
+      $secure_cookie = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+      session_set_cookie_params([
+        'lifetime' => 3600,
+        'path'     => '/',
+        'secure'   => $secure_cookie,
+        'httponly' => true,
+        'samesite' => 'Lax'
+      ]);
+      session_start();
+    }
     @require_once dirname(__FILE__) . '/../config.php';
     if (function_exists('mb_id') && function_exists('get_member_name')) {
       $mbId = mb_id();
