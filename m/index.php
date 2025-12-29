@@ -92,6 +92,7 @@ if ($selected_meeting > 0) {
 
 // 참석자들의 정보 조회
 $members = ['M' => [], 'W' => []];
+$member_info = []; // mb_id => ['name' => '', 'sex' => '']
 if (!empty($attendees)) {
     $ids_str = implode(',', $attendees);
     $sql = "SELECT mb_id, mb_name, mb_sex FROM t_member WHERE mb_id IN ({$ids_str}) ORDER BY mb_sex DESC, mb_name ASC";
@@ -100,9 +101,97 @@ if (!empty($attendees)) {
         while ($row = $result->fetch_assoc()) {
             $sex = $row['mb_sex'] ?: 'M';
             $members[$sex][] = $row;
+            $member_info[$row['mb_id']] = ['name' => $row['mb_name'], 'sex' => $sex];
         }
     }
 }
+
+// 해당 날짜에 이미 배정된 구역 정보 조회 (호별 구역 + 공개증거)
+$assigned_groups = ['M' => [], 'W' => []];
+$assigned_members = ['M' => [], 'W' => []]; // 이미 배정된 사람들 ID 목록
+$seen_groups = ['M' => [], 'W' => []]; // 중복 체크용
+
+// 배정 처리 함수
+function processAssignment($group_ids, $tt_name, &$attendees, &$member_info, &$assigned_groups, &$assigned_members, &$seen_groups) {
+    $group_attendees = array_values(array_intersect($group_ids, $attendees));
+    if (count($group_attendees) >= 1) {
+        // 중복 체크 (전체 그룹 기준)
+        sort($group_attendees);
+        $group_key = implode(',', $group_attendees);
+
+        // 그룹 내 성별 분류
+        $members_by_sex = ['M' => [], 'W' => []];
+        foreach ($group_attendees as $gid) {
+            if (isset($member_info[$gid])) {
+                $sex = $member_info[$gid]['sex'];
+                $members_by_sex[$sex][] = $gid;
+            }
+        }
+
+        $type = (strpos($tt_name, '공개증거') !== false) ? '공개' : '호별';
+
+        // 각 성별에 해당하는 멤버가 있으면 해당 성별 배정완료에 추가
+        foreach (['M', 'W'] as $sex) {
+            if (!empty($members_by_sex[$sex])) {
+                // 해당 성별 기준으로 중복 체크
+                if (isset($seen_groups[$sex][$group_key])) {
+                    continue;
+                }
+                $seen_groups[$sex][$group_key] = true;
+
+                // 전체 그룹 정보 (모든 멤버 포함)
+                $group_info = [];
+                foreach ($group_attendees as $gid) {
+                    if (isset($member_info[$gid])) {
+                        $group_info[] = ['id' => $gid, 'name' => $member_info[$gid]['name']];
+                    }
+                }
+
+                // 해당 성별 멤버만 배정완료 처리
+                foreach ($members_by_sex[$sex] as $gid) {
+                    $assigned_members[$sex][] = $gid;
+                }
+
+                if (!empty($group_info)) {
+                    $assigned_groups[$sex][] = ['members' => $group_info, 'type' => $type];
+                }
+            }
+        }
+    }
+}
+
+// 1. t_territory에서 현재 배정 조회 (선택한 모임 기준)
+if ($selected_meeting > 0) {
+    $sql = "SELECT tt_id, tt_name, tt_assigned FROM t_territory WHERE tt_assigned_date = '{$selected_date}' AND tt_assigned != '' AND m_id = {$selected_meeting}";
+    $result = $mysqli->query($sql);
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $group_ids = array_filter(array_map('trim', explode(',', $row['tt_assigned'])), function($id) {
+                return !empty($id) && is_numeric($id);
+            });
+            $group_ids = array_map('intval', $group_ids);
+            processAssignment($group_ids, $row['tt_name'], $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups);
+        }
+    }
+
+    // 2. t_territory_record에서 배정 기록 조회 (선택한 모임 기준)
+    $sql = "SELECT r.ttr_assigned_num, t.tt_name
+            FROM t_territory_record r
+            JOIN t_territory t ON r.tt_id = t.tt_id
+            WHERE r.ttr_assigned_date = '{$selected_date}' AND r.ttr_assigned_num != '' AND r.m_id = {$selected_meeting}";
+    $result = $mysqli->query($sql);
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $group_ids = array_filter(array_map('trim', explode(',', $row['ttr_assigned_num'])), function($id) {
+                return !empty($id) && is_numeric($id);
+            });
+            $group_ids = array_map('intval', $group_ids);
+            processAssignment($group_ids, $row['tt_name'], $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups);
+        }
+    }
+}
+$assigned_members['M'] = array_unique($assigned_members['M']);
+$assigned_members['W'] = array_unique($assigned_members['W']);
 
 // 짝 횟수 계산 함수
 function getPairCount($mysqli, $mb_id1, $mb_id2, $days = 180) {
@@ -121,10 +210,10 @@ function getPairCount($mysqli, $mb_id1, $mb_id2, $days = 180) {
         $count = (int)$row['cnt'];
     }
 
-    // t_territory_record에서도 조회
+    // t_territory_record에서도 조회 (ttr_assigned_num에 ID가 저장됨)
     $sql2 = "SELECT COUNT(*) as cnt FROM t_territory_record
-             WHERE FIND_IN_SET({$mb_id1}, ttr_assigned)
-             AND FIND_IN_SET({$mb_id2}, ttr_assigned)
+             WHERE FIND_IN_SET({$mb_id1}, ttr_assigned_num)
+             AND FIND_IN_SET({$mb_id2}, ttr_assigned_num)
              AND ttr_assigned_date >= '{$date_from}'
              AND ttr_assigned_date != '0000-00-00'";
     $result2 = $mysqli->query($sql2);
@@ -260,11 +349,19 @@ function recommendGroups($members, $pair_matrix, $group_size) {
     return $groups;
 }
 
-// 추천 그룹 생성
+// 추천 그룹 생성 (이미 배정된 사람들 제외)
 $recommended_groups = ['M' => [], 'W' => []];
+$single_unassigned = ['M' => null, 'W' => null]; // 미배정 1명인 경우
 foreach (['M', 'W'] as $sex) {
-    if (count($members[$sex]) >= 2) {
-        $recommended_groups[$sex] = recommendGroups($members[$sex], $pair_matrix[$sex], $group_size);
+    // 이미 배정된 사람 제외한 멤버 목록
+    $unassigned_members = array_filter($members[$sex], function($m) use ($assigned_members, $sex) {
+        return !in_array((int)$m['mb_id'], $assigned_members[$sex]);
+    });
+    $unassigned_members = array_values($unassigned_members); // 인덱스 재정렬
+    if (count($unassigned_members) >= 2) {
+        $recommended_groups[$sex] = recommendGroups($unassigned_members, $pair_matrix[$sex], $group_size);
+    } elseif (count($unassigned_members) == 1) {
+        $single_unassigned[$sex] = $unassigned_members[0];
     }
 }
 ?>
@@ -484,6 +581,42 @@ foreach (['M', 'W'] as $sex) {
             font-weight: 500;
             display: inline-block;
         }
+        .pair-matrix td.name.assigned,
+        .pair-matrix thead th.assigned {
+            background: #fef3c7 !important;
+        }
+        .assigned-box {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: #fefce8;
+            border: 1px solid #fde047;
+            border-radius: 10px;
+        }
+        .assigned-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #854d0e;
+            margin-bottom: 8px;
+        }
+        .unassigned-box {
+            padding: 12px;
+            background: #f0fdf4;
+            border-radius: 10px;
+        }
+        .unassigned-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #166534;
+            margin-bottom: 8px;
+        }
+        .type-badge {
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            margin-left: 4px;
+            background: #e5e7eb;
+            color: #4b5563;
+        }
         .help-section {
             margin-top: 40px;
             padding-top: 20px;
@@ -647,14 +780,14 @@ foreach (['M', 'W'] as $sex) {
                                 <tr>
                                     <th></th>
                                     <?php foreach ($members['M'] as $m): ?>
-                                        <th><?php echo htmlspecialchars($m['mb_name']); ?></th>
+                                        <th class="<?php echo in_array((int)$m['mb_id'], $assigned_members['M']) ? 'assigned' : ''; ?>"><?php echo htmlspecialchars($m['mb_name']); ?></th>
                                     <?php endforeach; ?>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($members['M'] as $m1): ?>
                                     <tr>
-                                        <td class="name"><?php echo htmlspecialchars($m1['mb_name']); ?></td>
+                                        <td class="name <?php echo in_array((int)$m1['mb_id'], $assigned_members['M']) ? 'assigned' : ''; ?>"><?php echo htmlspecialchars($m1['mb_name']); ?></td>
                                         <?php foreach ($members['M'] as $m2): ?>
                                             <?php if ($m1['mb_id'] == $m2['mb_id']): ?>
                                                 <td class="self">-</td>
@@ -675,23 +808,56 @@ foreach (['M', 'W'] as $sex) {
                 <?php endif; ?>
 
                 <!-- 형제 추천 -->
-                <?php if (!empty($recommended_groups['M'])): ?>
-                <div class="recommend-box">
-                    <div class="recommend-title">추천 짝 (<?php echo $group_size; ?>명씩) <button type="button" onclick="location.reload();" class="refresh-btn">다시 추천</button></div>
-                    <div class="group-list">
-                        <?php foreach ($recommended_groups['M'] as $idx => $group): ?>
-                            <div class="group-card">
-                                <span class="group-number"><?php echo $idx + 1; ?></span>
-                                <span class="group-members">
-                                    <?php
-                                        $names = array_map(function($m) { return $m['name']; }, $group['members']);
-                                        echo htmlspecialchars(implode(', ', $names));
-                                    ?>
-                                </span>
-                                <span class="group-pair-count">(<?php echo $group['pair_count']; ?>회)</span>
-                            </div>
-                        <?php endforeach; ?>
+                <?php if (!empty($assigned_groups['M']) || !empty($recommended_groups['M']) || $single_unassigned['M']): ?>
+                <div class="recommend-container">
+                    <?php if (!empty($assigned_groups['M'])): ?>
+                    <div class="assigned-box">
+                        <div class="assigned-title">배정 완료 (<?php echo count($assigned_groups['M']); ?>팀)</div>
+                        <div class="group-list">
+                            <?php foreach ($assigned_groups['M'] as $idx => $group): ?>
+                                <div class="group-card">
+                                    <span class="group-number" style="background:#eab308;"><?php echo $idx + 1; ?></span>
+                                    <span class="group-members">
+                                        <?php
+                                            $names = array_map(function($m) { return $m['name']; }, $group['members']);
+                                            echo htmlspecialchars(implode(', ', $names));
+                                        ?>
+                                    </span>
+                                    <span class="type-badge"><?php echo $group['type']; ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
+                    <?php endif; ?>
+                    <?php if (!empty($recommended_groups['M'])): ?>
+                    <div class="unassigned-box">
+                        <div class="unassigned-title">추천 짝 (<?php echo $group_size; ?>명씩) <button type="button" onclick="location.reload();" class="refresh-btn">다시 추천</button></div>
+                        <div class="group-list">
+                            <?php foreach ($recommended_groups['M'] as $idx => $group): ?>
+                                <div class="group-card">
+                                    <span class="group-number"><?php echo $idx + 1; ?></span>
+                                    <span class="group-members">
+                                        <?php
+                                            $names = array_map(function($m) { return $m['name']; }, $group['members']);
+                                            echo htmlspecialchars(implode(', ', $names));
+                                        ?>
+                                    </span>
+                                    <span class="group-pair-count">(<?php echo $group['pair_count']; ?>회)</span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php elseif ($single_unassigned['M']): ?>
+                    <div class="unassigned-box">
+                        <div class="unassigned-title">미배정</div>
+                        <div class="group-list">
+                            <div class="group-card">
+                                <span class="group-number">1</span>
+                                <span class="group-members"><?php echo htmlspecialchars($single_unassigned['M']['mb_name']); ?></span>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
                 <?php endif; ?>
             </div>
@@ -710,14 +876,14 @@ foreach (['M', 'W'] as $sex) {
                                 <tr>
                                     <th></th>
                                     <?php foreach ($members['W'] as $m): ?>
-                                        <th><?php echo htmlspecialchars($m['mb_name']); ?></th>
+                                        <th class="<?php echo in_array((int)$m['mb_id'], $assigned_members['W']) ? 'assigned' : ''; ?>"><?php echo htmlspecialchars($m['mb_name']); ?></th>
                                     <?php endforeach; ?>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($members['W'] as $m1): ?>
                                     <tr>
-                                        <td class="name"><?php echo htmlspecialchars($m1['mb_name']); ?></td>
+                                        <td class="name <?php echo in_array((int)$m1['mb_id'], $assigned_members['W']) ? 'assigned' : ''; ?>"><?php echo htmlspecialchars($m1['mb_name']); ?></td>
                                         <?php foreach ($members['W'] as $m2): ?>
                                             <?php if ($m1['mb_id'] == $m2['mb_id']): ?>
                                                 <td class="self">-</td>
@@ -738,23 +904,56 @@ foreach (['M', 'W'] as $sex) {
                 <?php endif; ?>
 
                 <!-- 자매 추천 -->
-                <?php if (!empty($recommended_groups['W'])): ?>
-                <div class="recommend-box">
-                    <div class="recommend-title">추천 짝 (<?php echo $group_size; ?>명씩) <button type="button" onclick="location.reload();" class="refresh-btn">다시 추천</button></div>
-                    <div class="group-list">
-                        <?php foreach ($recommended_groups['W'] as $idx => $group): ?>
-                            <div class="group-card">
-                                <span class="group-number"><?php echo $idx + 1; ?></span>
-                                <span class="group-members">
-                                    <?php
-                                        $names = array_map(function($m) { return $m['name']; }, $group['members']);
-                                        echo htmlspecialchars(implode(', ', $names));
-                                    ?>
-                                </span>
-                                <span class="group-pair-count">(<?php echo $group['pair_count']; ?>회)</span>
-                            </div>
-                        <?php endforeach; ?>
+                <?php if (!empty($assigned_groups['W']) || !empty($recommended_groups['W']) || $single_unassigned['W']): ?>
+                <div class="recommend-container">
+                    <?php if (!empty($assigned_groups['W'])): ?>
+                    <div class="assigned-box">
+                        <div class="assigned-title">배정 완료 (<?php echo count($assigned_groups['W']); ?>팀)</div>
+                        <div class="group-list">
+                            <?php foreach ($assigned_groups['W'] as $idx => $group): ?>
+                                <div class="group-card">
+                                    <span class="group-number" style="background:#eab308;"><?php echo $idx + 1; ?></span>
+                                    <span class="group-members">
+                                        <?php
+                                            $names = array_map(function($m) { return $m['name']; }, $group['members']);
+                                            echo htmlspecialchars(implode(', ', $names));
+                                        ?>
+                                    </span>
+                                    <span class="type-badge"><?php echo $group['type']; ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
+                    <?php endif; ?>
+                    <?php if (!empty($recommended_groups['W'])): ?>
+                    <div class="unassigned-box">
+                        <div class="unassigned-title">추천 짝 (<?php echo $group_size; ?>명씩) <button type="button" onclick="location.reload();" class="refresh-btn">다시 추천</button></div>
+                        <div class="group-list">
+                            <?php foreach ($recommended_groups['W'] as $idx => $group): ?>
+                                <div class="group-card">
+                                    <span class="group-number"><?php echo $idx + 1; ?></span>
+                                    <span class="group-members">
+                                        <?php
+                                            $names = array_map(function($m) { return $m['name']; }, $group['members']);
+                                            echo htmlspecialchars(implode(', ', $names));
+                                        ?>
+                                    </span>
+                                    <span class="group-pair-count">(<?php echo $group['pair_count']; ?>회)</span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php elseif ($single_unassigned['W']): ?>
+                    <div class="unassigned-box">
+                        <div class="unassigned-title">미배정</div>
+                        <div class="group-list">
+                            <div class="group-card">
+                                <span class="group-number">1</span>
+                                <span class="group-members"><?php echo htmlspecialchars($single_unassigned['W']['mb_name']); ?></span>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
                 <?php endif; ?>
             </div>
