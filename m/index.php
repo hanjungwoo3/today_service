@@ -29,7 +29,7 @@ if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
     }
 
     if (!$is_admin) {
-        header('Location: view.php');
+        header('Location: ../index.php');
         exit;
     }
 } else {
@@ -40,6 +40,26 @@ if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
 $selected_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $selected_period = isset($_GET['period']) ? $_GET['period'] : '6m';
 $group_size = isset($_GET['group']) ? (int)$_GET['group'] : 4;
+$selected_meeting = isset($_GET['meeting']) ? (int)$_GET['meeting'] : 0;
+
+// 해당 날짜의 호별(ms_type=1) 모임 목록 조회
+$meetings = [];
+$sql = "SELECT m_id, ms_time, mp_name, mb_id FROM t_meeting WHERE m_date = '{$selected_date}' AND ms_type = 1 ORDER BY ms_time";
+$result = $mysqli->query($sql);
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        // 참석자 수 계산
+        $ids = preg_split('/[,\s]+/', trim($row['mb_id']));
+        $ids = array_filter($ids, function($id) { return !empty($id) && is_numeric($id); });
+        $row['count'] = count($ids);
+        $meetings[] = $row;
+    }
+}
+
+// 선택된 모임이 없거나 유효하지 않으면 첫번째 모임 선택
+if ($selected_meeting == 0 && !empty($meetings)) {
+    $selected_meeting = $meetings[0]['m_id'];
+}
 
 // 기간 옵션
 $period_options = [
@@ -51,12 +71,13 @@ $period_options = [
 ];
 $period_days = isset($period_options[$selected_period]) ? $period_options[$selected_period]['days'] : 180;
 
-// 해당 날짜의 모임 참석자 조회
+// 선택된 호별 모임의 참석자 조회
 $attendees = [];
-$sql = "SELECT m.mb_id as attend_ids FROM t_meeting m WHERE m.m_date = '{$selected_date}'";
-$result = $mysqli->query($sql);
-if ($result && $result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
+if ($selected_meeting > 0) {
+    $sql = "SELECT mb_id as attend_ids FROM t_meeting WHERE m_id = {$selected_meeting}";
+    $result = $mysqli->query($sql);
+    if ($result && $result->num_rows > 0) {
+        $row = $result->fetch_assoc();
         // 쉼표 또는 공백으로 분리
         $ids = preg_split('/[,\s]+/', trim($row['attend_ids']));
         foreach ($ids as $id) {
@@ -65,8 +86,8 @@ if ($result && $result->num_rows > 0) {
                 $attendees[] = (int)$id;
             }
         }
+        $attendees = array_unique($attendees);
     }
-    $attendees = array_unique($attendees);
 }
 
 // 참석자들의 정보 조회
@@ -147,6 +168,21 @@ function recommendGroups($members, $pair_matrix, $group_size) {
     foreach ($members as $m) {
         $id_to_name[$m['mb_id']] = $m['mb_name'];
         $member_ids[] = $m['mb_id'];
+    }
+
+    // 전체 인원이 그룹 크기 이하면 한 그룹으로
+    if (count($member_ids) <= $group_size) {
+        $group_info = [];
+        $total_pair_count = 0;
+        foreach ($member_ids as $id) {
+            $group_info[] = ['id' => $id, 'name' => $id_to_name[$id]];
+        }
+        for ($i = 0; $i < count($member_ids); $i++) {
+            for ($j = $i + 1; $j < count($member_ids); $j++) {
+                $total_pair_count += isset($pair_matrix[$member_ids[$i]][$member_ids[$j]]) ? $pair_matrix[$member_ids[$i]][$member_ids[$j]] : 0;
+            }
+        }
+        return [['members' => $group_info, 'pair_count' => $total_pair_count]];
     }
 
     // 랜덤 셔플
@@ -243,8 +279,14 @@ foreach (['M', 'W'] as $sex) {
         .date-selector {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px 12px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .date-selector .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         .date-selector input[type="date"],
         .date-selector select {
@@ -253,6 +295,41 @@ foreach (['M', 'W'] as $sex) {
             border-radius: 8px;
             font-size: 14px;
             background: #fff;
+        }
+        @media (max-width: 768px) {
+            .date-selector {
+                gap: 6px 10px;
+            }
+            .date-selector label {
+                font-size: 13px;
+            }
+            .date-selector input[type="date"],
+            .date-selector select {
+                padding: 6px 8px;
+                font-size: 13px;
+            }
+            .date-selector .filter-group {
+                flex: 0 0 auto;
+            }
+        }
+        .meeting-info {
+            padding: 8px 12px;
+            background: #f0fdf4;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #166534;
+        }
+        .search-btn {
+            padding: 8px 16px;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .search-btn:hover {
+            background: #2563eb;
         }
         .section {
             margin-bottom: 30px;
@@ -367,12 +444,87 @@ foreach (['M', 'W'] as $sex) {
             font-size: 12px;
             color: #6b7280;
         }
+        .recommend-box {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f0fdf4;
+            border-radius: 10px;
+        }
+        .recommend-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #166534;
+            margin-bottom: 10px;
+        }
+        .refresh-btn {
+            font-size: 11px;
+            padding: 3px 8px;
+            background: #fff;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+        .refresh-btn:hover {
+            background: #dcfce7;
+        }
         .no-data {
             padding: 20px;
             text-align: center;
             color: #6b7280;
             background: #f9fafb;
             border-radius: 8px;
+        }
+        .single-member {
+            padding: 10px 14px;
+            background: #fff;
+            border: 1px solid #e0e7ff;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .help-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .help-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+        .help-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .help-item {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+        .help-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 4px;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+        .help-text b {
+            color: #334155;
+        }
+        .help-color {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-right: 4px;
         }
         .legend {
             display: flex;
@@ -408,30 +560,49 @@ foreach (['M', 'W'] as $sex) {
 <body>
     <div class="app-shell">
         <header class="toolbar">
-            <a href="index.php" style="text-decoration: none;">
-                <button type="button">목록</button>
-            </a>
+            <div></div>
             <h1>짝 배정 현황 (최근 <?php echo $period_options[$selected_period]['label']; ?>)</h1>
             <div></div>
         </header>
 
-        <form method="get" class="date-selector">
-            <label for="date">봉사 날짜:</label>
-            <input type="date" id="date" name="date" value="<?php echo htmlspecialchars($selected_date); ?>" onchange="this.form.submit()">
-            <label for="period">조회 기간:</label>
-            <select id="period" name="period" onchange="this.form.submit()">
-                <?php foreach ($period_options as $key => $opt): ?>
-                    <option value="<?php echo $key; ?>" <?php echo $selected_period === $key ? 'selected' : ''; ?>>
-                        <?php echo htmlspecialchars($opt['label']); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-            <label for="group">짝 인원:</label>
-            <select id="group" name="group" onchange="this.form.submit()">
-                <option value="2" <?php echo $group_size === 2 ? 'selected' : ''; ?>>2명</option>
-                <option value="3" <?php echo $group_size === 3 ? 'selected' : ''; ?>>3명</option>
-                <option value="4" <?php echo $group_size === 4 ? 'selected' : ''; ?>>4명</option>
-            </select>
+        <form method="get" class="date-selector" id="filterForm">
+            <div class="filter-group">
+                <label for="date">봉사일:</label>
+                <input type="date" id="date" name="date" value="<?php echo htmlspecialchars($selected_date); ?>" onchange="updateMeetings(this.value)">
+            </div>
+            <div class="filter-group">
+                <label for="meeting">모임:</label>
+                <select id="meeting" name="meeting">
+                    <?php if (empty($meetings)): ?>
+                        <option value="">호별 모임 없음</option>
+                    <?php else: ?>
+                        <?php foreach ($meetings as $m): ?>
+                            <option value="<?php echo $m['m_id']; ?>" <?php echo $selected_meeting == $m['m_id'] ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars(substr($m['ms_time'], 0, 5) . ' ' . $m['mp_name'] . ' (' . $m['count'] . '명)'); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="period">기간:</label>
+                <select id="period" name="period">
+                    <?php foreach ($period_options as $key => $opt): ?>
+                        <option value="<?php echo $key; ?>" <?php echo $selected_period === $key ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($opt['label']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="group">인원:</label>
+                <select id="group" name="group">
+                    <option value="2" <?php echo $group_size === 2 ? 'selected' : ''; ?>>2명</option>
+                    <option value="3" <?php echo $group_size === 3 ? 'selected' : ''; ?>>3명</option>
+                    <option value="4" <?php echo $group_size === 4 ? 'selected' : ''; ?>>4명</option>
+                </select>
+            </div>
+            <button type="submit" class="search-btn">조회</button>
         </form>
 
         <div class="legend">
@@ -453,17 +624,22 @@ foreach (['M', 'W'] as $sex) {
             </div>
         </div>
 
-        <?php if (empty($attendees)): ?>
+        <?php if (empty($meetings)): ?>
             <div class="no-data">
-                <?php echo htmlspecialchars($selected_date); ?> 에 등록된 참석자가 없습니다.
+                <?php echo htmlspecialchars($selected_date); ?> 에 호별 봉사 모임이 없습니다.
+            </div>
+        <?php elseif (empty($attendees)): ?>
+            <div class="no-data">
+                선택한 모임에 등록된 참석자가 없습니다.
             </div>
         <?php else: ?>
 
             <!-- 형제 섹션 -->
+            <?php if (count($members['M']) > 0): ?>
             <div class="section">
                 <div class="section-title male">형제 (<?php echo count($members['M']); ?>명)</div>
-                <?php if (count($members['M']) < 2): ?>
-                    <div class="no-data">형제가 2명 미만입니다.</div>
+                <?php if (count($members['M']) == 1): ?>
+                    <div class="single-member"><?php echo htmlspecialchars($members['M'][0]['mb_name']); ?></div>
                 <?php else: ?>
                     <div class="matrix-container">
                         <table class="pair-matrix">
@@ -497,13 +673,36 @@ foreach (['M', 'W'] as $sex) {
                         </table>
                     </div>
                 <?php endif; ?>
+
+                <!-- 형제 추천 -->
+                <?php if (!empty($recommended_groups['M'])): ?>
+                <div class="recommend-box">
+                    <div class="recommend-title">추천 짝 (<?php echo $group_size; ?>명씩) <button type="button" onclick="location.reload();" class="refresh-btn">다시 추천</button></div>
+                    <div class="group-list">
+                        <?php foreach ($recommended_groups['M'] as $idx => $group): ?>
+                            <div class="group-card">
+                                <span class="group-number"><?php echo $idx + 1; ?></span>
+                                <span class="group-members">
+                                    <?php
+                                        $names = array_map(function($m) { return $m['name']; }, $group['members']);
+                                        echo htmlspecialchars(implode(', ', $names));
+                                    ?>
+                                </span>
+                                <span class="group-pair-count">(<?php echo $group['pair_count']; ?>회)</span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
+            <?php endif; ?>
 
             <!-- 자매 섹션 -->
+            <?php if (count($members['W']) > 0): ?>
             <div class="section">
                 <div class="section-title female">자매 (<?php echo count($members['W']); ?>명)</div>
-                <?php if (count($members['W']) < 2): ?>
-                    <div class="no-data">자매가 2명 미만입니다.</div>
+                <?php if (count($members['W']) == 1): ?>
+                    <div class="single-member"><?php echo htmlspecialchars($members['W'][0]['mb_name']); ?></div>
                 <?php else: ?>
                     <div class="matrix-container">
                         <table class="pair-matrix">
@@ -537,63 +736,96 @@ foreach (['M', 'W'] as $sex) {
                         </table>
                     </div>
                 <?php endif; ?>
-            </div>
 
-            <!-- 추천 짝 섹션 -->
-            <div class="section">
-                <div class="section-title" style="background: #f0fdf4; color: #166534;">
-                    추천 짝 배정 (<?php echo $group_size; ?>명씩)
-                    <button type="button" onclick="location.reload();" style="float: right; font-size: 12px; padding: 4px 8px;">다시 추천</button>
-                </div>
-
-                <?php if (!empty($recommended_groups['M']) || !empty($recommended_groups['W'])): ?>
-                    <div class="recommend-container">
-                        <?php if (!empty($recommended_groups['M'])): ?>
-                            <div class="recommend-section">
-                                <h4 style="color: #1e40af; margin: 12px 0 8px;">형제</h4>
-                                <div class="group-list">
-                                    <?php foreach ($recommended_groups['M'] as $idx => $group): ?>
-                                        <div class="group-card">
-                                            <span class="group-number"><?php echo $idx + 1; ?></span>
-                                            <span class="group-members">
-                                                <?php
-                                                    $names = array_map(function($m) { return $m['name']; }, $group['members']);
-                                                    echo htmlspecialchars(implode(', ', $names));
-                                                ?>
-                                            </span>
-                                            <span class="group-pair-count">(<?php echo $group['pair_count']; ?>회)</span>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
+                <!-- 자매 추천 -->
+                <?php if (!empty($recommended_groups['W'])): ?>
+                <div class="recommend-box">
+                    <div class="recommend-title">추천 짝 (<?php echo $group_size; ?>명씩) <button type="button" onclick="location.reload();" class="refresh-btn">다시 추천</button></div>
+                    <div class="group-list">
+                        <?php foreach ($recommended_groups['W'] as $idx => $group): ?>
+                            <div class="group-card">
+                                <span class="group-number"><?php echo $idx + 1; ?></span>
+                                <span class="group-members">
+                                    <?php
+                                        $names = array_map(function($m) { return $m['name']; }, $group['members']);
+                                        echo htmlspecialchars(implode(', ', $names));
+                                    ?>
+                                </span>
+                                <span class="group-pair-count">(<?php echo $group['pair_count']; ?>회)</span>
                             </div>
-                        <?php endif; ?>
-
-                        <?php if (!empty($recommended_groups['W'])): ?>
-                            <div class="recommend-section">
-                                <h4 style="color: #be185d; margin: 12px 0 8px;">자매</h4>
-                                <div class="group-list">
-                                    <?php foreach ($recommended_groups['W'] as $idx => $group): ?>
-                                        <div class="group-card">
-                                            <span class="group-number"><?php echo $idx + 1; ?></span>
-                                            <span class="group-members">
-                                                <?php
-                                                    $names = array_map(function($m) { return $m['name']; }, $group['members']);
-                                                    echo htmlspecialchars(implode(', ', $names));
-                                                ?>
-                                            </span>
-                                            <span class="group-pair-count">(<?php echo $group['pair_count']; ?>회)</span>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        <?php endif; ?>
+                        <?php endforeach; ?>
                     </div>
-                <?php else: ?>
-                    <div class="no-data">추천할 짝이 없습니다.</div>
+                </div>
                 <?php endif; ?>
             </div>
+            <?php endif; ?>
 
         <?php endif; ?>
+
+        <!-- 기능 설명 -->
+        <div class="help-section">
+            <div class="help-title">사용 안내</div>
+            <div class="help-content">
+                <div class="help-item">
+                    <div class="help-label">검색 방법</div>
+                    <div class="help-text">
+                        <b>봉사일</b>을 선택하면 해당 날짜의 호별 모임 목록이 자동으로 표시됩니다.<br>
+                        <b>모임</b>을 선택하고 <b>조회</b> 버튼을 누르면 해당 모임 참석자들의 짝 현황이 표시됩니다.
+                    </div>
+                </div>
+                <div class="help-item">
+                    <div class="help-label">필터 옵션</div>
+                    <div class="help-text">
+                        <b>기간</b>: 짝 횟수를 계산할 기간 (최근 1주일 ~ 1년)<br>
+                        <b>인원</b>: 추천 짝을 몇 명씩 그룹으로 만들지 설정
+                    </div>
+                </div>
+                <div class="help-item">
+                    <div class="help-label">짝 횟수 매트릭스</div>
+                    <div class="help-text">
+                        표에서 두 사람이 교차하는 셀의 숫자는 선택한 기간 동안 함께 구역 봉사를 한 횟수입니다.<br>
+                        <span class="help-color" style="background:#fef2f2;">빨강(0회)</span>
+                        <span class="help-color" style="background:#fefce8;">노랑(1회)</span>
+                        <span class="help-color" style="background:#f0fdf4;">초록(2회)</span>
+                        <span class="help-color" style="background:#eff6ff;">파랑(3회+)</span>
+                    </div>
+                </div>
+                <div class="help-item">
+                    <div class="help-label">추천 짝</div>
+                    <div class="help-text">
+                        함께 봉사한 횟수가 적은 사람들끼리 그룹을 만들어 추천합니다.<br>
+                        <b>(숫자)회</b>: 해당 그룹 내 멤버들이 서로 함께 봉사한 총 횟수의 합계입니다.<br>
+                        예: 3명 그룹에서 A-B가 1회, B-C가 0회, A-C가 2회면 총 (3회)로 표시됩니다.
+                    </div>
+                </div>
+                <div class="help-item">
+                    <div class="help-label">다시 추천</div>
+                    <div class="help-text">
+                        같은 점수의 후보가 여러 명일 때 랜덤으로 선택하므로, 버튼을 누르면 다른 조합이 나올 수 있습니다.
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    <script>
+    function updateMeetings(date) {
+        fetch('api/meetings.php?date=' + date)
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('meeting');
+                select.innerHTML = '';
+                if (data.length === 0) {
+                    select.innerHTML = '<option value="">호별 모임 없음</option>';
+                } else {
+                    data.forEach(m => {
+                        const option = document.createElement('option');
+                        option.value = m.id;
+                        option.textContent = m.label;
+                        select.appendChild(option);
+                    });
+                }
+            });
+    }
+    </script>
 </body>
 </html>
