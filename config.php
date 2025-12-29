@@ -79,11 +79,12 @@ $_REQUEST = array_map_deep('sql_escape_string',  $_REQUEST);
 
 // 세션 쿠키 보안 설정 (HTTPS 환경에서 secure, 기본 httponly/samesite=Lax)
 // 세션이 이미 시작되지 않은 경우에만 설정 및 시작
+// 세션 쿠키 path는 항상 '/'로 설정하여 서브디렉토리(/c, /s 등)에서도 세션 공유
 if (session_status() === PHP_SESSION_NONE) {
   $secure_cookie = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
   session_set_cookie_params([
     'lifetime' => 3600, // 60분
-    'path'     => $base_path ?: '/',
+    'path'     => '/',
     'secure'   => $secure_cookie,
     'httponly' => true,
     'samesite' => 'Lax'
