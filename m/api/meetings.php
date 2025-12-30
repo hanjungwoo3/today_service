@@ -14,8 +14,8 @@ if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
             session_start();
         }
         require_once dirname(__FILE__) . '/../../config.php';
-        if (function_exists('mb_id') && function_exists('is_admin')) {
-            $is_admin = is_admin(mb_id());
+        if (function_exists('mb_id') && function_exists('get_member_auth')) {
+            $is_admin = (get_member_auth(mb_id()) == '1'); // 주관리자만
         }
     }
     if (!$is_admin) {

@@ -23,8 +23,8 @@ if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
             session_start();
         }
         require_once dirname(__FILE__) . '/../config.php';
-        if (function_exists('mb_id') && function_exists('is_admin')) {
-            $is_admin = is_admin(mb_id());
+        if (function_exists('mb_id') && function_exists('get_member_auth')) {
+            $is_admin = (get_member_auth(mb_id()) == '1'); // 주관리자만
         }
     }
 
@@ -33,7 +33,7 @@ if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
         exit;
     }
 }
-// LOCAL_MODE일 때는 m/config.php → m/config_local.php에서 이미 DB 연결됨
+// LOCAL_MODE일 때는 m/config.php에서 이미 DB 연결됨
 
 $selected_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $selected_period = isset($_GET['period']) ? $_GET['period'] : '6m';
