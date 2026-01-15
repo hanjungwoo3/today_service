@@ -1,148 +1,160 @@
 <!DOCTYPE html>
 <html lang="ko">
-    <head>
+
+<head>
     <title>오늘의 봉사</title>
-        <meta charset="utf-8">
-        <meta name="description" content="JW Ministry"/>
-        <meta name="robots" content="noindex,nofollow"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, shrink-to-fit=no, minimum-scale=1.0, user-scalable=no">
-        <link rel="stylesheet" href="<?=dirname($_SERVER['SCRIPT_NAME'])?>/lib/bootstrap-4.5.3-dist/css/bootstrap.min.css" >
-        <script src="<?=dirname($_SERVER['SCRIPT_NAME'])?>/js/jquery-3.5.1.min.js"></script>
-        <script type="text/javascript" src="<?=dirname($_SERVER['SCRIPT_NAME'])?>/lib/bootstrap-4.5.3-dist/js/bootstrap.min.js"></script>
-        <style>
-            @font-face {
+    <meta charset="utf-8">
+    <meta name="description" content="JW Ministry" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, shrink-to-fit=no, minimum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet"
+        href="<?= dirname($_SERVER['SCRIPT_NAME']) ?>/lib/bootstrap-4.5.3-dist/css/bootstrap.min.css">
+    <script src="<?= dirname($_SERVER['SCRIPT_NAME']) ?>/js/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript"
+        src="<?= dirname($_SERVER['SCRIPT_NAME']) ?>/lib/bootstrap-4.5.3-dist/js/bootstrap.min.js"></script>
+    <style>
+        @font-face {
             font-family: 'NanumSquare';
             font-weight: 400;
             src: url(../font/NanumSquare/NanumSquareR.eot);
             src: url(../font/NanumSquare/NanumSquareR.eot?#iefix) format('embedded-opentype'),
                 url(../font/NanumSquare/NanumSquareR.woff) format('woff'),
                 url(../font/NanumSquare/NanumSquareR.ttf) format('truetype');
-            }
-            @font-face {
-                font-family: 'NanumSquare';
-                font-weight: 700;
-                src: url(../font/NanumSquare/NanumSquareB.eot);
-                src: url(../font/NanumSquare/NanumSquareB.eot?#iefix) format('embedded-opentype'),
-                    url(../font/NanumSquare/NanumSquareB.woff) format('woff'),
-                    url(../font/NanumSquare/NanumSquareB.ttf) format('truetype');
-            }
-            @font-face {
-                font-family: 'NanumSquare';
-                font-weight: 800;
-                src: url(../font/NanumSquare/NanumSquareEB.eot);
-                src: url(../font/NanumSquare/NanumSquareEB.eot?#iefix) format('embedded-opentype'),
-                    url(../font/NanumSquare/NanumSquareEB.woff) format('woff'),
-                    url(../font/NanumSquare/NanumSquareEB.ttf) format('truetype');
-            }
-            @font-face {
-                font-family: 'NanumSquare';
-                font-weight: 300;
-                src: url(../font/NanumSquare/NanumSquareL.eot);
-                src: url(../font/NanumSquare/NanumSquareL.eot?#iefix) format('embedded-opentype'),
-                    url(../font/NanumSquare/NanumSquareL.woff) format('woff'),
-                    url(../font/NanumSquare/NanumSquareL.ttf) format('truetype');
-            }
-            html, html > * {
-                font-family: 'NanumSquare', sans-serif;
-            }
-        </style>
-    </head>
-    <body>
-<?php
-
-// multi-dimensional array에 사용자지정 함수적용
-function array_map_deep($fn, $array){
-    if(is_array($array)) {
-        foreach($array as $key => $value) {
-            if(is_array($value)) {
-                $array[$key] = array_map_deep($fn, $value);
-            } else {
-                $array[$key] = call_user_func($fn, $value);
-            }
         }
-    } else {
-        $array = call_user_func($fn, $array);
+
+        @font-face {
+            font-family: 'NanumSquare';
+            font-weight: 700;
+            src: url(../font/NanumSquare/NanumSquareB.eot);
+            src: url(../font/NanumSquare/NanumSquareB.eot?#iefix) format('embedded-opentype'),
+                url(../font/NanumSquare/NanumSquareB.woff) format('woff'),
+                url(../font/NanumSquare/NanumSquareB.ttf) format('truetype');
+        }
+
+        @font-face {
+            font-family: 'NanumSquare';
+            font-weight: 800;
+            src: url(../font/NanumSquare/NanumSquareEB.eot);
+            src: url(../font/NanumSquare/NanumSquareEB.eot?#iefix) format('embedded-opentype'),
+                url(../font/NanumSquare/NanumSquareEB.woff) format('woff'),
+                url(../font/NanumSquare/NanumSquareEB.ttf) format('truetype');
+        }
+
+        @font-face {
+            font-family: 'NanumSquare';
+            font-weight: 300;
+            src: url(../font/NanumSquare/NanumSquareL.eot);
+            src: url(../font/NanumSquare/NanumSquareL.eot?#iefix) format('embedded-opentype'),
+                url(../font/NanumSquare/NanumSquareL.woff) format('woff'),
+                url(../font/NanumSquare/NanumSquareL.ttf) format('truetype');
+        }
+
+        html,
+        html>* {
+            font-family: 'NanumSquare', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <?php
+
+    // multi-dimensional array에 사용자지정 함수적용
+    function array_map_deep($fn, $array)
+    {
+        if (is_array($array)) {
+            foreach ($array as $key => $value) {
+                if (is_array($value)) {
+                    $array[$key] = array_map_deep($fn, $value);
+                } else {
+                    $array[$key] = call_user_func($fn, $value);
+                }
+            }
+        } else {
+            $array = call_user_func($fn, $array);
+        }
+
+        return $array;
     }
 
-    return $array;
-}
 
+    // SQL Injection 대응 문자열 필터링
+    function sql_escape_string($str)
+    {
 
-// SQL Injection 대응 문자열 필터링
-function sql_escape_string($str){
+        $str = call_user_func('addslashes', $str);
 
-    $str = call_user_func('addslashes', $str);
+        return $str;
+    }
 
-    return $str;
-}
-
-//==============================================================================
+    //==============================================================================
 // SQL Injection 등으로 부호를 위해 sql_escape_string() 적용
 //------------------------------------------------------------------------------
-
-// sql_escape_string 적용
-$_POST    = array_map_deep('sql_escape_string',  $_POST);
-$_GET     = array_map_deep('sql_escape_string',  $_GET);
-$_COOKIE  = array_map_deep('sql_escape_string',  $_COOKIE);
-$_REQUEST = array_map_deep('sql_escape_string',  $_REQUEST);
-//==============================================================================
-
-if(!file_exists('config_custom.php')){
-    echo "'config_custom.php' 파일이 존재하지 않습니다.";
-    exit;
-}
-
-include_once('config_custom.php'); // 커스텀 설정
-
-if(empty($host) || empty($user) || empty($password) || empty($dbname)){
-    echo '<script> alert("\'config_custom.php\' 파일내의 정보가 비어있습니다."); location.href="'.dirname($_SERVER['SCRIPT_NAME']).'/update.php"; </script>';
-    exit;
-}
-
-if(empty($_POST['type']) || empty($_POST['db_name']) || empty($_POST['db_password'])){
-    echo '잘못된 접근입니다.';
-    exit;
-}
-
-if($_POST['db_name'] != $user){
-    echo '<script> alert("데이터베이스 아이디 또는 비밀번호가 올바르지 않습니다."); location.href="'.dirname($_SERVER['SCRIPT_NAME']).'/update.php"; </script>';
-    exit;
-}
-
-if($_POST['db_password'] != $password){
-    echo '<script> alert("데이터베이스 아이디 또는 비밀번호가 올바르지 않습니다."); location.href="'.dirname($_SERVER['SCRIPT_NAME']).'/update.php"; </script>';
-    exit;
-}
-
-$mysqli = new mysqli($host, $user, $password, $dbname);
-// 연결 오류 발생 시 스크립트 종료
-if ($mysqli->connect_errno) {
-    die('Connect Error: '.$mysqli->connect_error);
-}
-
-if(!file_exists('config_table.php')){
-    echo "'config_table.php' 파일이 존재하지 않습니다.";
-    exit;
-}
-
-include_once('config_table.php'); // 테이블 설정
-
-$type = $_POST['type'];
-
-if($type == 'new'){
-    if(empty($_POST['name']) || empty($_POST['password']) || empty($_POST['password_confirm'])){
-        echo '<script> alert("필요한 정보를 입력하지 않았습니다."); location.href="'.dirname($_SERVER['SCRIPT_NAME']).'/update.php"; </script>';
+    
+    // sql_escape_string 적용
+    $_POST = array_map_deep('sql_escape_string', $_POST);
+    $_GET = array_map_deep('sql_escape_string', $_GET);
+    $_COOKIE = array_map_deep('sql_escape_string', $_COOKIE);
+    $_REQUEST = array_map_deep('sql_escape_string', $_REQUEST);
+    //==============================================================================
+    
+    if (!file_exists('config_custom.php')) {
+        echo "'config_custom.php' 파일이 존재하지 않습니다.";
         exit;
     }
 
-    if($_POST['password'] != $_POST['password_confirm']){
-        echo '<script> alert("관리자 비밀번호와 비밀번호 확인이 일치하지 않습니다."); location.href="'.dirname($_SERVER['SCRIPT_NAME']).'/update.php"; </script>';
+    include_once('config_custom.php'); // 커스텀 설정
+    
+    if (empty($host) || empty($user) || empty($password) || empty($dbname)) {
+        echo '<script> alert("\'config_custom.php\' 파일내의 정보가 비어있습니다."); location.href="' . dirname($_SERVER['SCRIPT_NAME']) . '/update.php"; </script>';
         exit;
     }
-}
 
-/* 존재하지 않는 테이블 생성 */
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".BOARD_TABLE." (
+    if (empty($_POST['type']) || empty($_POST['db_name']) || empty($_POST['db_password'])) {
+        echo '잘못된 접근입니다.';
+        exit;
+    }
+
+    if ($_POST['db_name'] != $user) {
+        echo '<script> alert("데이터베이스 아이디 또는 비밀번호가 올바르지 않습니다."); location.href="' . dirname($_SERVER['SCRIPT_NAME']) . '/update.php"; </script>';
+        exit;
+    }
+
+    if ($_POST['db_password'] != $password) {
+        echo '<script> alert("데이터베이스 아이디 또는 비밀번호가 올바르지 않습니다."); location.href="' . dirname($_SERVER['SCRIPT_NAME']) . '/update.php"; </script>';
+        exit;
+    }
+
+    $mysqli = new mysqli($host, $user, $password, $dbname);
+    // 연결 오류 발생 시 스크립트 종료
+    if ($mysqli->connect_errno) {
+        die('Connect Error: ' . $mysqli->connect_error);
+    }
+
+    if (!file_exists('config_table.php')) {
+        echo "'config_table.php' 파일이 존재하지 않습니다.";
+        exit;
+    }
+
+    include_once('config_table.php'); // 테이블 설정
+    
+    $type = $_POST['type'];
+
+    if ($type == 'new') {
+        if (empty($_POST['name']) || empty($_POST['password']) || empty($_POST['password_confirm'])) {
+            echo '<script> alert("필요한 정보를 입력하지 않았습니다."); location.href="' . dirname($_SERVER['SCRIPT_NAME']) . '/update.php"; </script>';
+            exit;
+        }
+
+        if ($_POST['password'] != $_POST['password_confirm']) {
+            echo '<script> alert("관리자 비밀번호와 비밀번호 확인이 일치하지 않습니다."); location.href="' . dirname($_SERVER['SCRIPT_NAME']) . '/update.php"; </script>';
+            exit;
+        }
+    }
+
+    /* 존재하지 않는 테이블 생성 */
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . BOARD_TABLE . " (
     `b_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `mb_id` int(11) NOT NULL COMMENT '작성자고유번호',
     `b_title` varchar(50) NOT NULL COMMENT '제목',
@@ -154,7 +166,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".BOARD_TABLE." (
     `update_datetime` datetime NOT NULL COMMENT '수정날짜',
     PRIMARY KEY (`b_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".DISPLAY_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . DISPLAY_TABLE . " (
     `d_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `dp_id` int(11) NOT NULL COMMENT '전시대 장소',
     `d_assigned` text NOT NULL COMMENT '배정된전도인',
@@ -166,7 +178,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".DISPLAY_TABLE." (
     `dp_num` int(11) NOT NULL DEFAULT '1' COMMENT '전시대 팀 번호',
     PRIMARY KEY (`d_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".DISPLAY_PLACE_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . DISPLAY_PLACE_TABLE . " (
     `dp_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `dp_address` varchar(255) NOT NULL COMMENT '장소사진',
     `dp_name` varchar(50) NOT NULL COMMENT '장소명',
@@ -175,12 +187,12 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".DISPLAY_PLACE_TABLE." (
     `d_ms_all` int(11) NOT NULL DEFAULT '0' COMMENT '모임형태',
     PRIMARY KEY (`dp_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".GROUP_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . GROUP_TABLE . " (
     `g_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `g_name` varchar(255) NOT NULL COMMENT '집단이름',
     PRIMARY KEY (`g_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".HOUSE_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . HOUSE_TABLE . " (
     `h_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `tt_id` int(11) NOT NULL COMMENT '구역고유번호',
     `h_address1` varchar(50) NOT NULL COMMENT '주소1',
@@ -195,7 +207,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".HOUSE_TABLE." (
     `mb_id` int(11) NOT NULL COMMENT '재방문 전도인 ID',
     PRIMARY KEY (`h_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".HOUSE_MEMO_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . HOUSE_MEMO_TABLE . " (
     `hm_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `h_id` int(11) NOT NULL COMMENT 'house고유번호',
     `hm_content` varchar(255) NOT NULL COMMENT '내용',
@@ -205,7 +217,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".HOUSE_MEMO_TABLE." (
     `update_datetime` datetime NOT NULL COMMENT '수정날짜',
     PRIMARY KEY (`hm_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".MEETING_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . MEETING_TABLE . " (
     `m_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `mb_id` text NOT NULL COMMENT '참여 멤버',
     `ms_id` int(11) NOT NULL COMMENT '봉사모임계획',
@@ -228,7 +240,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".MEETING_TABLE." (
     PRIMARY KEY (`m_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
 
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".MEETING_ADD_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . MEETING_ADD_TABLE . " (
     `ma_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '추가계획고유번호',
     `ma_title` varchar(255) NOT NULL COMMENT '추가계획이름',
     `ma_date` datetime NOT NULL COMMENT '시작 날짜시간',
@@ -241,13 +253,13 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".MEETING_ADD_TABLE." (
     `ma_color` varchar(11) NOT NULL COMMENT '회중일정 색상',
     PRIMARY KEY (`ma_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".MEETING_PLACE_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . MEETING_PLACE_TABLE . " (
     `mp_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `mp_name` varchar(50) NOT NULL COMMENT '장소명',
     `mp_address` varchar(255) NOT NULL COMMENT '주소',
     PRIMARY KEY (`mp_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".MEETING_SCHEDULE_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . MEETING_SCHEDULE_TABLE . " (
     `ms_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `ma_id` int(11) NOT NULL COMMENT '추가계획id',
     `g_id` int(11) NOT NULL COMMENT '집단아이디',
@@ -263,7 +275,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".MEETING_SCHEDULE_TABLE." (
     `ms_limit` text NOT NULL COMMENT '참석자 제한',
     PRIMARY KEY (`ms_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".MEMBER_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . MEMBER_TABLE . " (
     `mb_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `mb_name` varchar(50) NOT NULL COMMENT '이름',
     `mb_hash` varchar(255) NOT NULL COMMENT '비밀번호 해시',
@@ -280,7 +292,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".MEMBER_TABLE." (
     `font_size` varchar(10) NOT NULL DEFAULT '' COMMENT '글자 크기',
     PRIMARY KEY (`mb_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".MINISTER_EVENT_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . MINISTER_EVENT_TABLE . " (
     `me_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `me_date` datetime NOT NULL COMMENT '일정시작하는날짜',
     `me_date2` datetime NOT NULL COMMENT '일정이끝나는날짜',
@@ -291,7 +303,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".MINISTER_EVENT_TABLE." (
     `mb_id` int(11) NOT NULL COMMENT '작성자',
     PRIMARY KEY (`me_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".MINISTER_REPORT_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . MINISTER_REPORT_TABLE . " (
     `mr_id` int(11) NOT NULL AUTO_INCREMENT,
     `mb_id` int(11) NOT NULL COMMENT '작성자',
     `mr_date` date NOT NULL COMMENT '봉사보고작성날짜',
@@ -303,13 +315,13 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".MINISTER_REPORT_TABLE." (
     `mr_study` int(5) NOT NULL COMMENT '연구',
     PRIMARY KEY (`mr_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".OPTION_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . OPTION_TABLE . " (
     `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '아이디',
     `name` text NOT NULL COMMENT '옵션명',
     `value` text NOT NULL COMMENT '옵션값',
     PRIMARY KEY (`id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".RETURN_VISIT_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . RETURN_VISIT_TABLE . " (
     `rv_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `mb_id` int(11) NOT NULL COMMENT 'member고유번호',
     `h_id` int(11) NOT NULL COMMENT 'house고유번호',
@@ -320,7 +332,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".RETURN_VISIT_TABLE." (
     `update_datetime` datetime NOT NULL COMMENT '수정날짜',
     PRIMARY KEY (`rv_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".TELEPHONE_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . TELEPHONE_TABLE . " (
     `tp_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `tp_num` varchar(50) NOT NULL COMMENT '구역번호',
     `tp_name` varchar(50) NOT NULL COMMENT '구역이름',
@@ -340,7 +352,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".TELEPHONE_TABLE." (
     `update_datetime` datetime NOT NULL COMMENT '수정날짜',
     PRIMARY KEY (`tp_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".TELEPHONE_HOUSE_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . TELEPHONE_HOUSE_TABLE . " (
     `tph_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'telephone_house 고유번호',
     `tp_id` int(11) NOT NULL COMMENT 'telephone 고유번호',
     `tph_number` varchar(50) NOT NULL COMMENT '전화번호',
@@ -354,7 +366,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".TELEPHONE_HOUSE_TABLE." (
     `mb_id` int(11) NOT NULL COMMENT '재방문 전도인 ID',
     PRIMARY KEY (`tph_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".TELEPHONE_HOUSE_MEMO_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . TELEPHONE_HOUSE_MEMO_TABLE . " (
     `tphm_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `tph_id` int(11) NOT NULL COMMENT 'telephone_house 고유번호',
     `tphm_content` varchar(255) NOT NULL COMMENT '내용',
@@ -365,7 +377,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".TELEPHONE_HOUSE_MEMO_TABLE." (
     PRIMARY KEY (`tphm_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
 
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".TELEPHONE_RECORD_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . TELEPHONE_RECORD_TABLE . " (
     `tpr_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `tp_id` int(11) NOT NULL COMMENT 'telephone고유번호',
     `tpr_assigned` text NOT NULL COMMENT '배정된전도인',
@@ -382,7 +394,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".TELEPHONE_RECORD_TABLE." (
     `update_datetime` datetime NOT NULL COMMENT '수정날짜',
     PRIMARY KEY (`tpr_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".TELEPHONE_RETURN_VISIT_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . TELEPHONE_RETURN_VISIT_TABLE . " (
     `tprv_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `mb_id` int(11) NOT NULL COMMENT '재방문 전도인 ID',
     `tph_id` int(11) NOT NULL COMMENT 'telephone_house 고유번호',
@@ -393,7 +405,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".TELEPHONE_RETURN_VISIT_TABLE." (
     `update_datetime` datetime NOT NULL COMMENT '수정날짜',
     PRIMARY KEY (`tprv_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".TERRITORY_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . TERRITORY_TABLE . " (
     `tt_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `tt_num` varchar(255) NOT NULL COMMENT '구역번호',
     `tt_name` varchar(255) NOT NULL COMMENT '구역명',
@@ -418,7 +430,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".TERRITORY_TABLE." (
     PRIMARY KEY (`tt_id`),
     KEY `tt_ms_all` (`tt_ms_all`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".TERRITORY_RECORD_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . TERRITORY_RECORD_TABLE . " (
     `ttr_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '고유번호',
     `tt_id` int(11) NOT NULL COMMENT '구역 고유번호',
     `ttr_assigned` text NOT NULL COMMENT '배정된전도인',
@@ -435,7 +447,7 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".TERRITORY_RECORD_TABLE." (
     `update_datetime` datetime NOT NULL COMMENT '수정날짜',
     PRIMARY KEY (`ttr_id`)
     ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;");
-$mysqli->query("CREATE TABLE IF NOT EXISTS ".WORK_LOG_TABLE." (
+    $mysqli->query("CREATE TABLE IF NOT EXISTS " . WORK_LOG_TABLE . " (
     `wl_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '작업로그 고유번호',
     `wl_cdate` datetime NOT NULL COMMENT '작업실행 날짜/시간',
     `wl_key` varchar(255) NOT NULL COMMENT '작업실행 키값',
@@ -443,209 +455,217 @@ $mysqli->query("CREATE TABLE IF NOT EXISTS ".WORK_LOG_TABLE." (
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
 
 
-if($type == 'new'){
+    if ($type == 'new') {
 
-    $name = $_POST['name'];
-    $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+        $name = $_POST['name'];
+        $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
 
-    $mysqli->query("INSERT INTO ".MEMBER_TABLE." (`mb_id`, `mb_name`, `mb_hash`, `mb_hp`, `mb_sex`, `mb_position`, `mb_pioneer`, `mb_auth`, `mb_display`, `mb_address`, `g_id`, `mb_movein_date`, `mb_moveout_date`, `font_size`) VALUES
-(1, '".$name."', '".$password."', '', 'M', '', '', '1', 0, '', 0, '0000-00-00', '0000-00-00', '');");
+        $mysqli->query("INSERT INTO " . MEMBER_TABLE . " (`mb_id`, `mb_name`, `mb_hash`, `mb_hp`, `mb_sex`, `mb_position`, `mb_pioneer`, `mb_auth`, `mb_display`, `mb_address`, `g_id`, `mb_movein_date`, `mb_moveout_date`, `font_size`) VALUES
+(1, '" . $name . "', '" . $password . "', '', 'M', '', '', '1', 0, '', 0, '0000-00-00', '0000-00-00', '');");
+
+        ?>
+        <script>
+            alert("설치가 완료되었습니다.");
+            window.location.href = "<?= dirname($_SERVER['SCRIPT_NAME']) ?>/"; // 메인 페이지로 이동
+        </script>
+        <?php
+
+    } elseif ($type == 'update') {
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . DISPLAY_TABLE . " LIKE 'd_assigned_group'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . DISPLAY_TABLE . " ADD `d_assigned_group` text NOT NULL COMMENT '배정된 짝 당 수';");
+        }
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . DISPLAY_TABLE . " LIKE 'dp_num'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . DISPLAY_TABLE . " ADD `dp_num` int(11) NOT NULL DEFAULT '1' COMMENT '전시대 팀 번호';");
+        }
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . DISPLAY_PLACE_TABLE . " LIKE 'dp_count'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . DISPLAY_PLACE_TABLE . " ADD `dp_count` int(11) NOT NULL DEFAULT '1' COMMENT '전시대 장소 개수';");
+        }
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . MEETING_TABLE . " LIKE 'g_id'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . MEETING_TABLE . " ADD `g_id` int(11) NOT NULL COMMENT '집단아이디';");
+        }
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . MEETING_SCHEDULE_TABLE . " LIKE 'g_id'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . MEETING_SCHEDULE_TABLE . " ADD `g_id` int(11) NOT NULL COMMENT '집단아이디';");
+        }
+
+        if ($mysqli->query("SHOW COLUMNS FROM " . MEMBER_TABLE . " LIKE 'mb_vietnam'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . MEMBER_TABLE . " DROP `mb_vietnam`;");
+        }
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . MEMBER_TABLE . " LIKE 'g_id'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . MEMBER_TABLE . " ADD `g_id` int(11) NOT NULL COMMENT '집단아이디';");
+        }
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . TELEPHONE_TABLE . " LIKE 'tp_assigned_group'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TELEPHONE_TABLE . " ADD `tp_assigned_group` text NOT NULL COMMENT '배정된 짝 당 수';");
+        }
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . TELEPHONE_RECORD_TABLE . " LIKE 'tpr_assigned_group'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TELEPHONE_RECORD_TABLE . " ADD `tpr_assigned_group` text NOT NULL COMMENT '배정된 짝 당 수';");
+        }
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . TERRITORY_TABLE . " LIKE 'tt_assigned_group'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TERRITORY_TABLE . " ADD `tt_assigned_group` text NOT NULL COMMENT '배정된 짝 당 수';");
+        }
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . TERRITORY_RECORD_TABLE . " LIKE 'ttr_assigned_group'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TERRITORY_RECORD_TABLE . " ADD `ttr_assigned_group` text NOT NULL COMMENT '배정된 짝 당 수';");
+        }
+
+        // 2.2.0 추가
+        if (!$mysqli->query("SHOW COLUMNS FROM " . MEETING_SCHEDULE_TABLE . " LIKE 'ms_limit'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . MEETING_SCHEDULE_TABLE . " ADD `ms_limit` text NOT NULL COMMENT '참석자 제한';");
+        }
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . MEETING_TABLE . " LIKE 'm_guide'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . MEETING_TABLE . " ADD `m_guide` varchar(50) NOT NULL COMMENT '당일 인도자' AFTER m_contents;");
+        }
+
+        if ($mysqli->query("SHOW COLUMNS FROM " . WORK_LOG_TABLE . " LIKE 'wl_id'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . WORK_LOG_TABLE . " MODIFY `wl_id` int(11) NOT NULL AUTO_INCREMENT;");
+        }
+
+        // 2.4.0 추가
+        if (!$mysqli->query("SHOW COLUMNS FROM " . MEETING_TABLE . " LIKE 'm_cancle_reason'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . MEETING_TABLE . " ADD `m_cancle_reason` text NOT NULL COMMENT '봉사모임취소사유' AFTER m_cancle;");
+        }
+        if ($mysqli->query("SHOW COLUMNS FROM " . MEETING_TABLE . " LIKE 'ma_title'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . MEETING_TABLE . " DROP `ma_title`;");
+        }
+
+        // 2.4.4 추가
+        if ($mysqli->query("SHOW COLUMNS FROM " . TERRITORY_TABLE . " LIKE 'tt_cdate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TERRITORY_TABLE . " CHANGE `tt_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
+        }
+        if ($mysqli->query("SHOW COLUMNS FROM " . TERRITORY_TABLE . " LIKE 'tt_udate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TERRITORY_TABLE . " CHANGE `tt_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
+        }
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . TELEPHONE_TABLE . " LIKE 'create_datetime'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TELEPHONE_TABLE . " ADD `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
+        }
+        if (!$mysqli->query("SHOW COLUMNS FROM " . TELEPHONE_TABLE . " LIKE 'update_datetime'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TELEPHONE_TABLE . " ADD `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
+        }
+
+        if ($mysqli->query("SHOW COLUMNS FROM " . BOARD_TABLE . " LIKE 'b_cdate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . BOARD_TABLE . " CHANGE `b_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
+        }
+        if ($mysqli->query("SHOW COLUMNS FROM " . BOARD_TABLE . " LIKE 'b_udate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . BOARD_TABLE . " CHANGE `b_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
+        }
+
+        if ($mysqli->query("SHOW COLUMNS FROM " . HOUSE_MEMO_TABLE . " LIKE 'hm_cdate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . HOUSE_MEMO_TABLE . " CHANGE `hm_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
+        }
+        if ($mysqli->query("SHOW COLUMNS FROM " . HOUSE_MEMO_TABLE . " LIKE 'hm_udate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . HOUSE_MEMO_TABLE . " CHANGE `hm_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
+        }
+
+        if ($mysqli->query("SHOW COLUMNS FROM " . TELEPHONE_HOUSE_MEMO_TABLE . " LIKE 'tphm_cdate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TELEPHONE_HOUSE_MEMO_TABLE . " CHANGE `tphm_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
+        }
+        if ($mysqli->query("SHOW COLUMNS FROM " . TELEPHONE_HOUSE_MEMO_TABLE . " LIKE 'tphm_udate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TELEPHONE_HOUSE_MEMO_TABLE . " CHANGE `tphm_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
+        }
+
+        if ($mysqli->query("SHOW COLUMNS FROM " . RETURN_VISIT_TABLE . " LIKE 'rv_cdate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . RETURN_VISIT_TABLE . " CHANGE `rv_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
+        }
+        if ($mysqli->query("SHOW COLUMNS FROM " . RETURN_VISIT_TABLE . " LIKE 'rv_udate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . RETURN_VISIT_TABLE . " CHANGE `rv_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
+        }
+
+        if ($mysqli->query("SHOW COLUMNS FROM " . TELEPHONE_RETURN_VISIT_TABLE . " LIKE 'tprv_cdate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TELEPHONE_RETURN_VISIT_TABLE . " CHANGE `tprv_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
+        }
+        if ($mysqli->query("SHOW COLUMNS FROM " . TELEPHONE_RETURN_VISIT_TABLE . " LIKE 'tprv_udate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TELEPHONE_RETURN_VISIT_TABLE . " CHANGE `tprv_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
+        }
+
+        if ($mysqli->query("SHOW COLUMNS FROM " . TERRITORY_RECORD_TABLE . " LIKE 'ttr_cdate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TERRITORY_RECORD_TABLE . " CHANGE `ttr_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
+        }
+        if ($mysqli->query("SHOW COLUMNS FROM " . TERRITORY_RECORD_TABLE . " LIKE 'ttr_udate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TERRITORY_RECORD_TABLE . " CHANGE `ttr_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
+        }
+
+        if ($mysqli->query("SHOW COLUMNS FROM " . TELEPHONE_RECORD_TABLE . " LIKE 'tpr_cdate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TELEPHONE_RECORD_TABLE . " CHANGE `tpr_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
+        }
+        if ($mysqli->query("SHOW COLUMNS FROM " . TELEPHONE_RECORD_TABLE . " LIKE 'tpr_udate'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . TELEPHONE_RECORD_TABLE . " CHANGE `tpr_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
+        }
+
+        // 2.4.6 추가 (구역지도 polygon 데이터에서 역슬래시 제거)
+        $mysqli->query("UPDATE " . TERRITORY_TABLE . " SET `tt_polygon` = REPLACE(`tt_polygon`, '\\\\', '')");
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . MEMBER_TABLE . " LIKE 'font_size'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . MEMBER_TABLE . " ADD `font_size` varchar(10) NOT NULL DEFAULT '' COMMENT '글자 크기';");
+        }
+
+        // 2.5.0 추가
+        if (!$mysqli->query("SHOW COLUMNS FROM " . DISPLAY_PLACE_TABLE . " LIKE 'ms_id'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . DISPLAY_PLACE_TABLE . " ADD `ms_id` int(11) NOT NULL DEFAULT '0' COMMENT '모임아이디';");
+        }
+        if (!$mysqli->query("SHOW COLUMNS FROM " . DISPLAY_PLACE_TABLE . " LIKE 'd_ms_all'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . DISPLAY_PLACE_TABLE . " ADD `d_ms_all` int(11) NOT NULL DEFAULT '0' COMMENT '모임형태';");
+        }
+
+        if (!$mysqli->query("SHOW COLUMNS FROM " . MEETING_TABLE . " LIKE 'm_start_time'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . MEETING_TABLE . " ADD `m_start_time` time NOT NULL COMMENT '봉사시작시간';");
+        }
+        if (!$mysqli->query("SHOW COLUMNS FROM " . MEETING_TABLE . " LIKE 'm_finish_time'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . MEETING_TABLE . " ADD `m_finish_time` time NOT NULL COMMENT '봉사마치는시간';");
+        }
+
+
+        // 2.5.11 추가
+        if (!$mysqli->query("SHOW COLUMNS FROM " . MEETING_TABLE . " LIKE 'ms_limit'")->fetch_row()) {
+            $mysqli->query("ALTER TABLE " . MEETING_TABLE . " ADD `ms_limit` int(11) DEFAULT 0 COMMENT '지원자 수 제한' AFTER g_id;");
+            $mysqli->query("UPDATE " . MEETING_TABLE . " m INNER JOIN " . MEETING_SCHEDULE_TABLE . " ms ON m.ms_id = ms.ms_id SET m.ms_limit = IF(ms.ms_limit = '', 0, ms.ms_limit);");
+        }
+        ?>
+        <script>
+            alert("업데이트가 완료되었습니다.");
+            window.location.href = "<?= ($_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/"; // 메인 페이지로 이동
+        </script>
+        <?php
+
+    } elseif ($type == 'insert_admin') {
+
+        if (empty($_POST['name']) || empty($_POST['password']) || empty($_POST['password_confirm'])) {
+            $redirect_url = ($_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/update.php';
+            echo '<script> alert("필요한 정보를 입력하지 않았습니다."); location.href="' . $redirect_url . '"; </script>';
+            exit;
+        }
+
+        if ($_POST['password'] != $_POST['password_confirm']) {
+            $redirect_url = ($_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/update.php';
+            echo '<script> alert("관리자 비밀번호와 비밀번호 확인이 일치하지 않습니다."); location.href="' . $redirect_url . '"; </script>';
+            exit;
+        }
+
+        $name = $_POST['name'];
+        $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+
+        $mysqli->query("INSERT INTO " . MEMBER_TABLE . " ( `mb_name`, `mb_hash`, `mb_hp`, `mb_sex`, `mb_position`, `mb_pioneer`, `mb_auth`, `mb_display`, `mb_address`, `g_id`, `mb_movein_date`, `mb_moveout_date`, `font_size`) VALUES
+    ('" . $name . "', '" . $password . "', '', 'M', '', '', '1', 0, '', 0, '0000-00-00', '0000-00-00', '');");
+
+        ?>
+        <script>
+            alert("관리자 계정 생성이 완료되었습니다.");
+            window.location.href = "<?= ($_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') ?>/"; // 메인 페이지로 이동
+        </script>
+        <?php
+
+    }
 
     ?>
-    <script>
-        alert("설치가 완료되었습니다.");
-        window.location.href = "<?=dirname($_SERVER['SCRIPT_NAME'])?>/"; // 메인 페이지로 이동
-    </script>
-    <?php
-
-}elseif($type == 'update'){
-
-    if (!$mysqli->query("SHOW COLUMNS FROM ".DISPLAY_TABLE." LIKE 'd_assigned_group'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".DISPLAY_TABLE." ADD `d_assigned_group` text NOT NULL COMMENT '배정된 짝 당 수';");
-    }
-
-    if (!$mysqli->query("SHOW COLUMNS FROM ".DISPLAY_TABLE." LIKE 'dp_num'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".DISPLAY_TABLE." ADD `dp_num` int(11) NOT NULL DEFAULT '1' COMMENT '전시대 팀 번호';");
-    }
-
-    if (!$mysqli->query("SHOW COLUMNS FROM ".DISPLAY_PLACE_TABLE." LIKE 'dp_count'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".DISPLAY_PLACE_TABLE." ADD `dp_count` int(11) NOT NULL DEFAULT '1' COMMENT '전시대 장소 개수';");
-    }
-
-    if (!$mysqli->query("SHOW COLUMNS FROM ".MEETING_TABLE." LIKE 'g_id'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".MEETING_TABLE." ADD `g_id` int(11) NOT NULL COMMENT '집단아이디';");
-    }
-
-    if (!$mysqli->query("SHOW COLUMNS FROM ".MEETING_SCHEDULE_TABLE." LIKE 'g_id'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".MEETING_SCHEDULE_TABLE." ADD `g_id` int(11) NOT NULL COMMENT '집단아이디';");
-    }
-
-    if ($mysqli->query("SHOW COLUMNS FROM ".MEMBER_TABLE." LIKE 'mb_vietnam'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".MEMBER_TABLE." DROP `mb_vietnam`;");
-    }
-
-    if (!$mysqli->query("SHOW COLUMNS FROM ".MEMBER_TABLE." LIKE 'g_id'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".MEMBER_TABLE." ADD `g_id` int(11) NOT NULL COMMENT '집단아이디';");
-    }
-
-    if (!$mysqli->query("SHOW COLUMNS FROM ".TELEPHONE_TABLE." LIKE 'tp_assigned_group'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TELEPHONE_TABLE." ADD `tp_assigned_group` text NOT NULL COMMENT '배정된 짝 당 수';");
-    }
-
-    if (!$mysqli->query("SHOW COLUMNS FROM ".TELEPHONE_RECORD_TABLE." LIKE 'tpr_assigned_group'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TELEPHONE_RECORD_TABLE." ADD `tpr_assigned_group` text NOT NULL COMMENT '배정된 짝 당 수';");
-    }
-
-    if (!$mysqli->query("SHOW COLUMNS FROM ".TERRITORY_TABLE." LIKE 'tt_assigned_group'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TERRITORY_TABLE." ADD `tt_assigned_group` text NOT NULL COMMENT '배정된 짝 당 수';");
-    }
-
-    if (!$mysqli->query("SHOW COLUMNS FROM ".TERRITORY_RECORD_TABLE." LIKE 'ttr_assigned_group'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TERRITORY_RECORD_TABLE." ADD `ttr_assigned_group` text NOT NULL COMMENT '배정된 짝 당 수';");
-    }
-
-    // 2.2.0 추가
-    if (!$mysqli->query("SHOW COLUMNS FROM ".MEETING_SCHEDULE_TABLE." LIKE 'ms_limit'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".MEETING_SCHEDULE_TABLE." ADD `ms_limit` text NOT NULL COMMENT '참석자 제한';");
-    }
-
-    if (!$mysqli->query("SHOW COLUMNS FROM ".MEETING_TABLE." LIKE 'm_guide'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".MEETING_TABLE." ADD `m_guide` varchar(50) NOT NULL COMMENT '당일 인도자' AFTER m_contents;");
-    }
-
-    if ($mysqli->query("SHOW COLUMNS FROM ".WORK_LOG_TABLE." LIKE 'wl_id'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".WORK_LOG_TABLE." MODIFY `wl_id` int(11) NOT NULL AUTO_INCREMENT;");
-    }
-
-    // 2.4.0 추가
-    if (!$mysqli->query("SHOW COLUMNS FROM ".MEETING_TABLE." LIKE 'm_cancle_reason'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".MEETING_TABLE." ADD `m_cancle_reason` text NOT NULL COMMENT '봉사모임취소사유' AFTER m_cancle;");
-    }
-    if ($mysqli->query("SHOW COLUMNS FROM ".MEETING_TABLE." LIKE 'ma_title'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".MEETING_TABLE." DROP `ma_title`;");
-    }
-
-    // 2.4.4 추가
-    if ($mysqli->query("SHOW COLUMNS FROM ".TERRITORY_TABLE." LIKE 'tt_cdate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TERRITORY_TABLE." CHANGE `tt_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
-    }
-    if ($mysqli->query("SHOW COLUMNS FROM ".TERRITORY_TABLE." LIKE 'tt_udate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TERRITORY_TABLE." CHANGE `tt_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
-    }
-
-    if (!$mysqli->query("SHOW COLUMNS FROM ".TELEPHONE_TABLE." LIKE 'create_datetime'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TELEPHONE_TABLE." ADD `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
-    }
-    if (!$mysqli->query("SHOW COLUMNS FROM ".TELEPHONE_TABLE." LIKE 'update_datetime'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TELEPHONE_TABLE." ADD `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
-    }
-
-    if ($mysqli->query("SHOW COLUMNS FROM ".BOARD_TABLE." LIKE 'b_cdate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".BOARD_TABLE." CHANGE `b_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
-    }
-    if ($mysqli->query("SHOW COLUMNS FROM ".BOARD_TABLE." LIKE 'b_udate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".BOARD_TABLE." CHANGE `b_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
-    }
-
-    if ($mysqli->query("SHOW COLUMNS FROM ".HOUSE_MEMO_TABLE." LIKE 'hm_cdate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".HOUSE_MEMO_TABLE." CHANGE `hm_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
-    }
-    if ($mysqli->query("SHOW COLUMNS FROM ".HOUSE_MEMO_TABLE." LIKE 'hm_udate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".HOUSE_MEMO_TABLE." CHANGE `hm_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
-    }
-
-    if ($mysqli->query("SHOW COLUMNS FROM ".TELEPHONE_HOUSE_MEMO_TABLE." LIKE 'tphm_cdate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TELEPHONE_HOUSE_MEMO_TABLE." CHANGE `tphm_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
-    }
-    if ($mysqli->query("SHOW COLUMNS FROM ".TELEPHONE_HOUSE_MEMO_TABLE." LIKE 'tphm_udate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TELEPHONE_HOUSE_MEMO_TABLE." CHANGE `tphm_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
-    }
-
-    if ($mysqli->query("SHOW COLUMNS FROM ".RETURN_VISIT_TABLE." LIKE 'rv_cdate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".RETURN_VISIT_TABLE." CHANGE `rv_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
-    }
-    if ($mysqli->query("SHOW COLUMNS FROM ".RETURN_VISIT_TABLE." LIKE 'rv_udate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".RETURN_VISIT_TABLE." CHANGE `rv_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
-    }
-
-    if ($mysqli->query("SHOW COLUMNS FROM ".TELEPHONE_RETURN_VISIT_TABLE." LIKE 'tprv_cdate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TELEPHONE_RETURN_VISIT_TABLE." CHANGE `tprv_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
-    }
-    if ($mysqli->query("SHOW COLUMNS FROM ".TELEPHONE_RETURN_VISIT_TABLE." LIKE 'tprv_udate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TELEPHONE_RETURN_VISIT_TABLE." CHANGE `tprv_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
-    }
-
-    if ($mysqli->query("SHOW COLUMNS FROM ".TERRITORY_RECORD_TABLE." LIKE 'ttr_cdate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TERRITORY_RECORD_TABLE." CHANGE `ttr_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
-    }
-    if ($mysqli->query("SHOW COLUMNS FROM ".TERRITORY_RECORD_TABLE." LIKE 'ttr_udate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TERRITORY_RECORD_TABLE." CHANGE `ttr_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
-    }
-
-    if ($mysqli->query("SHOW COLUMNS FROM ".TELEPHONE_RECORD_TABLE." LIKE 'tpr_cdate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TELEPHONE_RECORD_TABLE." CHANGE `tpr_cdate` `create_datetime` datetime NOT NULL COMMENT '생성날짜';");
-    }
-    if ($mysqli->query("SHOW COLUMNS FROM ".TELEPHONE_RECORD_TABLE." LIKE 'tpr_udate'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".TELEPHONE_RECORD_TABLE." CHANGE `tpr_udate` `update_datetime` datetime NOT NULL COMMENT '수정날짜';");
-    }
-
-    // 2.4.6 추가 (구역지도 polygon 데이터에서 역슬래시 제거)
-    $mysqli->query("UPDATE ".TERRITORY_TABLE." SET `tt_polygon` = REPLACE(`tt_polygon`, '\\\\', '')");
-
-    if (!$mysqli->query("SHOW COLUMNS FROM ".MEMBER_TABLE." LIKE 'font_size'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".MEMBER_TABLE." ADD `font_size` varchar(10) NOT NULL DEFAULT '' COMMENT '글자 크기';");
-    }
-
-    // 2.5.0 추가
-    if (!$mysqli->query("SHOW COLUMNS FROM ".DISPLAY_PLACE_TABLE." LIKE 'ms_id'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".DISPLAY_PLACE_TABLE." ADD `ms_id` int(11) NOT NULL DEFAULT '0' COMMENT '모임아이디';");
-    }
-    if (!$mysqli->query("SHOW COLUMNS FROM ".DISPLAY_PLACE_TABLE." LIKE 'd_ms_all'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".DISPLAY_PLACE_TABLE." ADD `d_ms_all` int(11) NOT NULL DEFAULT '0' COMMENT '모임형태';");
-    }
-    
-    if (!$mysqli->query("SHOW COLUMNS FROM ".MEETING_TABLE." LIKE 'm_start_time'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".MEETING_TABLE." ADD `m_start_time` time NOT NULL COMMENT '봉사시작시간';");
-    }
-    if (!$mysqli->query("SHOW COLUMNS FROM ".MEETING_TABLE." LIKE 'm_finish_time'")->fetch_row()) {
-        $mysqli->query("ALTER TABLE ".MEETING_TABLE." ADD `m_finish_time` time NOT NULL COMMENT '봉사마치는시간';");
-    }
-    ?>
-    <script>
-        alert("업데이트가 완료되었습니다.");
-        window.location.href = "<?=($_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/')?>/"; // 메인 페이지로 이동
-    </script>
-    <?php
-
-}elseif($type == 'insert_admin'){
-
-    if(empty($_POST['name']) || empty($_POST['password']) || empty($_POST['password_confirm'])){
-        $redirect_url = ($_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/update.php';
-        echo '<script> alert("필요한 정보를 입력하지 않았습니다."); location.href="'.$redirect_url.'"; </script>';
-        exit;
-    }
-
-    if($_POST['password'] != $_POST['password_confirm']){
-        $redirect_url = ($_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/update.php';
-        echo '<script> alert("관리자 비밀번호와 비밀번호 확인이 일치하지 않습니다."); location.href="'.$redirect_url.'"; </script>';
-        exit;
-    }
-
-    $name = $_POST['name'];
-    $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-
-    $mysqli->query("INSERT INTO ".MEMBER_TABLE." ( `mb_name`, `mb_hash`, `mb_hp`, `mb_sex`, `mb_position`, `mb_pioneer`, `mb_auth`, `mb_display`, `mb_address`, `g_id`, `mb_movein_date`, `mb_moveout_date`, `font_size`) VALUES
-    ('".$name."', '".$password."', '', 'M', '', '', '1', 0, '', 0, '0000-00-00', '0000-00-00', '');");
-
-    ?>
-    <script>
-        alert("관리자 계정 생성이 완료되었습니다.");
-        window.location.href = "<?=($_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['SCRIPT_NAME']), '/')?>/"; // 메인 페이지로 이동
-    </script>
-    <?php
-
-}
-
-?>
 </body>
+
 </html>
