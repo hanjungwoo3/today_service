@@ -39,8 +39,11 @@ if (isset($work) && $work == 'del') { // 모임 계획 삭제
     $st_time = isset($st_time) ? $st_time : '';
     $fi_time = isset($fi_time) ? $fi_time : '';
 
+    // ms_limit가 빈값(기본값 따름)일 경우 MEETING_TABLE에는 -1로 저장 (int 컬럼이므로 '' 저장시 0이 됨을 방지)
+    $m_ms_limit = ($ms_limit === '') ? -1 : $ms_limit;
+
     $m_sql = "UPDATE " . MEETING_TABLE . "
-              SET ms_time = '{$time}', ms_guide = '{$guide_str1}', ms_guide2 = '{$guide_str2}', mp_id = '{$place}', ms_type = '{$type}', mp_name = '" . $mp['mp_name'] . "', mp_address = '" . $mp['mp_address'] . "', g_id = '{$group}', m_start_time = '{$st_time}', m_finish_time = '{$fi_time}', ms_limit = '{$ms_limit}'
+              SET ms_time = '{$time}', ms_guide = '{$guide_str1}', ms_guide2 = '{$guide_str2}', mp_id = '{$place}', ms_type = '{$type}', mp_name = '" . $mp['mp_name'] . "', mp_address = '" . $mp['mp_address'] . "', g_id = '{$group}', m_start_time = '{$st_time}', m_finish_time = '{$fi_time}', ms_limit = '{$m_ms_limit}'
               WHERE ms_id = {$ms_id} AND ( (m_date > '{$today}') OR ( m_date = '{$today}' AND ms_time > '{$current_time}') )";
     $mysqli->query($m_sql);
 

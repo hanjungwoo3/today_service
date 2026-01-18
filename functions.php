@@ -433,10 +433,13 @@ function get_territory_progress($tt_id)
 {
 	global $mysqli;
 
-	$sql = "SELECT count(*) FROM " . HOUSE_TABLE . " WHERE tt_id = {$tt_id}";
+	// 특이사항이 없는 집만 전체 집 수에 포함
+	$sql = "SELECT count(*) FROM " . HOUSE_TABLE . " 
+		WHERE tt_id = {$tt_id} 
+		AND (h_condition IS NULL OR CAST(h_condition AS UNSIGNED) = 0)";
 	$h_result = $mysqli->query($sql);
 	$h_row = $h_result->fetch_row();
-	$total_house = $h_row[0]; // 전체 집 수
+	$total_house = $h_row[0]; // 전체 집 수 (특이사항 제외)
 
 	// 특이사항이 있는 집 (진행률 계산에서 제외)
 	// 숫자로 변환하여 0보다 크면 특이사항이 있는 것으로 간주 (1~10)
@@ -479,10 +482,13 @@ function get_telephone_progress($tp_id)
 {
 	global $mysqli;
 
-	$sql = "SELECT count(*) FROM " . TELEPHONE_HOUSE_TABLE . " WHERE tp_id = {$tp_id}";
+	// 특이사항이 없는 집만 전체 집 수에 포함
+	$sql = "SELECT count(*) FROM " . TELEPHONE_HOUSE_TABLE . " 
+		WHERE tp_id = {$tp_id} 
+		AND (tph_condition IS NULL OR CAST(tph_condition AS UNSIGNED) = 0)";
 	$tph_result = $mysqli->query($sql);
 	$tph_row = $tph_result->fetch_row();
-	$total_house = $tph_row[0]; // 전체 집 수
+	$total_house = $tph_row[0]; // 전체 집 수 (특이사항 제외)
 
 	// 특이사항이 있는 집 (진행률 계산에서 제외)
 	// 숫자로 변환하여 0보다 크면 특이사항이 있는 것으로 간주
@@ -1719,87 +1725,87 @@ function board_new($mb_id)
 function header_menu($active_menu, $active_page)
 {
 	ob_start(); ?>
-		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-			aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-			<svg class="bi" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-				<path fill-rule="evenodd"
-					d="M2.5 11.5A.5.5 0 0 1 3 11h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 3h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z">
-				</path>
-			</svg>
-		</button>
-		<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-			<div class="navbar-nav">
-				<?php
-				$page_arr = array();
-				if ($active_menu == 'minister'): // 봉사자
-					$page_arr[] = array('나의 봉사', BASE_PATH . '/pages/minister_schedule.php');
-					if (RETURNVISIT_USE == 'use'):
-						$page_arr[] = array('재방문', BASE_PATH . '/pages/minister_returnvisit.php');
-					endif;
-					$page_arr[] = array('나의 구역', BASE_PATH . '/pages/minister_territory.php');
-					// $page_arr[] = array('전화구역', '/pages/minister_telephone.php');
-					// $page_arr[] = array('편지구역', '/pages/minister_letter.php');
-					$page_arr[] = array('개인 구역', BASE_PATH . '/pages/minister_personal.php');
-					if (MINISTER_STATISTICS_USE == 'use'):
-						$page_arr[] = array('나의 통계', BASE_PATH . '/pages/minister_statistics.php');
-					endif;
-					if (!is_moveout(mb_id())):
-						$page_arr[] = array('회중 봉사', BASE_PATH . '/pages/minister_meeting_schedule.php');
-					endif;
-					$page_arr[] = array('나의 설정', BASE_PATH . '/pages/minister_personal_info.php');
-				elseif ($active_menu == 'board'):  // 공지
-					$board_title = array('', '봉사자', '파이오니아', '인도자', '봉사의 종', '장로', '관리자', '질문과 대답');
-					$board_arr[] = 1;
-					$board_arr[] = 7;
-					if (in_array(2, get_member_board_auth(mb_id()))):
-						$board_arr[] = 2;
-					endif;
-					if (in_array(3, get_member_board_auth(mb_id()))):
-						$board_arr[] = 3;
-					endif;
-					if (in_array(4, get_member_board_auth(mb_id()))):
-						$board_arr[] = 4;
-					endif;
-					if (in_array(5, get_member_board_auth(mb_id()))):
-						$board_arr[] = 5;
-					endif;
-					if (in_array(6, get_member_board_auth(mb_id()))):
-						$board_arr[] = 6;
-					endif;
-					foreach (array_filter($board_arr) as $value)
-						echo '<a class="nav-item nav-link ' . get_active_text($active_page, $value) . '" href="' . BASE_PATH . '/pages/board.php?auth=' . $value . '">' . $board_title[$value] . get_current_text($active_page, $value) . '</a>';
-				elseif ($active_menu == 'guide'): // 인도자
-					$page_arr[] = array('모임', BASE_PATH . '/pages/guide_history.php');
-					$page_arr[] = array('구역', BASE_PATH . '/pages/guide_territory.php');
-					if (GUIDE_STATISTICS_USE == 'use'):
-						$page_arr[] = array('통계', BASE_PATH . '/pages/guide_statistics.php');
-					endif;
-				elseif ($active_menu == 'admin'): // 관리자
-					$page_arr[] = array('전도인 관리', BASE_PATH . '/pages/admin_member.php');
-					$page_arr[] = array('일반 구역 관리', BASE_PATH . '/pages/admin_territory.php');
-					$page_arr[] = array('전화 구역 관리', BASE_PATH . '/pages/admin_telephone.php');
-					$page_arr[] = array('편지 구역 관리', BASE_PATH . '/pages/admin_letter.php');
-					$page_arr[] = array('세대 관리', BASE_PATH . '/pages/admin_house.php');
-					$page_arr[] = array('전시대 장소 관리', BASE_PATH . '/pages/admin_display_place.php');
-					$page_arr[] = array('집단 관리', BASE_PATH . '/pages/admin_group.php');
-					$page_arr[] = array('모임 장소 관리', BASE_PATH . '/pages/admin_meeting_place.php');
-					$page_arr[] = array('모임 계획 관리', BASE_PATH . '/pages/admin_meeting.php');
-					$page_arr[] = array('회중 일정 관리', BASE_PATH . '/pages/admin_addschedule.php');
-					$page_arr[] = array('통계', BASE_PATH . '/pages/admin_statistics.php');
-					if (get_member_auth(mb_id()) == 1):
-						$page_arr[] = array('설정', BASE_PATH . '/pages/admin_setting.php');
-					endif;
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+		aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+		<svg class="bi" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+			<path fill-rule="evenodd"
+				d="M2.5 11.5A.5.5 0 0 1 3 11h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4A.5.5 0 0 1 3 3h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z">
+			</path>
+		</svg>
+	</button>
+	<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+		<div class="navbar-nav">
+			<?php
+			$page_arr = array();
+			if ($active_menu == 'minister'): // 봉사자
+				$page_arr[] = array('나의 봉사', BASE_PATH . '/pages/minister_schedule.php');
+				if (RETURNVISIT_USE == 'use'):
+					$page_arr[] = array('재방문', BASE_PATH . '/pages/minister_returnvisit.php');
 				endif;
-				foreach (array_filter($page_arr) as $value)
-					echo '<a class="nav-item nav-link ' . get_active_text($active_page, $value[0]) . '" href="' . $value[1] . '">' . $value[0] . get_current_text($active_page, $value[0]) . '</a>';
-				?>
-			</div>
+				$page_arr[] = array('나의 구역', BASE_PATH . '/pages/minister_territory.php');
+				// $page_arr[] = array('전화구역', '/pages/minister_telephone.php');
+				// $page_arr[] = array('편지구역', '/pages/minister_letter.php');
+				$page_arr[] = array('개인 구역', BASE_PATH . '/pages/minister_personal.php');
+				if (MINISTER_STATISTICS_USE == 'use'):
+					$page_arr[] = array('나의 통계', BASE_PATH . '/pages/minister_statistics.php');
+				endif;
+				if (!is_moveout(mb_id())):
+					$page_arr[] = array('회중 봉사', BASE_PATH . '/pages/minister_meeting_schedule.php');
+				endif;
+				$page_arr[] = array('나의 설정', BASE_PATH . '/pages/minister_personal_info.php');
+			elseif ($active_menu == 'board'):  // 공지
+				$board_title = array('', '봉사자', '파이오니아', '인도자', '봉사의 종', '장로', '관리자', '질문과 대답');
+				$board_arr[] = 1;
+				$board_arr[] = 7;
+				if (in_array(2, get_member_board_auth(mb_id()))):
+					$board_arr[] = 2;
+				endif;
+				if (in_array(3, get_member_board_auth(mb_id()))):
+					$board_arr[] = 3;
+				endif;
+				if (in_array(4, get_member_board_auth(mb_id()))):
+					$board_arr[] = 4;
+				endif;
+				if (in_array(5, get_member_board_auth(mb_id()))):
+					$board_arr[] = 5;
+				endif;
+				if (in_array(6, get_member_board_auth(mb_id()))):
+					$board_arr[] = 6;
+				endif;
+				foreach (array_filter($board_arr) as $value)
+					echo '<a class="nav-item nav-link ' . get_active_text($active_page, $value) . '" href="' . BASE_PATH . '/pages/board.php?auth=' . $value . '">' . $board_title[$value] . get_current_text($active_page, $value) . '</a>';
+			elseif ($active_menu == 'guide'): // 인도자
+				$page_arr[] = array('모임', BASE_PATH . '/pages/guide_history.php');
+				$page_arr[] = array('구역', BASE_PATH . '/pages/guide_territory.php');
+				if (GUIDE_STATISTICS_USE == 'use'):
+					$page_arr[] = array('통계', BASE_PATH . '/pages/guide_statistics.php');
+				endif;
+			elseif ($active_menu == 'admin'): // 관리자
+				$page_arr[] = array('전도인 관리', BASE_PATH . '/pages/admin_member.php');
+				$page_arr[] = array('일반 구역 관리', BASE_PATH . '/pages/admin_territory.php');
+				$page_arr[] = array('전화 구역 관리', BASE_PATH . '/pages/admin_telephone.php');
+				$page_arr[] = array('편지 구역 관리', BASE_PATH . '/pages/admin_letter.php');
+				$page_arr[] = array('세대 관리', BASE_PATH . '/pages/admin_house.php');
+				$page_arr[] = array('전시대 장소 관리', BASE_PATH . '/pages/admin_display_place.php');
+				$page_arr[] = array('집단 관리', BASE_PATH . '/pages/admin_group.php');
+				$page_arr[] = array('모임 장소 관리', BASE_PATH . '/pages/admin_meeting_place.php');
+				$page_arr[] = array('모임 계획 관리', BASE_PATH . '/pages/admin_meeting.php');
+				$page_arr[] = array('회중 일정 관리', BASE_PATH . '/pages/admin_addschedule.php');
+				$page_arr[] = array('통계', BASE_PATH . '/pages/admin_statistics.php');
+				if (get_member_auth(mb_id()) == 1):
+					$page_arr[] = array('설정', BASE_PATH . '/pages/admin_setting.php');
+				endif;
+			endif;
+			foreach (array_filter($page_arr) as $value)
+				echo '<a class="nav-item nav-link ' . get_active_text($active_page, $value[0]) . '" href="' . $value[1] . '">' . $value[0] . get_current_text($active_page, $value[0]) . '</a>';
+			?>
 		</div>
-		<?php
-		$html = ob_get_contents();
-		ob_end_clean();
+	</div>
+	<?php
+	$html = ob_get_contents();
+	ob_end_clean();
 
-		return $html;
+	return $html;
 }
 
 function footer_menu($active_page)
@@ -1817,444 +1823,444 @@ function footer_menu($active_page)
 
 	ob_start();
 	?>
-		<footer class="footer nav-<?= $navclass ?>">
-			<ul class="nav nav-tabs">
-				<li class="nav-item">
-					<a class="nav-link <?= get_active_text($active_page, '오늘의 봉사'); ?>" href="<?= BASE_PATH ?>/" title="홈"
-						aria-label="홈">
-						<svg class="icon-home-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
-							xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<title>홈</title>
-							<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-								<g id="Artboard-Copy" transform="translate(-15.000000, -703.000000)">
-									<g id="001_off" transform="translate(15.000000, 703.000000)">
-										<rect id="Rectangle" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32" height="32">
-										</rect>
-										<g id="Group" transform="translate(3.000000, 4.000000)" stroke="#111111"
+	<footer class="footer nav-<?= $navclass ?>">
+		<ul class="nav nav-tabs">
+			<li class="nav-item">
+				<a class="nav-link <?= get_active_text($active_page, '오늘의 봉사'); ?>" href="<?= BASE_PATH ?>/" title="홈"
+					aria-label="홈">
+					<svg class="icon-home-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
+						xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<title>홈</title>
+						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+							<g id="Artboard-Copy" transform="translate(-15.000000, -703.000000)">
+								<g id="001_off" transform="translate(15.000000, 703.000000)">
+									<rect id="Rectangle" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32" height="32">
+									</rect>
+									<g id="Group" transform="translate(3.000000, 4.000000)" stroke="#111111"
+										stroke-linejoin="round" stroke-width="1.5">
+										<polyline id="Path" stroke-linecap="round" points="0 13 13 0 26 13"></polyline>
+										<polyline id="Path-2" points="19 6.01985765 19 1 23 1 23 10"></polyline>
+										<polyline id="Path-3" stroke-linecap="round"
+											points="4 12.4977436 4 24.4977436 22 24.4977436 22 12.4977436"></polyline>
+										<polyline id="Path-4" points="10 25 10 16 16 16 16 25"></polyline>
+									</g>
+								</g>
+							</g>
+						</g>
+					</svg>
+					<svg class="icon-home-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
+						xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<title>홈</title>
+						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+							<g id="Artboard-Copy-2" transform="translate(-15.000000, -703.000000)">
+								<g id="" transform="translate(15.000000, 703.000000)">
+									<rect id="Rectangle" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32" height="32">
+									</rect>
+									<polygon id="Path-6" fill-opacity="0.2" fill="#C9DEFF"
+										points="7 28.4977436 13 28.4977436 13 20 19 20 19 28.4977436 25 28.4977436 25 13.3811121 17.5047728 5.48374646 7 16">
+									</polygon>
+									<g id="Group" transform="translate(3.000000, 4.000000)" stroke="#4A6DA7"
+										stroke-linejoin="round" stroke-width="1.5">
+										<polyline id="Path" stroke-linecap="round" points="0 13 13 0 26 13"></polyline>
+										<polyline id="Path-2" points="19 6.01985765 19 1 23 1 23 10"></polyline>
+										<polyline id="Path-3" stroke-linecap="round"
+											points="4 12.4977436 4 24.4977436 22 24.4977436 22 12.4977436"></polyline>
+										<polyline id="Path-4" points="10 25 10 16 16 16 16 25"></polyline>
+									</g>
+								</g>
+							</g>
+						</g>
+					</svg>
+					<span>홈</span>
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link <?= get_active_text($active_page, '봉사자'); ?>"
+					href="<?= BASE_PATH ?>/pages/minister_schedule.php" title="봉사자" aria-label="봉사자">
+					<svg class="icon-minister-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
+						xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+						<title>봉사자</title>
+						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+							<g id="Artboard-Copy" transform="translate(-75.000000, -703.000000)">
+								<g id="icon" transform="translate(15.000000, 703.000000)">
+									<g id="Group-3" transform="translate(60.000000, 0.000000)">
+										<rect id="Rectangle-Copy" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
+											height="32"></rect>
+										<g id="Group" transform="translate(4.000000, 5.000000)" stroke="#111111"
 											stroke-linejoin="round" stroke-width="1.5">
-											<polyline id="Path" stroke-linecap="round" points="0 13 13 0 26 13"></polyline>
-											<polyline id="Path-2" points="19 6.01985765 19 1 23 1 23 10"></polyline>
-											<polyline id="Path-3" stroke-linecap="round"
-												points="4 12.4977436 4 24.4977436 22 24.4977436 22 12.4977436"></polyline>
-											<polyline id="Path-4" points="10 25 10 16 16 16 16 25"></polyline>
-										</g>
-									</g>
-								</g>
-							</g>
-						</svg>
-						<svg class="icon-home-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
-							xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<title>홈</title>
-							<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-								<g id="Artboard-Copy-2" transform="translate(-15.000000, -703.000000)">
-									<g id="" transform="translate(15.000000, 703.000000)">
-										<rect id="Rectangle" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32" height="32">
-										</rect>
-										<polygon id="Path-6" fill-opacity="0.2" fill="#C9DEFF"
-											points="7 28.4977436 13 28.4977436 13 20 19 20 19 28.4977436 25 28.4977436 25 13.3811121 17.5047728 5.48374646 7 16">
-										</polygon>
-										<g id="Group" transform="translate(3.000000, 4.000000)" stroke="#4A6DA7"
-											stroke-linejoin="round" stroke-width="1.5">
-											<polyline id="Path" stroke-linecap="round" points="0 13 13 0 26 13"></polyline>
-											<polyline id="Path-2" points="19 6.01985765 19 1 23 1 23 10"></polyline>
-											<polyline id="Path-3" stroke-linecap="round"
-												points="4 12.4977436 4 24.4977436 22 24.4977436 22 12.4977436"></polyline>
-											<polyline id="Path-4" points="10 25 10 16 16 16 16 25"></polyline>
-										</g>
-									</g>
-								</g>
-							</g>
-						</svg>
-						<span>홈</span>
-					</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link <?= get_active_text($active_page, '봉사자'); ?>"
-						href="<?= BASE_PATH ?>/pages/minister_schedule.php" title="봉사자" aria-label="봉사자">
-						<svg class="icon-minister-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
-							xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-							<title>봉사자</title>
-							<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-								<g id="Artboard-Copy" transform="translate(-75.000000, -703.000000)">
-									<g id="icon" transform="translate(15.000000, 703.000000)">
-										<g id="Group-3" transform="translate(60.000000, 0.000000)">
-											<rect id="Rectangle-Copy" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
-												height="32"></rect>
-											<g id="Group" transform="translate(4.000000, 5.000000)" stroke="#111111"
-												stroke-linejoin="round" stroke-width="1.5">
-												<g id="Group-2">
-													<polyline id="Path-4"
-														transform="translate(12.000000, 13.000000) scale(1, -1) translate(-12.000000, -13.000000) "
-														points="10 15 10 11 14 11 14 15"></polyline>
-													<polygon id="Path-3" stroke-linecap="round" points="0 3 0 21 24 21 24 3">
-													</polygon>
-													<polyline id="Path" stroke-linecap="round"
-														transform="translate(12.000000, 9.000000) scale(1, -1) translate(-12.000000, -9.000000) "
-														points="3 12 12 6 21 12"></polyline>
-													<polyline id="Path-4" points="8 3 8 0 16 0 16 3"></polyline>
-												</g>
-											</g>
-										</g>
-									</g>
-								</g>
-							</g>
-						</svg>
-						<svg class="icon-minister-on <?= get_active_text($active_page, '봉사자'); ?>" width="32px" height="32px"
-							viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"
-							xmlns:xlink="http://www.w3.org/1999/xlink">
-							<title>봉사자</title>
-							<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-								<g id="Artboard-Copy-2" transform="translate(-75.000000, -703.000000)">
-									<g id="icon" transform="translate(15.000000, 703.000000)">
-										<g id="Group-3" transform="translate(60.000000, 0.000000)">
-											<rect id="Rectangle-Copy" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
-												height="32"></rect>
-											<g id="Group-2" transform="translate(4.000000, 5.000000)">
-												<path
-													d="M2,21.0139971 L24,21.0139971 L24,5.01399714 L4,5.01399714 C2.8954305,5.01399714 2,5.90942764 2,7.01399714 L2,21.0139971 L2,21.0139971 Z"
-													id="Path-6" fill-opacity="0.2" fill="#C9DEFF"></path>
-												<polyline id="Path-4" stroke="#4A6DA7" stroke-width="1.5"
-													stroke-linejoin="round"
+											<g id="Group-2">
+												<polyline id="Path-4"
 													transform="translate(12.000000, 13.000000) scale(1, -1) translate(-12.000000, -13.000000) "
 													points="10 15 10 11 14 11 14 15"></polyline>
-												<polygon id="Path-3" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
-													stroke-linejoin="round" points="0 3 0 21 24 21 24 3"></polygon>
-												<polyline id="Path" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
-													stroke-linejoin="round"
+												<polygon id="Path-3" stroke-linecap="round" points="0 3 0 21 24 21 24 3">
+												</polygon>
+												<polyline id="Path" stroke-linecap="round"
 													transform="translate(12.000000, 9.000000) scale(1, -1) translate(-12.000000, -9.000000) "
 													points="3 12 12 6 21 12"></polyline>
-												<polyline id="Path-4" stroke="#4A6DA7" stroke-width="1.5"
-													stroke-linejoin="round" points="8 3 8 0 16 0 16 3"></polyline>
+												<polyline id="Path-4" points="8 3 8 0 16 0 16 3"></polyline>
+											</g>
+										</g>
+									</g>
+								</g>
+							</g>
+						</g>
+					</svg>
+					<svg class="icon-minister-on <?= get_active_text($active_page, '봉사자'); ?>" width="32px" height="32px"
+						viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"
+						xmlns:xlink="http://www.w3.org/1999/xlink">
+						<title>봉사자</title>
+						<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+							<g id="Artboard-Copy-2" transform="translate(-75.000000, -703.000000)">
+								<g id="icon" transform="translate(15.000000, 703.000000)">
+									<g id="Group-3" transform="translate(60.000000, 0.000000)">
+										<rect id="Rectangle-Copy" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
+											height="32"></rect>
+										<g id="Group-2" transform="translate(4.000000, 5.000000)">
+											<path
+												d="M2,21.0139971 L24,21.0139971 L24,5.01399714 L4,5.01399714 C2.8954305,5.01399714 2,5.90942764 2,7.01399714 L2,21.0139971 L2,21.0139971 Z"
+												id="Path-6" fill-opacity="0.2" fill="#C9DEFF"></path>
+											<polyline id="Path-4" stroke="#4A6DA7" stroke-width="1.5"
+												stroke-linejoin="round"
+												transform="translate(12.000000, 13.000000) scale(1, -1) translate(-12.000000, -13.000000) "
+												points="10 15 10 11 14 11 14 15"></polyline>
+											<polygon id="Path-3" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
+												stroke-linejoin="round" points="0 3 0 21 24 21 24 3"></polygon>
+											<polyline id="Path" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
+												stroke-linejoin="round"
+												transform="translate(12.000000, 9.000000) scale(1, -1) translate(-12.000000, -9.000000) "
+												points="3 12 12 6 21 12"></polyline>
+											<polyline id="Path-4" stroke="#4A6DA7" stroke-width="1.5"
+												stroke-linejoin="round" points="8 3 8 0 16 0 16 3"></polyline>
+										</g>
+									</g>
+								</g>
+							</g>
+						</g>
+					</svg>
+					<span>봉사자</span>
+				</a>
+			</li>
+			<?php if (DISPLAY_USE == 'use'): // 전시대 사용 ?>
+				<?php if ((get_member_display(mb_id()) == 0 || get_member_display(mb_id()) == '') && !is_moveout(mb_id())): // 전시대 참여가 가능하고,전출전도인이 아니면 ?>
+					<li class="nav-item">
+						<a class="nav-link <?= get_active_text($active_page, '전시대'); ?>" href="<?= BASE_PATH ?>/pages/meeting.php"
+							title="전시대" aria-label="전시대">
+							<svg class="icon-display-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
+								xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+								<title>전시대</title>
+								<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+									<g id="Artboard-Copy" transform="translate(-135.000000, -703.000000)">
+										<g id="icon" transform="translate(15.000000, 703.000000)">
+											<g id="Group-3" transform="translate(120.000000, 0.000000)">
+												<rect id="Rectangle-Copy" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
+													height="32"></rect>
+												<g id="Group" transform="translate(7.000000, 2.000000)" stroke="#111111"
+													stroke-linejoin="round" stroke-width="1.5">
+													<g id="Group-2">
+														<path
+															d="M1,28 L1,26.5 C1,25.6715729 1.67157288,25 2.5,25 C3.32842712,25 4,25.6715729 4,26.5 L4,28 L4,28"
+															id="Path-4"
+															transform="translate(2.500000, 26.500000) scale(1, -1) translate(-2.500000, -26.500000) ">
+														</path>
+														<path
+															d="M14,28 L14,26.5 C14,25.6715729 14.6715729,25 15.5,25 C16.3284271,25 17,25.6715729 17,26.5 L17,28 L17,28"
+															id="Path-4-Copy"
+															transform="translate(15.500000, 26.500000) scale(1, -1) translate(-15.500000, -26.500000) ">
+														</path>
+														<polygon id="Path-3" stroke-linecap="round" points="0 4 0 25 18 25 18 4">
+														</polygon>
+														<polyline id="Path-4" stroke-linecap="round" points="3 12 3 8 15 8 15 12">
+														</polyline>
+														<polyline id="Path-4-Copy-2" stroke-linecap="round"
+															points="3 19 3 15 15 15 15 19"></polyline>
+														<polyline id="Path-4" points="6 4 6 0 12 0 12 4"></polyline>
+													</g>
+												</g>
+											</g>
+										</g>
+									</g>
+								</g>
+							</svg>
+							<svg class="icon-display-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
+								xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+								<title>전시대</title>
+								<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+									<g id="Artboard-Copy-2" transform="translate(-135.000000, -703.000000)">
+										<g id="icon" transform="translate(15.000000, 703.000000)">
+											<g id="Group-3" transform="translate(120.000000, 0.000000)">
+												<rect id="Rectangle-Copy" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
+													height="32"></rect>
+												<g id="Group-2" transform="translate(7.000000, 2.000000)">
+													<path
+														d="M2.3,25 L17.3,25 L17.3,7 L4.3,7 C3.1954305,7 2.3,7.8954305 2.3,9 L2.3,25 L2.3,25 Z"
+														id="Path-6" fill-opacity="0.2" fill="#C9DEFF"></path>
+													<path
+														d="M1,28 L1,26.5 C1,25.6715729 1.67157288,25 2.5,25 C3.32842712,25 4,25.6715729 4,26.5 L4,28 L4,28"
+														id="Path-4" stroke="#4A6DA7" stroke-width="1.5" stroke-linejoin="round"
+														transform="translate(2.500000, 26.500000) scale(1, -1) translate(-2.500000, -26.500000) ">
+													</path>
+													<path
+														d="M14,28 L14,26.5 C14,25.6715729 14.6715729,25 15.5,25 C16.3284271,25 17,25.6715729 17,26.5 L17,28 L17,28"
+														id="Path-4-Copy" stroke="#4A6DA7" stroke-width="1.5" stroke-linejoin="round"
+														transform="translate(15.500000, 26.500000) scale(1, -1) translate(-15.500000, -26.500000) ">
+													</path>
+													<polygon id="Path-3" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
+														stroke-linejoin="round" points="0 4 0 25 18 25 18 4"></polygon>
+													<polyline id="Path-4" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
+														stroke-linejoin="round" points="3 11 3 7 15 7 15 11"></polyline>
+													<polyline id="Path-4-Copy-2" stroke="#4A6DA7" stroke-width="1.5"
+														stroke-linecap="round" stroke-linejoin="round"
+														points="3 18.6363636 3 14.6363636 15 14.6363636 15 18.6363636"></polyline>
+													<polyline id="Path-4" stroke="#4A6DA7" stroke-width="1.5"
+														stroke-linejoin="round" points="6 4 6 0 12 0 12 4"></polyline>
+												</g>
+											</g>
+										</g>
+									</g>
+								</g>
+							</svg>
+							<span>전시대</span>
+						</a>
+					</li>
+				<?php endif; ?>
+			<?php endif; ?>
+			<?php if (!is_moveout(mb_id())): // 전출전도인이 아니면 ?>
+				<li class="nav-item">
+					<a class="nav-link <?= get_active_text($active_page, '공지'); ?>" href="<?= BASE_PATH ?>/pages/board.php"
+						title="공지사항" aria-label="공지사항">
+						<svg class="icon-board-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
+							xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+							<title>공지사항</title>
+							<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+								<g id="Artboard-Copy" transform="translate(-195.000000, -703.000000)">
+									<g id="icon" transform="translate(15.000000, 703.000000)">
+										<g id="004_off" transform="translate(180.000000, 0.000000)">
+											<rect id="Rectangle" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
+												height="32"></rect>
+											<g id="Group" transform="translate(6.000000, 6.000000)" stroke="#111111"
+												stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+												<polyline id="Path-3"
+													transform="translate(1.000000, 10.000000) rotate(90.000000) translate(-1.000000, -10.000000) "
+													points="-2 9 -2 11 4 11 4 9"></polyline>
+												<line x1="20" y1="9" x2="20" y2="11" id="Path-3-Copy-2"
+													transform="translate(20.000000, 10.000000) rotate(90.000000) translate(-20.000000, -10.000000) ">
+												</line>
+												<line x1="18.5" y1="4.5" x2="19.5" y2="6.5" id="Path-3-Copy-3"
+													transform="translate(19.000000, 5.500000) rotate(90.000000) translate(-19.000000, -5.500000) ">
+												</line>
+												<line x1="18.5" y1="13.5" x2="19.5" y2="15.5" id="Path-3-Copy-4"
+													transform="translate(19.000000, 14.500000) scale(-1, 1) rotate(90.000000) translate(-19.000000, -14.500000) ">
+												</line>
+												<polyline id="Path-3-Copy"
+													transform="translate(8.500000, 10.000000) rotate(90.000000) translate(-8.500000, -10.000000) "
+													points="15.5975395 4.5 -1.5 4.5 3.5 15.5 13.5 15.5 18.5 4.5"></polyline>
 											</g>
 										</g>
 									</g>
 								</g>
 							</g>
 						</svg>
-						<span>봉사자</span>
+						<svg class="icon-board-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
+							xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+							<title>공지사항</title>
+							<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+								<g id="Artboard-Copy-2" transform="translate(-195.000000, -703.000000)">
+									<g id="icon" transform="translate(15.000000, 703.000000)">
+										<g id="004_on" transform="translate(180.000000, 0.000000)">
+											<rect id="Rectangle" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
+												height="32"></rect>
+											<g id="Group" transform="translate(6.000000, 6.000000)">
+												<path
+													d="M3,14.6363636 L14,20 L14,2.15463772 L4.19377532,6.47415692 C3.46826423,6.79373547 3,7.51168002 3,8.30445792 L3,14.6363636 L3,14.6363636 Z"
+													id="Path-6" fill-opacity="0.2" fill="#C9DEFF"></path>
+												<polyline id="Path-3" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
+													stroke-linejoin="round"
+													transform="translate(1.000000, 10.000000) rotate(90.000000) translate(-1.000000, -10.000000) "
+													points="-2 9 -2 11 4 11 4 9"></polyline>
+												<line x1="20" y1="9" x2="20" y2="11" id="Path-3-Copy-2" stroke="#4A6DA7"
+													stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+													transform="translate(20.000000, 10.000000) rotate(90.000000) translate(-20.000000, -10.000000) ">
+												</line>
+												<line x1="18.5" y1="4.5" x2="19.5" y2="6.5" id="Path-3-Copy-3" stroke="#4A6DA7"
+													stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+													transform="translate(19.000000, 5.500000) rotate(90.000000) translate(-19.000000, -5.500000) ">
+												</line>
+												<line x1="18.5" y1="13.5" x2="19.5" y2="15.5" id="Path-3-Copy-4"
+													stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
+													stroke-linejoin="round"
+													transform="translate(19.000000, 14.500000) scale(-1, 1) rotate(90.000000) translate(-19.000000, -14.500000) ">
+												</line>
+												<polyline id="Path-3-Copy" stroke="#4A6DA7" stroke-width="1.5"
+													stroke-linecap="round" stroke-linejoin="round"
+													transform="translate(8.500000, 10.000000) rotate(90.000000) translate(-8.500000, -10.000000) "
+													points="15.5975395 4.5 -1.5 4.5 3.5 15.5 13.5 15.5 18.5 4.5"></polyline>
+											</g>
+										</g>
+									</g>
+								</g>
+							</g>
+						</svg>
+						<span>공지사항</span>
 					</a>
 				</li>
-				<?php if (DISPLAY_USE == 'use'): // 전시대 사용 ?>
-						<?php if ((get_member_display(mb_id()) == 0 || get_member_display(mb_id()) == '') && !is_moveout(mb_id())): // 전시대 참여가 가능하고,전출전도인이 아니면 ?>
-								<li class="nav-item">
-									<a class="nav-link <?= get_active_text($active_page, '전시대'); ?>" href="<?= BASE_PATH ?>/pages/meeting.php"
-										title="전시대" aria-label="전시대">
-										<svg class="icon-display-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
-											xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-											<title>전시대</title>
-											<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-												<g id="Artboard-Copy" transform="translate(-135.000000, -703.000000)">
-													<g id="icon" transform="translate(15.000000, 703.000000)">
-														<g id="Group-3" transform="translate(120.000000, 0.000000)">
-															<rect id="Rectangle-Copy" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
-																height="32"></rect>
-															<g id="Group" transform="translate(7.000000, 2.000000)" stroke="#111111"
-																stroke-linejoin="round" stroke-width="1.5">
-																<g id="Group-2">
-																	<path
-																		d="M1,28 L1,26.5 C1,25.6715729 1.67157288,25 2.5,25 C3.32842712,25 4,25.6715729 4,26.5 L4,28 L4,28"
-																		id="Path-4"
-																		transform="translate(2.500000, 26.500000) scale(1, -1) translate(-2.500000, -26.500000) ">
-																	</path>
-																	<path
-																		d="M14,28 L14,26.5 C14,25.6715729 14.6715729,25 15.5,25 C16.3284271,25 17,25.6715729 17,26.5 L17,28 L17,28"
-																		id="Path-4-Copy"
-																		transform="translate(15.500000, 26.500000) scale(1, -1) translate(-15.500000, -26.500000) ">
-																	</path>
-																	<polygon id="Path-3" stroke-linecap="round" points="0 4 0 25 18 25 18 4">
-																	</polygon>
-																	<polyline id="Path-4" stroke-linecap="round" points="3 12 3 8 15 8 15 12">
-																	</polyline>
-																	<polyline id="Path-4-Copy-2" stroke-linecap="round"
-																		points="3 19 3 15 15 15 15 19"></polyline>
-																	<polyline id="Path-4" points="6 4 6 0 12 0 12 4"></polyline>
-																</g>
-															</g>
-														</g>
-													</g>
-												</g>
-											</g>
-										</svg>
-										<svg class="icon-display-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
-											xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-											<title>전시대</title>
-											<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-												<g id="Artboard-Copy-2" transform="translate(-135.000000, -703.000000)">
-													<g id="icon" transform="translate(15.000000, 703.000000)">
-														<g id="Group-3" transform="translate(120.000000, 0.000000)">
-															<rect id="Rectangle-Copy" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
-																height="32"></rect>
-															<g id="Group-2" transform="translate(7.000000, 2.000000)">
-																<path
-																	d="M2.3,25 L17.3,25 L17.3,7 L4.3,7 C3.1954305,7 2.3,7.8954305 2.3,9 L2.3,25 L2.3,25 Z"
-																	id="Path-6" fill-opacity="0.2" fill="#C9DEFF"></path>
-																<path
-																	d="M1,28 L1,26.5 C1,25.6715729 1.67157288,25 2.5,25 C3.32842712,25 4,25.6715729 4,26.5 L4,28 L4,28"
-																	id="Path-4" stroke="#4A6DA7" stroke-width="1.5" stroke-linejoin="round"
-																	transform="translate(2.500000, 26.500000) scale(1, -1) translate(-2.500000, -26.500000) ">
-																</path>
-																<path
-																	d="M14,28 L14,26.5 C14,25.6715729 14.6715729,25 15.5,25 C16.3284271,25 17,25.6715729 17,26.5 L17,28 L17,28"
-																	id="Path-4-Copy" stroke="#4A6DA7" stroke-width="1.5" stroke-linejoin="round"
-																	transform="translate(15.500000, 26.500000) scale(1, -1) translate(-15.500000, -26.500000) ">
-																</path>
-																<polygon id="Path-3" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
-																	stroke-linejoin="round" points="0 4 0 25 18 25 18 4"></polygon>
-																<polyline id="Path-4" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
-																	stroke-linejoin="round" points="3 11 3 7 15 7 15 11"></polyline>
-																<polyline id="Path-4-Copy-2" stroke="#4A6DA7" stroke-width="1.5"
-																	stroke-linecap="round" stroke-linejoin="round"
-																	points="3 18.6363636 3 14.6363636 15 14.6363636 15 18.6363636"></polyline>
-																<polyline id="Path-4" stroke="#4A6DA7" stroke-width="1.5"
-																	stroke-linejoin="round" points="6 4 6 0 12 0 12 4"></polyline>
-															</g>
-														</g>
-													</g>
-												</g>
-											</g>
-										</svg>
-										<span>전시대</span>
-									</a>
-								</li>
-						<?php endif; ?>
-				<?php endif; ?>
-				<?php if (!is_moveout(mb_id())): // 전출전도인이 아니면 ?>
-						<li class="nav-item">
-							<a class="nav-link <?= get_active_text($active_page, '공지'); ?>" href="<?= BASE_PATH ?>/pages/board.php"
-								title="공지사항" aria-label="공지사항">
-								<svg class="icon-board-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
-									xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<title>공지사항</title>
-									<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-										<g id="Artboard-Copy" transform="translate(-195.000000, -703.000000)">
-											<g id="icon" transform="translate(15.000000, 703.000000)">
-												<g id="004_off" transform="translate(180.000000, 0.000000)">
-													<rect id="Rectangle" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
-														height="32"></rect>
-													<g id="Group" transform="translate(6.000000, 6.000000)" stroke="#111111"
-														stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
-														<polyline id="Path-3"
-															transform="translate(1.000000, 10.000000) rotate(90.000000) translate(-1.000000, -10.000000) "
-															points="-2 9 -2 11 4 11 4 9"></polyline>
-														<line x1="20" y1="9" x2="20" y2="11" id="Path-3-Copy-2"
-															transform="translate(20.000000, 10.000000) rotate(90.000000) translate(-20.000000, -10.000000) ">
-														</line>
-														<line x1="18.5" y1="4.5" x2="19.5" y2="6.5" id="Path-3-Copy-3"
-															transform="translate(19.000000, 5.500000) rotate(90.000000) translate(-19.000000, -5.500000) ">
-														</line>
-														<line x1="18.5" y1="13.5" x2="19.5" y2="15.5" id="Path-3-Copy-4"
-															transform="translate(19.000000, 14.500000) scale(-1, 1) rotate(90.000000) translate(-19.000000, -14.500000) ">
-														</line>
-														<polyline id="Path-3-Copy"
-															transform="translate(8.500000, 10.000000) rotate(90.000000) translate(-8.500000, -10.000000) "
-															points="15.5975395 4.5 -1.5 4.5 3.5 15.5 13.5 15.5 18.5 4.5"></polyline>
-													</g>
-												</g>
+			<?php endif; ?>
+			<?php
+			if ((is_guide(mb_id()) || is_admin(mb_id())) && !is_moveout(mb_id())):
+				?>
+				<li class="nav-item">
+					<a class="nav-link <?= get_active_text($active_page, '인도자'); ?>"
+						href="<?= BASE_PATH ?>/pages/guide_history.php" title="인도자" aria-label="인도자">
+						<svg class="icon-guide-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
+							xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+							<title>인도자</title>
+							<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+								<g id="Artboard-Copy" transform="translate(-255.000000, -703.000000)">
+									<g id="icon" transform="translate(15.000000, 703.000000)">
+										<g id="005_off" transform="translate(240.000000, 0.000000)">
+											<rect id="Rectangle-Copy-4" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
+												height="32"></rect>
+											<path
+												d="M6.97799789,28 L6,21.7190187 L13.1142801,18.0681078 L13.1142801,15.4132012 L10.7637448,12.122038 L10.7637448,7.74091542 C11.8884394,5.24697181 13.486547,4 15.5580674,4 C18.6653481,4 20.2302418,7.74091542 20.2302418,7.74091542 C20.2302418,7.74091542 20.2302418,9.20128961 20.2302418,12.122038 L17.8131939,15.4132012 L17.8131939,18.0681078 L26,21.7190187 L25.0220021,28"
+												id="Path-5" stroke="#111111" stroke-width="1.5" stroke-linecap="round"
+												stroke-linejoin="round"></path>
+											<polyline id="Path-3-Copy-4" stroke="#111111" stroke-width="1.5"
+												stroke-linecap="round" stroke-linejoin="round"
+												transform="translate(14.570231, 24.184230) scale(-1, 1) rotate(90.000000) translate(-14.570231, -24.184230) "
+												points="10.7544609 22.7544609 12.9258856 25.6139997 18.3860003 25.6139997">
+											</polyline>
+											<line x1="16.3997042" y1="18.9955503" x2="19.4395895" y2="22.4955503"
+												id="Path-3-Copy-5" stroke="#111111" stroke-width="1.5" stroke-linecap="round"
+												stroke-linejoin="round"
+												transform="translate(17.697627, 20.797923) rotate(90.000000) translate(-17.697627, -20.797923) ">
+											</line>
+										</g>
+									</g>
+								</g>
+							</g>
+						</svg>
+						<svg class="icon-guide-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
+							xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+							<title>인도자</title>
+							<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+								<g id="Artboard-Copy-2" transform="translate(-255.000000, -703.000000)">
+									<g id="icon" transform="translate(15.000000, 703.000000)">
+										<g id="005_on" transform="translate(240.000000, 0.000000)">
+											<rect id="Rectangle-Copy-4" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
+												height="32"></rect>
+											<path
+												d="M7,28 L25,28 L26,21.8495492 L19.9508565,19.5 L16,22.7187021 L13.1404612,20.4195466 L9.05378133,22.3014939 C8.48330209,22.5642039 8.06936348,23.0796362 7.93597773,23.6933717 L7,28 L7,28 Z"
+												id="Path-6" fill-opacity="0.2" fill="#C9DEFF"></path>
+											<path
+												d="M6.97799789,28 L6,21.7190187 L13.1142801,18.0681078 L13.1142801,15.4132012 L10.7637448,12.122038 L10.7637448,7.74091542 C11.8884394,5.24697181 13.486547,4 15.5580674,4 C18.6653481,4 20.2302418,7.74091542 20.2302418,7.74091542 C20.2302418,7.74091542 20.2302418,9.20128961 20.2302418,12.122038 L17.8131939,15.4132012 L17.8131939,18.0681078 L26,21.7190187 L25.0220021,28"
+												id="Path-5" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
+												stroke-linejoin="round"></path>
+											<polyline id="Path-3-Copy-4" stroke="#4A6DA7" stroke-width="1.5"
+												stroke-linecap="round" stroke-linejoin="round"
+												transform="translate(14.570231, 24.184230) scale(-1, 1) rotate(90.000000) translate(-14.570231, -24.184230) "
+												points="10.7544609 22.7544609 12.9258856 25.6139997 18.3860003 25.6139997">
+											</polyline>
+											<line x1="16.3997042" y1="18.9955503" x2="19.4395895" y2="22.4955503"
+												id="Path-3-Copy-5" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
+												stroke-linejoin="round"
+												transform="translate(17.697627, 20.797923) rotate(90.000000) translate(-17.697627, -20.797923) ">
+											</line>
+										</g>
+									</g>
+								</g>
+							</g>
+						</svg>
+						<span>인도자</span>
+					</a>
+				</li>
+			<?php endif; ?>
+			<?php if (is_admin(mb_id()) && !is_moveout(mb_id())): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= get_active_text($active_page, '관리자'); ?>"
+						href="<?= BASE_PATH ?>/pages/admin_member.php" title="관리자" aria-label="관리자">
+						<svg class="icon-admin-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
+							xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+							<title>관리자</title>
+							<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+								<g id="Artboard-Copy" transform="translate(-315.000000, -703.000000)">
+									<g id="icon" transform="translate(15.000000, 703.000000)">
+										<g id="006_off" transform="translate(300.000000, 0.000000)">
+											<rect id="Rectangle-Copy-5" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
+												height="32"></rect>
+											<g id="Group-4" transform="translate(5.000000, 5.000000)" stroke="#111111"
+												stroke-width="1.5">
+												<path
+													d="M11,0.75 C11.4253464,0.75 11.8446511,0.776338265 12.2564226,0.827531165 L13.2157621,3.30349893 C14.1130274,3.56190674 14.9465732,3.97486393 15.6871901,4.51204482 L18.1797212,3.73526786 C18.7838743,4.33787044 19.315355,5.01576967 19.7595784,5.75403291 L18.4640209,8.05078438 C18.8110322,8.89695018 19.0232765,9.81469468 19.0738211,10.7761811 L21.2191117,12.27247 C21.1335861,13.1516942 20.9414855,13.9989949 20.6560397,14.8007341 L18.083407,15.2014646 C17.6366693,16.0256955 17.0552729,16.7636229 16.3693514,17.3843558 L16.559383,20.0338956 C15.8573454,20.4958572 15.0964309,20.8729625 14.2905779,21.1508022 L12.3674511,19.3406202 C11.9292202,19.4157891 11.4789801,19.4548717 11.0197734,19.4548717 C10.549189,19.4548717 10.0880211,19.4138281 9.63954441,19.3349669 L7.70952567,21.1508379 C6.90356386,20.8729705 6.14255169,20.4958111 5.440433,20.0337746 L5.63175872,17.3493494 C4.96447506,16.7377196 4.39779526,16.0144522 3.9599463,15.2084793 L1.34397427,14.8007733 C1.05851376,13.9990028 0.86640583,13.1516667 0.780881957,12.2724049 L2.96731105,10.7469909 C3.01973096,9.81129525 3.22531752,8.91737079 3.5591796,8.09094494 L2.24095933,5.75313933 C2.68506267,5.01524138 3.21634248,4.33766169 3.82023285,3.73531371 L6.340084,4.52096391 C7.07104958,3.98869034 7.89294501,3.57759651 8.77757501,3.31696044 L9.74336335,0.827557773 C10.1552037,0.776347391 10.5745799,0.75 11,0.75 Z"
+													id="Combined-Shape"></path>
+												<path
+													d="M11.8384558,14.9119815 C12.2356664,14.8272595 12.6110434,14.6835728 12.9549863,14.4905222 C14.1753689,13.8055374 15,12.4990702 15,11 C15,8.790861 13.209139,7 11,7 C8.790861,7 7,8.790861 7,11 C7,11.5994585 7.13186637,12.168118 7.3681741,12.6785534 C7.7254563,13.4502992 8.32148632,14.0889476 9.06147749,14.499712"
+													id="Oval" stroke-linecap="round"
+													transform="translate(11.000000, 10.955991) rotate(30.000000) translate(-11.000000, -10.955991) ">
+												</path>
 											</g>
 										</g>
 									</g>
-								</svg>
-								<svg class="icon-board-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
-									xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<title>공지사항</title>
-									<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-										<g id="Artboard-Copy-2" transform="translate(-195.000000, -703.000000)">
-											<g id="icon" transform="translate(15.000000, 703.000000)">
-												<g id="004_on" transform="translate(180.000000, 0.000000)">
-													<rect id="Rectangle" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
-														height="32"></rect>
-													<g id="Group" transform="translate(6.000000, 6.000000)">
-														<path
-															d="M3,14.6363636 L14,20 L14,2.15463772 L4.19377532,6.47415692 C3.46826423,6.79373547 3,7.51168002 3,8.30445792 L3,14.6363636 L3,14.6363636 Z"
-															id="Path-6" fill-opacity="0.2" fill="#C9DEFF"></path>
-														<polyline id="Path-3" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
-															stroke-linejoin="round"
-															transform="translate(1.000000, 10.000000) rotate(90.000000) translate(-1.000000, -10.000000) "
-															points="-2 9 -2 11 4 11 4 9"></polyline>
-														<line x1="20" y1="9" x2="20" y2="11" id="Path-3-Copy-2" stroke="#4A6DA7"
-															stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-															transform="translate(20.000000, 10.000000) rotate(90.000000) translate(-20.000000, -10.000000) ">
-														</line>
-														<line x1="18.5" y1="4.5" x2="19.5" y2="6.5" id="Path-3-Copy-3" stroke="#4A6DA7"
-															stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-															transform="translate(19.000000, 5.500000) rotate(90.000000) translate(-19.000000, -5.500000) ">
-														</line>
-														<line x1="18.5" y1="13.5" x2="19.5" y2="15.5" id="Path-3-Copy-4"
-															stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
-															stroke-linejoin="round"
-															transform="translate(19.000000, 14.500000) scale(-1, 1) rotate(90.000000) translate(-19.000000, -14.500000) ">
-														</line>
-														<polyline id="Path-3-Copy" stroke="#4A6DA7" stroke-width="1.5"
-															stroke-linecap="round" stroke-linejoin="round"
-															transform="translate(8.500000, 10.000000) rotate(90.000000) translate(-8.500000, -10.000000) "
-															points="15.5975395 4.5 -1.5 4.5 3.5 15.5 13.5 15.5 18.5 4.5"></polyline>
-													</g>
-												</g>
+								</g>
+							</g>
+						</svg>
+						<svg class="icon-admin-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
+							xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+							<title>관리자</title>
+							<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+								<g id="Artboard-Copy-2" transform="translate(-315.000000, -703.000000)">
+									<g id="icon" transform="translate(15.000000, 703.000000)">
+										<g id="006_on" transform="translate(300.000000, 0.000000)">
+											<rect id="Rectangle-Copy-5" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
+												height="32"></rect>
+											<g id="Group-4" transform="translate(5.000000, 5.000000)">
+												<circle id="Oval" fill-opacity="0.2" fill="#C9DEFF" cx="11" cy="11" r="6">
+												</circle>
+												<path
+													d="M11,0.75 C11.4253464,0.75 11.8446511,0.776338265 12.2564226,0.827531165 L13.2157621,3.30349893 C14.1130274,3.56190674 14.9465732,3.97486393 15.6871901,4.51204482 L18.1797212,3.73526786 C18.7838743,4.33787044 19.315355,5.01576967 19.7595784,5.75403291 L18.4640209,8.05078438 C18.8110322,8.89695018 19.0232765,9.81469468 19.0738211,10.7761811 L21.2191117,12.27247 C21.1335861,13.1516942 20.9414855,13.9989949 20.6560397,14.8007341 L18.083407,15.2014646 C17.6366693,16.0256955 17.0552729,16.7636229 16.3693514,17.3843558 L16.559383,20.0338956 C15.8573454,20.4958572 15.0964309,20.8729625 14.2905779,21.1508022 L12.3674511,19.3406202 C11.9292202,19.4157891 11.4789801,19.4548717 11.0197734,19.4548717 C10.549189,19.4548717 10.0880211,19.4138281 9.63954441,19.3349669 L7.70952567,21.1508379 C6.90356386,20.8729705 6.14255169,20.4958111 5.440433,20.0337746 L5.63175872,17.3493494 C4.96447506,16.7377196 4.39779526,16.0144522 3.9599463,15.2084793 L1.34397427,14.8007733 C1.05851376,13.9990028 0.86640583,13.1516667 0.780881957,12.2724049 L2.96731105,10.7469909 C3.01973096,9.81129525 3.22531752,8.91737079 3.5591796,8.09094494 L2.24095933,5.75313933 C2.68506267,5.01524138 3.21634248,4.33766169 3.82023285,3.73531371 L6.340084,4.52096391 C7.07104958,3.98869034 7.89294501,3.57759651 8.77757501,3.31696044 L9.74336335,0.827557773 C10.1552037,0.776347391 10.5745799,0.75 11,0.75 Z"
+													id="Combined-Shape" stroke="#4A6DA7" stroke-width="1.5"></path>
+												<path
+													d="M11.8384558,14.9119815 C12.2356664,14.8272595 12.6110434,14.6835728 12.9549863,14.4905222 C14.1753689,13.8055374 15,12.4990702 15,11 C15,8.790861 13.209139,7 11,7 C8.790861,7 7,8.790861 7,11 C7,11.5994585 7.13186637,12.168118 7.3681741,12.6785534 C7.7254563,13.4502992 8.32148632,14.0889476 9.06147749,14.499712"
+													id="Oval" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
+													transform="translate(11.000000, 10.955991) rotate(30.000000) translate(-11.000000, -10.955991) ">
+												</path>
 											</g>
 										</g>
 									</g>
-								</svg>
-								<span>공지사항</span>
-							</a>
-						</li>
-				<?php endif; ?>
-				<?php
-				if ((is_guide(mb_id()) || is_admin(mb_id())) && !is_moveout(mb_id())):
-					?>
-						<li class="nav-item">
-							<a class="nav-link <?= get_active_text($active_page, '인도자'); ?>"
-								href="<?= BASE_PATH ?>/pages/guide_history.php" title="인도자" aria-label="인도자">
-								<svg class="icon-guide-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
-									xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<title>인도자</title>
-									<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-										<g id="Artboard-Copy" transform="translate(-255.000000, -703.000000)">
-											<g id="icon" transform="translate(15.000000, 703.000000)">
-												<g id="005_off" transform="translate(240.000000, 0.000000)">
-													<rect id="Rectangle-Copy-4" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
-														height="32"></rect>
-													<path
-														d="M6.97799789,28 L6,21.7190187 L13.1142801,18.0681078 L13.1142801,15.4132012 L10.7637448,12.122038 L10.7637448,7.74091542 C11.8884394,5.24697181 13.486547,4 15.5580674,4 C18.6653481,4 20.2302418,7.74091542 20.2302418,7.74091542 C20.2302418,7.74091542 20.2302418,9.20128961 20.2302418,12.122038 L17.8131939,15.4132012 L17.8131939,18.0681078 L26,21.7190187 L25.0220021,28"
-														id="Path-5" stroke="#111111" stroke-width="1.5" stroke-linecap="round"
-														stroke-linejoin="round"></path>
-													<polyline id="Path-3-Copy-4" stroke="#111111" stroke-width="1.5"
-														stroke-linecap="round" stroke-linejoin="round"
-														transform="translate(14.570231, 24.184230) scale(-1, 1) rotate(90.000000) translate(-14.570231, -24.184230) "
-														points="10.7544609 22.7544609 12.9258856 25.6139997 18.3860003 25.6139997">
-													</polyline>
-													<line x1="16.3997042" y1="18.9955503" x2="19.4395895" y2="22.4955503"
-														id="Path-3-Copy-5" stroke="#111111" stroke-width="1.5" stroke-linecap="round"
-														stroke-linejoin="round"
-														transform="translate(17.697627, 20.797923) rotate(90.000000) translate(-17.697627, -20.797923) ">
-													</line>
-												</g>
-											</g>
-										</g>
-									</g>
-								</svg>
-								<svg class="icon-guide-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
-									xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<title>인도자</title>
-									<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-										<g id="Artboard-Copy-2" transform="translate(-255.000000, -703.000000)">
-											<g id="icon" transform="translate(15.000000, 703.000000)">
-												<g id="005_on" transform="translate(240.000000, 0.000000)">
-													<rect id="Rectangle-Copy-4" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
-														height="32"></rect>
-													<path
-														d="M7,28 L25,28 L26,21.8495492 L19.9508565,19.5 L16,22.7187021 L13.1404612,20.4195466 L9.05378133,22.3014939 C8.48330209,22.5642039 8.06936348,23.0796362 7.93597773,23.6933717 L7,28 L7,28 Z"
-														id="Path-6" fill-opacity="0.2" fill="#C9DEFF"></path>
-													<path
-														d="M6.97799789,28 L6,21.7190187 L13.1142801,18.0681078 L13.1142801,15.4132012 L10.7637448,12.122038 L10.7637448,7.74091542 C11.8884394,5.24697181 13.486547,4 15.5580674,4 C18.6653481,4 20.2302418,7.74091542 20.2302418,7.74091542 C20.2302418,7.74091542 20.2302418,9.20128961 20.2302418,12.122038 L17.8131939,15.4132012 L17.8131939,18.0681078 L26,21.7190187 L25.0220021,28"
-														id="Path-5" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
-														stroke-linejoin="round"></path>
-													<polyline id="Path-3-Copy-4" stroke="#4A6DA7" stroke-width="1.5"
-														stroke-linecap="round" stroke-linejoin="round"
-														transform="translate(14.570231, 24.184230) scale(-1, 1) rotate(90.000000) translate(-14.570231, -24.184230) "
-														points="10.7544609 22.7544609 12.9258856 25.6139997 18.3860003 25.6139997">
-													</polyline>
-													<line x1="16.3997042" y1="18.9955503" x2="19.4395895" y2="22.4955503"
-														id="Path-3-Copy-5" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
-														stroke-linejoin="round"
-														transform="translate(17.697627, 20.797923) rotate(90.000000) translate(-17.697627, -20.797923) ">
-													</line>
-												</g>
-											</g>
-										</g>
-									</g>
-								</svg>
-								<span>인도자</span>
-							</a>
-						</li>
-				<?php endif; ?>
-				<?php if (is_admin(mb_id()) && !is_moveout(mb_id())): ?>
-						<li class="nav-item">
-							<a class="nav-link <?= get_active_text($active_page, '관리자'); ?>"
-								href="<?= BASE_PATH ?>/pages/admin_member.php" title="관리자" aria-label="관리자">
-								<svg class="icon-admin-off" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
-									xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<title>관리자</title>
-									<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-										<g id="Artboard-Copy" transform="translate(-315.000000, -703.000000)">
-											<g id="icon" transform="translate(15.000000, 703.000000)">
-												<g id="006_off" transform="translate(300.000000, 0.000000)">
-													<rect id="Rectangle-Copy-5" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
-														height="32"></rect>
-													<g id="Group-4" transform="translate(5.000000, 5.000000)" stroke="#111111"
-														stroke-width="1.5">
-														<path
-															d="M11,0.75 C11.4253464,0.75 11.8446511,0.776338265 12.2564226,0.827531165 L13.2157621,3.30349893 C14.1130274,3.56190674 14.9465732,3.97486393 15.6871901,4.51204482 L18.1797212,3.73526786 C18.7838743,4.33787044 19.315355,5.01576967 19.7595784,5.75403291 L18.4640209,8.05078438 C18.8110322,8.89695018 19.0232765,9.81469468 19.0738211,10.7761811 L21.2191117,12.27247 C21.1335861,13.1516942 20.9414855,13.9989949 20.6560397,14.8007341 L18.083407,15.2014646 C17.6366693,16.0256955 17.0552729,16.7636229 16.3693514,17.3843558 L16.559383,20.0338956 C15.8573454,20.4958572 15.0964309,20.8729625 14.2905779,21.1508022 L12.3674511,19.3406202 C11.9292202,19.4157891 11.4789801,19.4548717 11.0197734,19.4548717 C10.549189,19.4548717 10.0880211,19.4138281 9.63954441,19.3349669 L7.70952567,21.1508379 C6.90356386,20.8729705 6.14255169,20.4958111 5.440433,20.0337746 L5.63175872,17.3493494 C4.96447506,16.7377196 4.39779526,16.0144522 3.9599463,15.2084793 L1.34397427,14.8007733 C1.05851376,13.9990028 0.86640583,13.1516667 0.780881957,12.2724049 L2.96731105,10.7469909 C3.01973096,9.81129525 3.22531752,8.91737079 3.5591796,8.09094494 L2.24095933,5.75313933 C2.68506267,5.01524138 3.21634248,4.33766169 3.82023285,3.73531371 L6.340084,4.52096391 C7.07104958,3.98869034 7.89294501,3.57759651 8.77757501,3.31696044 L9.74336335,0.827557773 C10.1552037,0.776347391 10.5745799,0.75 11,0.75 Z"
-															id="Combined-Shape"></path>
-														<path
-															d="M11.8384558,14.9119815 C12.2356664,14.8272595 12.6110434,14.6835728 12.9549863,14.4905222 C14.1753689,13.8055374 15,12.4990702 15,11 C15,8.790861 13.209139,7 11,7 C8.790861,7 7,8.790861 7,11 C7,11.5994585 7.13186637,12.168118 7.3681741,12.6785534 C7.7254563,13.4502992 8.32148632,14.0889476 9.06147749,14.499712"
-															id="Oval" stroke-linecap="round"
-															transform="translate(11.000000, 10.955991) rotate(30.000000) translate(-11.000000, -10.955991) ">
-														</path>
-													</g>
-												</g>
-											</g>
-										</g>
-									</g>
-								</svg>
-								<svg class="icon-admin-on" width="32px" height="32px" viewBox="0 0 32 32" version="1.1"
-									xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-									<title>관리자</title>
-									<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-										<g id="Artboard-Copy-2" transform="translate(-315.000000, -703.000000)">
-											<g id="icon" transform="translate(15.000000, 703.000000)">
-												<g id="006_on" transform="translate(300.000000, 0.000000)">
-													<rect id="Rectangle-Copy-5" fill-opacity="0" fill="#FFFFFF" x="0" y="0" width="32"
-														height="32"></rect>
-													<g id="Group-4" transform="translate(5.000000, 5.000000)">
-														<circle id="Oval" fill-opacity="0.2" fill="#C9DEFF" cx="11" cy="11" r="6">
-														</circle>
-														<path
-															d="M11,0.75 C11.4253464,0.75 11.8446511,0.776338265 12.2564226,0.827531165 L13.2157621,3.30349893 C14.1130274,3.56190674 14.9465732,3.97486393 15.6871901,4.51204482 L18.1797212,3.73526786 C18.7838743,4.33787044 19.315355,5.01576967 19.7595784,5.75403291 L18.4640209,8.05078438 C18.8110322,8.89695018 19.0232765,9.81469468 19.0738211,10.7761811 L21.2191117,12.27247 C21.1335861,13.1516942 20.9414855,13.9989949 20.6560397,14.8007341 L18.083407,15.2014646 C17.6366693,16.0256955 17.0552729,16.7636229 16.3693514,17.3843558 L16.559383,20.0338956 C15.8573454,20.4958572 15.0964309,20.8729625 14.2905779,21.1508022 L12.3674511,19.3406202 C11.9292202,19.4157891 11.4789801,19.4548717 11.0197734,19.4548717 C10.549189,19.4548717 10.0880211,19.4138281 9.63954441,19.3349669 L7.70952567,21.1508379 C6.90356386,20.8729705 6.14255169,20.4958111 5.440433,20.0337746 L5.63175872,17.3493494 C4.96447506,16.7377196 4.39779526,16.0144522 3.9599463,15.2084793 L1.34397427,14.8007733 C1.05851376,13.9990028 0.86640583,13.1516667 0.780881957,12.2724049 L2.96731105,10.7469909 C3.01973096,9.81129525 3.22531752,8.91737079 3.5591796,8.09094494 L2.24095933,5.75313933 C2.68506267,5.01524138 3.21634248,4.33766169 3.82023285,3.73531371 L6.340084,4.52096391 C7.07104958,3.98869034 7.89294501,3.57759651 8.77757501,3.31696044 L9.74336335,0.827557773 C10.1552037,0.776347391 10.5745799,0.75 11,0.75 Z"
-															id="Combined-Shape" stroke="#4A6DA7" stroke-width="1.5"></path>
-														<path
-															d="M11.8384558,14.9119815 C12.2356664,14.8272595 12.6110434,14.6835728 12.9549863,14.4905222 C14.1753689,13.8055374 15,12.4990702 15,11 C15,8.790861 13.209139,7 11,7 C8.790861,7 7,8.790861 7,11 C7,11.5994585 7.13186637,12.168118 7.3681741,12.6785534 C7.7254563,13.4502992 8.32148632,14.0889476 9.06147749,14.499712"
-															id="Oval" stroke="#4A6DA7" stroke-width="1.5" stroke-linecap="round"
-															transform="translate(11.000000, 10.955991) rotate(30.000000) translate(-11.000000, -10.955991) ">
-														</path>
-													</g>
-												</g>
-											</g>
-										</g>
-									</g>
-								</svg>
-								<span>관리자</span>
-							</a>
-						</li>
-				<?php endif; ?>
-			</ul>
-		</footer>
-		<?php
-		$html = ob_get_contents();
-		ob_end_clean();
+								</g>
+							</g>
+						</svg>
+						<span>관리자</span>
+					</a>
+				</li>
+			<?php endif; ?>
+		</ul>
+	</footer>
+	<?php
+	$html = ob_get_contents();
+	ob_end_clean();
 
-		return $html;
+	return $html;
 }
 
 function kakao_menu($address)
 {
 	ob_start(); ?>
-		<button type="button" class="btn btn-outline-info btn-sm ml-1" data-toggle="dropdown" aria-haspopup="true"
-			aria-expanded="false">
-			<i class="bi bi-geo-alt"></i>
-		</button>
-		<div class="dropdown-menu">
-			<button class="dropdown-item" type="button"
-				onclick="daum_roadview('<?= DEFAULT_ADDRESS . ' ' . $address ?>')">로드뷰</button>
-			<button class="dropdown-item" type="button"
-				onclick="kakao_navi('<?= DEFAULT_ADDRESS . ' ' . $address ?>','<?= $address ?>');">길찾기</button>
-			<button class="dropdown-item" type="button"
-				onclick="map_view('house','<?= DEFAULT_ADDRESS . ' ' . $address ?>')">지도보기</button>
-		</div>
-		<?php
-		$html = ob_get_contents();
-		ob_end_clean();
+	<button type="button" class="btn btn-outline-info btn-sm ml-1" data-toggle="dropdown" aria-haspopup="true"
+		aria-expanded="false">
+		<i class="bi bi-geo-alt"></i>
+	</button>
+	<div class="dropdown-menu">
+		<button class="dropdown-item" type="button"
+			onclick="daum_roadview('<?= DEFAULT_ADDRESS . ' ' . $address ?>')">로드뷰</button>
+		<button class="dropdown-item" type="button"
+			onclick="kakao_navi('<?= DEFAULT_ADDRESS . ' ' . $address ?>','<?= $address ?>');">길찾기</button>
+		<button class="dropdown-item" type="button"
+			onclick="map_view('house','<?= DEFAULT_ADDRESS . ' ' . $address ?>')">지도보기</button>
+	</div>
+	<?php
+	$html = ob_get_contents();
+	ob_end_clean();
 
-		return $html;
+	return $html;
 }
 
 
@@ -3218,6 +3224,11 @@ function get_meeting_limit($s_date, $ms_id)
 
 	// 개별 모임 설정(스냅샷)이 있으면 우선 사용
 	if (isset($m['ms_limit']) && $m['ms_limit'] !== '' && $m['ms_limit'] !== null) {
+		// -1이면 기본값 따름
+		if ($m['ms_limit'] == -1) {
+			return get_meeting_schedule_attend_limit($ms_id);
+		}
+		// 0이면 제한 없음
 		return ($m['ms_limit'] == 0) ? '' : $m['ms_limit'];
 	}
 

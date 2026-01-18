@@ -627,7 +627,18 @@
         // 2.5.11 추가
         if (!$mysqli->query("SHOW COLUMNS FROM " . MEETING_TABLE . " LIKE 'ms_limit'")->fetch_row()) {
             $mysqli->query("ALTER TABLE " . MEETING_TABLE . " ADD `ms_limit` int(11) DEFAULT 0 COMMENT '지원자 수 제한' AFTER g_id;");
-            $mysqli->query("UPDATE " . MEETING_TABLE . " m INNER JOIN " . MEETING_SCHEDULE_TABLE . " ms ON m.ms_id = ms.ms_id SET m.ms_limit = IF(ms.ms_limit = '', 0, ms.ms_limit);");
+            $mysqli->query("UPDATE " . MEETING_TABLE . " m INNER JOIN " . MEETING_SCHEDULE_TABLE . " ms ON m.ms_id = ms.ms_id SET m.ms_limit = IF(ms.ms_limit = '', -1, ms.ms_limit);");
+        }
+
+        // 2.5.12 추가
+        if ($mysqli->query("SHOW COLUMNS FROM " . MEETING_TABLE . " LIKE 'ms_limit'")->fetch_row()) {
+            // 한번만 실행되도록 로그 확인
+            $check_log = $mysqli->query("SELECT count(*) FROM " . WORK_LOG_TABLE . " WHERE wl_key = 'batch_fix_ms_limit_2_5_12'");
+            $log_row = $check_log->fetch_row();
+            if ($log_row[0] == 0) {
+                $mysqli->query("UPDATE " . MEETING_TABLE . " m INNER JOIN " . MEETING_SCHEDULE_TABLE . " ms ON m.ms_id = ms.ms_id SET m.ms_limit = -1 WHERE ms.ms_limit = '' AND m.ms_limit = 0;");
+                $mysqli->query("INSERT INTO " . WORK_LOG_TABLE . " (wl_cdate, wl_key) VALUES (NOW(), 'batch_fix_ms_limit_2_5_12')");
+            }
         }
         ?>
         <script>

@@ -1,4 +1,4 @@
-<?php include_once('../config.php');?>
+<?php include_once('../config.php'); ?>
 
 <?php
 // PHP 버전 체크: 7.4 이상이면 PhpSpreadsheet 버전 사용 (Deprecated 경고 방지)
@@ -39,8 +39,8 @@ if ($php_version_check && file_exists($php8_file)) {
  * @version    ##VERSION##, ##DATE##
  */
 
- ini_set('memory_limit','-1'); 
- set_time_limit(0);
+ini_set('memory_limit', '-1');
+set_time_limit(0);
 
 /** Error reporting */
 error_reporting(E_ALL);
@@ -70,30 +70,31 @@ $objPHPExcel = new PHPExcel();
 $sheet = $objPHPExcel->getActiveSheet();
 
 $styleArray = array(
-  'borders' => array(
-    'allborders' => array(
-      'style' => PHPExcel_Style_Border::BORDER_MEDIUM
-    )
-  )
+	'borders' => array(
+		'allborders' => array(
+			'style' => PHPExcel_Style_Border::BORDER_MEDIUM
+		)
+	)
 );
 
 $styleArray2 = array(
-  'borders' => array(
-    'inside' => array(
-      'style' => PHPExcel_Style_Border::BORDER_THIN
-    )
-  )
+	'borders' => array(
+		'inside' => array(
+			'style' => PHPExcel_Style_Border::BORDER_THIN
+		)
+	)
 );
 
 $number = 1;
 $record_start_row = array(); // 구역기록 출력 시작 행
 $record_start_column = array(); // 구역기록 출력 시작 열
 $end_date = array(); // 마지막으로 완료한 날짜
+$max_row = 4; // 테두리 적용 범위 계산용
 
 // 초기 세팅
-$sql = "SELECT tp_id, tp_num FROM ".TELEPHONE_TABLE." ORDER BY tp_num+0 ASC, tp_num ASC";
+$sql = "SELECT tp_id, tp_num FROM " . TELEPHONE_TABLE . " ORDER BY tp_num+0 ASC, tp_num ASC";
 $result = $mysqli->query($sql);
-while($row=$result->fetch_assoc()){
+while ($row = $result->fetch_assoc()) {
 
 	// 변수 세팅
 	$tp_id = $row['tp_id'];
@@ -103,6 +104,7 @@ while($row=$result->fetch_assoc()){
 	$top_number = $number;
 	$number++;
 	$bottom_number = $number;
+	$max_row = max($max_row, $bottom_number);
 
 	// 구역기록 출력 시작 행 세팅
 	$record_start_column[$tp_id] = $top_number;
@@ -113,11 +115,11 @@ while($row=$result->fetch_assoc()){
 	$end_date[$tp_id] = '';
 
 	// 구역번호 입력
-	$sheet->setCellValue("A".$top_number, $tp_num);
+	$sheet->setCellValue("A" . $top_number, $tp_num);
 
 	// 셀 합치기
-	$sheet->mergeCells("A".$top_number.':A'.$bottom_number);
-	$sheet->mergeCells("B".$top_number.':B'.$bottom_number);
+	$sheet->mergeCells("A" . $top_number . ':A' . $bottom_number);
+	$sheet->mergeCells("B" . $top_number . ':B' . $bottom_number);
 
 	// 셀 높이 설정
 	$sheet->getDefaultRowDimension()->setRowHeight(20);
@@ -132,22 +134,22 @@ while($row=$result->fetch_assoc()){
 
 // TELEPHONE RECORD 테이블 - 기간 내 배정 날짜가 포함되는 기록만 조회
 $sql = "SELECT tpr.tp_id, tpr_start_date, tpr_end_date, tpr_assigned, tpr_assigned_date, tpr_mb_name
-				FROM ".TELEPHONE_RECORD_TABLE." tpr INNER JOIN ".TELEPHONE_TABLE." tp ON tpr.tp_id = tp.tp_id
-				WHERE (tpr_assigned_date >= '".$tp_sdate."' AND tpr_assigned_date <= '".$tp_fdate."')
-				ORDER BY tpr.tp_id ASC";
+				FROM " . TELEPHONE_RECORD_TABLE . " tpr INNER JOIN " . TELEPHONE_TABLE . " tp ON tpr.tp_id = tp.tp_id
+				WHERE (tpr_assigned_date >= '" . $tp_sdate . "' AND tpr_assigned_date <= '" . $tp_fdate . "')
+				ORDER BY tpr.tp_id ASC, tpr.tpr_assigned_date ASC";
 $result = $mysqli->query($sql);
-while($row=$result->fetch_assoc()){
+while ($row = $result->fetch_assoc()) {
 
 	// 변수 세팅
 	$tp_id = $row['tp_id'];
-	$tpr_start_date = empty_date($row['tpr_start_date'])?'':$row['tpr_start_date'];
-	$tpr_end_date = empty_date($row['tpr_end_date'])?'':$row['tpr_end_date'];
+	$tpr_start_date = empty_date($row['tpr_start_date']) ? '' : $row['tpr_start_date'];
+	$tpr_end_date = empty_date($row['tpr_end_date']) ? '' : $row['tpr_end_date'];
 	$tpr_assigned = $row['tpr_assigned'];
-	$tpr_assigned_date = empty_date($row['tpr_assigned_date'])?'':$row['tpr_assigned_date'];
+	$tpr_assigned_date = empty_date($row['tpr_assigned_date']) ? '' : $row['tpr_assigned_date'];
 	$tpr_mb_name = $row['tpr_mb_name'];
 
 	// RECORD에 있는 구역번호가 삭제된 구역의 구역번호일때
-	if(empty($record_start_column[$tp_id])){
+	if (empty($record_start_column[$tp_id])) {
 		continue;
 	}
 
@@ -161,36 +163,38 @@ while($row=$result->fetch_assoc()){
 	$start_column = $record_start_column[$tp_id];
 
 	// 배정 날짜가 기간 내에 있으면 출력 (이미 SQL에서 필터링됨)
-	if($tpr_assigned_date){
+	if ($tpr_assigned_date) {
 
 		// 셀 넓이 설정
 		$sheet->getColumnDimension($left_alpabet)->setWidth(10);
 		$sheet->getColumnDimension($right_alpabet)->setWidth(10);
 
 		// 개인구역인지 아닌지
-		if($tpr_mb_name){ // 개인구역 배정받아서 봉사함
-			$sheet->setCellValue($left_alpabet.$start_column, $tpr_mb_name);
-		}else{ // 일반배정
-			$sheet->setCellValue($left_alpabet.$start_column, filter_assigned_member_array($tpr_assigned)[0]);
+		if ($tpr_mb_name) { // 개인구역 배정받아서 봉사함
+			$sheet->setCellValue($left_alpabet . $start_column, $tpr_mb_name);
+		} else { // 일반배정
+			$sheet->setCellValue($left_alpabet . $start_column, filter_assigned_member_array($tpr_assigned)[0]);
 		}
 
 		// 시작날짜, 마친날짜 입력
-		if($tpr_assigned_date){
-			$sheet->setCellValue($left_alpabet.($start_column+1), date('y.n.j',strtotime($tpr_assigned_date))); // 시작날짜
-		}else{
-			if($tpr_mb_name) $sheet->setCellValue($left_alpabet.($start_column+1), date('y.n.j',strtotime($tpr_start_date)));
+		if ($tpr_assigned_date) {
+			$sheet->setCellValue($left_alpabet . ($start_column + 1), date('y.m.d', strtotime($tpr_assigned_date))); // 시작날짜
+		} else {
+			if ($tpr_mb_name)
+				$sheet->setCellValue($left_alpabet . ($start_column + 1), date('y.m.d', strtotime($tpr_start_date)));
 		}
-		if($tpr_end_date){
-			$sheet->setCellValue($right_alpabet.($start_column+1), date('y.n.j',strtotime($tpr_end_date))); // 마친날짜
-			if(empty($end_date[$tp_id]) || $end_date[$tp_id] < $tpr_end_date) $end_date[$tp_id] = $tpr_end_date;
+		if ($tpr_end_date) {
+			$sheet->setCellValue($right_alpabet . ($start_column + 1), date('y.m.d', strtotime($tpr_end_date))); // 마친날짜
+			if (empty($end_date[$tp_id]) || $end_date[$tp_id] < $tpr_end_date)
+				$end_date[$tp_id] = $tpr_end_date;
 		}
 
 		// 셀 합치기
-		$sheet->mergeCells($left_alpabet.$start_column.':'.$right_alpabet.$start_column);
+		$sheet->mergeCells($left_alpabet . $start_column . ':' . $right_alpabet . $start_column);
 
 		// 선 굵기
-		$sheet->getStyle($left_alpabet.$start_column.':'.$right_alpabet.($start_column+1))->applyFromArray($styleArray); // 테두리 진한선
-		$sheet->getStyle($left_alpabet.$start_column.':'.$right_alpabet.($start_column+1))->applyFromArray($styleArray2); // 내부 연한선
+		$sheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray); // 테두리 진한선
+		$sheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray2); // 내부 연한선
 
 		// 구역기록 출력 시작 행 업데이트
 		$start_row++;
@@ -201,17 +205,17 @@ while($row=$result->fetch_assoc()){
 
 // TELEPHONE 테이블 - 현재 배정된 구역 중 기간 내 배정 날짜가 포함되는 것만
 $sql = "SELECT tp_id, tp_start_date, tp_end_date, tp_assigned, tp_assigned_date, mb_id, tp_mb_date
-				FROM ".TELEPHONE_TABLE."
-				WHERE (tp_assigned_date >= '".$tp_sdate."' AND tp_assigned_date <= '".$tp_fdate."')";
+				FROM " . TELEPHONE_TABLE . "
+				WHERE (tp_assigned_date >= '" . $tp_sdate . "' AND tp_assigned_date <= '" . $tp_fdate . "')";
 $result = $mysqli->query($sql);
-while($row=$result->fetch_assoc()){
+while ($row = $result->fetch_assoc()) {
 
 	// 변수 세팅
 	$tp_id = $row['tp_id'];
-	$tp_start_date= empty_date($row['tp_start_date'])?'':$row['tp_start_date'];
-	$tp_end_date = empty_date($row['tp_end_date'])?'':$row['tp_end_date'];
+	$tp_start_date = empty_date($row['tp_start_date']) ? '' : $row['tp_start_date'];
+	$tp_end_date = empty_date($row['tp_end_date']) ? '' : $row['tp_end_date'];
 	$tp_assigned = $row['tp_assigned'];
-	$tp_assigned_date = empty_date($row['tp_assigned_date'])?'':$row['tp_assigned_date'];
+	$tp_assigned_date = empty_date($row['tp_assigned_date']) ? '' : $row['tp_assigned_date'];
 	$mb_id = $row['mb_id'];
 
 	// 시작 열 값 세팅
@@ -224,43 +228,44 @@ while($row=$result->fetch_assoc()){
 	$start_column = $record_start_column[$tp_id];
 
 	// 배정 날짜가 기간 내에 있으면 출력 (이미 SQL에서 필터링됨)
-	if($tp_assigned_date){
+	if ($tp_assigned_date) {
 
 		// 셀 넓이 설정
 		$sheet->getColumnDimension($left_alpabet)->setWidth(10);
 		$sheet->getColumnDimension($right_alpabet)->setWidth(10);
 
 		// 개인구역인지 아닌지
-		if($mb_id){ // 개인구역 배정받아서 봉사함
+		if ($mb_id) { // 개인구역 배정받아서 봉사함
 			$member_name = get_member_name($mb_id);
-			$sheet->setCellValue($left_alpabet.$start_column, $member_name);
-		}else{ // 일반배정
-			$sheet->setCellValue($left_alpabet.$start_column, filter_assigned_member_array($tp_assigned)[0]);
+			$sheet->setCellValue($left_alpabet . $start_column, $member_name);
+		} else { // 일반배정
+			$sheet->setCellValue($left_alpabet . $start_column, filter_assigned_member_array($tp_assigned)[0]);
 		}
 
 		// 시작날짜, 마친날짜 입력
-		if($tp_assigned_date){
-			$sheet->setCellValue($left_alpabet.($start_column+1), date('y.n.j',strtotime($tp_assigned_date))); // 시작날짜
-		}else{
-			if($row['mb_id']){
-				if($row['tp_mb_date'] && !empty_date($row['tp_mb_date'])){
-					$sheet->setCellValue($left_alpabet.($start_column+1), date('y.n.j',strtotime($row['tp_mb_date'])));
-				}else{
-					$sheet->setCellValue($left_alpabet.($start_column+1), date('y.n.j',strtotime($tp_start_date)));
+		if ($tp_assigned_date) {
+			$sheet->setCellValue($left_alpabet . ($start_column + 1), date('y.m.d', strtotime($tp_assigned_date))); // 시작날짜
+		} else {
+			if ($row['mb_id']) {
+				if ($row['tp_mb_date'] && !empty_date($row['tp_mb_date'])) {
+					$sheet->setCellValue($left_alpabet . ($start_column + 1), date('y.m.d', strtotime($row['tp_mb_date'])));
+				} else {
+					$sheet->setCellValue($left_alpabet . ($start_column + 1), date('y.m.d', strtotime($tp_start_date)));
 				}
 			}
 		}
-		if($tp_end_date){
-			$sheet->setCellValue($right_alpabet.($start_column+1), date('y.n.j',strtotime($tp_end_date))); // 마친날짜
-			if(empty($end_date[$tp_id]) || $end_date[$tp_id] < $tp_end_date) $end_date[$tp_id] = $tp_end_date;
+		if ($tp_end_date) {
+			$sheet->setCellValue($right_alpabet . ($start_column + 1), date('y.m.d', strtotime($tp_end_date))); // 마친날짜
+			if (empty($end_date[$tp_id]) || $end_date[$tp_id] < $tp_end_date)
+				$end_date[$tp_id] = $tp_end_date;
 		}
 
 		// 셀 합치기
-		$sheet->mergeCells($left_alpabet.$start_column.':'.$right_alpabet.$start_column);
+		$sheet->mergeCells($left_alpabet . $start_column . ':' . $right_alpabet . $start_column);
 
 		// 선 굵기
-		$sheet->getStyle($left_alpabet.$start_column.':'.$right_alpabet.($start_column+1))->applyFromArray($styleArray); // 테두리 진한선
-		$sheet->getStyle($left_alpabet.$start_column.':'.$right_alpabet.($start_column+1))->applyFromArray($styleArray2); // 내부 연한선
+		$sheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray); // 테두리 진한선
+		$sheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray2); // 내부 연한선
 
 		// 구역기록 출력 시작 행 업데이트
 		$start_row++;
@@ -275,21 +280,29 @@ foreach ($end_date as $tp_id => $date) {
 	// 시작 행 값 세팅
 	$start_column = $record_start_column[$tp_id];
 
-  	// 마지막 완료 날짜 포맷팅
+	// 마지막 완료 날짜 포맷팅
 	$formatted_date = '';
-	if($date && !empty_date($date)) {
+	if ($date && !empty_date($date)) {
 		$formatted_date = date('y.m.d', strtotime($date));
 	}
-	$sheet->setCellValue("B".$start_column, $formatted_date);
+	$sheet->setCellValue("B" . $start_column, $formatted_date);
 
 	// 선 굵기
-	$sheet->getStyle("A".$start_column.':'."B".($start_column+1))->applyFromArray($styleArray);
-	$sheet->getStyle("A".$start_column.':'."B".($start_column+1))->applyFromArray($styleArray2); // 내부 연한선
+	$sheet->getStyle("A" . $start_column . ':' . "B" . ($start_column + 1))->applyFromArray($styleArray);
+	$sheet->getStyle("A" . $start_column . ':' . "B" . ($start_column + 1))->applyFromArray($styleArray2); // 내부 연한선
 
 }
 
 //상단 컬럼명
-$sheet->mergeCells('A1:'.$column_cnt.'1');
+// 실제 마지막 컬럼 계산
+$final_col = $column_cnt;
+$temp_i = 'C';
+while ($temp_i < $column_cnt) {
+	$temp_i++;
+	$final_col = $temp_i;
+	$temp_i++;
+}
+$sheet->mergeCells('A1:' . $final_col . '1');
 $sheet->mergeCells("A2:B2");
 $sheet->mergeCells("A3:A4");
 $sheet->mergeCells("B3:B4");
@@ -298,75 +311,75 @@ $objPHPExcel->getActiveSheet()->getStyle("A3")->getAlignment()->setWrapText(true
 $objPHPExcel->getActiveSheet()->getStyle("B3")->getAlignment()->setWrapText(true);
 
 $objPHPExcel->setActiveSheetIndex(0)
-  ->setCellValue('A1', '구역 배정 기록')
-  ->setCellValue('A2', '봉사 연도')
-  ->setCellValue('A3', '구역 번호')
-  ->setCellValue('B3', '마지막으로 완료한 날짜');
+	->setCellValue('A1', '구역 배정 기록')
+	->setCellValue('A2', '봉사 연도')
+	->setCellValue('A3', '구역 번호')
+	->setCellValue('B3', '마지막으로 완료한 날짜');
 
 $sheet->getStyle("A3:B4")->applyFromArray($styleArray); // 테두리 진한선
 $sheet->getStyle("A3:B4")->applyFromArray($styleArray2); // 내부 연한선
 
-for ($i='C'; $i < $column_cnt; $i++) {
-  $left_alpabet = $i;
-  $i++;
-  $right_alpabet = $i;
-  $sheet->getColumnDimension($left_alpabet)->setWidth(8);
-  $sheet->getColumnDimension($right_alpabet)->setWidth(8);
-  $sheet->mergeCells($left_alpabet.'3:'.$right_alpabet.'3');
+for ($i = 'C'; $i < $column_cnt; $i++) {
+	$left_alpabet = $i;
+	$i++;
+	$right_alpabet = $i;
+	$sheet->getColumnDimension($left_alpabet)->setWidth(8);
+	$sheet->getColumnDimension($right_alpabet)->setWidth(8);
+	$sheet->mergeCells($left_alpabet . '3:' . $right_alpabet . '3');
 
-  $objPHPExcel->setActiveSheetIndex(0)
-    ->setCellValue($left_alpabet.'3', '배정된 전도인')
-    ->setCellValue($left_alpabet.'4', '배정 날짜')
-    ->setCellValue($right_alpabet.'4', '완료 날짜');
+	$objPHPExcel->setActiveSheetIndex(0)
+		->setCellValue($left_alpabet . '3', '배정된 전도인')
+		->setCellValue($left_alpabet . '4', '배정 날짜')
+		->setCellValue($right_alpabet . '4', '완료 날짜');
 
-  $sheet->getStyle($left_alpabet.'3:'.$right_alpabet.'4')->applyFromArray($styleArray); // 테두리 진한선
-  $sheet->getStyle($left_alpabet.'3:'.$right_alpabet.'4')->applyFromArray($styleArray2); // 내부 연한선
+	$sheet->getStyle($left_alpabet . '3:' . $right_alpabet . '4')->applyFromArray($styleArray); // 테두리 진한선
+	$sheet->getStyle($left_alpabet . '3:' . $right_alpabet . '4')->applyFromArray($styleArray2); // 내부 연한선
 }
 
 $objPHPExcel->getActiveSheet()->duplicateStyleArray(
-		array(
-			'alignment' => array(
+	array(
+		'alignment' => array(
 			'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
-			'vertical'   => PHPExcel_Style_Alignment::VERTICAL_CENTER
+			'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER
 		)
 	),
-	'A1:Z'.$number
+	'A1:' . $final_col . $max_row
 );
 
 //전체 행 높이
-for($i = 1; $i <= $record_start_column[$tt_id]; $i ++) {
+for ($i = 1; $i <= $max_row; $i++) {
 	$sheet->getRowDimension($i)->setRowHeight(16);
-  }
-  
-  //폰트 스타일
-  $sheet->getStyle("A1:C2")->getFont()->setBold(true);
-  
-  $sheet->getStyle('A1:'.$column_cnt.'1')->getFont()->setSize(12);
-  $sheet->getStyle("A2:B2")->getFont()->setSize(10);
-  $sheet->getStyle("A3:".$right_alpabet."4")->getFont()->setSize(8);
-  $sheet->getStyle("A5:".$right_alpabet.$bottom_number)->getFont()->setSize(10);
+}
+
+//폰트 스타일
+$sheet->getStyle("A1:C2")->getFont()->setBold(true);
+
+$sheet->getStyle('A1:' . $final_col . '1')->getFont()->setSize(12);
+$sheet->getStyle("A2:B2")->getFont()->setSize(10);
+$sheet->getStyle("A3:" . $right_alpabet . "4")->getFont()->setSize(8);
+$sheet->getStyle("A5:" . $right_alpabet . $bottom_number)->getFont()->setSize(10);
 
 unset($styleArray);
 unset($styleArray2);
 
 // Rename worksheet
-$objPHPExcel->getActiveSheet()->setTitle('구역임명기록('.$tp_sdate.'_'.$tp_fdate.')');
+$objPHPExcel->getActiveSheet()->setTitle('구역배정기록(' . $tp_sdate . '_' . $tp_fdate . ')');
 
 // Set active sheet index to the first sheet, so Excel opens this as the first sheet
 $objPHPExcel->setActiveSheetIndex(0);
 
 // Redirect output to a client’s web browser (Excel2007)
 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-header('Content-Disposition: attachment;filename="구역임명기록('.$tp_sdate.'_'.$tp_fdate.').xlsx"');
+header('Content-Disposition: attachment;filename="구역배정기록(' . $tp_sdate . '_' . $tp_fdate . ').xlsx"');
 header('Cache-Control: max-age=0');
 // If you're serving to IE 9, then the following may be needed
 header('Cache-Control: max-age=1');
 
 // If you're serving to IE over SSL, then the following may be needed
-header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
-header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-header ('Pragma: public'); // HTTP/1.0
+header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+header('Pragma: public'); // HTTP/1.0
 
 $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
 ob_end_clean();
