@@ -80,8 +80,22 @@ if (!$settings) {
     <div id="countdownOverlay" class="countdown-overlay" style="display: none;">
         <div id="countdownNumber" class="countdown-number">3</div>
     </div>
-    
-    <?php 
+
+    <!-- 대기화면 음악 컨트롤 -->
+    <?php $waiting_music_enabled = isset($settings['waiting_music_enabled']) ? $settings['waiting_music_enabled'] : true; ?>
+    <div id="waitingMusicControl" class="waiting-music-control" style="display: none;">
+        <div class="waiting-music-inner">
+            <input type="checkbox" id="waitingMusicToggle" <?= $waiting_music_enabled ? 'checked' : '' ?>>
+            <label for="waitingMusicToggle" class="waiting-music-label">
+                <span id="waitingMusicTitle">음악 로딩 중...</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- 대기화면 음악 플레이어 -->
+    <audio id="waitingMusic" preload="auto"></audio>
+
+    <?php
     $music_url = isset($settings['online_music']) ? $settings['online_music'] : '';
     if (!empty($music_url)): 
         // CDN 직접 연결만 시도 (프록시 사용 안 함)
@@ -187,14 +201,22 @@ if (!$settings) {
         // 타이머 설정
         const TOTAL_SECONDS = <?= ($settings['minutes'] * 60) + (isset($settings['seconds']) ? $settings['seconds'] : 0) ?>;
         const END_MESSAGE = <?= json_encode($settings['end_message']) ?>;
-    
+        const WAITING_MUSIC_ENABLED = <?= (isset($settings['waiting_music_enabled']) && $settings['waiting_music_enabled']) ? 'true' : 'false' ?>;
+        const WAITING_MUSIC_VOLUME = <?= isset($settings['waiting_music_volume']) ? $settings['waiting_music_volume'] / 100 : 0.7 ?>;
+
     let remainingSeconds = TOTAL_SECONDS;
         let isRunning = true;
         let isPaused = false;
         let isManuallyPaused = false; // 사용자가 수동으로 일시정지했는지 추적
         let isMusicFadingOut = false; // 음악 페이드 아웃 시작 여부 추적
+        let isWaitingMusicFadingOut = false; // 대기화면 음악 페이드 아웃 시작 여부 추적
         let timerInterval;
         let blinkInterval;
+
+        // 대기화면 음악 관련 변수
+        let waitingMusicList = []; // 집회 노래 목록
+        let waitingMusic = null; // 대기화면 음악 플레이어
+        let currentWaitingSongIndex = -1; // 현재 재생 중인 곡 인덱스
         
         // DOM 요소
         const timerDisplay = document.getElementById('timerDisplay');
@@ -854,20 +876,26 @@ if (!$settings) {
                 startTime.setDate(startTime.getDate() + 1);
                 const nextDayTimeDiff = startTime - now;
                 const nextDayRemainingSeconds = Math.floor(nextDayTimeDiff / 1000);
-                
+
                 // 다음날까지의 시간이 3초 이하면 카운트다운 시작하지 않음 (너무 긴 시간)
                 return;
             }
-            
+
+            // 타이머 시작 5초 전에 대기화면 음악 페이드 아웃 시작
+            if (remainingSeconds === 5 && !isWaitingMusicFadingOut && waitingMusic && !waitingMusic.paused) {
+                console.log('⏰ 타이머 시작 5초 전 - 대기화면 음악 페이드 아웃 시작');
+                fadeOutWaitingMusic(4500); // 4.5초에 걸쳐 페이드 아웃 (0.5초 여유)
+            }
+
             // 정확히 시간이 되면 바로 타이머 시작 (카운트다운 없음)
             if (remainingSeconds <= 0 && remainingSeconds > -1 && !isRunning) {
                 console.log('시간 도달, 타이머 즉시 시작');
-                
+
                 // 전체화면이 아니면 먼저 전체화면으로 전환
                 if (!isFullscreenReady) {
                     toggleFullscreen();
                     isFullscreenReady = true;
-                    
+
                     // 전체화면 전환 후 잠시 대기 후 타이머 시작
                     setTimeout(() => {
                         if (isReady && isFullscreenReady) {
@@ -887,10 +915,10 @@ if (!$settings) {
                 duration = 2000;
             }
             if (!audioElement || audioElement.paused) return;
-            
+
             const originalVolume = audioElement.volume;
             const fadeStep = originalVolume / (duration / 50); // 50ms마다 볼륨 감소
-            
+
             const fadeInterval = setInterval(() => {
                 if (audioElement.volume > fadeStep) {
                     audioElement.volume -= fadeStep;
@@ -902,10 +930,170 @@ if (!$settings) {
                     console.log('음악 페이드 아웃 완료');
                 }
             }, 50);
-            
+
             console.log(`음악 페이드 아웃 시작 (${duration}ms)`);
         }
-        
+
+        // 대기화면 음악 초기화 및 재생
+        function initWaitingMusic() {
+            waitingMusic = document.getElementById('waitingMusic');
+            const waitingMusicControl = document.getElementById('waitingMusicControl');
+            const waitingMusicToggle = document.getElementById('waitingMusicToggle');
+            const waitingMusicTitle = document.getElementById('waitingMusicTitle');
+
+            if (!waitingMusic || !waitingMusicControl) {
+                console.log('대기화면 음악 요소를 찾을 수 없습니다');
+                return;
+            }
+
+            // music_list.json에서 집회 노래 목록 로드
+            fetch('music_list.json')
+                .then(response => response.json())
+                .then(data => {
+                    // 집회 카테고리 노래만 필터링
+                    waitingMusicList = data.songs.filter(song => song.title.includes('(집회)'));
+                    console.log('집회 노래 목록 로드됨:', waitingMusicList.length, '곡');
+
+                    if (waitingMusicList.length === 0) {
+                        console.log('집회 노래가 없습니다');
+                        return;
+                    }
+
+                    // 대기화면 음악 컨트롤 표시
+                    waitingMusicControl.style.display = 'block';
+
+                    // 랜덤 곡 선택 및 재생
+                    playRandomWaitingSong();
+
+                    // 곡이 끝나면 다음 곡 재생 (연속 재생)
+                    waitingMusic.addEventListener('ended', () => {
+                        if (!isWaitingMusicFadingOut) {
+                            console.log('곡 재생 완료, 다음 곡 재생');
+                            playRandomWaitingSong();
+                        }
+                    });
+
+                    // 체크박스 토글 이벤트
+                    waitingMusicToggle.addEventListener('change', () => {
+                        if (waitingMusicToggle.checked) {
+                            waitingMusic.play().then(() => {
+                                console.log('대기화면 음악 재생 재개');
+                            }).catch(e => {
+                                console.log('대기화면 음악 재생 실패:', e);
+                            });
+                        } else {
+                            waitingMusic.pause();
+                            console.log('대기화면 음악 일시정지');
+                        }
+                    });
+
+                    // 오류 처리
+                    waitingMusic.addEventListener('error', (e) => {
+                        console.error('대기화면 음악 로드 오류:', e);
+                        // 오류 발생 시 다음 곡 시도
+                        setTimeout(() => {
+                            playRandomWaitingSong();
+                        }, 1000);
+                    });
+                })
+                .catch(e => {
+                    console.error('음악 목록 로드 실패:', e);
+                });
+        }
+
+        // 랜덤 곡 선택 및 재생
+        function playRandomWaitingSong() {
+            if (waitingMusicList.length === 0) return;
+
+            const waitingMusicTitle = document.getElementById('waitingMusicTitle');
+
+            // 랜덤 인덱스 선택 (이전 곡과 다른 곡 선택)
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * waitingMusicList.length);
+            } while (newIndex === currentWaitingSongIndex && waitingMusicList.length > 1);
+
+            currentWaitingSongIndex = newIndex;
+            const song = waitingMusicList[currentWaitingSongIndex];
+
+            // 음악 URL 설정
+            waitingMusic.src = song.url;
+            waitingMusic.volume = 0; // 볼륨 0에서 시작
+            console.log('대기화면 음악 목표 볼륨:', WAITING_MUSIC_VOLUME, '(', WAITING_MUSIC_VOLUME * 100, '%)');
+
+            // 제목 표시 (번호와 제목만 표시, "(집회)" 제거)
+            const displayTitle = song.title.replace(' (집회)', '');
+            waitingMusicTitle.textContent = '♪ ' + displayTitle;
+
+            // 재생 시작
+            waitingMusic.play().then(() => {
+                console.log('대기화면 음악 재생:', displayTitle);
+                // Fade in으로 목표 볼륨까지 올림
+                fadeInWaitingMusic(WAITING_MUSIC_VOLUME, 2000);
+            }).catch(e => {
+                console.log('대기화면 음악 자동 재생 차단:', e.message);
+                // 사용자 상호작용 후 재생 시도
+                document.addEventListener('click', function playOnClick() {
+                    waitingMusic.play().then(() => {
+                        console.log('클릭 후 대기화면 음악 재생 성공');
+                        fadeInWaitingMusic(WAITING_MUSIC_VOLUME, 2000);
+                    }).catch(err => {
+                        console.log('클릭 후에도 재생 실패:', err);
+                    });
+                    document.removeEventListener('click', playOnClick);
+                }, { once: true });
+            });
+        }
+
+        // 대기화면 음악 Fade In
+        function fadeInWaitingMusic(targetVolume, duration) {
+            if (!waitingMusic) return;
+
+            const fadeStep = targetVolume / (duration / 50);
+            console.log('Fade In 시작: 목표 볼륨', targetVolume);
+
+            const fadeInterval = setInterval(() => {
+                if (waitingMusic.volume < targetVolume - fadeStep) {
+                    waitingMusic.volume += fadeStep;
+                } else {
+                    waitingMusic.volume = targetVolume;
+                    clearInterval(fadeInterval);
+                    console.log('Fade In 완료: 현재 볼륨', waitingMusic.volume);
+                }
+            }, 50);
+        }
+
+        // 대기화면 음악 페이드 아웃 및 정지
+        function fadeOutWaitingMusic(duration) {
+            if (!waitingMusic || waitingMusic.paused) return;
+
+            isWaitingMusicFadingOut = true;
+            const waitingMusicControl = document.getElementById('waitingMusicControl');
+
+            const originalVolume = waitingMusic.volume;
+            const fadeStep = originalVolume / (duration / 50);
+
+            const fadeInterval = setInterval(() => {
+                if (waitingMusic.volume > fadeStep) {
+                    waitingMusic.volume -= fadeStep;
+                } else {
+                    waitingMusic.volume = 0;
+                    waitingMusic.pause();
+                    waitingMusic.volume = originalVolume;
+                    clearInterval(fadeInterval);
+
+                    // 대기화면 음악 컨트롤 숨기기
+                    if (waitingMusicControl) {
+                        waitingMusicControl.style.display = 'none';
+                    }
+
+                    console.log('대기화면 음악 페이드 아웃 완료');
+                }
+            }, 50);
+
+            console.log(`대기화면 음악 페이드 아웃 시작 (${duration}ms)`);
+        }
+
         // 전체화면 토글 함수
         function toggleFullscreen() {
             if (!document.fullscreenElement && 
@@ -950,23 +1138,28 @@ if (!$settings) {
             isReady = true;
             isFullscreenReady = false;
             isRunning = false;
-            
+
             // CSS에서 기본적으로 숨겨져 있으므로 별도 숨김 처리 불필요
-            
+
             // 제목만 표시 (큰 크기로 표시)
             const timerTitle = document.querySelector('.timer-title');
             timerTitle.style.display = 'block';
             timerTitle.style.cursor = 'pointer'; // 클릭 가능하다는 것을 표시
-            
+
             // 제목 클릭 이벤트 리스너 추가 (스페이스키와 동일한 기능)
             timerTitle.addEventListener('click', handleReadyStateClick);
-            
+
             // 진행바 구분선 미리 생성 (준비 상태에서도 보이도록)
             createProgressTicks();
-            
+
             // 현재 시간 표시 요소 생성
             createCurrentTimeDisplay();
-            
+
+            // 대기화면 음악 시작 (설정에서 활성화된 경우)
+            if (WAITING_MUSIC_ENABLED) {
+                initWaitingMusic();
+            }
+
             console.log('준비 상태: 제목과 현재 시간 표시');
         }
         
@@ -1005,7 +1198,24 @@ if (!$settings) {
         // 타이머 시작 (준비 상태에서 실행 상태로)
         function startTimerFromReady() {
             if (!isReady) return;
-            
+
+            // 대기화면 음악 즉시 페이드 아웃 (수동 시작 시)
+            if (waitingMusic && !waitingMusic.paused && !isWaitingMusicFadingOut) {
+                console.log('수동 타이머 시작 - 대기화면 음악 빠른 페이드 아웃');
+                fadeOutWaitingMusic(800); // 0.8초에 걸쳐 빠른 페이드 아웃
+            }
+
+            // 타이머 음악 즉시 재생 시작 (사용자 상호작용 컨텍스트 유지)
+            if (backgroundMusic) {
+                backgroundMusic.volume = 1.0; // 타이머 음악은 100% 볼륨
+                backgroundMusic.play().then(() => {
+                    console.log('타이머 음악 재생 성공 (사용자 상호작용 직후)');
+                }).catch(e => {
+                    console.log('타이머 음악 자동 재생 차단:', e.message);
+                    showMusicPlayButton();
+                });
+            }
+
             // 깜빡임 효과 시작
             const bodyElement = document.body;
             bodyElement.classList.add('timer-flash');
@@ -1085,17 +1295,8 @@ if (!$settings) {
                 updateDisplay();
                 startTimer();
                 
-                // 음악 재생 시작 (타이머 시작과 함께)
-                if (backgroundMusic) {
-                    console.log('타이머 시작과 함께 음악 재생 시도');
-                    backgroundMusic.play().then(() => {
-                        console.log('음악 재생 성공');
-                    }).catch(e => {
-                        console.log('음악 자동 재생 차단:', e.message);
-                        showMusicPlayButton();
-                    });
-                }
-                
+                // 음악은 이미 startTimerFromReady() 시작 시 재생됨 (사용자 상호작용 컨텍스트 유지)
+
                 console.log('타이머 시작됨');
             }, 800); // 0.8초 후 실행
         }

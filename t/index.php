@@ -11,7 +11,9 @@ session_start();
                 'online_music' => isset($_POST['online_music']) ? $_POST['online_music'] : '',
                 'music_category' => isset($_POST['music_category']) ? $_POST['music_category'] : 'all',
                 'auto_start_hour' => (int)(isset($_POST['auto_start_hour']) ? $_POST['auto_start_hour'] : -1),
-                'auto_start_minute' => (int)(isset($_POST['auto_start_minute']) ? $_POST['auto_start_minute'] : 0)
+                'auto_start_minute' => (int)(isset($_POST['auto_start_minute']) ? $_POST['auto_start_minute'] : 0),
+                'waiting_music_enabled' => isset($_POST['waiting_music_enabled']) ? true : false,
+                'waiting_music_volume' => isset($_POST['waiting_music_volume']) ? (int)$_POST['waiting_music_volume'] : 70
             );
     
     // JSON 파일로 저장 (모든 설정 포함)
@@ -37,7 +39,9 @@ session_start();
             'online_music' => '',
             'music_category' => 'all',
             'auto_start_hour' => -1,
-            'auto_start_minute' => 0
+            'auto_start_minute' => 0,
+            'waiting_music_enabled' => true,
+            'waiting_music_volume' => 70
         );
 
 if (file_exists('timer_settings.json')) {
@@ -135,8 +139,8 @@ $settings['online_music'] = '';
                     <label for="auto_start">자동 시작시간 :</label>
                     <div class="auto-start-container">
                         <select id="auto_start_hour" name="auto_start_hour" style="display: inline-block; width: auto; margin-right: 10px;">
-                            <?php 
-                            $selected_hour = isset($settings['auto_start_hour']) ? $settings['auto_start_hour'] : -1; 
+                            <?php
+                            $selected_hour = isset($settings['auto_start_hour']) ? $settings['auto_start_hour'] : -1;
                             ?>
                             <option value="-1" <?= ($selected_hour == -1) ? 'selected' : '' ?>>사용 안함</option>
                             <?php
@@ -157,7 +161,29 @@ $settings['online_music'] = '';
                         </select>
                     </div>
                 </div>
-                
+
+                <div class="input-group">
+                    <label for="waiting_music_enabled">대기화면 음악 :</label>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="waiting_music_enabled" name="waiting_music_enabled" <?= (isset($settings['waiting_music_enabled']) && $settings['waiting_music_enabled']) ? 'checked' : '' ?>>
+                        <label for="waiting_music_enabled" class="checkbox-label">대기시간에 집회 노래 랜덤 재생</label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="waiting_music_volume">대기화면 볼륨 :</label>
+                    <select id="waiting_music_volume" name="waiting_music_volume" class="volume-select-standalone">
+                        <?php
+                        $selected_volume = isset($settings['waiting_music_volume']) ? $settings['waiting_music_volume'] : 70;
+                        $volumes = array(10 => '10%', 30 => '30%', 50 => '50%', 70 => '70%', 100 => '100%');
+                        foreach ($volumes as $value => $label) {
+                            $selected = ($selected_volume == $value) ? 'selected' : '';
+                            echo "<option value=\"$value\" $selected>$label</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+
                        <div class="input-group">
                            <label for="music_category">음악 카테고리 :</label>
                             <div class="category-select-container">

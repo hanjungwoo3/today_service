@@ -896,6 +896,42 @@ select option {
     font-style: italic;
 }
 
+/* 체크박스 컨테이너 */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.checkbox-container input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #00ffff;
+}
+
+.checkbox-container .checkbox-label {
+    font-size: 16px;
+    color: #cccccc;
+    cursor: pointer;
+    min-width: auto;
+}
+
+.checkbox-container .volume-select {
+    width: auto;
+    min-width: 70px;
+    padding: 8px 12px;
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+.volume-select-standalone {
+    width: auto;
+    min-width: 100px;
+    padding: 10px 15px;
+    font-size: 16px;
+}
+
 /* 파일 입력 스타일링 */
 .file-input-container {
     display: flex;
@@ -959,4 +995,45 @@ select option {
     width: 100%;
     transition: opacity 2s ease-in-out;
     opacity: 0;
+}
+
+/* 대기화면 음악 컨트롤 */
+.waiting-music-control {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    background: rgba(40, 40, 40, 0.9);
+    padding: 12px 24px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.waiting-music-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.waiting-music-control input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    accent-color: #00ffff;
+    flex-shrink: 0;
+}
+
+.waiting-music-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: #ffffff;
+    font-size: clamp(14px, 2vw, 18px);
+    font-family: 'WTBaeumMyungjo', serif;
+    white-space: nowrap;
+}
+
+#waitingMusicTitle {
+    color: #cccccc;
 }
