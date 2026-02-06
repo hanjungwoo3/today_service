@@ -1203,6 +1203,12 @@ if (!$settings) {
         function startTimerFromReady() {
             if (!isReady) return;
 
+            // 대기화면 음악 컨트롤 숨기기
+            const waitingMusicControl = document.getElementById('waitingMusicControl');
+            if (waitingMusicControl) {
+                waitingMusicControl.style.display = 'none';
+            }
+
             // 대기화면 음악 즉시 페이드 아웃 (수동 시작 시)
             if (waitingMusic && !waitingMusic.paused && !isWaitingMusicFadingOut) {
                 console.log('수동 타이머 시작 - 대기화면 음악 빠른 페이드 아웃');
