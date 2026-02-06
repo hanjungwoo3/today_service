@@ -84,12 +84,7 @@ if (!$settings) {
     <!-- 대기화면 음악 컨트롤 -->
     <?php $waiting_music_enabled = isset($settings['waiting_music_enabled']) ? $settings['waiting_music_enabled'] : true; ?>
     <div id="waitingMusicControl" class="waiting-music-control" style="display: none;">
-        <div class="waiting-music-inner">
-            <input type="checkbox" id="waitingMusicToggle" <?= $waiting_music_enabled ? 'checked' : '' ?>>
-            <label for="waitingMusicToggle" class="waiting-music-label">
-                <span id="waitingMusicTitle">음악 로딩 중...</span>
-            </label>
-        </div>
+        <span id="waitingMusicTitle">음악 로딩 중...</span>
     </div>
 
     <!-- 대기화면 음악 플레이어 -->
@@ -938,7 +933,6 @@ if (!$settings) {
         function initWaitingMusic() {
             waitingMusic = document.getElementById('waitingMusic');
             const waitingMusicControl = document.getElementById('waitingMusicControl');
-            const waitingMusicToggle = document.getElementById('waitingMusicToggle');
             const waitingMusicTitle = document.getElementById('waitingMusicTitle');
 
             if (!waitingMusic || !waitingMusicControl) {
@@ -973,16 +967,26 @@ if (!$settings) {
                         }
                     });
 
-                    // 체크박스 토글 이벤트
-                    waitingMusicToggle.addEventListener('change', () => {
-                        if (waitingMusicToggle.checked) {
-                            waitingMusic.play().then(() => {
+                    // 제목 클릭으로 재생/일시정지 토글
+                    let savedMusicTitle = '';
+                    waitingMusicTitle.style.cursor = 'pointer';
+                    waitingMusicTitle.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('클릭됨, paused:', waitingMusic.paused);
+                        if (waitingMusic.paused) {
+                            waitingMusic.play().then(function() {
+                                waitingMusicTitle.textContent = savedMusicTitle;
+                                waitingMusicTitle.classList.remove('music-paused');
                                 console.log('대기화면 음악 재생 재개');
-                            }).catch(e => {
-                                console.log('대기화면 음악 재생 실패:', e);
+                            }).catch(function(err) {
+                                console.log('대기화면 음악 재생 실패:', err);
                             });
                         } else {
+                            savedMusicTitle = waitingMusicTitle.textContent;
                             waitingMusic.pause();
+                            waitingMusicTitle.textContent = '노래 다시 시작';
+                            waitingMusicTitle.classList.add('music-paused');
                             console.log('대기화면 음악 일시정지');
                         }
                     });
@@ -1603,10 +1607,7 @@ if (!$settings) {
         
         // 컨트롤 버튼들이 삭제되어 이벤트 리스너 등록 불필요
         
-        // 즉시 준비 상태로 시작 (타이머 자동 시작 방지)
-        setTimeout(() => {
-            showReadyState(); // 준비 상태로 시작
-        }, 100);
+        // showReadyState()는 위 스크립트에서 이미 호출됨
         
     </script>
 </body>
