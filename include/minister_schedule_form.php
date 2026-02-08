@@ -65,9 +65,9 @@ if (isset($me['me_switch']) && $me['me_switch'] == 1) {
     <label class="col-4 col-md-2 col-form-label">시작</label>
     <div class="col-8 col-md-10">
       <input type="date" name="date" class="form-control <?= $d_display ?>"
-        value="<?php echo isset($me_date) ? $me_date : $s_date; ?>" onchange="datemin();">
+        value="<?php echo isset($me_date) ? $me_date : $s_date; ?>" max="9999-12-31">
       <input type="datetime-local" name="datetime" class="form-control <?= $dt_display ?>"
-        value="<?php echo isset($me_datetime) ? $me_datetime : $s_datetime; ?>" onchange="datemin();">
+        value="<?php echo isset($me_datetime) ? $me_datetime : $s_datetime; ?>" max="9999-12-31T23:59">
     </div>
   </div>
 
@@ -75,9 +75,9 @@ if (isset($me['me_switch']) && $me['me_switch'] == 1) {
     <label class="col-4 col-md-2 col-form-label">종료</label>
     <div class="col-8 col-md-10">
       <input type="date" name="date2" class="form-control <?= $d_display ?>"
-        value="<?php echo isset($me_date2) ? $me_date2 : $s_date; ?>" onchange="datemax();">
+        value="<?php echo isset($me_date2) ? $me_date2 : $s_date; ?>" max="9999-12-31">
       <input type="datetime-local" name="datetime2" class="form-control <?= $dt_display ?>"
-        value="<?php echo isset($me_datetime2) ? $me_datetime2 : $s_datetime; ?>" onchange="datemax();">
+        value="<?php echo isset($me_datetime2) ? $me_datetime2 : $s_datetime; ?>" max="9999-12-31T23:59">
     </div>
   </div>
 
@@ -93,3 +93,21 @@ if (isset($me['me_switch']) && $me['me_switch'] == 1) {
     <button class="btn btn-outline-primary" type="submit"><i class="bi bi-save"></i> 저장</button>
   </div>
 </form>
+
+<script>
+  $(document).ready(function () {
+    // 연도 입력 4자리 제한 (브라우저 기본 max 속성이 키보드 입력을 완전히 막지 못하는 경우 대비)
+    $('input[type="date"], input[type="datetime-local"]').on('input', function () {
+      var val = $(this).val();
+      if (val) {
+        var year = val.split('-')[0];
+        if (year.length > 4) {
+          // 4자리를 초과하면 앞 4자리만 남기고 자름
+          var newYear = year.substring(0, 4);
+          var newVal = val.replace(year, newYear);
+          $(this).val(newVal);
+        }
+      }
+    });
+  });
+</script>

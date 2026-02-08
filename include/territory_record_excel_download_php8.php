@@ -71,6 +71,8 @@ $styleArray3 = [
 	],
 ];
 
+
+
 $number = 5;
 $column_cnt = 'J'; // 컬럼명을 출력할 총 열
 $record_start_row = array(); // 구역기록 출력 시작 행
@@ -138,6 +140,7 @@ while ($row = $result->fetch_assoc()) {
 	$ttr_assigned_date = empty_date($row['ttr_assigned_date']) ? '' : $row['ttr_assigned_date'];
 	$ttr_mb_name = $row['ttr_mb_name'];
 
+
 	// RECORD에 있는 구역번호가 삭제된 구역의 구역번호일때
 	if (empty($record_start_column[$tt_id])) {
 		continue;
@@ -184,6 +187,8 @@ while ($row = $result->fetch_assoc()) {
 		$activeWorksheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray2); // 테두리 진한선
 		$activeWorksheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray3); // 내부 연한선
 
+
+
 		// 구역기록 출력 시작 행 업데이트
 		$start_row++;
 		$record_start_row[$tt_id] = $start_row;
@@ -209,6 +214,7 @@ while ($row = $result->fetch_assoc()) {
 	$tt_assigned = $row['tt_assigned'];
 	$tt_assigned_date = empty_date($row['tt_assigned_date']) ? '' : $row['tt_assigned_date'];
 	$mb_id = $row['mb_id'];
+
 
 	// 시작 열 값 세팅
 	$start_row = $record_start_row[$tt_id]; // 미리 생성된 배열에서 시작 숫자 가져옴
@@ -256,6 +262,8 @@ while ($row = $result->fetch_assoc()) {
 		// 선 굵기
 		$activeWorksheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray2); // 테두리 진한선
 		$activeWorksheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray3); // 내부 연한선
+
+
 
 		// 구역기록 출력 시작 행 업데이트
 		$start_row++;

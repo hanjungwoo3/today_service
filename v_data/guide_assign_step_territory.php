@@ -100,13 +100,18 @@ $tt_ids_str = implode(',', $tt_ids);
 
 // 2. Batch Fetch Progress
 $progress_map = array();
-$sql = "SELECT tt_id, count(*) as total, 
-               SUM(CASE WHEN h_condition IS NOT NULL AND CAST(h_condition AS UNSIGNED) > 0 THEN 1 ELSE 0 END) as condition_count,
-               SUM(CASE WHEN h_visit = 'Y' AND (h_condition IS NULL OR CAST(h_condition AS UNSIGNED) = 0) THEN 1 ELSE 0 END) as visit,
-               SUM(CASE WHEN h_visit = 'N' AND (h_condition IS NULL OR CAST(h_condition AS UNSIGNED) = 0) THEN 1 ELSE 0 END) as absence
-        FROM " . HOUSE_TABLE . " 
-        WHERE tt_id IN ({$tt_ids_str}) 
-        GROUP BY tt_id";
+$sql = "SELECT h.tt_id, 
+               SUM(CASE WHEN (t.tt_status LIKE '%absence%' AND h.h_visit_old = 'Y') THEN 0 ELSE 1 END) as total, 
+               SUM(CASE WHEN (t.tt_status LIKE '%absence%' AND h.h_visit_old = 'Y') THEN 0 
+                        WHEN h.h_condition IS NOT NULL AND CAST(h.h_condition AS UNSIGNED) > 0 THEN 1 ELSE 0 END) as condition_count,
+               SUM(CASE WHEN (t.tt_status LIKE '%absence%' AND h.h_visit_old = 'Y') THEN 0 
+                        WHEN h.h_visit = 'Y' AND (h.h_condition IS NULL OR CAST(h.h_condition AS UNSIGNED) = 0) THEN 1 ELSE 0 END) as visit,
+               SUM(CASE WHEN (t.tt_status LIKE '%absence%' AND h.h_visit_old = 'Y') THEN 0 
+                        WHEN h.h_visit = 'N' AND (h.h_condition IS NULL OR CAST(h.h_condition AS UNSIGNED) = 0) THEN 1 ELSE 0 END) as absence
+        FROM " . HOUSE_TABLE . " h
+        JOIN " . TERRITORY_TABLE . " t ON h.tt_id = t.tt_id
+        WHERE h.tt_id IN ({$tt_ids_str}) 
+        GROUP BY h.tt_id";
 $result = $mysqli->query($sql);
 while ($row = $result->fetch_assoc()) {
 	$progress_map[$row['tt_id']] = $row;

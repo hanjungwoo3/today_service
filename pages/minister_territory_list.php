@@ -20,7 +20,7 @@ if ($result->num_rows > 0) {
   while ($row = $result->fetch_assoc()) {
     $tt_id = $row['tt_id'];
     $territory_progress = get_territory_progress($tt_id);
-    $effective_total = $territory_progress['total'] - $territory_progress['condition'];
+    $effective_total = $territory_progress['total'];
     if ($effective_total > 0) {
       $progress = floor((($territory_progress['visit'] + $territory_progress['absence']) / $effective_total) * 100);
     } else {
@@ -47,7 +47,7 @@ if ($result->num_rows > 0) {
                 // 새로운 progress 키 사용
                 if ($all_past_records[0]['progress'] == 'completed'): ?>
                   <span class="text-success">완료</span>
-                <?php
+                  <?php
                   // 진행 중
                 elseif ($all_past_records[0]['progress'] == 'in_progress'): ?>
                   <span class="text-warning">진행 중</span>
@@ -61,12 +61,14 @@ if ($result->num_rows > 0) {
 
           <div class="progress d-inline-flex align-middle w-100 mt-n1" style="height: 5px;">
             <div class="progress-bar <?= $progress == 100 ? 'bg-success' : 'bg-warning' ?>" role="progressbar"
-              style="width:<?= $progress . '%'; ?>" aria-valuenow="<?= $progress; ?>" aria-valuemin="0" aria-valuemax="100"></div>
+              style="width:<?= $progress . '%'; ?>" aria-valuenow="<?= $progress; ?>" aria-valuemin="0" aria-valuemax="100">
+            </div>
           </div>
 
           <div class="mt-n2">
             <small class="text-secondary d-inline-block">
-              전체 <?= $effective_total ?> · 만남 <?= $territory_progress['visit'] ?> · 부재 <?= $territory_progress['absence'] ?> · 남은
+              전체 <?= $effective_total ?> · 만남 <?= $territory_progress['visit'] ?> · 부재 <?= $territory_progress['absence'] ?>
+              · 남은
               집 <?= $effective_total - $territory_progress['visit'] - $territory_progress['absence'] ?>
             </small>
           </div>

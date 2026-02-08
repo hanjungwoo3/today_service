@@ -72,46 +72,45 @@ while ($ty = $result->fetch_assoc()){
     $type[$ty['tt_type']][0]++;
   }else{
     $type[$ty['tt_type']][0] = 1;
-  }
-  if(isset($type_sum[0])){
-    $type_sum[0]++;
-  }else{
-    $type_sum[0] = 1;
-  }
-  if(empty_date($ty['tt_assigned_date'])){
-    if(isset($type[$ty['tt_type']][1])){
-      $type[$ty['tt_type']][1]++;
-    }else{
-      $type[$ty['tt_type']][1] = 1;
+
+$territories = array();
+while ($row = $result->fetch_assoc()) {
+    $territories[] = $row;
+}
+
+// 3. 통계 집계
+foreach ($territories as $tt) {
+    // 3-1. 구역 종류
+     if(isset($type[$tt['tt_type']][0])){
+        $type[$tt['tt_type']][0]++;
+      }else{
+        $type[$tt['tt_type']][0] = 1;
+      }
+      if(isset($type_sum[0])){
+        $type_sum[0]++;
+      }else{
+        $type_sum[0] = 1;
+      }
+
+    // 3-2. 상태 결정
+    $status_key = 2; // Default: 미완료
+
+    if (empty_date($tt['tt_assigned_date'])) {
+        $status_key = 1; // 미사용
+    } elseif (!empty_date($tt['tt_end_date'])) {
+        $status_key = 3; // 완료 (반납일 존재)
     }
-    if(isset($type_sum[1])){
-      $type_sum[1]++;
+
+    if(isset($type[$tt['tt_type']][$status_key])){
+        $type[$tt['tt_type']][$status_key]++;
     }else{
-      $type_sum[1] = 1;
+        $type[$tt['tt_type']][$status_key] = 1;
     }
-  }elseif(!empty_date($ty['tt_end_date'])){
-    if(isset($type[$ty['tt_type']][3])){
-      $type[$ty['tt_type']][3]++;
+    if(isset($type_sum[$status_key])){
+        $type_sum[$status_key]++;
     }else{
-      $type[$ty['tt_type']][3] = 1;
+        $type_sum[$status_key] = 1;
     }
-    if(isset($type_sum[3])){
-      $type_sum[3]++;
-    }else{
-      $type_sum[3] = 1;
-    }
-  }else{
-    if(isset($type[$ty['tt_type']][2])){
-      $type[$ty['tt_type']][2]++;
-    }else{
-      $type[$ty['tt_type']][2] = 1;
-    }
-    if(isset($type_sum[2])){
-      $type_sum[2]++;
-    }else{
-      $type_sum[2] = 1;
-    }
-  }
 }
 
 //전화구역카드

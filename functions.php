@@ -433,10 +433,22 @@ function get_territory_progress($tt_id)
 {
 	global $mysqli;
 
+	// 구역 상태 확인 (부재 모드 확인용)
+	$status_sql = "SELECT tt_status FROM " . TERRITORY_TABLE . " WHERE tt_id = {$tt_id}";
+	$status_result = $mysqli->query($status_sql);
+	$status_row = $status_result->fetch_assoc();
+	$is_absence = (strpos($status_row['tt_status'], 'absence') !== false);
+
+	$absence_filter = "";
+	if ($is_absence) {
+		$absence_filter = " AND (h_visit_old != 'Y' OR h_visit_old IS NULL) ";
+	}
+
 	// 특이사항이 없는 집만 전체 집 수에 포함
 	$sql = "SELECT count(*) FROM " . HOUSE_TABLE . " 
 		WHERE tt_id = {$tt_id} 
-		AND (h_condition IS NULL OR CAST(h_condition AS UNSIGNED) = 0)";
+		AND (h_condition IS NULL OR CAST(h_condition AS UNSIGNED) = 0)
+		{$absence_filter}";
 	$h_result = $mysqli->query($sql);
 	$h_row = $h_result->fetch_row();
 	$total_house = $h_row[0]; // 전체 집 수 (특이사항 제외)
@@ -455,7 +467,8 @@ function get_territory_progress($tt_id)
 	$sql = "SELECT count(*) FROM " . HOUSE_TABLE . " 
         WHERE tt_id = {$tt_id} 
         AND h_visit = 'Y' 
-        AND (h_condition IS NULL OR CAST(h_condition AS UNSIGNED) = 0)";
+        AND (h_condition IS NULL OR CAST(h_condition AS UNSIGNED) = 0)
+		{$absence_filter}";
 	$h_result = $mysqli->query($sql);
 	$h_row = $h_result->fetch_row();
 	$visit_house = $h_row[0];
@@ -464,7 +477,8 @@ function get_territory_progress($tt_id)
 	$sql = "SELECT count(*) FROM " . HOUSE_TABLE . " 
         WHERE tt_id = {$tt_id} 
         AND h_visit = 'N' 
-        AND (h_condition IS NULL OR CAST(h_condition AS UNSIGNED) = 0)";
+        AND (h_condition IS NULL OR CAST(h_condition AS UNSIGNED) = 0)
+		{$absence_filter}";
 	$h_result = $mysqli->query($sql);
 	$h_row = $h_result->fetch_row();
 	$absence_house = $h_row[0];
@@ -482,10 +496,22 @@ function get_telephone_progress($tp_id)
 {
 	global $mysqli;
 
+	// 구역 상태 확인 (부재 모드 확인용)
+	$status_sql = "SELECT tp_status FROM " . TELEPHONE_TABLE . " WHERE tp_id = {$tp_id}";
+	$status_result = $mysqli->query($status_sql);
+	$status_row = $status_result->fetch_assoc();
+	$is_absence = (strpos($status_row['tp_status'], 'absence') !== false);
+
+	$absence_filter = "";
+	if ($is_absence) {
+		$absence_filter = " AND (tph_visit_old != 'Y' OR tph_visit_old IS NULL) ";
+	}
+
 	// 특이사항이 없는 집만 전체 집 수에 포함
 	$sql = "SELECT count(*) FROM " . TELEPHONE_HOUSE_TABLE . " 
 		WHERE tp_id = {$tp_id} 
-		AND (tph_condition IS NULL OR CAST(tph_condition AS UNSIGNED) = 0)";
+		AND (tph_condition IS NULL OR CAST(tph_condition AS UNSIGNED) = 0)
+		{$absence_filter}";
 	$tph_result = $mysqli->query($sql);
 	$tph_row = $tph_result->fetch_row();
 	$total_house = $tph_row[0]; // 전체 집 수 (특이사항 제외)
@@ -505,7 +531,8 @@ function get_telephone_progress($tp_id)
 	$sql = "SELECT count(*) FROM " . TELEPHONE_HOUSE_TABLE . " 
         WHERE tp_id = {$tp_id} 
         AND tph_visit = 'Y' 
-        AND (tph_condition IS NULL OR CAST(tph_condition AS UNSIGNED) = 0)";
+        AND (tph_condition IS NULL OR CAST(tph_condition AS UNSIGNED) = 0)
+		{$absence_filter}";
 	$tph_result = $mysqli->query($sql);
 	$tph_row = $tph_result->fetch_row();
 	$visit_house = $tph_row[0];
@@ -514,7 +541,8 @@ function get_telephone_progress($tp_id)
 	$sql = "SELECT count(*) FROM " . TELEPHONE_HOUSE_TABLE . " 
         WHERE tp_id = {$tp_id} 
         AND tph_visit = 'N' 
-        AND (tph_condition IS NULL OR CAST(tph_condition AS UNSIGNED) = 0)";
+        AND (tph_condition IS NULL OR CAST(tph_condition AS UNSIGNED) = 0)
+		{$absence_filter}";
 	$tph_result = $mysqli->query($sql);
 	$tph_row = $tph_result->fetch_row();
 	$absence_house = $tph_row[0];
@@ -2328,7 +2356,7 @@ function get_territory_memo($tt_id)
 	$return = '';
 	$sql = "SELECT tt_memo FROM " . TERRITORY_TABLE . " WHERE tt_id = {$tt_id}";
 	$result = $mysqli->query($sql);
-	if ($result->num_rows > 0) {
+	if ($result && $result->num_rows > 0) {
 		$row = $result->fetch_assoc();
 		$return = $row['tt_memo'];
 	}
@@ -2344,7 +2372,7 @@ function get_telephone_memo($tp_id)
 	$return = '';
 	$sql = "SELECT tp_memo FROM " . TELEPHONE_TABLE . " WHERE tp_id = {$tp_id}";
 	$result = $mysqli->query($sql);
-	if ($result->num_rows > 0) {
+	if ($result && $result->num_rows > 0) {
 		$row = $result->fetch_assoc();
 		$return = $row['tp_memo'];
 	}

@@ -130,9 +130,9 @@ if (isset($mar['ma_switch']) && $mar['ma_switch'] == 1) {
         <label class="col-4 col-md-2 col-form-label">시작</label>
         <div class="col-8 col-md-10">
           <input type="date" name="date" class="form-control <?= $d_display ?>"
-            value="<?= isset($ma_date) ? $ma_date : $today; ?>" max="9999-12-31" onchange="datemin();">
+            value="<?= isset($ma_date) ? $ma_date : $today; ?>" max="9999-12-31">
           <input type="datetime-local" name="datetime" class="form-control <?= $dt_display ?>"
-            value="<?= isset($ma_datetime) ? $ma_datetime : $datetime; ?>" max="9999-12-31T23:59" onchange="datemin();">
+            value="<?= isset($ma_datetime) ? $ma_datetime : $datetime; ?>" max="9999-12-31T23:59">
         </div>
       </div>
 
@@ -140,9 +140,9 @@ if (isset($mar['ma_switch']) && $mar['ma_switch'] == 1) {
         <label class="col-4 col-md-2 col-form-label">종료</label>
         <div class="col-8 col-md-10">
           <input type="date" name="date2" class="form-control <?= $d_display ?>"
-            value="<?= isset($ma_date2) ? $ma_date2 : $today; ?>" max="9999-12-31" onchange="datemax();">
+            value="<?= isset($ma_date2) ? $ma_date2 : $today; ?>" max="9999-12-31">
           <input type="datetime-local" name="datetime2" class="form-control <?= $dt_display ?>"
-            value="<?= isset($ma_datetime2) ? $ma_datetime2 : $datetime; ?>" max="9999-12-31T23:59" onchange="datemax();">
+            value="<?= isset($ma_datetime2) ? $ma_datetime2 : $datetime; ?>" max="9999-12-31T23:59">
         </div>
       </div>
 
