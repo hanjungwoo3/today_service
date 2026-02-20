@@ -6,8 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a PHP-based service management system with multiple sub-applications:
 - **Main App** (root): Meeting and ministry service scheduling system with MySQL backend
-- **Calendar** (`c/`): Monthly calendar with schedule notes and JSON storage
-- **Meeting Program Manager** (`s/`): Weekly meeting program management with web scraping
+- **Calendar** (`c/`): 봉사인도 월별 캘린더 (JSON storage)
+- **Program Manager** (`s/`): 평일집회 프로그램, 공개강연 계획표, 청소/마이크/안내인/연사음료 계획표
+- **Ministry Record** (`m/`): 호별봉사 전도인 기록 및 짝배정
 - **Timer** (`t/`): Presentation timer with music playback
 
 ## Development Environment
@@ -68,8 +69,8 @@ Local git config is already set for `hanjungwoo3` account.
 - `BASE_PATH` dynamic calculation for subfolder deployments
 
 **Key Directories:**
-- `pages/` - Feature pages (meeting lists, schedules, etc.)
-- `include/` - Reusable components
+- `pages/` - Feature pages (meeting lists, schedules, iframe 래퍼 등)
+- `include/` - Reusable components (`custom_board_top.php`: 게시판 네비, `custom_home_assignments.php`: 홈 배정특권)
 - `core/` - Core classes (class.core.php, class.territory.php, etc.)
 - `v_data/` - Data views
 - `classes/` - Third-party libraries (PHPExcel, ZipStream, PhpSpreadsheet)
@@ -116,25 +117,39 @@ Local git config is already set for `hanjungwoo3` account.
 - Time labels ("오전/오후/저녁") hidden on mobile via `@media (max-width: 768px)`
 - No right padding/spacing on mobile for full-width calendar display
 
-### Meeting Program Manager (s/)
+### Program Manager (s/)
+
+`s/` 디렉토리는 세 가지 독립 모듈을 포함:
+
+#### 1) 평일집회 프로그램 (index, api, view, print, print2)
+- Web scraper로 외부 소스에서 프로그램 데이터 수집
+- JSON 스토리지 (주간 파일: `data/YYYY-WW.json`)
+- `api.php` — `MeetingDataManager` 클래스
+- 프로그램 섹션: `treasures`(보물), `ministry`(봉사), `living`(생활)
+
+#### 2) 공개강연 계획표 (talk_view, talk_admin, talk_api, talk_print)
+- JSON 스토리지 (`data/talks.json`)
+- `talk_api.php` — `TalkDataManager` 클래스
+- 연사/사회/낭독/기도 배정 관리
+
+#### 3) 청소/마이크/안내인/연사음료 (duty_view, duty_admin, duty_api, duty_print)
+- JSON 스토리지 (연도별: `data/duty_YYYY.json`)
+- `duty_api.php` — `DutyDataManager` 클래스
+- 월별 상반기/하반기 배정, 청소집단, 연사음료 관리
+
+**공통 패턴:** 각 모듈은 `*_view.php`(읽기), `*_admin.php`(편집), `*_api.php`(데이터), `*_print.php`(인쇄) 구조
+
+### Ministry Record (m/)
 
 **Architecture:**
-- Web scraper that fetches meeting programs from external source
-- JSON-based data storage (weekly files: `YYYY-WW.json`)
-- Week-based navigation
+- 호별봉사 전도인 기록 및 추천짝 배정
+- MySQL backend (t_meeting 테이블 활용)
+- 구역배정(guide_assign_step.php)과 연동
 
 **Key Files:**
-- `index.php` - UI for viewing/editing weekly programs
-- `api.php` - Data management class (`MeetingDataManager`)
-- `scraper.php` - Web scraping logic for fetching program data
-- `service.php` - Service interface for program operations
-- `data/YYYY-WW.json` - Weekly program data
-
-**Program Structure:**
-Programs are categorized into three sections:
-- `treasures` (보물) - Items 1-3
-- `ministry` (봉사) - Items 4-6
-- `living` (생활) - Items 7+
+- `index.php` - 전도인 기록 메인 UI (추천짝 카드, goToAssign 연동)
+- `api/meetings.php` - 모임 목록 AJAX API
+- `config.php` - 로컬 개발 모드 설정
 
 ### Timer Application (t/)
 
@@ -172,7 +187,7 @@ Mobile view requires testing at different screen widths. The design is optimized
 
 ### Working with JSON Data
 
-Calendar and Meeting Manager use JSON files for storage:
+Calendar, Meeting Program, Public Talk, Duty Schedule 모듈은 JSON 파일 스토리지 사용:
 - Always backup before modifying
 - Maintain the expected JSON structure
 - Validate JSON after manual edits
