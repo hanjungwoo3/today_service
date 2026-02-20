@@ -17,3 +17,9 @@ router.php
 
 # meeting data directory
 s/data/
+
+# Local development environment
+.dev/
+
+# bkit PDCA files
+docs/
