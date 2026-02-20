@@ -3,6 +3,7 @@ include_once('../header.php');
 
 check_accessible('super');
 
+$mb = ['mb_auth'=>'', 'mb_position'=>'', 'mb_pioneer'=>'1', 'g_id'=>'', 'mb_sex'=>'M', 'mb_display'=>'0', 'mb_name'=>'', 'mb_hp'=>'', 'mb_address'=>'', 'mb_movein_date'=>'', 'mb_moveout_date'=>''];
 if(isset($mb_id)){
   $mb = get_member_data($mb_id);
 }

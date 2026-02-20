@@ -23,7 +23,12 @@ $date_parts = explode("-", $date);
   <div id="container" class="container-fluid">
 
     <nav class="navbar navbar-light bg-light mb-4">
-      <a class="navbar-brand" href="<?=BASE_PATH?>/pages/guide_history.php?s_date=<?=$date?>&toYear=<?=$date_parts[0]?>&toMonth=<?=$date_parts[1]?>"><i class="bi bi-arrow-left"></i></a>
+      <div>
+        <a class="navbar-brand mb-0" href="<?=BASE_PATH?>/pages/guide_history.php?s_date=<?=$date?>&toYear=<?=$date_parts[0]?>&toMonth=<?=$date_parts[1]?>"><i class="bi bi-arrow-left"></i></a>
+        <?php if(isset($_GET['preselect']) && !empty($_GET['preselect'])): ?>
+        <a href="<?=BASE_PATH?>/pages/ministry_record.php?date=<?=$date?>&meeting=<?=$m_id?>" class="btn btn-sm text-white" style="background:#7a6a9e;"><i class="bi bi-people"></i> 짝배정으로 돌아가기</a>
+        <?php endif; ?>
+      </div>
       <div class="w-75 float-right text-right mb-0 clearfix" onclick="open_meeting_info('<?=$date?>','<?=$ms_id?>','guide_assign')">
         <div>
           <small class="badge badge-pill badge-light align-middle"><?=get_meeting_schedule_type_text($meeting_data['ms_type'])?></small>
@@ -1516,6 +1521,36 @@ $(document).ready(function(){
   });
 
   v_guide_assign_step.init();
+
+  // preselect 파라미터가 있으면 멤버 자동 선택 후 구역배정 모드로 전환
+  (function() {
+    var params = new URLSearchParams(window.location.search);
+    var preselect = params.get('preselect');
+    if (preselect) {
+      var ids = preselect.split(',').filter(function(id) { return id.trim() !== ''; });
+      // 멤버 목록 로드 완료 후 선택 적용 (폴링으로 체크)
+      var checkInterval = setInterval(function() {
+        if (v_guide_assign_step.members.length > 0) {
+          clearInterval(checkInterval);
+          // 참여자로 등록되어 있는지 확인하고 선택
+          ids.forEach(function(id) {
+            var member = v_guide_assign_step.members.find(function(m) { return String(m.mb_id) === String(id); });
+            if (member && member.attend == 1) {
+              if (!v_guide_assign_step.selected_members.includes(id)) {
+                v_guide_assign_step.selected_members.push(id);
+              }
+            }
+          });
+          // 구역 배정 모드로 전환
+          if (v_guide_assign_step.selected_members.length > 0) {
+            v_guide_assign_step.changeMode('assign');
+          }
+        }
+      }, 200);
+      // 5초 후 타임아웃
+      setTimeout(function() { clearInterval(checkInterval); }, 5000);
+    }
+  })();
 
   // 폴링 시 트래픽 절감을 위해 비가시 상태에서는 스킵
   const pollVisible = (fn) => {

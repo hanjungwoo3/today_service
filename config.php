@@ -10,11 +10,13 @@ define('DEBUG_MODE', false); // 배포 환경에서는 false로 설정
 $script_name = $_SERVER['SCRIPT_NAME'];
 $current_dir = dirname($script_name);
 
-// pages, include, v_data 폴더에서 실행되는 경우
+// 하위 폴더에서 실행되는 경우
 if (
   strpos($script_name, '/pages/') !== false ||
   strpos($script_name, '/include/') !== false ||
-  strpos($script_name, '/v_data/') !== false
+  strpos($script_name, '/v_data/') !== false ||
+  strpos($script_name, '/s/') !== false ||
+  strpos($script_name, '/c/') !== false
 ) {
   $base_path = dirname($current_dir);
 } else {

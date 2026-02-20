@@ -103,6 +103,28 @@ if ($method === 'POST') {
         exit;
     }
 
+    // 6개월 이상 된 백업 파일 정리
+    $cutoff = new DateTime();
+    $cutoff->modify('-6 months');
+    $cutoffTimestamp = $cutoff->getTimestamp();
+    $backupBaseDir = STORAGE_DIR . '/backups';
+    if (is_dir($backupBaseDir)) {
+        $monthDirs = glob($backupBaseDir . '/*', GLOB_ONLYDIR);
+        foreach ($monthDirs as $monthDir) {
+            $files = glob($monthDir . '/*.json');
+            foreach ($files as $file) {
+                if (filemtime($file) < $cutoffTimestamp) {
+                    @unlink($file);
+                }
+            }
+            // 빈 디렉토리 삭제
+            $remaining = glob($monthDir . '/*');
+            if (empty($remaining)) {
+                @rmdir($monthDir);
+            }
+        }
+    }
+
     echo json_encode(array('success' => true));
     exit;
 }

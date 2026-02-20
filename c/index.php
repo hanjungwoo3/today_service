@@ -3,40 +3,19 @@ date_default_timezone_set('Asia/Seoul');
 
 require_once __DIR__ . '/lib/helpers.php';
 
-// 로컬 개발 모드 체크
-$localConfigFile = __DIR__ . '/config.php';
-if (file_exists($localConfigFile)) {
-    require_once $localConfigFile;
+// 관리자 권한 체크
+$is_admin = false;
+if (file_exists(dirname(__FILE__) . '/../config.php')) {
+    @require_once dirname(__FILE__) . '/../config.php';
+    if (function_exists('mb_id') && function_exists('is_admin')) {
+        $is_admin = is_admin(mb_id());
+    }
 }
 
-// 로컬 모드가 아닐 때만 관리자 권한 체크
-if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
-    $is_admin = false;
-    if (file_exists(dirname(__FILE__) . '/../config.php')) {
-        // PHP 8.x 호환: 상위 config.php를 로드하기 전에 세션 쿠키 path를 루트로 설정
-        // (config.php에서 SCRIPT_NAME 기반으로 path가 /c로 설정되는 문제 방지)
-        if (session_status() === PHP_SESSION_NONE) {
-            $secure_cookie = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
-            session_set_cookie_params([
-                'lifetime' => 3600,
-                'path'     => '/',
-                'secure'   => $secure_cookie,
-                'httponly' => true,
-                'samesite' => 'Lax'
-            ]);
-            session_start();
-        }
-        require_once dirname(__FILE__) . '/../config.php';
-        if (function_exists('mb_id') && function_exists('is_admin')) {
-            $is_admin = is_admin(mb_id());
-        }
-    }
-
-    // 관리자가 아니면 view.php로 리다이렉트
-    if (!$is_admin) {
-        header('Location: view.php' . (isset($_GET['year']) && isset($_GET['month']) ? '?year='.$_GET['year'].'&month='.$_GET['month'] : ''));
-        exit;
-    }
+// 관리자가 아니면 view.php로 리다이렉트
+if (!$is_admin) {
+    header('Location: view.php' . (isset($_GET['year']) && isset($_GET['month']) ? '?year='.$_GET['year'].'&month='.$_GET['month'] : ''));
+    exit;
 }
 
 $now = new DateTime('now');
@@ -230,6 +209,10 @@ if ($status === 'saved') {
             </div>
             <p class="utility-description">사용자모드로 볼 수 있는 링크를 클립보드에 복사합니다. 다른 사람들과 공유할 때 사용하세요.</p>
           </div>
+
+          <div class="utility-button-group" id="newWindowGroup" style="display:none;">
+            <a href="#" id="newWindowBtn" class="utility-btn" style="text-decoration:none;">새창으로 보기 ↗</a>
+          </div>
         </div>
       </form>
     </div>
@@ -291,18 +274,18 @@ if ($status === 'saved') {
         document.body.removeChild(textArea);
       }
       
-      // iframe 안에서만 사용자모드로 보기 버튼 새창으로 열기
+      // iframe 안에서 새창으로 보기 버튼 표시
       (function() {
-        const isInIframe = window.self !== window.top;
-        const viewCalendarBtn = document.getElementById('viewCalendarBtn');
-        const viewCalendarBtnText = document.getElementById('viewCalendarBtnText');
-        
-        if (isInIframe && viewCalendarBtn) {
-          viewCalendarBtnText.textContent = '사용자모드로 보기 ↗';
-          viewCalendarBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            window.open(this.href, '_blank', 'noopener,noreferrer');
-          });
+        if (window.self !== window.top) {
+          var group = document.getElementById('newWindowGroup');
+          var btn = document.getElementById('newWindowBtn');
+          if (group) group.style.display = '';
+          if (btn) {
+            btn.addEventListener('click', function(e) {
+              e.preventDefault();
+              window.open(window.location.href, '_blank', 'noopener,noreferrer');
+            });
+          }
         }
       })();
     </script>

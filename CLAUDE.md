@@ -12,20 +12,27 @@ This is a PHP-based service management system with multiple sub-applications:
 
 ## Development Environment
 
-### Running the Development Server
+### Local Server (Podman + nginx + PHP)
+
+로컬 개발 환경은 Podman 컨테이너(nginx) + PHP 내장 서버로 구성:
 
 ```bash
-# Run from repository root
-php -S localhost:8000
+# PHP 내장 서버 (nginx에서 proxy_pass로 연결)
+php -S localhost:9000
+
+# nginx 컨테이너 (podman) — SSL 역방향 프록시
+# 포트: 0.0.0.0:8443 → 443 (macOS에서 443은 권한 필요하므로 8443 사용)
+# 프록시: https://ys1914.com:8443 → http://host.containers.internal:9000
+podman start nginx-ssl
+
+# 포트포워딩: 443 → 8443 (sudo 필요 — 터미널에서 직접 실행)
+# 재부팅 시 초기화됨
+echo "rdr pass on lo0 inet proto tcp from any to 127.0.0.1 port 443 -> 127.0.0.1 port 8443" | sudo pfctl -ef -
 ```
 
-### Calendar Module (c/)
-```bash
-cd c/
-php -S localhost:8000
-# Access at: http://localhost:8000/view.php (read-only)
-#            http://localhost:8000/index.php (admin edit)
-```
+- **접속 URL**: `https://ys1914.com` (포트포워딩 후) 또는 `https://ys1914.com:8443`
+- **hosts 파일**: `127.0.0.1 ys1914.com`
+- **DB**: MariaDB 컨테이너 (`mysql-test`, 포트 3306)
 
 ### Git Configuration
 
@@ -198,6 +205,59 @@ All modules support mobile:
 - Calendar: 380px max container width
 - Main app: Bootstrap-based responsive grid
 - Timer: Full-screen optimized display
+
+## Custom Files (Upstream 머지 시 주의)
+
+이 프로젝트는 upstream 기본 시스템 위에 커스텀 파일을 추가하여 사용합니다.
+Upstream 머지 시 아래 파일들은 충돌이 발생하지 않도록 주의하세요.
+
+### 신규 생성 파일 (upstream에 없음 — 충돌 없음)
+
+| 파일 | 설명 |
+|------|------|
+| `include/custom_board_top.php` | 게시판 상단 커스텀 네비게이션 카드 (평일집회/주말집회/봉사인도/청소·마이크/짝배정) |
+| `include/custom_home_assignments.php` | 홈 화면 "나의 배정 특권" 섹션 |
+| `pages/meeting_program.php` | 평일집회 계획표 (`s/` iframe 래퍼) |
+| `pages/public_talk.php` | 주말집회(공개강연) 계획표 (`s/` iframe 래퍼) |
+| `pages/service_guide_calendar.php` | 봉사인도 계획표 (`c/` iframe 래퍼) |
+| `pages/duty_schedule.php` | 청소/마이크/안내인/연사음료 계획표 (`s/duty_view.php` iframe 래퍼) |
+| `pages/ministry_record.php` | 호별봉사 짝배정 현황 (`m/` iframe 래퍼) |
+| `s/talk_view.php` | 공개강연 읽기 전용 뷰 |
+| `s/talk_admin.php` | 공개강연 관리자 편집 |
+| `s/talk_api.php` | 공개강연 API (JSON 스토리지) |
+| `s/talk_print.php` | 공개강연 인쇄용 |
+| `s/duty_view.php` | 청소/마이크/안내인/연사음료 읽기 전용 뷰 |
+| `s/duty_admin.php` | 청소/마이크/안내인/연사음료 관리자 편집 |
+| `s/duty_api.php` | 청소/마이크/안내인/연사음료 API (JSON 스토리지) |
+| `s/duty_print.php` | 청소/마이크/안내인/연사음료 인쇄용 |
+
+### 기존 파일 수정 내역 (upstream 머지 시 충돌 가능)
+
+| 파일 | 변경량 | 충돌위험 | 수정 내용 |
+|------|--------|----------|-----------|
+| `.gitignore` | +6줄 | 낮음 | `.dev/`, `docs/` 무시 규칙 추가 (파일 끝에 append) |
+| `config.php` | +4/-2줄 | **중간** | `BASE_PATH` 계산 조건에 `/s/`, `/c/` 경로 추가 |
+| `index.php` | +2줄 | 낮음 | `custom_home_assignments.php` include 1줄 (`file_exists` 가드) |
+| `pages/board_list.php` | +1줄 | 낮음 | `custom_board_top.php` include 1줄 (`file_exists` 가드) |
+| `pages/admin_member_form.php` | +1줄 | 낮음 | `$mb` 변수 기본값 초기화 (신규 등록 시 undefined 방지) |
+| `pages/guide_assign_step.php` | +36/-1줄 | **중간** | navbar에 "짝배정으로 돌아가기" 버튼 + preselect 자동선택 JS |
+| `m/index.php` | +83/-7줄 | **중간** | SQL에 `ms_id` 추가, 클릭 가능한 추천짝 카드, `goToAssign()`, localStorage 필터 저장 |
+| `m/api/meetings.php` | +2/-1줄 | 낮음 | SQL/응답에 `ms_id` 필드 추가 |
+
+#### 머지 후 수동 확인 필요 사항
+
+1. **`config.php`** — `BASE_PATH` 계산 분기문이 upstream에서 변경되었는지 확인. `/s/`, `/c/` 경로 조건이 누락되면 하위 모듈 동작 불가
+2. **`pages/guide_assign_step.php`** — navbar 구조(`<a>` → `<div>` 래핑)와 하단 preselect JS 블록 유지 확인
+3. **`m/index.php`** — 변경량이 가장 크므로 upstream 변경과 수동 비교 필요
+
+### 독립 모듈 (upstream과 무관)
+
+| 디렉토리 | 설명 |
+|-----------|------|
+| `c/` | 봉사인도 캘린더 (JSON 스토리지) |
+| `s/` | 평일집회/주말집회/청소마이크 프로그램 관리 |
+| `m/` | 호별봉사 전도인 기록 |
+| `t/` | 프레젠테이션 타이머 |
 
 ## Korean Holiday Integration
 

@@ -262,9 +262,10 @@ class MeetingDataManager
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         $result = file_put_contents($filePath, $json) !== false;
 
-        // 저장 성공 시 오래된 주차 자동 아카이빙
+        // 저장 성공 시 오래된 주차 자동 아카이빙 + 오래된 백업 정리
         if ($result) {
             $this->archiveOldWeeks();
+            $this->cleanupOldBackups();
         }
 
         return $result;
@@ -672,6 +673,43 @@ class MeetingDataManager
         }
 
         return false;
+    }
+
+    /**
+     * 3개월 이상 된 백업(bak/) 및 아카이브(archive/) 파일 삭제
+     */
+    public function cleanupOldBackups()
+    {
+        $cutoff = new DateTime();
+        $cutoff->modify('-6 months');
+        $cutoffTimestamp = $cutoff->getTimestamp();
+
+        // bak/ 정리 - 파일명: YYYYWW_YYYYMMDDHHmmss.json
+        $bakDir = $this->dataDir . '/bak';
+        if (is_dir($bakDir)) {
+            $files = glob($bakDir . '/*.json');
+            foreach ($files as $file) {
+                $basename = basename($file, '.json');
+                // 타임스탬프 부분 추출 (YYYYWW_ 뒤의 14자리 또는 _deleted_ 뒤의 14자리)
+                if (preg_match('/_(\d{14})/', $basename, $m)) {
+                    $fileDate = DateTime::createFromFormat('YmdHis', $m[1]);
+                    if ($fileDate && $fileDate->getTimestamp() < $cutoffTimestamp) {
+                        @unlink($file);
+                    }
+                }
+            }
+        }
+
+        // archive/ 정리 - 파일명: YYYYWW.json
+        $archiveDir = $this->dataDir . '/archive';
+        if (is_dir($archiveDir)) {
+            $files = glob($archiveDir . '/*.json');
+            foreach ($files as $file) {
+                if (filemtime($file) < $cutoffTimestamp) {
+                    @unlink($file);
+                }
+            }
+        }
     }
 }
 

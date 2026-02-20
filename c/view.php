@@ -4,33 +4,20 @@ date_default_timezone_set('Asia/Seoul');
 
 require_once __DIR__ . '/lib/helpers.php';
 
-// 로컬 개발 모드 체크
-$localConfigFile = __DIR__ . '/config.php';
-if (file_exists($localConfigFile)) {
-    require_once $localConfigFile;
-}
-
-// 로그인한 사용자 이름 가져오기 (선택적)
-// 로컬 모드가 아닐 때만 상위 디렉토리 config.php 로드
+// 로그인한 사용자 이름 가져오기
 $loggedInUserName = '';
 $is_admin = false;
-if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
-  if (file_exists(dirname(__FILE__) . '/../config.php')) {
+if (file_exists(dirname(__FILE__) . '/../config.php')) {
     @require_once dirname(__FILE__) . '/../config.php';
     if (function_exists('mb_id') && function_exists('get_member_name')) {
-      $mbId = mb_id();
-      if (!empty($mbId)) {
-        $loggedInUserName = get_member_name($mbId);
-      }
+        $mbId = mb_id();
+        if (!empty($mbId)) {
+            $loggedInUserName = get_member_name($mbId);
+        }
     }
-    // 관리자 권한 체크
     if (function_exists('mb_id') && function_exists('is_admin')) {
-      $is_admin = is_admin(mb_id());
+        $is_admin = is_admin(mb_id());
     }
-  }
-} else {
-  // 로컬 모드일 때는 관리자로 설정
-  $is_admin = true;
 }
 
 $now = new DateTime('now');
@@ -67,9 +54,9 @@ $today = new DateTime('now');
       }
 
       .container {
-        max-width: 380px;
+        max-width: 1024px;
         min-width: 340px;
-        margin: 0;
+        margin: 0 auto;
         background: #fff;
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
@@ -684,15 +671,6 @@ $today = new DateTime('now');
           const newWindowBtn = document.getElementById('newWindowBtn');
 
           if (isInIframe) {
-            <?php if ($is_admin): ?>
-            const adminBtnText = document.getElementById('adminBtnText');
-            adminBtnText.textContent = '관리자모드로 보기 ↗';
-            adminBtn.addEventListener('click', function(e) {
-              e.preventDefault();
-              window.open(this.href, '_blank', 'noopener,noreferrer');
-            });
-            <?php endif; ?>
-
             // 새창으로 보기 버튼 표시
             newWindowBtn.style.display = 'inline-block';
             newWindowBtn.addEventListener('click', function(e) {

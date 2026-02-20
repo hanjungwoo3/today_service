@@ -1,37 +1,21 @@
 <?php
-// 로컬 개발 모드 체크
-$localConfigFile = dirname(__FILE__) . '/../c/config.php';
-if (file_exists($localConfigFile)) {
-    require_once $localConfigFile;
-}
+// 서비스 워커 캐시 방지
+header('Cache-Control: no-cache, no-store, must-revalidate');
 
 // 로그인한 사용자 정보 가져오기
 $loggedInUserName = '';
 $is_admin = false;
-
-// 로컬 모드가 아닐 때만 관리자 권한 체크
-if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
-    if (file_exists(dirname(__FILE__) . '/../config.php')) {
-        require_once dirname(__FILE__) . '/../config.php';
-        if (function_exists('mb_id') && function_exists('get_member_name')) {
-            $mbId = mb_id();
-            if (!empty($mbId)) {
-                $loggedInUserName = get_member_name($mbId);
-            }
-        }
-        if (function_exists('mb_id') && function_exists('is_admin')) {
-            $is_admin = is_admin(mb_id());
+if (file_exists(dirname(__FILE__) . '/../config.php')) {
+    @require_once dirname(__FILE__) . '/../config.php';
+    if (function_exists('mb_id') && function_exists('get_member_name')) {
+        $mbId = mb_id();
+        if (!empty($mbId)) {
+            $loggedInUserName = get_member_name($mbId);
         }
     }
-} else {
-    // 로컬 개발 환경에서는 테스트용 사용자 설정
-    if (defined('USER')) {
-        $userName = constant('USER');
-        if (!empty($userName)) {
-            $loggedInUserName = $userName;
-        }
+    if (function_exists('mb_id') && function_exists('is_admin')) {
+        $is_admin = is_admin(mb_id());
     }
-    $is_admin = true;
 }
 
 require_once 'api.php';
@@ -572,7 +556,7 @@ foreach ($targetWeeks as $weekInfo) {
                 <tr>
                     <td style="border: none; padding: 0;">
                         <div class="doc-header">
-                            <div class="congregation-name">시흥장현회중</div>
+                            <div class="congregation-name"><?=defined('SITE_NAME') ? htmlspecialchars(SITE_NAME) : ''?></div>
                             <div class="doc-title">평일 집회 계획표</div>
                         </div>
                     </td>

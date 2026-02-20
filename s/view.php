@@ -1,37 +1,21 @@
 <?php
-// 로컬 개발 모드 체크
-$localConfigFile = dirname(__FILE__) . '/../c/config.php';
-if (file_exists($localConfigFile)) {
-    require_once $localConfigFile;
-}
+// 서비스 워커 캐시 방지
+header('Cache-Control: no-cache, no-store, must-revalidate');
 
-// 로그인한 사용자 정보 가져오기 (선택적)
-// 로컬 모드가 아닐 때만 상위 디렉토리 config.php 로드
+// 로그인한 사용자 정보 가져오기
 $loggedInUserName = '';
 $is_admin = false;
-if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
-    if (file_exists(dirname(__FILE__) . '/../config.php')) {
-        @require_once dirname(__FILE__) . '/../config.php';
-        if (function_exists('mb_id') && function_exists('get_member_name')) {
-            $mbId = mb_id();
-            if (!empty($mbId)) {
-                $loggedInUserName = get_member_name($mbId);
-            }
-        }
-        if (function_exists('mb_id') && function_exists('is_admin')) {
-            $is_admin = is_admin(mb_id());
+if (file_exists(dirname(__FILE__) . '/../config.php')) {
+    @require_once dirname(__FILE__) . '/../config.php';
+    if (function_exists('mb_id') && function_exists('get_member_name')) {
+        $mbId = mb_id();
+        if (!empty($mbId)) {
+            $loggedInUserName = get_member_name($mbId);
         }
     }
-} else {
-    // 로컬 개발 환경에서는 테스트용 사용자 설정
-    if (defined('USER')) {
-        $userName = constant('USER');
-        if (!empty($userName)) {
-            $loggedInUserName = $userName;
-        }
+    if (function_exists('mb_id') && function_exists('is_admin')) {
+        $is_admin = is_admin(mb_id());
     }
-    // 로컬 모드일 때는 관리자로 설정
-    $is_admin = true;
 }
 
 require_once 'api.php';
@@ -321,10 +305,18 @@ if (!empty($loggedInUserName)) {
     foreach ($myUpcomingAssignments as $assignment) {
         $dateKey = $assignment['dateRange'];
         if (!isset($groupedByDate[$dateKey])) {
+            // 집회 날짜 계산
+            $jan4g = new DateTime($assignment['year'] . '-01-04');
+            $jan4Dg = $jan4g->format('N');
+            $wsg = clone $jan4g;
+            $wsg->modify('-' . ($jan4Dg - 1) . ' days');
+            $wsg->modify('+' . (($assignment['week'] - 1) * 7) . ' days');
+            $wsg->modify('+' . ($meetingWeekday - 1) . ' days');
             $groupedByDate[$dateKey] = array(
                 'year' => $assignment['year'],
                 'week' => $assignment['week'],
                 'dateRange' => $dateKey,
+                'meetingDate' => $wsg->format('Y-m-d'),
                 'items' => array()
             );
         }
@@ -349,6 +341,8 @@ function filterAssignedNames($v)
     $trimmed = trim($v);
     return !empty($trimmed);
 }
+
+$embed = isset($_GET['embed']) && $_GET['embed'] == '1';
 ?>
 <!DOCTYPE html>
 <html lang="ko">
@@ -375,9 +369,8 @@ function filterAssignedNames($v)
         }
 
         .container {
-            max-width: 380px;
             min-width: 340px;
-            margin: 0;
+            margin: 0 auto;
             background: white;
             border-radius: 6px;
             padding: 8px;
@@ -457,7 +450,6 @@ function filterAssignedNames($v)
             margin-top: 8px;
             z-index: 1000;
             width: 100%;
-            max-width: 380px;
             display: block;
         }
 
@@ -635,10 +627,27 @@ function filterAssignedNames($v)
             text-decoration: none;
             color: inherit;
             transition: background 0.2s;
+            position: relative;
         }
 
         .my-assignment-item:hover {
             background: #efefef;
+        }
+
+        .my-assignment-item.today {
+            background: #fff3f3;
+        }
+
+        .my-assignment-dday {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            font-size: 11px;
+            color: #999;
+            font-weight: 600;
+        }
+        .my-assignment-dday.is-today {
+            color: #e53935;
         }
 
         .my-assignment-date {
@@ -920,6 +929,9 @@ function filterAssignedNames($v)
                 display: none;
             }
         }
+        <?php if ($embed): ?>
+        body { padding-top: 0; }
+        <?php endif; ?>
     </style>
 </head>
 
@@ -927,15 +939,16 @@ function filterAssignedNames($v)
     <div class="container">
         <div class="navigation">
             <div class="nav-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+                <?php $eq = $embed ? '&embed=1' : ''; ?>
                 <?php if ($prevWeekData !== null): ?>
-                    <a href="?year=<?php echo $prevWeekData['year']; ?>&week=<?php echo $prevWeekData['week']; ?>" class="nav-button" style="background: #667eea;">◀ 이전</a>
+                    <a href="?year=<?php echo $prevWeekData['year']; ?>&week=<?php echo $prevWeekData['week'] . $eq; ?>" class="nav-button" style="background: #667eea;">◀ 이전</a>
                 <?php else: ?>
                     <span class="nav-button" style="background: #ccc; color: #888; cursor: not-allowed; pointer-events: none;">◀ 이전</span>
                 <?php endif; ?>
-                <a href="?year=<?php echo $currentYear; ?>&week=<?php echo $currentWeek; ?>" class="nav-button" style="background: #4CAF50;">📅 이번주</a>
+                <a href="?year=<?php echo $currentYear; ?>&week=<?php echo $currentWeek . $eq; ?>" class="nav-button" style="background: #4CAF50;">📅 이번주</a>
                 <button onclick="showWeekSelector()" class="nav-button" style="background: #FF9800;">📆 선택</button>
                 <?php if ($nextWeekData !== null): ?>
-                    <a href="?year=<?php echo $nextWeekData['year']; ?>&week=<?php echo $nextWeekData['week']; ?>" class="nav-button" style="background: #667eea;">다음 ▶</a>
+                    <a href="?year=<?php echo $nextWeekData['year']; ?>&week=<?php echo $nextWeekData['week'] . $eq; ?>" class="nav-button" style="background: #667eea;">다음 ▶</a>
                 <?php else: ?>
                     <span class="nav-button" style="background: #ccc; color: #888; cursor: not-allowed; pointer-events: none;">다음 ▶</span>
                 <?php endif; ?>
@@ -1213,7 +1226,13 @@ function filterAssignedNames($v)
             <div class="my-assignments-section">
                 <div class="my-assignments-title">📋 이번 주 이후 나에게 배정된 특권</div>
                 <?php foreach ($myUpcomingAssignments as $dateGroup): ?>
-                    <a href="view.php?year=<?php echo $dateGroup['year']; ?>&week=<?php echo $dateGroup['week']; ?>" class="my-assignment-item">
+                    <?php
+                        $_mIsToday = (isset($dateGroup['meetingDate']) && $dateGroup['meetingDate'] === $currentDate->format('Y-m-d'));
+                        $_mDiffDays = isset($dateGroup['meetingDate']) ? (int)$currentDate->diff(new DateTime($dateGroup['meetingDate']))->days : 0;
+                        $_mDdayText = $_mIsToday ? '오늘' : $_mDiffDays . '일 후';
+                    ?>
+                    <a href="view.php?year=<?php echo $dateGroup['year']; ?>&week=<?php echo $dateGroup['week']; ?>" class="my-assignment-item<?= $_mIsToday ? ' today' : '' ?>">
+                        <span class="my-assignment-dday<?= $_mIsToday ? ' is-today' : '' ?>"><?= $_mDdayText ?></span>
                         <div class="my-assignment-content">
                             <?php
                             $firstItem = true;
@@ -1267,7 +1286,7 @@ function filterAssignedNames($v)
         <?php endif; ?>
         <div style="text-align: center; margin-top: 10px; padding: 10px 20px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
             <?php if ($is_admin): ?>
-                <a href="index.php?year=<?php echo $year; ?>&week=<?php echo $week; ?>"
+                <a href="index.php?year=<?php echo $year; ?>&week=<?php echo $week . $eq; ?>"
                     id="adminBtn"
                     class="admin-btn"
                     style="display: inline-block;
@@ -1308,15 +1327,6 @@ function filterAssignedNames($v)
                 const newWindowBtn = document.getElementById('newWindowBtn');
 
                 if (isInIframe) {
-                    <?php if ($is_admin): ?>
-                        const adminBtnText = document.getElementById('adminBtnText');
-                        adminBtnText.textContent = '관리자모드로 보기 ↗';
-                        adminBtn.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            window.open(this.href, '_blank', 'noopener,noreferrer');
-                        });
-                    <?php endif; ?>
-
                     // 새창으로 보기 버튼 표시
                     newWindowBtn.style.display = 'inline-block';
                     newWindowBtn.addEventListener('click', function(e) {
@@ -1492,7 +1502,8 @@ function filterAssignedNames($v)
         }
 
         function selectWeek(year, week) {
-            window.location.href = '?year=' + year + '&week=' + week;
+            var embedParam = <?php echo $embed ? "'&embed=1'" : "''"; ?>;
+            window.location.href = '?year=' + year + '&week=' + week + embedParam;
         }
 
         // 주차 번호를 날짜로 변환 (평일집회 요일 날짜)

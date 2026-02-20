@@ -29,7 +29,7 @@ if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
 $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 
 $meetings = [];
-$sql = "SELECT m_id, ms_time, mp_name, mb_id FROM t_meeting WHERE m_date = '{$date}' AND ms_type = 1 ORDER BY ms_time";
+$sql = "SELECT m_id, ms_id, ms_time, mp_name, mb_id FROM t_meeting WHERE m_date = '{$date}' AND ms_type = 1 ORDER BY ms_time";
 $result = $mysqli->query($sql);
 if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
@@ -39,6 +39,7 @@ if ($result && $result->num_rows > 0) {
         $count = count($ids);
         $meetings[] = [
             'id' => $row['m_id'],
+            'ms_id' => $row['ms_id'],
             'label' => substr($row['ms_time'], 0, 5) . ' ' . $row['mp_name'] . ' (' . $count . '명)'
         ];
     }

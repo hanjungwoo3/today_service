@@ -1,9 +1,4 @@
 <?php
-// 로컬 개발 모드 체크
-$localConfigFile = dirname(__FILE__) . '/../c/config.php';
-if (file_exists($localConfigFile)) {
-    require_once $localConfigFile;
-}
 
 require_once 'api.php';
 

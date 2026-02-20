@@ -30,6 +30,7 @@ $result = $mysqli->query($sql);
 
 <?php if($result->num_rows > 0):?>
 <div class="list-group list-group-flush">
+  <?php if(file_exists(__DIR__.'/../include/custom_board_top.php')) include __DIR__.'/../include/custom_board_top.php'; ?>
   <?php while($row = $result->fetch_assoc()):?>
     <?php
     $bold = ($row['b_notice'])?'font-weight-bold':'';

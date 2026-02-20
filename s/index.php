@@ -1,44 +1,27 @@
 <?php
-// 로컬 개발 모드 체크
-$localConfigFile = __DIR__ . '/../c/config.php';
-if (file_exists($localConfigFile)) {
-    require_once $localConfigFile;
-}
+// 서비스 워커 캐시 방지
+header('Cache-Control: no-cache, no-store, must-revalidate');
 
 // 로그인한 사용자 정보 가져오기
 $loggedInUserName = '';
 $is_admin = false;
+if (file_exists(dirname(__FILE__) . '/../config.php')) {
+    require_once dirname(__FILE__) . '/../config.php';
+    if (function_exists('mb_id') && function_exists('get_member_name')) {
+        $mbId = mb_id();
+        if (!empty($mbId)) {
+            $loggedInUserName = get_member_name($mbId);
+        }
+    }
+    if (function_exists('mb_id') && function_exists('is_admin')) {
+        $is_admin = is_admin(mb_id());
+    }
+}
 
-// 로컬 모드가 아닐 때만 관리자 권한 체크
-if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
-    if (file_exists(dirname(__FILE__) . '/../config.php')) {
-        require_once dirname(__FILE__) . '/../config.php';
-        if (function_exists('mb_id') && function_exists('get_member_name')) {
-            $mbId = mb_id();
-            if (!empty($mbId)) {
-                $loggedInUserName = get_member_name($mbId);
-            }
-        }
-        if (function_exists('mb_id') && function_exists('is_admin')) {
-            $is_admin = is_admin(mb_id());
-        }
-    }
-
-    // 관리자가 아니면 view.php로 리다이렉트
-    if (!$is_admin) {
-        header('Location: view.php' . (isset($_GET['year']) && isset($_GET['week']) ? '?year=' . $_GET['year'] . '&week=' . $_GET['week'] : ''));
-        exit;
-    }
-} else {
-    // 로컬 개발 환경에서는 테스트용 사용자 설정
-    if (defined('USER')) {
-        $userName = constant('USER');
-        if (!empty($userName)) {
-            $loggedInUserName = $userName;
-        }
-    }
-    // 로컬 모드일 때는 관리자로 설정
-    $is_admin = true;
+// 관리자가 아니면 view.php로 리다이렉트
+if (!$is_admin) {
+    header('Location: view.php' . (isset($_GET['year']) && isset($_GET['week']) ? '?year=' . $_GET['year'] . '&week=' . $_GET['week'] : ''));
+    exit;
 }
 
 require_once 'api.php';
@@ -50,6 +33,7 @@ $currentWeek = $manager->getCurrentWeek();
 // URL 파라미터로 연도/주차 받기
 $year = isset($_GET['year']) ? (int)$_GET['year'] : $currentYear;
 $week = isset($_GET['week']) ? (int)$_GET['week'] : $currentWeek;
+$embed = isset($_GET['embed']) && $_GET['embed'] == '1';
 
 // 주차 범위 체크
 if ($week < 1) {
@@ -279,7 +263,6 @@ if (!empty($loggedInUserName)) {
         }
 
         .container {
-            max-width: 600px;
             margin: 0 auto;
             background: white;
             border-radius: 6px;
@@ -823,7 +806,6 @@ if (!empty($loggedInUserName)) {
             margin-top: 8px;
             z-index: 1000;
             width: 100%;
-            max-width: 380px;
             display: block;
         }
 
@@ -976,6 +958,9 @@ if (!empty($loggedInUserName)) {
                 display: none;
             }
         }
+        <?php if ($embed): ?>
+        body { padding-top: 0; }
+        <?php endif; ?>
     </style>
 </head>
 
@@ -1212,7 +1197,11 @@ if (!empty($loggedInUserName)) {
                 <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">
                     현재 입력한 내용을 사용자 화면에서 확인할 수 있습니다. 저장되지 않은 내용은 반영되지 않으니, 저장 후 확인하세요.
                 </p>
-                <a href="view.php?year=<?php echo $year; ?>&week=<?php echo $week; ?>" class="action-button preview" style="width: 100%; margin: 0; display: block; text-align: center; text-decoration: none;">👁️ 사용자모드로 보기</a>
+                <a href="view.php?year=<?php echo $year; ?>&week=<?php echo $week; ?><?php echo $embed ? '&embed=1' : ''; ?>" class="action-button preview" style="width: 100%; margin: 0; display: block; text-align: center; text-decoration: none;">👁️ 사용자모드로 보기</a>
+            </div>
+
+            <div id="newWindowGroup" style="display:none; background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                <a href="#" id="newWindowBtn" class="action-button preview" style="width: 100%; margin: 0; display: block; text-align: center; text-decoration: none;">↗ 새창으로 보기</a>
             </div>
 
             <div id="web-fetch-section" style="<?php echo (!empty($data['no_meeting']) && $data['no_meeting']) ? 'display:none;' : ''; ?>">
@@ -1889,6 +1878,20 @@ if (!empty($loggedInUserName)) {
 
             return meetingMonth + '월 ' + meetingDay + '일';
         }
+        // iframe 안에서 새창으로 보기 버튼 표시
+        (function() {
+            if (window.self !== window.top) {
+                var group = document.getElementById('newWindowGroup');
+                var btn = document.getElementById('newWindowBtn');
+                if (group) group.style.display = '';
+                if (btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        window.open(window.location.href, '_blank', 'noopener,noreferrer');
+                    });
+                }
+            }
+        })();
     </script>
 </body>
 
