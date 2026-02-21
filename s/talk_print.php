@@ -195,22 +195,22 @@ foreach ($allTalks as $talk) {
         .talk-print-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 13px;
+            font-size: 14px;
         }
         .talk-print-table th {
             background: #4CAF50;
             color: white;
-            padding: 8px 6px;
-            font-size: 12px;
+            padding: 10px 8px;
+            font-size: 14px;
             font-weight: 600;
             text-align: center;
             border: 1px solid #388E3C;
         }
         .talk-print-table td {
-            padding: 6px;
+            padding: 8px;
             border: 1px solid #ddd;
             vertical-align: middle;
-            font-size: 12px;
+            font-size: 14px;
         }
         .talk-print-table tr.excluded {
             opacity: 0.3;
@@ -218,19 +218,19 @@ foreach ($allTalks as $talk) {
         }
         .talk-print-table tr:hover { background: #f9f9f9; }
 
-        .pt-col-date { width: 65px; text-align: center; white-space: nowrap; }
-        .pt-col-speaker { width: 60px; text-align: center; }
-        .pt-col-congregation { width: 100px; text-align: center; font-size: 11px; }
+        .pt-col-date { width: 70px; text-align: center; white-space: nowrap; }
+        .pt-col-speaker { width: 65px; text-align: center; }
+        .pt-col-congregation { width: 110px; text-align: center; font-size: 13px; white-space: nowrap; }
         .pt-col-topic { }
-        .pt-col-chairman { width: 55px; text-align: center; }
-        .pt-col-reader { width: 55px; text-align: center; }
-        .pt-col-prayer { width: 55px; text-align: center; }
+        .pt-col-chairman { width: 60px; text-align: center; }
+        .pt-col-reader { width: 60px; text-align: center; }
+        .pt-col-prayer { width: 60px; text-align: center; }
 
         .topic-circuit-bg { background: #e8f5e9; }
         .topic-special-bg { background: #fff3e0; }
         .topic-type-label {
             font-weight: 700;
-            font-size: 11px;
+            font-size: 12px;
             display: block;
         }
         .topic-type-label.circuit { color: #2e7d32; }
@@ -240,11 +240,12 @@ foreach ($allTalks as $talk) {
             body { overflow-x: auto; }
         }
 
+        @page { margin: 10mm 8mm; }
         @media print {
             body { background: white; padding: 0; margin: 0; }
             .controls { display: none !important; }
             .talk-print-table tr.excluded { display: none !important; }
-            .page-container { box-shadow: none; padding: 0; margin: 0; width: 100%; max-width: 100%; }
+            .page-container { box-shadow: none; padding: 0; margin: 0; width: 100%; max-width: 100%; min-width: 0; }
         }
     </style>
 </head>
@@ -302,7 +303,7 @@ foreach ($allTalks as $talk) {
                     elseif ($talk['topic_type'] === 'special_talk') $topicBg = 'topic-special-bg';
                 ?>
                 <tr id="print-row-<?php echo $index; ?>">
-                    <td class="pt-col-date"><strong><?php echo $dateDisplay; ?></strong></td>
+                    <td class="pt-col-date"><?php echo $dateDisplay; ?></td>
                     <td class="pt-col-speaker"><?php echo htmlspecialchars($talk['speaker']); ?></td>
                     <td class="pt-col-congregation"><?php echo htmlspecialchars($talk['congregation']); ?></td>
                     <td class="pt-col-topic <?php echo $topicBg; ?>">

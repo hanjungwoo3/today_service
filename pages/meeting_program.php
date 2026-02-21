@@ -2,14 +2,9 @@
 
 <header class="navbar navbar-expand-xl fixed-top header">
   <h1 class="text-white mb-0 navbar-brand">평일집회 계획표</h1>
-  <p class="text-white today-info mb-0 ml-md-auto">
-    <a href="<?=BASE_PATH?>/pages/board.php" class="btn btn-outline-light btn-sm">
-      <i class="bi bi-arrow-left"></i> 공지
-    </a>
-  </p>
 </header>
 
-<?php echo footer_menu('공지'); ?>
+<?php echo footer_menu('오늘의 봉사'); ?>
 
 <style>
 @media (max-width: 768px) {

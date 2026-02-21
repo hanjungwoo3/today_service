@@ -146,12 +146,14 @@ function hl($name, $loggedIn) {
             font-size: 11px;
             text-align: right;
             white-space: nowrap;
-            background: #fafbfd;
+            background: #eef1f6;
         }
         .cleaning-group {
             color: #2e7d32;
             font-weight: 700;
         }
+
+        .admin-link { grid-column: span 2; }
 
         .my-name {
             background: linear-gradient(135deg, #ef4444, #f97316);
@@ -166,15 +168,12 @@ function hl($name, $loggedIn) {
             .month-grid {
                 grid-template-columns: 1fr;
             }
+            .admin-link { grid-column: span 1; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="page-header">
-        <h1 class="page-title">청소/마이크/안내인/연사음료 계획표</h1>
-    </div>
-
     <div class="month-grid">
     <?php for ($m = 1; $m <= 12; $m++):
         if ($year === $currentYear && $m < $currentMonth) continue;
@@ -198,7 +197,7 @@ function hl($name, $loggedIn) {
             <span><?php echo $m; ?>월</span>
             <span class="header-info">
                 <?php $cg = trim($month['cleaning_group'] ?? ''); if (!empty($cg)): ?>
-                    <span>청소:<span class="cleaning-group"><?php echo htmlspecialchars($cg); ?></span></span>
+                    <span>청소집단:<span class="cleaning-group"><?php echo htmlspecialchars($cg); ?></span></span>
                 <?php endif; ?>
                 <?php if (!empty(trim($drinkDisplay))): ?>
                     <span>음료:<?php echo $drinkDisplay; ?></span>
@@ -263,7 +262,7 @@ function hl($name, $loggedIn) {
     <?php endfor; ?>
 
     <?php if ($is_elder): ?>
-    <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; overflow: hidden;">
+    <div class="admin-link" style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; overflow: hidden;">
         <div style="font-weight: 600; font-size: 13px; color: #333; margin-bottom: 4px;">관리자모드</div>
         <p style="font-size: 11px; color: #666; margin-bottom: 6px; line-height: 1.4;">청소 집단, 마이크, 안내인, 연사음료 배정을 수정할 수 있습니다.</p>
         <a href="duty_admin.php?year=<?php echo $year; ?>" style="display: block; text-align: center; padding: 6px 12px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 12px;">관리자모드로 보기</a>

@@ -37,10 +37,10 @@ $months = $data['months'];
             color: #333;
             font-size: 14px;
             padding: 20px;
-            min-width: 720px;
+            min-width: 900px;
         }
         .controls {
-            width: 720px;
+            width: 900px;
             margin: 0 auto 16px;
             display: flex;
             justify-content: space-between;
@@ -69,10 +69,10 @@ $months = $data['months'];
         .print-btn:hover { background: #45a049; }
 
         .print-container {
-            width: 720px;
+            width: 900px;
             margin: 0 auto;
             background: white;
-            padding: 14px;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
@@ -84,13 +84,13 @@ $months = $data['months'];
             padding-bottom: 4px;
             border-bottom: 2px solid #333;
         }
-        .doc-header .doc-site { font-size: 13px; font-weight: 700; }
-        .doc-header .doc-title { font-size: 13px; font-weight: 700; color: #555; }
+        .doc-header .doc-site { font-size: 15px; font-weight: 700; }
+        .doc-header .doc-title { font-size: 15px; font-weight: 700; color: #555; }
 
         .month-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 6px;
+            gap: 10px;
         }
         .month-card {
             border: 1px solid #ccc;
@@ -98,9 +98,9 @@ $months = $data['months'];
             overflow: hidden;
         }
         .month-header {
-            padding: 3px 6px;
+            padding: 5px 8px;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 14px;
             color: #333;
             display: flex;
             align-items: center;
@@ -111,7 +111,7 @@ $months = $data['months'];
         .month-header .header-info {
             display: flex;
             gap: 6px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 500;
             color: #666;
             margin-left: auto;
@@ -125,19 +125,19 @@ $months = $data['months'];
         .half-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 11px;
+            font-size: 13px;
         }
         .half-table th {
             background: #eef1f6;
-            font-size: 9px;
+            font-size: 11px;
             font-weight: 600;
             color: #888;
-            padding: 2px 3px;
+            padding: 3px 5px;
             text-align: center;
             border: 1px solid #ddd;
         }
         .half-table td {
-            padding: 2px 3px;
+            padding: 3px 5px;
             border: 1px solid #ddd;
             text-align: left;
             vertical-align: middle;
@@ -145,20 +145,20 @@ $months = $data['months'];
         .half-table td.row-label {
             font-weight: 600;
             color: #555;
-            font-size: 10px;
+            font-size: 12px;
             text-align: right;
             white-space: nowrap;
-            background: #fafbfd;
+            background: #eef1f6;
         }
 
         @media print {
-            body { background: white; padding: 0; margin: 0; }
+            body { background: white; padding: 0; margin: 0; min-width: 0; }
             .controls { display: none !important; }
             .print-container {
                 box-shadow: none;
-                padding: 10mm;
+                width: 100%;
+                padding: 5mm;
                 margin: 0;
-                max-width: 100%;
                 border-radius: 0;
             }
             .month-card { break-inside: avoid; }
@@ -199,7 +199,7 @@ $months = $data['months'];
                 <span><?php echo $m; ?>월</span>
                 <span class="header-info">
                     <?php $cg = trim($month['cleaning_group'] ?? ''); if (!empty($cg)): ?>
-                        <span>청소:<span class="cleaning-group"><?php echo htmlspecialchars($cg); ?></span></span>
+                        <span>청소집단:<span class="cleaning-group"><?php echo htmlspecialchars($cg); ?></span></span>
                     <?php endif; ?>
                     <?php if (!empty(trim($drinkDisplay))): ?>
                         <span>음료:<?php echo $drinkDisplay; ?></span>
@@ -216,33 +216,29 @@ $months = $data['months'];
                         </tr>
                     </thead>
                     <tbody>
+                        <?php
+                            $fm1 = trim($fh['mic1'] ?? ''); $fm2 = trim($fh['mic2'] ?? ''); $fma = trim($fh['mic_assist'] ?? '');
+                            $fMic = implode(', ', array_filter([$fm1, $fm2]));
+                            if (!empty($fma)) $fMic .= ' (' . htmlspecialchars($fma) . ')'; else $fMic = htmlspecialchars($fMic);
+                            $sm1 = trim($sh['mic1'] ?? ''); $sm2 = trim($sh['mic2'] ?? ''); $sma = trim($sh['mic_assist'] ?? '');
+                            $sMic = implode(', ', array_filter([$sm1, $sm2]));
+                            if (!empty($sma)) $sMic .= ' (' . htmlspecialchars($sma) . ')'; else $sMic = htmlspecialchars($sMic);
+
+                            $fHall = implode(', ', array_filter([trim($fh['att_hall1'] ?? ''), trim($fh['att_hall2'] ?? '')]));
+                            $sHall = implode(', ', array_filter([trim($sh['att_hall1'] ?? ''), trim($sh['att_hall2'] ?? '')]));
+                        ?>
                         <tr>
-                            <td class="row-label">마이크1</td>
-                            <td><?php echo htmlspecialchars($fh['mic1'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($sh['mic1'] ?? ''); ?></td>
+                            <td class="row-label">마이크</td>
+                            <td><?php echo $fMic; ?></td>
+                            <td><?php echo $sMic; ?></td>
                         </tr>
                         <tr>
-                            <td class="row-label">마이크2</td>
-                            <td><?php echo htmlspecialchars($fh['mic2'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($sh['mic2'] ?? ''); ?></td>
+                            <td class="row-label">청중석 안내</td>
+                            <td><?php echo htmlspecialchars($fHall); ?></td>
+                            <td><?php echo htmlspecialchars($sHall); ?></td>
                         </tr>
                         <tr>
-                            <td class="row-label">마이크보조</td>
-                            <td><?php echo htmlspecialchars($fh['mic_assist'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($sh['mic_assist'] ?? ''); ?></td>
-                        </tr>
-                        <tr>
-                            <td class="row-label">청중석1</td>
-                            <td><?php echo htmlspecialchars($fh['att_hall1'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($sh['att_hall1'] ?? ''); ?></td>
-                        </tr>
-                        <tr>
-                            <td class="row-label">청중석2</td>
-                            <td><?php echo htmlspecialchars($fh['att_hall2'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($sh['att_hall2'] ?? ''); ?></td>
-                        </tr>
-                        <tr>
-                            <td class="row-label">출입구</td>
+                            <td class="row-label">출입구 안내</td>
                             <td><?php echo htmlspecialchars($fh['att_entrance'] ?? ''); ?></td>
                             <td><?php echo htmlspecialchars($sh['att_entrance'] ?? ''); ?></td>
                         </tr>

@@ -7,7 +7,7 @@
 }
 .custom-nav-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 8px;
 }
 .custom-nav-item {
@@ -50,10 +50,14 @@
 .custom-nav-icon.nav-duty { background: #4a8a8b; }
 .custom-nav-icon.nav-record { background: #7a6a9e; }
 
+@media (max-width: 768px) {
+    .custom-nav-grid { grid-template-columns: repeat(3, 1fr); }
+}
 @media (max-width: 400px) {
     .custom-nav-item { padding: 8px 10px; gap: 8px; }
     .custom-nav-icon { width: 34px; height: 34px; font-size: 15px; }
     .custom-nav-label { font-size: 11.5px; }
+    .custom-nav-label.nav-label-sm { font-size: 9px; }
 }
 </style>
 
@@ -73,7 +77,7 @@
         </a>
         <a href="<?=BASE_PATH?>/pages/duty_schedule.php" class="custom-nav-item">
             <div class="custom-nav-icon nav-duty"><i class="bi bi-clipboard-check"></i></div>
-            <div class="custom-nav-label">청소,연사음료<br>안내인,마이크</div>
+            <div class="custom-nav-label nav-label-sm">청소·음료<br>마이크·안내</div>
         </a>
         <?php if(is_admin(mb_id())): ?>
         <a href="<?=BASE_PATH?>/pages/ministry_record.php" class="custom-nav-item">

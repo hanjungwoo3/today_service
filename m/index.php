@@ -743,7 +743,7 @@ foreach (['M', 'W'] as $sex) {
 </head>
 <body>
     <div class="app-shell">
-        <header class="toolbar">
+        <header class="toolbar" style="display:none;">
             <div></div>
             <h1>짝 배정 현황 (최근 <?php echo $period_options[$selected_period]['label']; ?>)</h1>
             <div></div>

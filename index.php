@@ -69,6 +69,7 @@ $cancle = $mysqli->query($sql);
 
 <div id="today-service-list"></div>
 
+<?php if(file_exists('include/custom_board_top.php')) include 'include/custom_board_top.php'; ?>
 <?php if(file_exists('include/custom_home_assignments.php')) include 'include/custom_home_assignments.php'; ?>
 
 <script type="text/javascript">

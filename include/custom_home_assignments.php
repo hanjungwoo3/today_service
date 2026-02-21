@@ -215,8 +215,8 @@ if (file_exists($_dutyApiPath)) {
     $_curDay = (int)$_today->format('j');
 
     $_dutyRoleLabels = array(
-        'mic1' => '마이크1', 'mic2' => '마이크2', 'mic_assist' => '마이크 보조',
-        'att_hall1' => '안내인 청중석', 'att_hall2' => '안내인 청중석', 'att_entrance' => '안내인 출입구',
+        'mic1' => '마이크', 'mic2' => '마이크', 'mic_assist' => '마이크 보조',
+        'att_hall1' => '청중석 안내', 'att_hall2' => '청중석 안내', 'att_entrance' => '출입구 안내',
         'drink_main' => '연사음료 담당자', 'drink_assist' => '연사음료 보조'
     );
 
@@ -243,6 +243,7 @@ if (file_exists($_dutyApiPath)) {
                     $_myDutyRoles[] = $_dutyRoleLabels[$_dk];
                 }
             }
+            $_myDutyRoles = array_unique($_myDutyRoles);
             if (!empty($_myDutyRoles)) {
                 $_fhActive = ($_dYear == $_curYear && $_dMonth == $_curMonth && $_curDay <= 15);
                 $_dutyAssignments[] = array(
@@ -264,6 +265,7 @@ if (file_exists($_dutyApiPath)) {
                     $_myDutyRoles[] = $_dutyRoleLabels[$_dk];
                 }
             }
+            $_myDutyRoles = array_unique($_myDutyRoles);
             if (!empty($_myDutyRoles)) {
                 $_shActive = ($_dYear == $_curYear && $_dMonth == $_curMonth && $_curDay > 15);
                 $_dutyAssignments[] = array(

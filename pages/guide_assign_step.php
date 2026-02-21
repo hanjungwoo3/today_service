@@ -25,9 +25,6 @@ $date_parts = explode("-", $date);
     <nav class="navbar navbar-light bg-light mb-4">
       <div>
         <a class="navbar-brand mb-0" href="<?=BASE_PATH?>/pages/guide_history.php?s_date=<?=$date?>&toYear=<?=$date_parts[0]?>&toMonth=<?=$date_parts[1]?>"><i class="bi bi-arrow-left"></i></a>
-        <?php if((isset($_GET['preselect']) && !empty($_GET['preselect'])) || (isset($_GET['load_tt_id']) && !empty($_GET['load_tt_id']))): ?>
-        <a href="<?=BASE_PATH?>/pages/ministry_record.php?date=<?=$date?>&meeting=<?=$m_id?>" class="btn btn-sm text-white" style="background:#7a6a9e;"><i class="bi bi-people"></i> 짝배정으로 돌아가기</a>
-        <?php endif; ?>
       </div>
       <div class="w-75 float-right text-right mb-0 clearfix" onclick="open_meeting_info('<?=$date?>','<?=$ms_id?>','guide_assign')">
         <div>
@@ -71,6 +68,11 @@ $date_parts = explode("-", $date);
             <?php if(GUIDE_MEETING_CONTENTS_USE == 'use'): ?>
             <li class="nav-item" v-if="auth" style="flex: 1; min-width: 0;">
               <a class="nav-link" v-on:click="changeMode('contents')" :class="mode=='contents'?'active':''" style="white-space: nowrap; padding: 0.5rem 0.25rem;">모임 내용 기록</a>
+            </li>
+            <?php endif; ?>
+            <?php if((isset($_GET['preselect']) && !empty($_GET['preselect'])) || (isset($_GET['load_tt_id']) && !empty($_GET['load_tt_id']))): ?>
+            <li class="nav-item" style="flex: 1; min-width: 0;">
+              <a class="nav-link" href="<?=BASE_PATH?>/pages/ministry_record.php?date=<?=$date?>&meeting=<?=$m_id?>" style="white-space: nowrap; padding: 0.5rem 0.25rem;">호별봉사 짝 배정</a>
             </li>
             <?php endif; ?>
           </ul>

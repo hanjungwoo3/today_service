@@ -60,20 +60,20 @@ foreach ($allTalks as $talk) {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
-            background: #fff8e1;
+            background: #f5f5f5;
             color: #333;
             font-size: 14px;
             position: relative;
         }
         body::before {
-            content: '관리자 전용';
+            content: '관리자 모드';
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-30deg);
             font-size: 80px;
             font-weight: 900;
-            color: rgba(0,0,0,0.04);
+            color: rgba(239,68,68,0.06);
             pointer-events: none;
             z-index: 0;
             white-space: nowrap;
@@ -179,7 +179,7 @@ foreach ($allTalks as $talk) {
         .col-prayer { width: 1%; text-align: center; white-space: nowrap; }
         .col-action { width: 28px; text-align: center; cursor: default; }
 
-        .date-text { font-weight: 600; }
+        .date-text { }
 
         .topic-circuit { background: #e8f5e9; }
         .topic-special { background: #fff3e0; }
@@ -205,6 +205,11 @@ foreach ($allTalks as $talk) {
 
         /* 지나간 날짜 */
         .past-row { opacity: 0.5; }
+
+        /* 모바일 연사 표시 */
+        .mobile-speaker { display: none; }
+        .desktop-only { }
+        .mobile-only-label { display: none; }
 
         /* 편집 모드 */
         td.editing {
@@ -275,6 +280,11 @@ foreach ($allTalks as $talk) {
             outline: 1px dashed #90caf9;
         }
 
+        /* 다음 주 강조 */
+        .next-row td { border-top: 2px solid #ef4444; border-bottom: 2px solid #ef4444; }
+        .next-row td:first-child { border-left: 2px solid #ef4444; }
+        .next-row td:last-child { border-right: 2px solid #ef4444; }
+
         /* 행 삭제 */
         .btn-remove-row {
             width: 20px; height: 20px;
@@ -338,13 +348,17 @@ foreach ($allTalks as $talk) {
             padding-bottom: 12px;
         }
         @media (max-width: 768px) {
-            .container { padding: 40px 6px 6px; }
-            .talk-table { font-size: 11px; min-width: 520px; }
+            .container { padding: 6px; }
+            .talk-table { font-size: 12px; min-width: 420px; }
             .talk-table th { padding: 6px 3px; font-size: 11px; }
-            .talk-table td { padding: 4px 3px; font-size: 11px; }
+            .talk-table td { padding: 5px 3px; font-size: 12px; }
             .col-date { width: 1%; white-space: nowrap; }
-            .col-speaker, .col-congregation { width: 1%; white-space: nowrap; }
+            .col-speaker, .col-congregation { display: none; }
             .col-chairman, .col-reader, .col-prayer { width: 1%; white-space: nowrap; }
+            .mobile-speaker { display: block; font-weight: normal; margin-bottom: 2px; color: #555; }
+            .topic-text { font-weight: 700; }
+            .desktop-only { display: none !important; }
+            .mobile-only-label { display: inline-block !important; }
             .page-title { font-size: 15px; }
         }
     </style>
@@ -379,15 +393,19 @@ foreach ($allTalks as $talk) {
             <?php if (empty($talks)): ?>
                 <tr id="emptyRow"><td colspan="8" class="empty-state">등록된 강연 일정이 없습니다.</td></tr>
             <?php else: ?>
+                <?php $nextFound = false; ?>
                 <?php foreach ($talks as $talk):
                     $isPast = $talk['date'] < $today;
+                    $isNext = false;
+                    if (!$isPast && !$nextFound) { $isNext = true; $nextFound = true; }
                     $d = new DateTime($talk['date']);
                     $dateDisplay = $d->format('y/m/d');
                     $rowClass = '';
                     if ($talk['topic_type'] === 'circuit_visit') $rowClass = 'row-circuit';
                     elseif ($talk['topic_type'] === 'special_talk') $rowClass = 'row-special';
+                    $sp = trim($talk['speaker']); $cg = trim($talk['congregation']);
                 ?>
-                <tr class="talk-row <?php echo $isPast ? 'past-row' : ''; ?> <?php echo $rowClass; ?>"
+                <tr class="talk-row <?php echo $isPast ? 'past-row' : ''; ?> <?php echo $isNext ? 'next-row' : ''; ?> <?php echo $rowClass; ?>"
                     data-date="<?php echo htmlspecialchars($talk['date']); ?>"
                     data-speaker="<?php echo htmlspecialchars($talk['speaker']); ?>"
                     data-congregation="<?php echo htmlspecialchars($talk['congregation']); ?>"
@@ -400,12 +418,21 @@ foreach ($allTalks as $talk) {
                     <td class="col-speaker editable" data-field="speaker"><?php echo htmlspecialchars($talk['speaker']) ?: '<span class="cell-empty">-</span>'; ?></td>
                     <td class="col-congregation editable" data-field="congregation"><?php echo htmlspecialchars($talk['congregation']) ?: '<span class="cell-empty">-</span>'; ?></td>
                     <td class="col-topic editable" data-field="topic">
-                        <?php if ($talk['topic_type'] === 'circuit_visit'): ?>
-                            <span class="topic-label circuit">순회 방문</span>
-                        <?php elseif ($talk['topic_type'] === 'special_talk'): ?>
-                            <span class="topic-label special">특별 강연</span>
-                        <?php endif; ?>
-                        <span class="topic-text"><?php echo htmlspecialchars($talk['topic']) ?: '<span class="cell-empty">-</span>'; ?></span>
+                        <span class="desktop-only"><?php
+                            if ($talk['topic_type'] === 'circuit_visit') echo '<span class="topic-label circuit">순회 방문</span>';
+                            elseif ($talk['topic_type'] === 'special_talk') echo '<span class="topic-label special">특별 강연</span>';
+                        ?></span>
+                        <span class="topic-text"><?php
+                            if ($talk['topic_type'] === 'circuit_visit') echo '<span class="topic-label circuit mobile-only-label">순회 방문</span> ';
+                            elseif ($talk['topic_type'] === 'special_talk') echo '<span class="topic-label special mobile-only-label">특별 강연</span> ';
+                            echo htmlspecialchars($talk['topic']) ?: '<span class="cell-empty">-</span>';
+                        ?></span>
+                        <span class="mobile-speaker"><?php
+                            if (!empty($sp)) {
+                                echo htmlspecialchars($sp);
+                                if (!empty($cg)) echo '(' . htmlspecialchars($cg) . ')';
+                            }
+                        ?></span>
                     </td>
                     <td class="col-chairman editable" data-field="chairman"><?php echo htmlspecialchars($talk['chairman']) ?: '<span class="cell-empty">-</span>'; ?></td>
                     <td class="col-reader editable" data-field="reader"><?php echo htmlspecialchars($talk['reader']) ?: '<span class="cell-empty">-</span>'; ?></td>
@@ -677,22 +704,32 @@ foreach ($allTalks as $talk) {
     }
 
     // 셀 렌더 (읽기 모드)
-    function renderCell(td) {
-        var row = td.closest('tr');
-        var field = td.getAttribute('data-field');
+    function renderCell(el) {
+        var row = el.closest('tr');
+        var field = el.getAttribute('data-field');
         var value = row.getAttribute('data-' + field.replace('_', '-'));
 
         if (field === 'date') {
-            td.innerHTML = '<span class="date-text">' + formatDateDisplay(value) + '</span>';
+            el.innerHTML = '<span class="date-text">' + formatDateDisplay(value) + '</span>';
         } else if (field === 'topic') {
             var topicType = row.getAttribute('data-topic-type');
-            var html = '';
+            var html = '<span class="desktop-only">';
             if (topicType === 'circuit_visit') html += '<span class="topic-label circuit">순회 방문</span>';
             else if (topicType === 'special_talk') html += '<span class="topic-label special">특별 강연</span>';
-            html += '<span class="topic-text">' + (escapeHtml(value) || '<span class="cell-empty">-</span>') + '</span>';
-            td.innerHTML = html;
+            html += '</span>';
+            html += '<span class="topic-text">';
+            if (topicType === 'circuit_visit') html += '<span class="topic-label circuit mobile-only-label">순회 방문</span> ';
+            else if (topicType === 'special_talk') html += '<span class="topic-label special mobile-only-label">특별 강연</span> ';
+            html += (escapeHtml(value) || '<span class="cell-empty">-</span>');
+            html += '</span>';
+            var sp = row.getAttribute('data-speaker') || '';
+            var cg = row.getAttribute('data-congregation') || '';
+            html += '<span class="mobile-speaker">';
+            if (sp) { html += escapeHtml(sp); if (cg) html += '(' + escapeHtml(cg) + ')'; }
+            html += '</span>';
+            el.innerHTML = html;
         } else {
-            td.innerHTML = escapeHtml(value) || '<span class="cell-empty">-</span>';
+            el.innerHTML = escapeHtml(value) || '<span class="cell-empty">-</span>';
         }
     }
 
@@ -712,23 +749,23 @@ foreach ($allTalks as $talk) {
     }
 
     // 셀 클릭 → 편집 모드
-    function startEdit(td) {
-        if (editingCell === td) return;
+    function startEdit(el) {
+        if (editingCell === el) return;
         if (editingCell) finishEdit(editingCell);
 
-        var row = td.closest('tr');
-        var field = td.getAttribute('data-field');
+        var row = el.closest('tr');
+        var field = el.getAttribute('data-field');
         var value = row.getAttribute('data-' + field.replace('_', '-'));
-        editingCell = td;
-        td.classList.add('editing');
+        editingCell = el;
+        el.classList.add('editing');
 
         if (field === 'date') {
-            td.innerHTML = '<input type="date" value="' + (value || '') + '" />';
-            var input = td.querySelector('input');
+            el.innerHTML = '<input type="date" value="' + (value || '') + '" />';
+            var input = el.querySelector('input');
             input.focus();
             input.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') { finishEdit(td); }
-                if (e.key === 'Escape') { cancelEdit(td, value); }
+                if (e.key === 'Enter') { finishEdit(el); }
+                if (e.key === 'Escape') { cancelEdit(el, value); }
             });
         } else if (field === 'topic') {
             var topicType = row.getAttribute('data-topic-type');
@@ -743,16 +780,16 @@ foreach ($allTalks as $talk) {
             html += '</div>';
             html += '<input type="text" value="' + escapeHtml(value) + '" />';
             html += '</div>';
-            td.innerHTML = html;
+            el.innerHTML = html;
 
-            var textInput = td.querySelector('input[type="text"]');
-            var numInput = td.querySelector('input[type="number"]');
-            var fetchBtn = td.querySelector('.topic-fetch-row button');
+            var textInput = el.querySelector('input[type="text"]');
+            var numInput = el.querySelector('input[type="number"]');
+            var fetchBtn = el.querySelector('.topic-fetch-row button');
 
             textInput.focus();
             textInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') { finishEdit(td); }
-                if (e.key === 'Escape') { cancelEdit(td, value); }
+                if (e.key === 'Enter') { finishEdit(el); }
+                if (e.key === 'Escape') { cancelEdit(el, value); }
             });
 
             fetchBtn.addEventListener('click', function() {
@@ -769,12 +806,12 @@ foreach ($allTalks as $talk) {
                     e.preventDefault();
                     fetchBtn.click();
                 }
-                if (e.key === 'Escape') { cancelEdit(td, value); }
+                if (e.key === 'Escape') { cancelEdit(el, value); }
             });
 
             // 체크박스 상호 배타
-            var cbCircuit = td.querySelector('input[name="circuit_visit"]');
-            var cbSpecial = td.querySelector('input[name="special_talk"]');
+            var cbCircuit = el.querySelector('input[name="circuit_visit"]');
+            var cbSpecial = el.querySelector('input[name="special_talk"]');
             cbCircuit.addEventListener('change', function() {
                 if (this.checked) cbSpecial.checked = false;
             });
@@ -782,13 +819,13 @@ foreach ($allTalks as $talk) {
                 if (this.checked) cbCircuit.checked = false;
             });
         } else {
-            td.innerHTML = '<input type="text" value="' + escapeHtml(value) + '" />';
-            var input = td.querySelector('input');
+            el.innerHTML = '<input type="text" value="' + escapeHtml(value) + '" />';
+            var input = el.querySelector('input');
             input.focus();
             input.select();
             input.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') { finishEdit(td); }
-                if (e.key === 'Escape') { cancelEdit(td, value); }
+                if (e.key === 'Enter') { finishEdit(el); }
+                if (e.key === 'Escape') { cancelEdit(el, value); }
             });
         }
     }
@@ -824,6 +861,11 @@ foreach ($allTalks as $talk) {
         editingCell = null;
         td.classList.remove('editing');
         renderCell(td);
+        // speaker/congregation 변경 시 topic 셀의 mobile-speaker도 업데이트
+        if (field === 'speaker' || field === 'congregation') {
+            var topicTd = row.querySelector('td.col-topic');
+            if (topicTd && !topicTd.classList.contains('editing')) renderCell(topicTd);
+        }
         autoSave();
     }
 
@@ -892,7 +934,7 @@ foreach ($allTalks as $talk) {
             '<td class="col-date editable" data-field="date"><span class="date-text">' + formatDateDisplay(nextDate) + '</span></td>' +
             '<td class="col-speaker editable" data-field="speaker"><span class="cell-empty">-</span></td>' +
             '<td class="col-congregation editable" data-field="congregation"><span class="cell-empty">-</span></td>' +
-            '<td class="col-topic editable" data-field="topic"><span class="topic-text"><span class="cell-empty">-</span></span></td>' +
+            '<td class="col-topic editable" data-field="topic"><span class="topic-text"><span class="cell-empty">-</span></span><span class="mobile-speaker"></span></td>' +
             '<td class="col-chairman editable" data-field="chairman"><span class="cell-empty">-</span></td>' +
             '<td class="col-reader editable" data-field="reader"><span class="cell-empty">-</span></td>' +
             '<td class="col-prayer editable" data-field="prayer"><span class="cell-empty">-</span></td>' +

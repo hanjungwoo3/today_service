@@ -631,7 +631,7 @@ $today = new DateTime('now');
               <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">
                   봉사인도 일정을 추가, 수정, 삭제할 수 있습니다. 봉사 안내표와 메모를 관리하세요.
               </p>
-              <a href="index.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>" style="display: block; text-align: center; padding: 8px 16px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px;">관리자모드로 보기</a>
+              <a href="index.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>" style="display: block; text-align: center; padding: 8px 16px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px;">관리자모드로 보기</a>
           </div>
       </div>
       <?php endif; ?>

@@ -17,6 +17,8 @@ if (!$is_elder) {
 require_once dirname(__FILE__) . '/duty_api.php';
 
 $currentYear = (int)date('Y');
+$currentMonth = (int)date('n');
+$currentDay = (int)date('j');
 $year = isset($_GET['year']) ? (int)$_GET['year'] : $currentYear;
 
 $manager = new DutyDataManager();
@@ -33,20 +35,20 @@ $months = $data['months'];
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
-            background: #fff8e1;
+            background: #f5f5f5;
             color: #333;
             font-size: 14px;
             position: relative;
         }
         body::before {
-            content: '관리자 전용';
+            content: '관리자 모드';
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-30deg);
             font-size: 80px;
             font-weight: 900;
-            color: rgba(0,0,0,0.04);
+            color: rgba(239,68,68,0.06);
             pointer-events: none;
             z-index: 0;
             white-space: nowrap;
@@ -91,6 +93,8 @@ $months = $data['months'];
             overflow: hidden;
             border: 1px solid #e0e0e0;
         }
+        .month-card.current { border: 2px solid #ef4444; }
+        .month-card.current .month-header { color: #ef4444; }
         .month-header {
             padding: 6px 10px;
             font-weight: 700;
@@ -135,6 +139,13 @@ $months = $data['months'];
             text-align: center;
             border: 1px solid #e8ecf0;
         }
+        .half-table th.active-half {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+        .half-table td.active-half {
+            background: #fff5f5;
+        }
         .half-table td {
             padding: 2px 3px;
             border: 1px solid #e8ecf0;
@@ -147,19 +158,31 @@ $months = $data['months'];
             font-size: 11px;
             text-align: right;
             white-space: nowrap;
-            background: #fafbfd;
+            background: #eef1f6;
         }
 
         /* 인라인 편집 */
-        td.editable { cursor: pointer; }
-        td.editable:hover {
+        td.editable, span.editable { cursor: pointer; }
+        td.editable:hover, span.editable:hover {
             background: #e3f2fd;
             outline: 1px dashed #90caf9;
+            border-radius: 2px;
         }
         td.editing { padding: 1px; }
         td.editing input[type="text"] {
             width: 100%;
             padding: 2px 3px;
+            border: 1px solid #42a5f5;
+            border-radius: 3px;
+            font-size: 11px;
+            font-family: inherit;
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 2px rgba(66,165,245,0.2);
+        }
+        span.editable.editing input[type="text"] {
+            width: 5em;
+            padding: 1px 3px;
             border: 1px solid #42a5f5;
             border-radius: 3px;
             font-size: 11px;
@@ -250,14 +273,11 @@ $months = $data['months'];
 </head>
 <body>
 <div class="container">
-    <div class="page-header">
-        <h1 class="page-title">청소/마이크/안내인/연사음료</h1>
-        <div class="header-actions">
-            <?php for ($y = $currentYear - 1; $y <= $currentYear + 1; $y++): ?>
-                <a href="?year=<?php echo $y; ?>"
-                   class="header-btn <?php echo $y === $year ? 'active' : ''; ?>"><?php echo $y; ?>년</a>
-            <?php endfor; ?>
-        </div>
+    <div class="header-actions" style="margin-bottom:8px;">
+        <?php for ($y = $currentYear - 1; $y <= $currentYear + 1; $y++): ?>
+            <a href="?year=<?php echo $y; ?>"
+               class="header-btn <?php echo $y === $year ? 'active' : ''; ?>"><?php echo $y; ?>년</a>
+        <?php endfor; ?>
     </div>
 
     <div class="month-grid">
@@ -265,12 +285,15 @@ $months = $data['months'];
         $month = isset($months[(string)$m]) ? $months[(string)$m] : array();
         $fh = isset($month['first_half']) ? $month['first_half'] : array();
         $sh = isset($month['second_half']) ? $month['second_half'] : array();
+        $isCurrent = ($year === $currentYear && $m === $currentMonth);
+        $firstHalfActive = ($isCurrent && $currentDay <= 15) ? ' active-half' : '';
+        $secondHalfActive = ($isCurrent && $currentDay > 15) ? ' active-half' : '';
     ?>
-    <div class="month-card">
+    <div class="month-card<?php echo $isCurrent ? ' current' : ''; ?>">
         <div class="month-header">
             <span><?php echo $m; ?>월</span>
             <span class="header-info">
-                <span>청소:<span class="header-editable cleaning-group" data-month="<?php echo $m; ?>" data-field="cleaning_group"><?php echo htmlspecialchars($month['cleaning_group'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span></span>
+                <span>청소집단:<span class="header-editable cleaning-group" data-month="<?php echo $m; ?>" data-field="cleaning_group"><?php echo htmlspecialchars($month['cleaning_group'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span></span>
                 <span>음료:<span class="header-editable" data-month="<?php echo $m; ?>" data-field="drink_main"><?php echo htmlspecialchars($month['drink_main'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>
                 (<span class="header-editable" data-month="<?php echo $m; ?>" data-field="drink_assist"><?php echo htmlspecialchars($month['drink_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>)</span>
             </span>
@@ -280,40 +303,25 @@ $months = $data['months'];
                 <thead>
                     <tr>
                         <th></th>
-                        <th>상반기 (1-15일)</th>
-                        <th>하반기 (16-말일)</th>
+                        <th class="<?php echo trim($firstHalfActive); ?>">상반기 (1-15일)</th>
+                        <th class="<?php echo trim($secondHalfActive); ?>">하반기 (16-말일)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="row-label">마이크1</td>
-                        <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic1"><?php echo htmlspecialchars($fh['mic1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                        <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic1"><?php echo htmlspecialchars($sh['mic1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                        <td class="row-label">마이크</td>
+                        <td class="<?php echo trim($firstHalfActive); ?>"><span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic1"><?php echo htmlspecialchars($fh['mic1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>, <span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic2"><?php echo htmlspecialchars($fh['mic2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span> (<span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic_assist"><?php echo htmlspecialchars($fh['mic_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>)</td>
+                        <td class="<?php echo trim($secondHalfActive); ?>"><span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic1"><?php echo htmlspecialchars($sh['mic1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>, <span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic2"><?php echo htmlspecialchars($sh['mic2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span> (<span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic_assist"><?php echo htmlspecialchars($sh['mic_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>)</td>
                     </tr>
                     <tr>
-                        <td class="row-label">마이크2</td>
-                        <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic2"><?php echo htmlspecialchars($fh['mic2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                        <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic2"><?php echo htmlspecialchars($sh['mic2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                        <td class="row-label">청중석 안내</td>
+                        <td class="<?php echo trim($firstHalfActive); ?>"><span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_hall1"><?php echo htmlspecialchars($fh['att_hall1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>, <span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_hall2"><?php echo htmlspecialchars($fh['att_hall2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span></td>
+                        <td class="<?php echo trim($secondHalfActive); ?>"><span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_hall1"><?php echo htmlspecialchars($sh['att_hall1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>, <span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_hall2"><?php echo htmlspecialchars($sh['att_hall2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span></td>
                     </tr>
                     <tr>
-                        <td class="row-label">마이크보조</td>
-                        <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic_assist"><?php echo htmlspecialchars($fh['mic_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                        <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic_assist"><?php echo htmlspecialchars($sh['mic_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    </tr>
-                    <tr>
-                        <td class="row-label">청중석1</td>
-                        <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_hall1"><?php echo htmlspecialchars($fh['att_hall1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                        <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_hall1"><?php echo htmlspecialchars($sh['att_hall1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    </tr>
-                    <tr>
-                        <td class="row-label">청중석2</td>
-                        <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_hall2"><?php echo htmlspecialchars($fh['att_hall2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                        <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_hall2"><?php echo htmlspecialchars($sh['att_hall2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    </tr>
-                    <tr>
-                        <td class="row-label">출입구</td>
-                        <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_entrance"><?php echo htmlspecialchars($fh['att_entrance'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                        <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_entrance"><?php echo htmlspecialchars($sh['att_entrance'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                        <td class="row-label">출입구 안내</td>
+                        <td class="editable<?php echo $firstHalfActive; ?>" data-month="<?php echo $m; ?>" data-half="first" data-field="att_entrance"><?php echo htmlspecialchars($fh['att_entrance'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                        <td class="editable<?php echo $secondHalfActive; ?>" data-month="<?php echo $m; ?>" data-half="second" data-field="att_entrance"><?php echo htmlspecialchars($sh['att_entrance'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
                     </tr>
                 </tbody>
             </table>
@@ -413,10 +421,8 @@ $months = $data['months'];
         input.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 finishEdit(el);
-                if (el.tagName === 'TD') {
-                    var next = getNextEditable(el);
-                    if (next) startEdit(next);
-                }
+                var next = getNextEditable(el);
+                if (next) startEdit(next);
             }
             if (e.key === 'Escape') {
                 editingCell = null;
@@ -426,10 +432,8 @@ $months = $data['months'];
             if (e.key === 'Tab') {
                 e.preventDefault();
                 finishEdit(el);
-                if (el.tagName === 'TD') {
-                    var target = e.shiftKey ? getPrevEditable(el) : getNextEditable(el);
-                    if (target) startEdit(target);
-                }
+                var target = e.shiftKey ? getPrevEditable(el) : getNextEditable(el);
+                if (target) startEdit(target);
             }
         });
     }
@@ -446,24 +450,28 @@ $months = $data['months'];
         autoSave();
     }
 
-    function getNextEditable(td) {
-        var all = Array.from(document.querySelectorAll('td.editable'));
-        var idx = all.indexOf(td);
+    function getNextEditable(el) {
+        var all = Array.from(document.querySelectorAll('.half-table .editable'));
+        var idx = all.indexOf(el);
         return idx >= 0 && idx < all.length - 1 ? all[idx + 1] : null;
     }
 
-    function getPrevEditable(td) {
-        var all = Array.from(document.querySelectorAll('td.editable'));
-        var idx = all.indexOf(td);
+    function getPrevEditable(el) {
+        var all = Array.from(document.querySelectorAll('.half-table .editable'));
+        var idx = all.indexOf(el);
         return idx > 0 ? all[idx - 1] : null;
     }
 
     // 테이블 셀 클릭
     document.addEventListener('click', function(e) {
+        var spanEditable = e.target.closest('span.editable');
         var td = e.target.closest('td.editable');
         var headerEl = e.target.closest('.header-editable');
 
-        if (td) {
+        if (spanEditable) {
+            startEdit(spanEditable);
+            e.stopPropagation();
+        } else if (td) {
             startEdit(td);
             e.stopPropagation();
         } else if (headerEl) {

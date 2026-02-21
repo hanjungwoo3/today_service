@@ -220,7 +220,7 @@ $today = (new DateTime())->format('Y-m-d');
             padding-bottom: 12px;
         }
         @media (max-width: 768px) {
-            .container { padding: 40px 6px 6px; }
+            .container { padding: 6px; }
             .talk-table { font-size: 12px; min-width: 420px; }
             .talk-table th { padding: 6px 3px; font-size: 11px; }
             .talk-table td { padding: 5px 3px; font-size: 12px; }
