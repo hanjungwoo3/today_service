@@ -111,9 +111,9 @@ $months = $data['months'];
         .month-header .header-info {
             display: flex;
             gap: 6px;
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 500;
-            color: #666;
+            color: #333;
             margin-left: auto;
         }
         .month-header .header-info .cleaning-group {
