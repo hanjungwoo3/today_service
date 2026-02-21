@@ -6,7 +6,7 @@ require_once __DIR__ . '/lib/helpers.php';
 
 // 로그인한 사용자 이름 가져오기
 $loggedInUserName = '';
-$is_admin = false;
+$is_elder = false;
 if (file_exists(dirname(__FILE__) . '/../config.php')) {
     @require_once dirname(__FILE__) . '/../config.php';
     if (function_exists('mb_id') && function_exists('get_member_name')) {
@@ -15,8 +15,8 @@ if (file_exists(dirname(__FILE__) . '/../config.php')) {
             $loggedInUserName = get_member_name($mbId);
         }
     }
-    if (function_exists('mb_id') && function_exists('is_admin')) {
-        $is_admin = is_admin(mb_id());
+    if (function_exists('mb_id') && function_exists('get_member_position')) {
+        $is_elder = (get_member_position(mb_id()) >= '2');
     }
 }
 
@@ -54,7 +54,7 @@ $today = new DateTime('now');
       }
 
       .container {
-        max-width: 1024px;
+        max-width: 800px;
         min-width: 340px;
         margin: 0 auto;
         background: #fff;
@@ -396,12 +396,6 @@ $today = new DateTime('now');
         }
       }
       
-      /* 일정관리 버튼 hover 효과 */
-      .admin-btn:hover {
-        background: #e2e8f0 !important;
-        color: #64748b !important;
-        border-color: #cbd5e1 !important;
-      }
     </style>
   </head>
   <body>
@@ -628,58 +622,19 @@ $today = new DateTime('now');
         </table>
       </div>
       
-      <div style="text-align: center; margin-top: 30px; padding: 20px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-        <?php if ($is_admin): ?>
-          <a href="index.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>"
-             id="adminBtn"
-             class="admin-btn"
-             style="display: inline-block;
-                    padding: 8px 16px;
-                    background: #f1f5f9;
-                    color: #94a3b8;
-                    text-decoration: none;
-                    border-radius: 6px;
-                    font-weight: 400;
-                    font-size: 13px;
-                    border: 1px solid #e2e8f0;
-                    box-shadow: none;
-                    transition: all 0.2s ease;">
-            <span id="adminBtnText">관리자모드로 보기</span>
-          </a>
-        <?php endif; ?>
-        <a href="#"
-           id="newWindowBtn"
-           style="display: none;
-                  padding: 8px 16px;
-                  background: #f1f5f9;
-                  color: #94a3b8;
-                  text-decoration: none;
-                  border-radius: 6px;
-                  font-weight: 400;
-                  font-size: 13px;
-                  border: 1px solid #e2e8f0;
-                  box-shadow: none;
-                  transition: all 0.2s ease;">
-          새창으로 보기 ↗
-        </a>
+      <?php if ($is_elder): ?>
+      <div style="padding: 12px 8px;">
+          <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                  <span style="font-weight: 600; font-size: 14px; color: #333;">관리자모드</span>
+              </div>
+              <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">
+                  봉사인도 일정을 추가, 수정, 삭제할 수 있습니다. 봉사 안내표와 메모를 관리하세요.
+              </p>
+              <a href="index.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>" style="display: block; text-align: center; padding: 8px 16px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 13px;">관리자모드로 보기</a>
+          </div>
       </div>
-      <script>
-        // iframe 안에서만 새창으로 열기
-        (function() {
-          const isInIframe = window.self !== window.top;
-          const adminBtn = document.getElementById('adminBtn');
-          const newWindowBtn = document.getElementById('newWindowBtn');
-
-          if (isInIframe) {
-            // 새창으로 보기 버튼 표시
-            newWindowBtn.style.display = 'inline-block';
-            newWindowBtn.addEventListener('click', function(e) {
-              e.preventDefault();
-              window.open(window.location.href, '_blank', 'noopener,noreferrer');
-            });
-          }
-        })();
-      </script>
+      <?php endif; ?>
     </div>
   </body>
 </html>

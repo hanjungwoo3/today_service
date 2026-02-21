@@ -4,7 +4,7 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 
 // 로그인한 사용자 정보 가져오기
 $loggedInUserName = '';
-$is_admin = false;
+$is_elder = false;
 if (file_exists(dirname(__FILE__) . '/../config.php')) {
     @require_once dirname(__FILE__) . '/../config.php';
     if (function_exists('mb_id') && function_exists('get_member_name')) {
@@ -13,8 +13,8 @@ if (file_exists(dirname(__FILE__) . '/../config.php')) {
             $loggedInUserName = get_member_name($mbId);
         }
     }
-    if (function_exists('mb_id') && function_exists('is_admin')) {
-        $is_admin = is_admin(mb_id());
+    if (function_exists('mb_id') && function_exists('get_member_position')) {
+        $is_elder = (get_member_position(mb_id()) >= '2');
     }
 }
 
@@ -370,6 +370,7 @@ $embed = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         .container {
             min-width: 340px;
+            max-width: 1024px;
             margin: 0 auto;
             background: white;
             border-radius: 6px;
@@ -1284,58 +1285,16 @@ $embed = isset($_GET['embed']) && $_GET['embed'] == '1';
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
-        <div style="text-align: center; margin-top: 10px; padding: 10px 20px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-            <?php if ($is_admin): ?>
+        <?php if ($is_elder): ?>
+        <div style="margin-top: 16px; border-top: 1px solid #e0e0e0; padding-top: 12px;">
+            <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px;">
+                <div style="font-weight: 600; font-size: 14px; color: #333; margin-bottom: 6px;">관리자모드</div>
+                <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">프로그램 배정을 수정하고 웹에서 데이터를 가져올 수 있습니다. 변경 후 저장 버튼을 눌러야 적용됩니다.</p>
                 <a href="index.php?year=<?php echo $year; ?>&week=<?php echo $week . $eq; ?>"
-                    id="adminBtn"
-                    class="admin-btn"
-                    style="display: inline-block;
-                    padding: 8px 16px;
-                    background: #f1f5f9;
-                    color: #94a3b8;
-                    text-decoration: none;
-                    border-radius: 6px;
-                    font-weight: 400;
-                    font-size: 15px;
-                    border: 1px solid #e2e8f0;
-                    box-shadow: none;
-                    transition: all 0.2s ease;">
-                    <span id="adminBtnText">관리자모드로 보기</span>
-                </a>
-            <?php endif; ?>
-            <a href="#"
-                id="newWindowBtn"
-                style="display: none;
-                    padding: 8px 16px;
-                    background: #f1f5f9;
-                    color: #94a3b8;
-                    text-decoration: none;
-                    border-radius: 6px;
-                    font-weight: 400;
-                    font-size: 15px;
-                    border: 1px solid #e2e8f0;
-                    box-shadow: none;
-                    transition: all 0.2s ease;">
-                새창으로 보기 ↗
-            </a>
+                   style="width: 100%; display: block; text-align: center; text-decoration: none; padding: 8px 16px; border-radius: 4px; font-size: 14px; font-weight: 600; background: #e0e0e0; color: #333; border: none; cursor: pointer; box-sizing: border-box;">관리자모드로 보기</a>
+            </div>
         </div>
-        <script>
-            // iframe 안에서만 새창으로 열기
-            (function() {
-                const isInIframe = window.self !== window.top;
-                const adminBtn = document.getElementById('adminBtn');
-                const newWindowBtn = document.getElementById('newWindowBtn');
-
-                if (isInIframe) {
-                    // 새창으로 보기 버튼 표시
-                    newWindowBtn.style.display = 'inline-block';
-                    newWindowBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        window.open(window.location.href, '_blank', 'noopener,noreferrer');
-                    });
-                }
-            })();
-        </script>
+        <?php endif; ?>
     </div>
 
     <script>

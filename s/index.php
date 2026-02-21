@@ -4,7 +4,7 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 
 // 로그인한 사용자 정보 가져오기
 $loggedInUserName = '';
-$is_admin = false;
+$is_elder = false;
 if (file_exists(dirname(__FILE__) . '/../config.php')) {
     require_once dirname(__FILE__) . '/../config.php';
     if (function_exists('mb_id') && function_exists('get_member_name')) {
@@ -13,13 +13,13 @@ if (file_exists(dirname(__FILE__) . '/../config.php')) {
             $loggedInUserName = get_member_name($mbId);
         }
     }
-    if (function_exists('mb_id') && function_exists('is_admin')) {
-        $is_admin = is_admin(mb_id());
+    if (function_exists('mb_id') && function_exists('get_member_position')) {
+        $is_elder = (get_member_position(mb_id()) >= '2');
     }
 }
 
-// 관리자가 아니면 view.php로 리다이렉트
-if (!$is_admin) {
+// 장로가 아니면 view.php로 리다이렉트
+if (!$is_elder) {
     header('Location: view.php' . (isset($_GET['year']) && isset($_GET['week']) ? '?year=' . $_GET['year'] . '&week=' . $_GET['week'] : ''));
     exit;
 }
@@ -263,6 +263,7 @@ if (!empty($loggedInUserName)) {
         }
 
         .container {
+            max-width: 1024px;
             margin: 0 auto;
             background: white;
             border-radius: 6px;
@@ -1011,19 +1012,15 @@ if (!empty($loggedInUserName)) {
 
         <!-- 프로그램 입력 영역 -->
         <div id="program-content" style="<?php echo (!empty($data['no_meeting']) && $data['no_meeting']) ? 'display:none;' : ''; ?>">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
-                <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+            <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                     <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">날짜</span>
-                    <input type="text" class="date-edit" id="date" value="<?php echo htmlspecialchars($data['date']); ?>" placeholder="날짜 입력 (예: 11월 3-9일)" style="flex: 1;">
+                    <input type="text" class="date-edit" id="date" value="<?php echo htmlspecialchars($data['date']); ?>" placeholder="날짜 입력 (예: 11월 3-9일)" style="flex: 1; margin-bottom: 0;">
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                     <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">성경 읽기</span>
-                    <input type="text" id="bible_reading" value="<?php echo htmlspecialchars($data['bible_reading']); ?>" class="bible-edit" placeholder="성경 읽기 범위" style="flex: 1;">
+                    <input type="text" id="bible_reading" value="<?php echo htmlspecialchars($data['bible_reading']); ?>" class="bible-edit" placeholder="성경 읽기 범위" style="flex: 1; margin-bottom: 0;">
                 </div>
-            </div>
-
-            <!-- 노래 정보 섹션 -->
-            <div class="songs-section">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="font-weight: 600; font-size: 13px; color: #555;">노래:</span>
                     <span style="font-size: 13px; color: #666;">시작</span>
@@ -1036,16 +1033,12 @@ if (!empty($loggedInUserName)) {
             </div>
 
             <!-- 배정 정보 섹션 -->
-            <div class="assignments-section">
-                <div class="assignment-row">
-                    <div class="assignment-item">
-                        <span class="assignment-label">소개말</span>
-                        <input type="text" class="assignment-input" id="opening_remarks" value="<?php echo htmlspecialchars($data['assignments']['opening_remarks']); ?>" placeholder="이름">
-                    </div>
-                    <div class="assignment-item">
-                        <span class="assignment-label">시작 기도</span>
-                        <input type="text" class="assignment-input" id="opening_prayer" value="<?php echo htmlspecialchars($data['assignments']['opening_prayer']); ?>" placeholder="이름">
-                    </div>
+            <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">소개말</span>
+                    <input type="text" class="assignment-input" id="opening_remarks" value="<?php echo htmlspecialchars($data['assignments']['opening_remarks']); ?>" placeholder="이름">
+                    <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">시작 기도</span>
+                    <input type="text" class="assignment-input" id="opening_prayer" value="<?php echo htmlspecialchars($data['assignments']['opening_prayer']); ?>" placeholder="이름">
                 </div>
             </div>
 
@@ -1055,6 +1048,8 @@ if (!empty($loggedInUserName)) {
                     <span class="section-icon dc-icon--gem"></span>
                     <input type="text" class="section-title-edit" id="section_treasures" name="sections[treasures]" value="<?php echo htmlspecialchars($data['sections']['treasures']); ?>" placeholder="섹션 제목">
                 </div>
+                <div style="overflow-x: auto; margin: 0 -8px; padding: 0 8px;">
+                <div style="min-width: 400px;">
                 <div id="treasuresContainer">
                     <?php foreach ($categorized['treasures'] as $index => $item): ?>
                         <div class="program-item" data-section="treasures" data-index="<?php echo $index; ?>">
@@ -1072,6 +1067,8 @@ if (!empty($loggedInUserName)) {
                         </div>
                     <?php endforeach; ?>
                 </div>
+                </div>
+                </div>
                 <button type="button" class="btn-add" onclick="addProgram('treasures')">+ 항목 추가</button>
             </div>
 
@@ -1081,6 +1078,8 @@ if (!empty($loggedInUserName)) {
                     <span class="section-icon dc-icon--wheat"></span>
                     <input type="text" class="section-title-edit" id="section_ministry" name="sections[ministry]" value="<?php echo htmlspecialchars($data['sections']['ministry']); ?>" placeholder="섹션 제목">
                 </div>
+                <div style="overflow-x: auto; margin: 0 -8px; padding: 0 8px;">
+                <div style="min-width: 400px;">
                 <div id="ministryContainer">
                     <?php foreach ($categorized['ministry'] as $index => $item): ?>
                         <div class="program-item" data-section="ministry" data-index="<?php echo $index; ?>">
@@ -1098,6 +1097,8 @@ if (!empty($loggedInUserName)) {
                         </div>
                     <?php endforeach; ?>
                 </div>
+                </div>
+                </div>
                 <button type="button" class="btn-add" onclick="addProgram('ministry')">+ 항목 추가</button>
             </div>
 
@@ -1107,6 +1108,8 @@ if (!empty($loggedInUserName)) {
                     <span class="section-icon dc-icon--sheep"></span>
                     <input type="text" class="section-title-edit" id="section_living" name="sections[living]" value="<?php echo htmlspecialchars($data['sections']['living']); ?>" placeholder="섹션 제목">
                 </div>
+                <div style="overflow-x: auto; margin: 0 -8px; padding: 0 8px;">
+                <div style="min-width: 400px;">
                 <div id="livingContainer">
                     <?php foreach ($categorized['living'] as $index => $item): ?>
                         <div class="program-item" data-section="living" data-index="<?php echo $index; ?>">
@@ -1124,19 +1127,17 @@ if (!empty($loggedInUserName)) {
                         </div>
                     <?php endforeach; ?>
                 </div>
+                </div>
+                </div>
                 <button type="button" class="btn-add" onclick="addProgram('living')">+ 항목 추가</button>
             </div>
 
-            <div class="assignments-section">
-                <div class="assignment-row">
-                    <div class="assignment-item">
-                        <span class="assignment-label">맺음말</span>
-                        <input type="text" class="assignment-input" id="closing_remarks" value="<?php echo htmlspecialchars($data['assignments']['closing_remarks']); ?>" placeholder="이름">
-                    </div>
-                    <div class="assignment-item">
-                        <span class="assignment-label">마치는 기도</span>
-                        <input type="text" class="assignment-input" id="closing_prayer" value="<?php echo htmlspecialchars($data['assignments']['closing_prayer']); ?>" placeholder="이름">
-                    </div>
+            <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">맺음말</span>
+                    <input type="text" class="assignment-input" id="closing_remarks" value="<?php echo htmlspecialchars($data['assignments']['closing_remarks']); ?>" placeholder="이름">
+                    <span style="font-weight: 600; font-size: 13px; color: #555; white-space: nowrap;">마치는 기도</span>
+                    <input type="text" class="assignment-input" id="closing_prayer" value="<?php echo htmlspecialchars($data['assignments']['closing_prayer']); ?>" placeholder="이름">
                 </div>
             </div>
 
@@ -1153,7 +1154,7 @@ if (!empty($loggedInUserName)) {
                 <span>배정없음</span>
             </label>
             <p style="font-size: 12px; color: #666; margin: 0 0 8px 0; line-height: 1.4;">
-                대회, 순회 방문, 기념식 주간 등 정규 집회가 없는 경우에 사용하세요.
+                대회, 순회방문, 기념식 등 집회가 없는 경우에 사용하세요.
             </p>
             <input type="text" class="no-meeting-title" id="no_meeting_title" placeholder="제목 입력 (예: 대회)" value="<?php echo htmlspecialchars(isset($data['no_meeting_title']) ? $data['no_meeting_title'] : ''); ?>" style="<?php echo (empty($data['no_meeting']) || !$data['no_meeting']) ? 'display:none;' : ''; ?>">
             <textarea class="no-meeting-reason" id="no_meeting_reason" placeholder="상세 사유 입력 (예: 지역대회 주간)" rows="10" style="<?php echo (empty($data['no_meeting']) || !$data['no_meeting']) ? 'display:none;' : ''; ?>"><?php echo htmlspecialchars(isset($data['no_meeting_reason']) ? $data['no_meeting_reason'] : ''); ?></textarea>
@@ -1168,19 +1169,19 @@ if (!empty($loggedInUserName)) {
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <label style="display: flex; align-items: center; padding: 6px 12px; background: white; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 13px;">
                     <input type="radio" name="meeting_weekday" value="2" style="margin-right: 6px;">
-                    <span>화요일</span>
+                    <span>화</span>
                 </label>
                 <label style="display: flex; align-items: center; padding: 6px 12px; background: white; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 13px;">
                     <input type="radio" name="meeting_weekday" value="3" style="margin-right: 6px;" checked>
-                    <span>수요일</span>
+                    <span>수</span>
                 </label>
                 <label style="display: flex; align-items: center; padding: 6px 12px; background: white; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 13px;">
                     <input type="radio" name="meeting_weekday" value="4" style="margin-right: 6px;">
-                    <span>목요일</span>
+                    <span>목</span>
                 </label>
                 <label style="display: flex; align-items: center; padding: 6px 12px; background: white; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 13px;">
                     <input type="radio" name="meeting_weekday" value="5" style="margin-right: 6px;">
-                    <span>금요일</span>
+                    <span>금</span>
                 </label>
             </div>
         </div>
@@ -1189,7 +1190,10 @@ if (!empty($loggedInUserName)) {
             <button onclick="saveData()" class="action-button save">💾 저장하기</button>
         </div>
 
-        <div style="margin-top: 20px; border-top: 1px solid #e0e0e0; padding-top: 15px;">
+    </div><!-- /.container -->
+
+    <div style="max-width: 1024px; margin: 0 auto; padding: 8px;">
+        <div style="margin-top: 12px; border-top: 1px solid #e0e0e0; padding-top: 15px;">
             <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                     <span style="font-weight: 600; font-size: 14px; color: #333;">사용자모드로 보기</span>
@@ -1200,9 +1204,6 @@ if (!empty($loggedInUserName)) {
                 <a href="view.php?year=<?php echo $year; ?>&week=<?php echo $week; ?><?php echo $embed ? '&embed=1' : ''; ?>" class="action-button preview" style="width: 100%; margin: 0; display: block; text-align: center; text-decoration: none;">👁️ 사용자모드로 보기</a>
             </div>
 
-            <div id="newWindowGroup" style="display:none; background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
-                <a href="#" id="newWindowBtn" class="action-button preview" style="width: 100%; margin: 0; display: block; text-align: center; text-decoration: none;">↗ 새창으로 보기</a>
-            </div>
 
             <div id="web-fetch-section" style="<?php echo (!empty($data['no_meeting']) && $data['no_meeting']) ? 'display:none;' : ''; ?>">
                 <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
@@ -1878,20 +1879,6 @@ if (!empty($loggedInUserName)) {
 
             return meetingMonth + '월 ' + meetingDay + '일';
         }
-        // iframe 안에서 새창으로 보기 버튼 표시
-        (function() {
-            if (window.self !== window.top) {
-                var group = document.getElementById('newWindowGroup');
-                var btn = document.getElementById('newWindowBtn');
-                if (group) group.style.display = '';
-                if (btn) {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        window.open(window.location.href, '_blank', 'noopener,noreferrer');
-                    });
-                }
-            }
-        })();
     </script>
 </body>
 

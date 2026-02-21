@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Seoul');
 
 // 로그인한 사용자 정보
 $loggedInUserName = '';
-$is_admin = false;
+$is_elder = false;
 if (file_exists(dirname(__FILE__) . '/../config.php')) {
     @require_once dirname(__FILE__) . '/../config.php';
     if (function_exists('mb_id') && function_exists('get_member_name')) {
@@ -15,8 +15,8 @@ if (file_exists(dirname(__FILE__) . '/../config.php')) {
             $loggedInUserName = get_member_name($mbId);
         }
     }
-    if (function_exists('mb_id') && function_exists('is_admin')) {
-        $is_admin = is_admin(mb_id());
+    if (function_exists('mb_id') && function_exists('get_member_position')) {
+        $is_elder = (get_member_position(mb_id()) >= '2');
     }
 }
 
@@ -131,13 +131,13 @@ $today = (new DateTime())->format('Y-m-d');
         .talk-table tr:last-child td { border-bottom: none; }
         .talk-table tr:hover { background: #f9f9f9; }
 
-        .col-date { width: 80px; text-align: center; white-space: nowrap; }
-        .col-speaker { width: 70px; text-align: center; }
-        .col-congregation { width: 90px; text-align: center; }
-        .col-topic { min-width: 150px; width: 25%; }
-        .col-chairman { width: 60px; text-align: center; }
-        .col-reader { width: 60px; text-align: center; }
-        .col-prayer { width: 60px; text-align: center; }
+        .col-date { width: 1%; text-align: center; white-space: nowrap; }
+        .col-speaker { width: 1%; text-align: center; white-space: nowrap; }
+        .col-congregation { width: 1%; text-align: center; white-space: nowrap; }
+        .col-topic { }
+        .col-chairman { width: 1%; text-align: center; white-space: nowrap; }
+        .col-reader { width: 1%; text-align: center; white-space: nowrap; }
+        .col-prayer { width: 1%; text-align: center; white-space: nowrap; }
         .date-text { font-weight: 600; }
         .my-name {
             background: linear-gradient(135deg, #ef4444, #f97316);
@@ -162,6 +162,9 @@ $today = (new DateTime())->format('Y-m-d');
             display: block;
             line-height: 1.4;
         }
+        .mobile-speaker { display: none; }
+        .desktop-only { }
+        .mobile-only-label { display: none; }
         .past-row { opacity: 0.5; }
         .next-row td { border-top: 2px solid #ef4444; border-bottom: 2px solid #ef4444; }
         .next-row td:first-child { border-left: 2px solid #ef4444; }
@@ -172,44 +175,69 @@ $today = (new DateTime())->format('Y-m-d');
             color: #999;
             font-size: 15px;
         }
-        .utility-section {
-            margin-top: 12px;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+        .bottom-actions {
+            margin-top: 16px;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 12px;
         }
-        .utility-btn {
-            padding: 8px 14px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: white;
-            color: #555;
+        .action-card {
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .action-card.normal { background: #f8f9ff; border: 1px solid #e0e0e0; }
+        .action-card-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        .action-card-desc {
             font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        .action-card-btn {
+            width: 100%;
+            display: block;
+            text-align: center;
             text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
             cursor: pointer;
         }
-        .utility-btn:hover { background: #f5f5f5; }
-        #newWindowGroup { display: none; margin-top: 8px; }
+        .action-card-btn.admin { background: #e0e0e0; color: #333; }
+        .action-card-btn.admin:hover { background: #d5d5d5; }
+        #newWindowGroup { display: none; }
 
+        .table-scroll-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 12px;
+        }
         @media (max-width: 768px) {
-            body { overflow-x: auto; }
-            .container { padding: 6px; min-width: 540px; }
-            .talk-table { font-size: 11px; min-width: 520px; }
+            .container { padding: 40px 6px 6px; }
+            .talk-table { font-size: 12px; min-width: 420px; }
             .talk-table th { padding: 6px 3px; font-size: 11px; }
-            .talk-table td { padding: 4px 3px; font-size: 11px; }
-            .col-date { width: 55px; }
-            .col-speaker, .col-chairman, .col-reader, .col-prayer { width: 45px; }
-            .col-congregation { width: 65px; }
-            .page-title { font-size: 15px; }
+            .talk-table td { padding: 5px 3px; font-size: 12px; }
+            .col-date { width: 1%; white-space: nowrap; }
+            .date-text { font-weight: normal; }
+            .col-speaker, .col-congregation { display: none; }
+            .col-chairman, .col-reader, .col-prayer { width: 1%; white-space: nowrap; }
+            .mobile-speaker { display: block; font-weight: normal; margin-bottom: 2px; color: #555; }
+            .topic-text { font-weight: 700; }
+            .desktop-only { display: none !important; }
+            .mobile-only-label { display: inline-block !important; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="page-header">
-        <h1 class="page-title">공개 강연 계획표</h1>
-    </div>
-
+    <div class="table-scroll-wrap">
     <table class="talk-table">
         <thead>
             <tr>
@@ -251,12 +279,23 @@ $today = (new DateTime())->format('Y-m-d');
                     </td>
                     <td class="col-congregation"><?php echo htmlspecialchars($talk['congregation']); ?></td>
                     <td class="col-topic">
-                        <?php if ($talk['topic_type'] === 'circuit_visit'): ?>
-                            <span class="topic-label circuit">순회 방문</span>
-                        <?php elseif ($talk['topic_type'] === 'special_talk'): ?>
-                            <span class="topic-label special">특별 강연</span>
-                        <?php endif; ?>
-                        <span class="topic-text"><?php echo htmlspecialchars($talk['topic']); ?></span>
+                        <span class="desktop-only"><?php
+                            if ($talk['topic_type'] === 'circuit_visit') echo '<span class="topic-label circuit">순회 방문</span>';
+                            elseif ($talk['topic_type'] === 'special_talk') echo '<span class="topic-label special">특별 강연</span>';
+                        ?></span>
+                        <span class="topic-text"><?php
+                            if ($talk['topic_type'] === 'circuit_visit') echo '<span class="topic-label circuit mobile-only-label">순회 방문</span> ';
+                            elseif ($talk['topic_type'] === 'special_talk') echo '<span class="topic-label special mobile-only-label">특별 강연</span> ';
+                            echo htmlspecialchars($talk['topic']);
+                        ?></span>
+                        <span class="mobile-speaker"><?php
+                            $sp = trim($talk['speaker']); $cg = trim($talk['congregation']);
+                            if (!empty($sp)) {
+                                if ($sp === $loggedInUserName) echo '<span class="my-name">' . htmlspecialchars($sp) . '</span>';
+                                else echo htmlspecialchars($sp);
+                                if (!empty($cg)) echo '(' . htmlspecialchars($cg) . ')';
+                            }
+                        ?></span>
                     </td>
                     <td class="col-chairman">
                         <?php if (!empty(trim($talk['chairman'])) && trim($talk['chairman']) === $loggedInUserName): ?>
@@ -284,15 +323,20 @@ $today = (new DateTime())->format('Y-m-d');
             <?php endif; ?>
         </tbody>
     </table>
+    </div><!-- /.table-scroll-wrap -->
 
-    <div class="utility-section">
-        <?php if ($is_admin): ?>
-            <a href="talk_admin.php" class="utility-btn">관리자모드로 보기</a>
+    <div class="bottom-actions">
+        <?php if ($is_elder): ?>
+        <div class="action-card normal">
+            <div class="action-card-title">관리자모드</div>
+            <p class="action-card-desc">강연 일정을 추가, 수정, 삭제할 수 있습니다. 변경 사항은 자동 저장됩니다.</p>
+            <a href="talk_admin.php" class="action-card-btn admin">관리자모드로 보기</a>
+        </div>
         <?php endif; ?>
-    </div>
 
-    <div id="newWindowGroup">
-        <a href="#" id="newWindowBtn" class="utility-btn">새창으로 보기 ↗</a>
+        <div id="newWindowGroup" class="action-card normal">
+            <a href="#" id="newWindowBtn" class="action-card-btn admin">↗ 새창으로 보기</a>
+        </div>
     </div>
 </div>
 

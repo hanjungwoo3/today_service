@@ -1,16 +1,16 @@
 <?php
 date_default_timezone_set('Asia/Seoul');
 
-// 관리자 권한 체크
-$is_admin = false;
+// 장로 이상 권한 체크
+$is_elder = false;
 if (file_exists(dirname(__FILE__) . '/../config.php')) {
     @require_once dirname(__FILE__) . '/../config.php';
-    if (function_exists('mb_id') && function_exists('is_admin')) {
-        $is_admin = is_admin(mb_id());
+    if (function_exists('mb_id') && function_exists('get_member_position')) {
+        $is_elder = (get_member_position(mb_id()) >= '2');
     }
 }
 
-if (!$is_admin) {
+if (!$is_elder) {
     header('Location: talk_view.php');
     exit;
 }
@@ -170,13 +170,13 @@ foreach ($allTalks as $talk) {
         .talk-table tr:last-child td { border-bottom: none; }
         .talk-table tr:hover { background: #f9f9f9; }
 
-        .col-date { width: 80px; text-align: center; white-space: nowrap; }
-        .col-speaker { width: 70px; text-align: center; }
-        .col-congregation { width: 90px; text-align: center; }
-        .col-topic { min-width: 150px; width: 25%; }
-        .col-chairman { width: 60px; text-align: center; }
-        .col-reader { width: 60px; text-align: center; }
-        .col-prayer { width: 60px; text-align: center; }
+        .col-date { width: 1%; text-align: center; white-space: nowrap; }
+        .col-speaker { width: 1%; text-align: center; white-space: nowrap; }
+        .col-congregation { width: 1%; text-align: center; white-space: nowrap; }
+        .col-topic { }
+        .col-chairman { width: 1%; text-align: center; white-space: nowrap; }
+        .col-reader { width: 1%; text-align: center; white-space: nowrap; }
+        .col-prayer { width: 1%; text-align: center; white-space: nowrap; }
         .col-action { width: 28px; text-align: center; cursor: default; }
 
         .date-text { font-weight: 600; }
@@ -332,25 +332,25 @@ foreach ($allTalks as $talk) {
         .save-toast.success { background: #e8f5e9; color: #2e7d32; }
         .save-toast.error { background: #ffebee; color: #c62828; }
 
+        .table-scroll-wrap {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 12px;
+        }
         @media (max-width: 768px) {
-            body { overflow-x: auto; }
-            .container { padding: 6px; min-width: 540px; }
+            .container { padding: 40px 6px 6px; }
             .talk-table { font-size: 11px; min-width: 520px; }
             .talk-table th { padding: 6px 3px; font-size: 11px; }
             .talk-table td { padding: 4px 3px; font-size: 11px; }
-            .col-date { width: 55px; }
-            .col-speaker, .col-chairman, .col-reader, .col-prayer { width: 45px; }
-            .col-congregation { width: 65px; }
+            .col-date { width: 1%; white-space: nowrap; }
+            .col-speaker, .col-congregation { width: 1%; white-space: nowrap; }
+            .col-chairman, .col-reader, .col-prayer { width: 1%; white-space: nowrap; }
             .page-title { font-size: 15px; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="page-header">
-        <h1 class="page-title">공개 강연 계획표 <span style="font-size:12px;color:#888;font-weight:400;">관리자</span></h1>
-    </div>
-
     <div class="action-card normal" style="margin-bottom:12px;">
         <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
             <span style="font-weight:600; font-size:13px; white-space:nowrap;">출력 시작 날짜</span>
@@ -361,6 +361,7 @@ foreach ($allTalks as $talk) {
         <p style="font-size:12px; color:#888; margin-top:6px;">이 날짜부터 표시됩니다. 비워두면 지난주 일요일부터 표시됩니다.</p>
     </div>
 
+    <div class="table-scroll-wrap">
     <table class="talk-table" id="talkTable">
         <thead>
             <tr>
@@ -421,6 +422,7 @@ foreach ($allTalks as $talk) {
     <div class="add-row-section">
         <button type="button" class="btn-add-row" onclick="addRow()">+ 행 추가</button>
     </div>
+    </div><!-- /.table-scroll-wrap -->
 
     <div class="bottom-actions">
         <div class="action-card normal">
@@ -429,14 +431,10 @@ foreach ($allTalks as $talk) {
             <a href="talk_view.php" class="action-card-btn preview">👁️ 사용자모드로 보기</a>
         </div>
 
-        <div id="newWindowGroup" style="display:none;" class="action-card normal">
-            <a href="#" id="newWindowBtn" class="action-card-btn preview">↗ 새창으로 보기</a>
-        </div>
-
         <div class="action-card info">
             <div class="action-card-title">프린트하기</div>
             <p class="action-card-desc">공개 강연 계획표를 인쇄용 페이지로 확인합니다. 인쇄할 행을 선택할 수 있습니다.</p>
-            <a href="talk_print.php" class="action-card-btn print">🖨️ 프린트하기</a>
+            <a href="talk_print.php" target="_blank" class="action-card-btn print">🖨️ 프린트하기</a>
         </div>
     </div>
 </div>
@@ -998,20 +996,7 @@ foreach ($allTalks as $talk) {
         });
     }
 
-    // iframe 새창
-    if (window.self !== window.top) {
-        var group = document.getElementById('newWindowGroup');
-        var btn = document.getElementById('newWindowBtn');
-        if (group) group.style.display = '';
-        if (btn) {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.open(window.location.href, '_blank', 'noopener,noreferrer');
-            });
-        }
-    }
-    // 페이지 로드 시 빈 행 1개 기본 추가
-    addRow();
+    // 행 추가는 사용자가 직접 버튼 클릭 시에만
 
 })();
 </script>

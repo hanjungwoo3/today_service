@@ -3,17 +3,17 @@ date_default_timezone_set('Asia/Seoul');
 
 require_once __DIR__ . '/lib/helpers.php';
 
-// 관리자 권한 체크
-$is_admin = false;
+// 장로 권한 체크
+$is_elder = false;
 if (file_exists(dirname(__FILE__) . '/../config.php')) {
     @require_once dirname(__FILE__) . '/../config.php';
-    if (function_exists('mb_id') && function_exists('is_admin')) {
-        $is_admin = is_admin(mb_id());
+    if (function_exists('mb_id') && function_exists('get_member_position')) {
+        $is_elder = (get_member_position(mb_id()) >= '2');
     }
 }
 
-// 관리자가 아니면 view.php로 리다이렉트
-if (!$is_admin) {
+// 장로가 아니면 view.php로 리다이렉트
+if (!$is_elder) {
     header('Location: view.php' . (isset($_GET['year']) && isset($_GET['month']) ? '?year='.$_GET['year'].'&month='.$_GET['month'] : ''));
     exit;
 }
@@ -64,6 +64,8 @@ if ($status === 'saved') {
         <input type="hidden" name="year" value="<?php echo htmlspecialchars((string)$year, ENT_QUOTES); ?>" />
         <input type="hidden" name="month" value="<?php echo htmlspecialchars((string)$month, ENT_QUOTES); ?>" />
 
+        <div style="overflow-x: auto;">
+        <div style="min-width: 500px;">
         <div class="calendar-grid">
           <?php foreach (array('일','월','화','수','목','금','토') as $weekday): ?>
             <div class="weekday-header"><?php echo $weekday; ?></div>
@@ -179,6 +181,8 @@ if ($status === 'saved') {
             <?php endforeach; ?>
           </div>
         </div>
+        </div>
+        </div>
 
         <div class="save-section">
           <button type="submit" id="saveBtn" class="save-btn">저장하기</button>
@@ -200,19 +204,14 @@ if ($status === 'saved') {
               <?php
                 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
                 $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
-                $scriptName = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '/index.php';
-                $baseUrl = $protocol . '://' . $host . dirname($scriptName);
-                $viewUrl = $baseUrl . '/view.php?year=' . $year . '&month=' . $month;
+                $viewUrl = $protocol . '://' . $host . '/pages/service_guide_calendar.php';
               ?>
-              <a href="view.php?year=<?php echo $year; ?>&month=<?php echo $month; ?>" id="viewCalendarBtn" class="utility-btn view-calendar-btn" style="text-decoration: none;"><span id="viewCalendarBtnText">사용자모드로 보기</span></a>
+              <a href="/pages/service_guide_calendar.php" id="viewCalendarBtn" class="utility-btn view-calendar-btn" style="text-decoration: none;" target="_top"><span id="viewCalendarBtnText">사용자모드로 보기</span></a>
               <button type="button" id="copyViewLink" class="utility-btn" data-url="<?php echo htmlspecialchars($viewUrl, ENT_QUOTES); ?>">사용자모드 URL 복사</button>
             </div>
             <p class="utility-description">사용자모드로 볼 수 있는 링크를 클립보드에 복사합니다. 다른 사람들과 공유할 때 사용하세요.</p>
           </div>
 
-          <div class="utility-button-group" id="newWindowGroup" style="display:none;">
-            <a href="#" id="newWindowBtn" class="utility-btn" style="text-decoration:none;">새창으로 보기 ↗</a>
-          </div>
         </div>
       </form>
     </div>
@@ -274,20 +273,6 @@ if ($status === 'saved') {
         document.body.removeChild(textArea);
       }
       
-      // iframe 안에서 새창으로 보기 버튼 표시
-      (function() {
-        if (window.self !== window.top) {
-          var group = document.getElementById('newWindowGroup');
-          var btn = document.getElementById('newWindowBtn');
-          if (group) group.style.display = '';
-          if (btn) {
-            btn.addEventListener('click', function(e) {
-              e.preventDefault();
-              window.open(window.location.href, '_blank', 'noopener,noreferrer');
-            });
-          }
-        }
-      })();
     </script>
   </body>
 </html>

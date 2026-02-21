@@ -3,7 +3,7 @@ header('Cache-Control: no-cache, no-store, must-revalidate');
 date_default_timezone_set('Asia/Seoul');
 
 $loggedInUserName = '';
-$is_admin = false;
+$is_elder = false;
 if (file_exists(dirname(__FILE__) . '/../config.php')) {
     @require_once dirname(__FILE__) . '/../config.php';
     if (function_exists('mb_id') && function_exists('get_member_name')) {
@@ -12,8 +12,8 @@ if (file_exists(dirname(__FILE__) . '/../config.php')) {
             $loggedInUserName = get_member_name($mbId);
         }
     }
-    if (function_exists('mb_id') && function_exists('is_admin')) {
-        $is_admin = is_admin(mb_id());
+    if (function_exists('mb_id') && function_exists('get_member_position')) {
+        $is_elder = (get_member_position(mb_id()) >= '2');
     }
 }
 
@@ -52,9 +52,14 @@ function hl($name, $loggedIn) {
             font-size: 14px;
         }
         .container {
-            max-width: 620px;
+            max-width: 720px;
             margin: 0 auto;
             padding: 10px;
+        }
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
         }
         .page-header {
             display: flex;
@@ -64,47 +69,89 @@ function hl($name, $loggedIn) {
             margin-bottom: 8px;
         }
         .page-title { font-size: 18px; font-weight: 700; color: #333; }
-        .duty-table {
-            width: 100%;
-            border-collapse: collapse;
+
+        .month-card {
             background: white;
             border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            margin-bottom: 0;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 16px;
         }
-        .duty-table th {
-            padding: 8px 4px;
-            font-size: 12px;
-            font-weight: 600;
-            text-align: center;
-            white-space: nowrap;
-        }
-        .duty-table .header-row1 th { background: #333; color: white; }
-        .duty-table .header-row2 th { background: #555; color: white; font-size: 11px; }
-        .duty-table td {
-            padding: 6px 4px;
-            border-bottom: 1px solid #e8e8e8;
-            font-size: 13px;
-            text-align: center;
-            vertical-align: middle;
-        }
-        .duty-table tr:last-child td { border-bottom: none; }
-        .duty-table tr:hover { background: #f9f9f9; }
-
-        .col-month { width: 40px; font-weight: 700; white-space: nowrap; }
-        .col-group { width: 36px; }
-        .col-period { width: 80px; font-size: 12px; }
-        .col-name { width: auto; }
-
-        .group-cell {
+        .month-card.current { border: 2px solid #ef4444; }
+        .month-card:not(.current) { border: 1px solid #e0e0e0; }
+        .month-header {
+            padding: 6px 10px;
             font-weight: 700;
             font-size: 14px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #e8ecf0;
         }
-        tbody.current-month td[rowspan] { background: #fff5f5; }
-        tbody.current-month tr.active-half td { background: #fff5f5; }
-        tbody.month-group td { border-bottom: 1px solid #e8e8e8; }
-        tbody.month-group tr:last-child td { border-bottom: 1px solid #e8e8e8; }
+        .month-header .header-info {
+            display: flex;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #666;
+            margin-left: auto;
+        }
+        .month-header .header-info .cleaning-group {
+            color: #2e7d32;
+            font-weight: 700;
+        }
+        .month-card.current .month-header {
+            color: #ef4444;
+        }
+        .month-body { padding: 1px; }
+        .half-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+            background: #f8f9ff;
+            border: 1px solid #e8ecf0;
+            border-radius: 6px;
+            overflow: hidden;
+            font-size: 12px;
+        }
+        .half-table th {
+            background: #eef1f6;
+            font-size: 10px;
+            font-weight: 600;
+            color: #888;
+            padding: 2px 3px;
+            text-align: center;
+            border-bottom: 1px solid #e8ecf0;
+        }
+        .half-table th.active-half {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+        .half-table td.active-half {
+            background: #fff5f5;
+        }
+        .half-table td {
+            padding: 2px 3px;
+            border: 1px solid #e8ecf0;
+            text-align: left;
+            vertical-align: middle;
+        }
+        .half-table th {
+            border: 1px solid #e8ecf0;
+        }
+        .half-table td.row-label {
+            font-weight: 600;
+            color: #555;
+            font-size: 11px;
+            text-align: right;
+            white-space: nowrap;
+            background: #fafbfd;
+        }
+        .cleaning-group {
+            color: #2e7d32;
+            font-weight: 700;
+        }
 
         .my-name {
             background: linear-gradient(135deg, #ef4444, #f97316);
@@ -114,32 +161,11 @@ function hl($name, $loggedIn) {
             font-weight: 700;
         }
 
-        .utility-section {
-            margin-top: 12px;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .utility-btn {
-            padding: 8px 14px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: white;
-            color: #555;
-            font-size: 12px;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .utility-btn:hover { background: #f5f5f5; }
-        #newWindowGroup { display: none; margin-top: 8px; }
-
-        @media (max-width: 768px) {
-            body { overflow-x: auto; }
-            .container { padding: 6px; min-width: 520px; }
-            .duty-table { font-size: 11px; min-width: 520px; }
-            .duty-table th { padding: 6px 2px; font-size: 10px; }
-            .duty-table td { padding: 4px 2px; font-size: 11px; }
-            .page-title { font-size: 15px; }
+        @media (max-width: 600px) {
+            .container { padding: 6px; }
+            .month-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -149,88 +175,101 @@ function hl($name, $loggedIn) {
         <h1 class="page-title">청소/마이크/안내인/연사음료 계획표</h1>
     </div>
 
-    <table class="duty-table">
-        <thead>
-            <tr class="header-row1">
-                <th rowspan="2" class="col-month"></th>
-                <th rowspan="2" class="col-group">회관<br>청소<br>집단</th>
-                <th colspan="4">청중 마이크</th>
-                <th colspan="3">안내인</th>
-                <th colspan="2">연사 음료</th>
-            </tr>
-            <tr class="header-row2">
-                <th class="col-period">날짜</th>
-                <th class="col-name">마이크1</th>
-                <th class="col-name">마이크2</th>
-                <th class="col-name">보조</th>
-                <th class="col-name">청중석</th>
-                <th class="col-name">청중석</th>
-                <th class="col-name">출입구</th>
-                <th class="col-name">담당자</th>
-                <th class="col-name">보조</th>
-            </tr>
-        </thead>
-            <?php for ($m = 1; $m <= 12; $m++):
-                $month = isset($months[(string)$m]) ? $months[(string)$m] : array();
-                $fh = isset($month['first_half']) ? $month['first_half'] : array();
-                $sh = isset($month['second_half']) ? $month['second_half'] : array();
-                $isCurrent = ($year === $currentYear && $m === $currentMonth);
-                $tbodyClass = 'month-group' . ($isCurrent ? ' current-month' : '');
-                $firstHalfActive = ($isCurrent && $currentDay <= 15) ? ' active-half' : '';
-                $secondHalfActive = ($isCurrent && $currentDay > 15) ? ' active-half' : '';
+    <div class="month-grid">
+    <?php for ($m = 1; $m <= 12; $m++):
+        if ($year === $currentYear && $m < $currentMonth) continue;
+        $month = isset($months[(string)$m]) ? $months[(string)$m] : array();
+        $fh = isset($month['first_half']) ? $month['first_half'] : array();
+        $sh = isset($month['second_half']) ? $month['second_half'] : array();
+        $isCurrent = ($year === $currentYear && $m === $currentMonth);
+        $cardClass = 'month-card' . ($isCurrent ? ' current' : '');
+        $firstHalfActive = ($isCurrent && $currentDay <= 15) ? ' active-half' : '';
+        $secondHalfActive = ($isCurrent && $currentDay > 15) ? ' active-half' : '';
+
+        // 연사음료 표시
+        $dm = trim($month['drink_main'] ?? '');
+        $da = trim($month['drink_assist'] ?? '');
+        $drinkDisplay = '';
+        if (!empty($dm)) $drinkDisplay = hl($dm, $loggedInUserName);
+        if (!empty($da)) $drinkDisplay .= ' (' . hl($da, $loggedInUserName) . ')';
+    ?>
+    <div class="<?php echo $cardClass; ?>">
+        <div class="month-header">
+            <span><?php echo $m; ?>월</span>
+            <span class="header-info">
+                <?php $cg = trim($month['cleaning_group'] ?? ''); if (!empty($cg)): ?>
+                    <span>청소:<span class="cleaning-group"><?php echo htmlspecialchars($cg); ?></span></span>
+                <?php endif; ?>
+                <?php if (!empty(trim($drinkDisplay))): ?>
+                    <span>음료:<?php echo $drinkDisplay; ?></span>
+                <?php endif; ?>
+            </span>
+        </div>
+        <div class="month-body">
+            <?php
+                // 상반기/하반기 데이터 준비
+                $halfData = array();
+                foreach (array(array('label' => '상반기 (1-15일)', 'data' => $fh, 'activeClass' => $firstHalfActive), array('label' => '하반기 (16-말일)', 'data' => $sh, 'activeClass' => $secondHalfActive)) as $half) {
+                    $h = $half['data'];
+                    $m1 = trim($h['mic1'] ?? ''); $m2 = trim($h['mic2'] ?? ''); $ma = trim($h['mic_assist'] ?? '');
+                    $micMain = array();
+                    if (!empty($m1)) $micMain[] = hl($m1, $loggedInUserName);
+                    if (!empty($m2)) $micMain[] = hl($m2, $loggedInUserName);
+                    $micDisplay = implode(', ', $micMain);
+                    if (!empty($ma)) $micDisplay .= ' (' . hl($ma, $loggedInUserName) . ')';
+
+                    $hallNames = array();
+                    $h1 = trim($h['att_hall1'] ?? ''); $h2 = trim($h['att_hall2'] ?? '');
+                    if (!empty($h1)) $hallNames[] = hl($h1, $loggedInUserName);
+                    if (!empty($h2)) $hallNames[] = hl($h2, $loggedInUserName);
+
+                    $entrance = trim($h['att_entrance'] ?? '');
+                    $halfData[] = array(
+                        'label' => $half['label'], 'activeClass' => $half['activeClass'],
+                        'mic' => !empty(trim($micDisplay)) ? $micDisplay : '-',
+                        'hall' => !empty($hallNames) ? implode(', ', $hallNames) : '-',
+                        'entrance' => !empty($entrance) ? hl($entrance, $loggedInUserName) : '-',
+                    );
+                }
             ?>
-            <tbody class="<?php echo $tbodyClass; ?>">
-                <tr class="<?php echo trim($firstHalfActive); ?>">
-                    <td class="col-month" rowspan="2"><?php echo $m; ?>월</td>
-                    <td class="col-group group-cell" rowspan="2" style="color:#2e7d32;"><?php echo htmlspecialchars($month['cleaning_group'] ?? ''); ?></td>
-                    <td class="col-period">1일 - 15일</td>
-                    <td><?php echo hl($fh['mic1'] ?? '', $loggedInUserName); ?></td>
-                    <td><?php echo hl($fh['mic2'] ?? '', $loggedInUserName); ?></td>
-                    <td><?php echo hl($fh['mic_assist'] ?? '', $loggedInUserName); ?></td>
-                    <td><?php echo hl($fh['att_hall1'] ?? '', $loggedInUserName); ?></td>
-                    <td><?php echo hl($fh['att_hall2'] ?? '', $loggedInUserName); ?></td>
-                    <td><?php echo hl($fh['att_entrance'] ?? '', $loggedInUserName); ?></td>
-                    <td rowspan="2"><?php echo hl($month['drink_main'] ?? '', $loggedInUserName); ?></td>
-                    <td rowspan="2"><?php echo hl($month['drink_assist'] ?? '', $loggedInUserName); ?></td>
-                </tr>
-                <tr class="<?php echo trim($secondHalfActive); ?>">
-                    <td class="col-period">16일 - 말일</td>
-                    <td><?php echo hl($sh['mic1'] ?? '', $loggedInUserName); ?></td>
-                    <td><?php echo hl($sh['mic2'] ?? '', $loggedInUserName); ?></td>
-                    <td><?php echo hl($sh['mic_assist'] ?? '', $loggedInUserName); ?></td>
-                    <td><?php echo hl($sh['att_hall1'] ?? '', $loggedInUserName); ?></td>
-                    <td><?php echo hl($sh['att_hall2'] ?? '', $loggedInUserName); ?></td>
-                    <td><?php echo hl($sh['att_entrance'] ?? '', $loggedInUserName); ?></td>
-                </tr>
-            </tbody>
-            <?php endfor; ?>
-    </table>
-
-    <div class="utility-section">
-        <?php if ($is_admin): ?>
-            <a href="duty_admin.php?year=<?php echo $year; ?>" class="utility-btn">관리자모드로 보기</a>
-        <?php endif; ?>
+            <table class="half-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th class="<?php echo trim($halfData[0]['activeClass']); ?>"><?php echo $halfData[0]['label']; ?></th>
+                        <th class="<?php echo trim($halfData[1]['activeClass']); ?>"><?php echo $halfData[1]['label']; ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="row-label">마이크</td>
+                        <td class="<?php echo trim($halfData[0]['activeClass']); ?>"><?php echo $halfData[0]['mic']; ?></td>
+                        <td class="<?php echo trim($halfData[1]['activeClass']); ?>"><?php echo $halfData[1]['mic']; ?></td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">청중석 안내</td>
+                        <td class="<?php echo trim($halfData[0]['activeClass']); ?>"><?php echo $halfData[0]['hall']; ?></td>
+                        <td class="<?php echo trim($halfData[1]['activeClass']); ?>"><?php echo $halfData[1]['hall']; ?></td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">출입구 안내</td>
+                        <td class="<?php echo trim($halfData[0]['activeClass']); ?>"><?php echo $halfData[0]['entrance']; ?></td>
+                        <td class="<?php echo trim($halfData[1]['activeClass']); ?>"><?php echo $halfData[1]['entrance']; ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
+    <?php endfor; ?>
 
-    <div id="newWindowGroup">
-        <a href="#" id="newWindowBtn" class="utility-btn">새창으로 보기 ↗</a>
+    <?php if ($is_elder): ?>
+    <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; overflow: hidden;">
+        <div style="font-weight: 600; font-size: 13px; color: #333; margin-bottom: 4px;">관리자모드</div>
+        <p style="font-size: 11px; color: #666; margin-bottom: 6px; line-height: 1.4;">청소 집단, 마이크, 안내인, 연사음료 배정을 수정할 수 있습니다.</p>
+        <a href="duty_admin.php?year=<?php echo $year; ?>" style="display: block; text-align: center; padding: 6px 12px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 12px;">관리자모드로 보기</a>
+    </div>
+    <?php endif; ?>
     </div>
 </div>
-
-<script>
-(function() {
-    if (window.self !== window.top) {
-        var group = document.getElementById('newWindowGroup');
-        var btn = document.getElementById('newWindowBtn');
-        if (group) group.style.display = '';
-        if (btn) {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.open(window.location.href, '_blank', 'noopener,noreferrer');
-            });
-        }
-    }
-})();
-</script>
 </body>
 </html>

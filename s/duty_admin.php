@@ -1,15 +1,15 @@
 <?php
 date_default_timezone_set('Asia/Seoul');
 
-$is_admin = false;
+$is_elder = false;
 if (file_exists(dirname(__FILE__) . '/../config.php')) {
     @require_once dirname(__FILE__) . '/../config.php';
-    if (function_exists('mb_id') && function_exists('is_admin')) {
-        $is_admin = is_admin(mb_id());
+    if (function_exists('mb_id') && function_exists('get_member_position')) {
+        $is_elder = (get_member_position(mb_id()) >= '2');
     }
 }
 
-if (!$is_admin) {
+if (!$is_elder) {
     header('Location: duty_view.php');
     exit;
 }
@@ -52,7 +52,7 @@ $months = $data['months'];
             white-space: nowrap;
         }
         .container {
-            max-width: 620px;
+            max-width: 720px;
             margin: 0 auto;
             padding: 10px;
         }
@@ -79,60 +79,115 @@ $months = $data['months'];
         .header-btn:hover { background: #f0f0f0; }
         .header-btn.active { background: #4CAF50; color: white; border-color: #4CAF50; }
 
-        .duty-table {
-            width: 100%;
-            border-collapse: collapse;
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .month-card {
             background: white;
             border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 16px;
+            border: 1px solid #e0e0e0;
         }
-        .duty-table th {
-            padding: 8px 4px;
+        .month-header {
+            padding: 6px 10px;
+            font-weight: 700;
+            font-size: 14px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #e8ecf0;
+        }
+        .month-header .header-info {
+            display: flex;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #666;
+            margin-left: auto;
+            align-items: center;
+        }
+        .month-header .header-info .cleaning-group {
+            color: #2e7d32;
+            font-weight: 700;
+        }
+        .month-body { padding: 1px; }
+
+        .half-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+            background: #f8f9ff;
+            border: 1px solid #e8ecf0;
+            border-radius: 6px;
+            overflow: hidden;
             font-size: 12px;
+        }
+        .half-table th {
+            background: #eef1f6;
+            font-size: 10px;
             font-weight: 600;
+            color: #888;
+            padding: 2px 3px;
             text-align: center;
-            white-space: nowrap;
+            border: 1px solid #e8ecf0;
         }
-        .duty-table .header-row1 th { background: #333; color: white; }
-        .duty-table .header-row2 th { background: #555; color: white; font-size: 11px; }
-        .duty-table td {
-            padding: 6px 4px;
-            border-bottom: 1px solid #e8e8e8;
-            font-size: 13px;
-            text-align: center;
+        .half-table td {
+            padding: 2px 3px;
+            border: 1px solid #e8ecf0;
+            text-align: left;
             vertical-align: middle;
-            cursor: pointer;
         }
-        .duty-table tr:last-child td { border-bottom: none; }
+        .half-table td.row-label {
+            font-weight: 600;
+            color: #555;
+            font-size: 11px;
+            text-align: right;
+            white-space: nowrap;
+            background: #fafbfd;
+        }
 
-        .col-month { width: 40px; font-weight: 700; cursor: default; white-space: nowrap; }
-        .col-group { width: 36px; }
-        .col-period { width: 80px; font-size: 12px; cursor: default; }
-        .col-name { width: auto; }
-
-        .group-cell { font-weight: 700; font-size: 14px; color: #2e7d32; }
-        .month-separator td { border-bottom: 2px solid #ccc; }
-        .cell-empty { color: #ccc; }
-
+        /* 인라인 편집 */
+        td.editable { cursor: pointer; }
         td.editable:hover {
             background: #e3f2fd;
             outline: 1px dashed #90caf9;
         }
-        td.editing { padding: 2px; }
+        td.editing { padding: 1px; }
         td.editing input[type="text"] {
-            width: 4.5em;
-            padding: 3px 2px;
+            width: 100%;
+            padding: 2px 3px;
             border: 1px solid #42a5f5;
             border-radius: 3px;
-            font-size: 12px;
+            font-size: 11px;
             font-family: inherit;
             outline: none;
             background: white;
             box-shadow: 0 0 0 2px rgba(66,165,245,0.2);
-            text-align: center;
         }
+        .header-editable {
+            cursor: pointer;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+        .header-editable:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        .header-editable.editing input[type="text"] {
+            width: 4em;
+            padding: 1px 3px;
+            border: 1px solid #42a5f5;
+            border-radius: 3px;
+            font-size: 11px;
+            font-family: inherit;
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 2px rgba(66,165,245,0.2);
+        }
+        .cell-empty { color: #ccc; }
 
         .bottom-actions {
             margin-top: 20px;
@@ -184,21 +239,19 @@ $months = $data['months'];
         .save-toast.success { background: #e8f5e9; color: #2e7d32; }
         .save-toast.error { background: #ffebee; color: #c62828; }
 
-        @media (max-width: 768px) {
-            body { overflow-x: auto; }
-            .container { padding: 6px; min-width: 520px; }
-            .duty-table { font-size: 11px; min-width: 520px; }
-            .duty-table th { padding: 6px 2px; font-size: 10px; }
-            .duty-table td { padding: 4px 2px; font-size: 11px; }
-            .page-title { font-size: 15px; }
-            .bottom-actions { position: sticky; left: 0; width: calc(100vw - 12px); max-width: calc(100vw - 12px); }
+        @media (max-width: 600px) {
+            .container { padding: 6px; }
+            .page-header { flex-wrap: wrap; }
+            .header-actions { width: 100%; }
+            .month-grid { grid-template-columns: 1fr; }
+            .bottom-actions { position: sticky; left: 0; }
         }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="page-header">
-        <h1 class="page-title">청소/마이크/안내인/연사음료 <span style="font-size:12px;color:#888;font-weight:400;">관리자</span></h1>
+        <h1 class="page-title">청소/마이크/안내인/연사음료</h1>
         <div class="header-actions">
             <?php for ($y = $currentYear - 1; $y <= $currentYear + 1; $y++): ?>
                 <a href="?year=<?php echo $y; ?>"
@@ -207,59 +260,67 @@ $months = $data['months'];
         </div>
     </div>
 
-    <table class="duty-table" id="dutyTable">
-        <thead>
-            <tr class="header-row1">
-                <th rowspan="2" class="col-month"></th>
-                <th rowspan="2" class="col-group">회관<br>청소<br>집단</th>
-                <th colspan="4">청중 마이크</th>
-                <th colspan="3">안내인</th>
-                <th colspan="2">연사 음료</th>
-            </tr>
-            <tr class="header-row2">
-                <th class="col-period">날짜</th>
-                <th class="col-name">마이크1</th>
-                <th class="col-name">마이크2</th>
-                <th class="col-name">보조</th>
-                <th class="col-name">청중석</th>
-                <th class="col-name">청중석</th>
-                <th class="col-name">출입구</th>
-                <th class="col-name">담당자</th>
-                <th class="col-name">보조</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php for ($m = 1; $m <= 12; $m++):
-                $month = isset($months[(string)$m]) ? $months[(string)$m] : array();
-                $fh = isset($month['first_half']) ? $month['first_half'] : array();
-                $sh = isset($month['second_half']) ? $month['second_half'] : array();
-            ?>
-                <tr data-month="<?php echo $m; ?>" data-half="first">
-                    <td class="col-month" rowspan="2"><?php echo $m; ?>월</td>
-                    <td class="col-group group-cell editable" rowspan="2"
-                        data-month="<?php echo $m; ?>" data-field="cleaning_group"><?php echo htmlspecialchars($month['cleaning_group'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    <td class="col-period">1일 - 15일</td>
-                    <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic1"><?php echo htmlspecialchars($fh['mic1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic2"><?php echo htmlspecialchars($fh['mic2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic_assist"><?php echo htmlspecialchars($fh['mic_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_hall1"><?php echo htmlspecialchars($fh['att_hall1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_hall2"><?php echo htmlspecialchars($fh['att_hall2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_entrance"><?php echo htmlspecialchars($fh['att_entrance'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    <td class="editable" rowspan="2" data-month="<?php echo $m; ?>" data-field="drink_main"><?php echo htmlspecialchars($month['drink_main'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    <td class="editable" rowspan="2" data-month="<?php echo $m; ?>" data-field="drink_assist"><?php echo htmlspecialchars($month['drink_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                </tr>
-                <tr class="month-separator" data-month="<?php echo $m; ?>" data-half="second">
-                    <td class="col-period">16일 - 말일</td>
-                    <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic1"><?php echo htmlspecialchars($sh['mic1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic2"><?php echo htmlspecialchars($sh['mic2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic_assist"><?php echo htmlspecialchars($sh['mic_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_hall1"><?php echo htmlspecialchars($sh['att_hall1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_hall2"><?php echo htmlspecialchars($sh['att_hall2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_entrance"><?php echo htmlspecialchars($sh['att_entrance'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                </tr>
-            <?php endfor; ?>
-        </tbody>
-    </table>
+    <div class="month-grid">
+    <?php for ($m = 1; $m <= 12; $m++):
+        $month = isset($months[(string)$m]) ? $months[(string)$m] : array();
+        $fh = isset($month['first_half']) ? $month['first_half'] : array();
+        $sh = isset($month['second_half']) ? $month['second_half'] : array();
+    ?>
+    <div class="month-card">
+        <div class="month-header">
+            <span><?php echo $m; ?>월</span>
+            <span class="header-info">
+                <span>청소:<span class="header-editable cleaning-group" data-month="<?php echo $m; ?>" data-field="cleaning_group"><?php echo htmlspecialchars($month['cleaning_group'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span></span>
+                <span>음료:<span class="header-editable" data-month="<?php echo $m; ?>" data-field="drink_main"><?php echo htmlspecialchars($month['drink_main'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>
+                (<span class="header-editable" data-month="<?php echo $m; ?>" data-field="drink_assist"><?php echo htmlspecialchars($month['drink_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>)</span>
+            </span>
+        </div>
+        <div class="month-body">
+            <table class="half-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>상반기 (1-15일)</th>
+                        <th>하반기 (16-말일)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="row-label">마이크1</td>
+                        <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic1"><?php echo htmlspecialchars($fh['mic1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                        <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic1"><?php echo htmlspecialchars($sh['mic1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">마이크2</td>
+                        <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic2"><?php echo htmlspecialchars($fh['mic2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                        <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic2"><?php echo htmlspecialchars($sh['mic2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">마이크보조</td>
+                        <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic_assist"><?php echo htmlspecialchars($fh['mic_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                        <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic_assist"><?php echo htmlspecialchars($sh['mic_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">청중석1</td>
+                        <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_hall1"><?php echo htmlspecialchars($fh['att_hall1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                        <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_hall1"><?php echo htmlspecialchars($sh['att_hall1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">청중석2</td>
+                        <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_hall2"><?php echo htmlspecialchars($fh['att_hall2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                        <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_hall2"><?php echo htmlspecialchars($sh['att_hall2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">출입구</td>
+                        <td class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_entrance"><?php echo htmlspecialchars($fh['att_entrance'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                        <td class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_entrance"><?php echo htmlspecialchars($sh['att_entrance'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <?php endfor; ?>
+    </div>
 
     <div class="bottom-actions">
         <div class="action-card normal">
@@ -271,7 +332,7 @@ $months = $data['months'];
         <div class="action-card info">
             <div class="action-card-title">프린트하기</div>
             <p class="action-card-desc">계획표를 인쇄용 페이지로 확인합니다.</p>
-            <a href="duty_print.php?year=<?php echo $year; ?>" class="action-card-btn print">프린트하기</a>
+            <a href="duty_print.php?year=<?php echo $year; ?>" target="_blank" class="action-card-btn print">프린트하기</a>
         </div>
     </div>
 </div>
@@ -282,8 +343,6 @@ $months = $data['months'];
 (function() {
     var editingCell = null;
     var currentYear = <?php echo $year; ?>;
-
-    // 현재 데이터를 메모리에 유지
     var dutyData = <?php echo json_encode($data, JSON_UNESCAPED_UNICODE); ?>;
 
     function escapeHtml(str) {
@@ -293,10 +352,10 @@ $months = $data['months'];
         return div.innerHTML;
     }
 
-    function getCellValue(td) {
-        var month = td.getAttribute('data-month');
-        var field = td.getAttribute('data-field');
-        var half = td.getAttribute('data-half');
+    function getCellValue(el) {
+        var month = el.getAttribute('data-month');
+        var field = el.getAttribute('data-field');
+        var half = el.getAttribute('data-half');
 
         if (!dutyData.months[month]) return '';
 
@@ -309,10 +368,10 @@ $months = $data['months'];
         return dutyData.months[month][halfKey][field] || '';
     }
 
-    function setCellValue(td, value) {
-        var month = td.getAttribute('data-month');
-        var field = td.getAttribute('data-field');
-        var half = td.getAttribute('data-half');
+    function setCellValue(el, value) {
+        var month = el.getAttribute('data-month');
+        var field = el.getAttribute('data-field');
+        var half = el.getAttribute('data-half');
 
         if (!dutyData.months[month]) {
             dutyData.months[month] = {
@@ -334,84 +393,83 @@ $months = $data['months'];
         }
     }
 
-    function renderCell(td) {
-        var value = getCellValue(td);
-        if (td.getAttribute('data-field') === 'cleaning_group') {
-            td.innerHTML = escapeHtml(value) || '<span class="cell-empty">-</span>';
-        } else {
-            td.innerHTML = escapeHtml(value) || '<span class="cell-empty">-</span>';
-        }
+    function renderCell(el) {
+        var value = getCellValue(el);
+        el.innerHTML = escapeHtml(value) || '<span class="cell-empty">-</span>';
     }
 
-    function startEdit(td) {
-        if (editingCell === td) return;
+    function startEdit(el) {
+        if (editingCell === el) return;
         if (editingCell) finishEdit(editingCell);
 
-        var value = getCellValue(td);
-        editingCell = td;
-        td.classList.add('editing');
-        td.innerHTML = '<input type="text" value="' + escapeHtml(value) + '" />';
-        var input = td.querySelector('input');
+        var value = getCellValue(el);
+        editingCell = el;
+        el.classList.add('editing');
+        el.innerHTML = '<input type="text" value="' + escapeHtml(value) + '" />';
+        var input = el.querySelector('input');
         input.focus();
         input.select();
 
         input.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
-                finishEdit(td);
-                // Tab 처럼 다음 셀로 이동
-                var next = getNextEditable(td);
-                if (next) startEdit(next);
+                finishEdit(el);
+                if (el.tagName === 'TD') {
+                    var next = getNextEditable(el);
+                    if (next) startEdit(next);
+                }
             }
             if (e.key === 'Escape') {
                 editingCell = null;
-                td.classList.remove('editing');
-                renderCell(td);
+                el.classList.remove('editing');
+                renderCell(el);
             }
             if (e.key === 'Tab') {
                 e.preventDefault();
-                finishEdit(td);
-                var target = e.shiftKey ? getPrevEditable(td) : getNextEditable(td);
-                if (target) startEdit(target);
+                finishEdit(el);
+                if (el.tagName === 'TD') {
+                    var target = e.shiftKey ? getPrevEditable(el) : getNextEditable(el);
+                    if (target) startEdit(target);
+                }
             }
         });
     }
 
-    function finishEdit(td) {
-        if (!td || !td.classList.contains('editing')) return;
-        var input = td.querySelector('input');
+    function finishEdit(el) {
+        if (!el || !el.classList.contains('editing')) return;
+        var input = el.querySelector('input');
         if (input) {
-            setCellValue(td, input.value.trim());
+            setCellValue(el, input.value.trim());
         }
         editingCell = null;
-        td.classList.remove('editing');
-        renderCell(td);
+        el.classList.remove('editing');
+        renderCell(el);
         autoSave();
     }
 
     function getNextEditable(td) {
-        var all = Array.from(document.querySelectorAll('#dutyTable td.editable'));
+        var all = Array.from(document.querySelectorAll('td.editable'));
         var idx = all.indexOf(td);
         return idx >= 0 && idx < all.length - 1 ? all[idx + 1] : null;
     }
 
     function getPrevEditable(td) {
-        var all = Array.from(document.querySelectorAll('#dutyTable td.editable'));
+        var all = Array.from(document.querySelectorAll('td.editable'));
         var idx = all.indexOf(td);
         return idx > 0 ? all[idx - 1] : null;
     }
 
-    // 셀 클릭
-    document.getElementById('dutyTable').addEventListener('click', function(e) {
+    // 테이블 셀 클릭
+    document.addEventListener('click', function(e) {
         var td = e.target.closest('td.editable');
+        var headerEl = e.target.closest('.header-editable');
+
         if (td) {
             startEdit(td);
             e.stopPropagation();
-        }
-    });
-
-    // 외부 클릭
-    document.addEventListener('click', function(e) {
-        if (editingCell && !editingCell.contains(e.target)) {
+        } else if (headerEl) {
+            startEdit(headerEl);
+            e.stopPropagation();
+        } else if (editingCell && !editingCell.contains(e.target)) {
             finishEdit(editingCell);
         }
     });

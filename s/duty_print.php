@@ -1,15 +1,15 @@
 <?php
 date_default_timezone_set('Asia/Seoul');
 
-$is_admin = false;
+$is_elder = false;
 if (file_exists(dirname(__FILE__) . '/../config.php')) {
     @require_once dirname(__FILE__) . '/../config.php';
-    if (function_exists('mb_id') && function_exists('is_admin')) {
-        $is_admin = is_admin(mb_id());
+    if (function_exists('mb_id') && function_exists('get_member_position')) {
+        $is_elder = (get_member_position(mb_id()) >= '2');
     }
 }
 
-if (!$is_admin) {
+if (!$is_elder) {
     header('Location: duty_view.php');
     exit;
 }
@@ -23,45 +23,39 @@ $manager = new DutyDataManager();
 $data = $manager->load($year);
 $months = $data['months'];
 ?>
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>청소/마이크/안내인/연사음료 계획표 - 인쇄</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        * {
-            box-sizing: border-box;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         body {
-            font-family: 'Malgun Gothic', 'Dotum', sans-serif;
+            font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-            color: #000;
+            color: #333;
             font-size: 14px;
+            padding: 20px;
+            min-width: 720px;
         }
-
         .controls {
-            background: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            width: 297mm;
-            min-width: 297mm;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .controls-row {
+            width: 720px;
+            margin: 0 auto 16px;
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
+        .doc-title-preview {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+        }
+        .controls-btns { display: flex; gap: 8px; }
         .print-btn {
             background: #4CAF50;
             color: white;
@@ -71,92 +65,105 @@ $months = $data['months'];
             font-weight: bold;
             cursor: pointer;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
         }
         .print-btn:hover { background: #45a049; }
-        .back-btn {
-            padding: 8px 14px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background: white;
-            color: #555;
-            font-size: 13px;
-            text-decoration: none;
-        }
-        .back-btn:hover { background: #f5f5f5; }
 
-        .page-container {
-            width: 297mm;
-            min-width: 297mm;
+        .print-container {
+            width: 720px;
             margin: 0 auto;
             background: white;
-            padding: 15mm;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 14px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .doc-header {
-            text-align: center;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 3px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #333;
         }
-        .doc-title {
-            font-size: 22px;
-            font-weight: bold;
-        }
-        .doc-year {
-            font-size: 14px;
-            color: #666;
-            margin-top: 4px;
-        }
+        .doc-header .doc-site { font-size: 13px; font-weight: 700; }
+        .doc-header .doc-title { font-size: 13px; font-weight: 700; color: #555; }
 
-        .print-table {
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+        }
+        .month-card {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .month-header {
+            padding: 3px 6px;
+            font-weight: 700;
+            font-size: 13px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #ddd;
+            background: #fafafa;
+        }
+        .month-header .header-info {
+            display: flex;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 500;
+            color: #666;
+            margin-left: auto;
+        }
+        .month-header .header-info .cleaning-group {
+            color: #2e7d32;
+            font-weight: 700;
+        }
+        .month-body { padding: 0; }
+
+        .half-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 11px;
         }
-        .print-table th {
-            padding: 6px 3px;
+        .half-table th {
+            background: #eef1f6;
+            font-size: 9px;
             font-weight: 600;
+            color: #888;
+            padding: 2px 3px;
             text-align: center;
-            border: 1px solid #999;
-            white-space: nowrap;
+            border: 1px solid #ddd;
         }
-        .print-table .h1 th { background: #333; color: white; font-size: 11px; }
-        .print-table .h2 th { background: #666; color: white; font-size: 10px; }
-        .print-table td {
-            padding: 5px 3px;
-            border: 1px solid #ccc;
-            text-align: center;
+        .half-table td {
+            padding: 2px 3px;
+            border: 1px solid #ddd;
+            text-align: left;
             vertical-align: middle;
-            font-size: 11px;
         }
-        .print-table .month-cell {
-            font-weight: 700;
-            font-size: 12px;
-        }
-        .print-table .group-cell {
-            font-weight: 700;
-            color: #2e7d32;
-            font-size: 12px;
-        }
-        .print-table .period-cell {
-            font-size: 10px;
+        .half-table td.row-label {
+            font-weight: 600;
             color: #555;
+            font-size: 10px;
+            text-align: right;
+            white-space: nowrap;
+            background: #fafbfd;
         }
 
         @media print {
             body { background: white; padding: 0; margin: 0; }
             .controls { display: none !important; }
-            .page-container {
+            .print-container {
                 box-shadow: none;
                 padding: 10mm;
                 margin: 0;
-                width: 100%;
+                max-width: 100%;
+                border-radius: 0;
             }
+            .month-card { break-inside: avoid; }
             @page {
-                size: A4 landscape;
+                size: A4 portrait;
                 margin: 5mm;
             }
         }
@@ -164,72 +171,87 @@ $months = $data['months'];
 </head>
 <body>
     <div class="controls">
-        <div class="controls-row">
-            <button onclick="window.print()" class="print-btn">
-                <i class="bi bi-printer"></i> 인쇄하기
-            </button>
-            <a href="duty_admin.php?year=<?php echo $year; ?>" class="back-btn">돌아가기</a>
+        <span class="doc-title-preview"><?php echo $year; ?>년 계획표 인쇄</span>
+        <div class="controls-btns">
+            <button onclick="window.print()" class="print-btn">인쇄하기</button>
         </div>
     </div>
 
-    <div class="page-container">
+    <div class="print-container">
         <div class="doc-header">
-            <div class="doc-title">청소 집단 / 마이크 전달 / 안내인 / 연사음료 계획표</div>
-            <div class="doc-year"><?php echo $year; ?>년<?php echo defined('SITE_NAME') ? ' — ' . htmlspecialchars(SITE_NAME) : ''; ?></div>
+            <span class="doc-site"><?php echo defined('SITE_NAME') ? htmlspecialchars(SITE_NAME) : ''; ?></span>
+            <span class="doc-title"><?php echo $year; ?>년 청소집단/마이크/안내인/연사음료 계획표</span>
         </div>
 
-        <table class="print-table">
-            <thead>
-                <tr class="h1">
-                    <th rowspan="2" style="width:40px;"></th>
-                    <th rowspan="2" style="width:40px;">회관<br>청소<br>집단</th>
-                    <th colspan="4">청중 마이크</th>
-                    <th colspan="3">안내인</th>
-                    <th colspan="2">연사 음료</th>
-                </tr>
-                <tr class="h2">
-                    <th style="width:70px;">날짜</th>
-                    <th>마이크1</th>
-                    <th>마이크2</th>
-                    <th>보조</th>
-                    <th>청중석</th>
-                    <th>청중석</th>
-                    <th>출입구</th>
-                    <th>담당자1</th>
-                    <th>보조</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php for ($m = 1; $m <= 12; $m++):
-                    $month = isset($months[(string)$m]) ? $months[(string)$m] : array();
-                    $fh = isset($month['first_half']) ? $month['first_half'] : array();
-                    $sh = isset($month['second_half']) ? $month['second_half'] : array();
-                ?>
-                    <tr>
-                        <td class="month-cell" rowspan="2"><?php echo $m; ?>월</td>
-                        <td class="group-cell" rowspan="2"><?php echo htmlspecialchars($month['cleaning_group'] ?? ''); ?></td>
-                        <td class="period-cell">1일 - 15일</td>
-                        <td><?php echo htmlspecialchars($fh['mic1'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($fh['mic2'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($fh['mic_assist'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($fh['att_hall1'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($fh['att_hall2'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($fh['att_entrance'] ?? ''); ?></td>
-                        <td rowspan="2"><?php echo htmlspecialchars($month['drink_main'] ?? ''); ?></td>
-                        <td rowspan="2"><?php echo htmlspecialchars($month['drink_assist'] ?? ''); ?></td>
-                    </tr>
-                    <tr>
-                        <td class="period-cell">16일 - 말일</td>
-                        <td><?php echo htmlspecialchars($sh['mic1'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($sh['mic2'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($sh['mic_assist'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($sh['att_hall1'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($sh['att_hall2'] ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($sh['att_entrance'] ?? ''); ?></td>
-                    </tr>
-                <?php endfor; ?>
-            </tbody>
-        </table>
+        <div class="month-grid">
+        <?php for ($m = 1; $m <= 12; $m++):
+            $month = isset($months[(string)$m]) ? $months[(string)$m] : array();
+            $fh = isset($month['first_half']) ? $month['first_half'] : array();
+            $sh = isset($month['second_half']) ? $month['second_half'] : array();
+            $dm = trim($month['drink_main'] ?? '');
+            $da = trim($month['drink_assist'] ?? '');
+            $drinkDisplay = '';
+            if (!empty($dm)) $drinkDisplay = htmlspecialchars($dm);
+            if (!empty($da)) $drinkDisplay .= ' (' . htmlspecialchars($da) . ')';
+        ?>
+        <div class="month-card">
+            <div class="month-header">
+                <span><?php echo $m; ?>월</span>
+                <span class="header-info">
+                    <?php $cg = trim($month['cleaning_group'] ?? ''); if (!empty($cg)): ?>
+                        <span>청소:<span class="cleaning-group"><?php echo htmlspecialchars($cg); ?></span></span>
+                    <?php endif; ?>
+                    <?php if (!empty(trim($drinkDisplay))): ?>
+                        <span>음료:<?php echo $drinkDisplay; ?></span>
+                    <?php endif; ?>
+                </span>
+            </div>
+            <div class="month-body">
+                <table class="half-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>상반기 (1-15일)</th>
+                            <th>하반기 (16-말일)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="row-label">마이크1</td>
+                            <td><?php echo htmlspecialchars($fh['mic1'] ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($sh['mic1'] ?? ''); ?></td>
+                        </tr>
+                        <tr>
+                            <td class="row-label">마이크2</td>
+                            <td><?php echo htmlspecialchars($fh['mic2'] ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($sh['mic2'] ?? ''); ?></td>
+                        </tr>
+                        <tr>
+                            <td class="row-label">마이크보조</td>
+                            <td><?php echo htmlspecialchars($fh['mic_assist'] ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($sh['mic_assist'] ?? ''); ?></td>
+                        </tr>
+                        <tr>
+                            <td class="row-label">청중석1</td>
+                            <td><?php echo htmlspecialchars($fh['att_hall1'] ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($sh['att_hall1'] ?? ''); ?></td>
+                        </tr>
+                        <tr>
+                            <td class="row-label">청중석2</td>
+                            <td><?php echo htmlspecialchars($fh['att_hall2'] ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($sh['att_hall2'] ?? ''); ?></td>
+                        </tr>
+                        <tr>
+                            <td class="row-label">출입구</td>
+                            <td><?php echo htmlspecialchars($fh['att_entrance'] ?? ''); ?></td>
+                            <td><?php echo htmlspecialchars($sh['att_entrance'] ?? ''); ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php endfor; ?>
+        </div>
     </div>
 </body>
 </html>

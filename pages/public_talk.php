@@ -11,6 +11,9 @@
 
 <?php echo footer_menu('공지'); ?>
 
+<style>
+body { background: #f5f5f5 !important; }
+</style>
 <div id="container" class="container-fluid p-0">
   <iframe src="<?=BASE_PATH?>/s/talk_view.php?embed=1"
           style="width:100%; height:calc(100vh - 110px); border:none;">

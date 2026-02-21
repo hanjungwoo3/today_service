@@ -220,7 +220,7 @@ foreach ($allTalks as $talk) {
 
         .pt-col-date { width: 65px; text-align: center; white-space: nowrap; }
         .pt-col-speaker { width: 60px; text-align: center; }
-        .pt-col-congregation { width: 80px; text-align: center; font-size: 11px; }
+        .pt-col-congregation { width: 100px; text-align: center; font-size: 11px; }
         .pt-col-topic { }
         .pt-col-chairman { width: 55px; text-align: center; }
         .pt-col-reader { width: 55px; text-align: center; }
@@ -271,7 +271,6 @@ foreach ($allTalks as $talk) {
                 <button onclick="window.print()" class="print-btn">
                     <i class="bi bi-printer"></i> 인쇄하기
                 </button>
-                <a href="talk_admin.php" class="back-btn">돌아가기</a>
             </div>
         </div>
     </div>
