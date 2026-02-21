@@ -75,7 +75,7 @@
             <div class="custom-nav-icon nav-duty"><i class="bi bi-clipboard-check"></i></div>
             <div class="custom-nav-label">청소,연사음료<br>안내인,마이크</div>
         </a>
-        <?php if(get_member_position(mb_id()) >= 2): ?>
+        <?php if(is_admin(mb_id())): ?>
         <a href="<?=BASE_PATH?>/pages/ministry_record.php" class="custom-nav-item">
             <div class="custom-nav-icon nav-record"><i class="bi bi-people"></i></div>
             <div class="custom-nav-label">호별봉사<br>짝배정</div>

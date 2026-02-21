@@ -25,7 +25,7 @@ $date_parts = explode("-", $date);
     <nav class="navbar navbar-light bg-light mb-4">
       <div>
         <a class="navbar-brand mb-0" href="<?=BASE_PATH?>/pages/guide_history.php?s_date=<?=$date?>&toYear=<?=$date_parts[0]?>&toMonth=<?=$date_parts[1]?>"><i class="bi bi-arrow-left"></i></a>
-        <?php if(isset($_GET['preselect']) && !empty($_GET['preselect'])): ?>
+        <?php if((isset($_GET['preselect']) && !empty($_GET['preselect'])) || (isset($_GET['load_tt_id']) && !empty($_GET['load_tt_id']))): ?>
         <a href="<?=BASE_PATH?>/pages/ministry_record.php?date=<?=$date?>&meeting=<?=$m_id?>" class="btn btn-sm text-white" style="background:#7a6a9e;"><i class="bi bi-people"></i> 짝배정으로 돌아가기</a>
         <?php endif; ?>
       </div>
@@ -1549,6 +1549,39 @@ $(document).ready(function(){
       }, 200);
       // 5초 후 타임아웃
       setTimeout(function() { clearInterval(checkInterval); }, 5000);
+    }
+  })();
+
+  // load_tt_id 파라미터가 있으면 구역배정 모드 → 배정됨 탭 → 배정불러오기 자동 실행
+  (function() {
+    var params = new URLSearchParams(window.location.search);
+    var loadTtId = params.get('load_tt_id');
+    var loadTtType = params.get('load_tt_type') || 'territory';
+    if (loadTtId) {
+      // 즉시 구역 배정 모드로 전환 (데이터 로드 시작)
+      v_guide_assign_step.changeMode('assign');
+      // assigned_data.territory 로드 완료 대기
+      var checkInterval = setInterval(function() {
+        var assignedTerritories = (v_guide_assign_step.assigned_data && v_guide_assign_step.assigned_data.territory) || [];
+        if (assignedTerritories.length > 0) {
+          clearInterval(checkInterval);
+          // 배정됨 탭으로 전환
+          v_guide_assign_step.activeTabId = '#v-pills-assign';
+          var assignTab = document.getElementById('v-pills-assign-tab');
+          if (assignTab) assignTab.click();
+          // 해당 구역의 배정불러오기 실행
+          setTimeout(function() {
+            var allData = (v_guide_assign_step.assigned_data && v_guide_assign_step.assigned_data.territory) || [];
+            for (var i = 0; i < allData.length; i++) {
+              if (String(allData[i].id) === String(loadTtId)) {
+                v_guide_assign_step.setSelectedMembers(allData[i].id, loadTtType, allData[i].assigned_ids, allData[i].assigned_group);
+                break;
+              }
+            }
+          }, 300);
+        }
+      }, 200);
+      setTimeout(function() { clearInterval(checkInterval); }, 8000);
     }
   })();
 

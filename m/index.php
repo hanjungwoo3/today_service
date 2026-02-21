@@ -7,9 +7,10 @@ if (file_exists($localConfigFile)) {
     require_once $localConfigFile;
 }
 
-// 로컬 모드가 아닐 때만 관리자 권한 체크
+// 권한 체크 (로컬: m/config.php에서 이미 config.php require됨)
+$is_admin = false;
+$is_elder = false;
 if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
-    $is_admin = false;
     if (file_exists(dirname(__FILE__) . '/../config.php')) {
         if (session_status() === PHP_SESSION_NONE) {
             $secure_cookie = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
@@ -23,17 +24,16 @@ if (!defined('LOCAL_MODE') || LOCAL_MODE !== true) {
             session_start();
         }
         require_once dirname(__FILE__) . '/../config.php';
-        if (function_exists('mb_id') && function_exists('get_member_position')) {
-            $is_admin = (get_member_position(mb_id()) == '2'); // 장로만
-        }
-    }
-
-    if (!$is_admin) {
-        header('Location: ../index.php');
-        exit;
     }
 }
-// LOCAL_MODE일 때는 m/config.php에서 이미 DB 연결됨
+if (function_exists('mb_id') && function_exists('is_admin') && function_exists('get_member_position')) {
+    $is_admin = is_admin(mb_id());
+    $is_elder = (get_member_position(mb_id()) >= '2');
+}
+if (!$is_admin) {
+    header('Location: ../index.php');
+    exit;
+}
 
 $selected_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
 $selected_period = isset($_GET['period']) ? $_GET['period'] : '6m';
@@ -119,34 +119,29 @@ $assigned_members = ['M' => [], 'W' => []]; // 이미 배정된 사람들 ID 목
 $seen_groups = ['M' => [], 'W' => []]; // 중복 체크용
 
 // 배정 처리 함수
-function processAssignment($group_ids, $tt_name, &$attendees, &$member_info, &$assigned_groups, &$assigned_members, &$seen_groups) {
+function processAssignment($group_ids, $tt_name, $tt_id, $tt_type, &$attendees, &$member_info, &$assigned_groups, &$assigned_members, &$seen_groups) {
     $group_attendees = array_values(array_intersect($group_ids, $attendees));
     if (count($group_attendees) >= 1) {
-        // 중복 체크 (전체 그룹 기준)
         sort($group_attendees);
         $group_key = implode(',', $group_attendees);
+        // 팀+구역 조합 중복 방지 (같은 팀+같은 구역은 스킵)
+        $dedup_key = $group_key . ':' . $tt_id;
 
-        // 그룹 내 성별 분류
         $members_by_sex = ['M' => [], 'W' => []];
         foreach ($group_attendees as $gid) {
             if (isset($member_info[$gid])) {
-                $sex = $member_info[$gid]['sex'];
-                $members_by_sex[$sex][] = $gid;
+                $members_by_sex[$member_info[$gid]['sex']][] = $gid;
             }
         }
 
         $type = (strpos($tt_name, '공개증거') !== false) ? '공개' : '호별';
 
-        // 각 성별에 해당하는 멤버가 있으면 해당 성별 배정완료에 추가
         foreach (['M', 'W'] as $sex) {
             if (!empty($members_by_sex[$sex])) {
-                // 해당 성별 기준으로 중복 체크
-                if (isset($seen_groups[$sex][$group_key])) {
-                    continue;
-                }
-                $seen_groups[$sex][$group_key] = true;
+                // 팀+구역 조합 중복 체크
+                if (isset($seen_groups[$sex][$dedup_key])) continue;
+                $seen_groups[$sex][$dedup_key] = true;
 
-                // 전체 그룹 정보 (모든 멤버 포함)
                 $group_info = [];
                 foreach ($group_attendees as $gid) {
                     if (isset($member_info[$gid])) {
@@ -154,13 +149,14 @@ function processAssignment($group_ids, $tt_name, &$attendees, &$member_info, &$a
                     }
                 }
 
-                // 해당 성별 멤버만 배정완료 처리
                 foreach ($members_by_sex[$sex] as $gid) {
-                    $assigned_members[$sex][] = $gid;
+                    if (!in_array($gid, $assigned_members[$sex])) {
+                        $assigned_members[$sex][] = $gid;
+                    }
                 }
 
                 if (!empty($group_info)) {
-                    $assigned_groups[$sex][] = ['members' => $group_info, 'type' => $type];
+                    $assigned_groups[$sex][] = ['members' => $group_info, 'type' => $type, 'territory' => $tt_name, 'tt_id' => $tt_id, 'tt_type' => $tt_type];
                 }
             }
         }
@@ -177,12 +173,12 @@ if ($selected_meeting > 0) {
                 return !empty($id) && is_numeric($id);
             });
             $group_ids = array_map('intval', $group_ids);
-            processAssignment($group_ids, $row['tt_name'], $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups);
+            processAssignment($group_ids, $row['tt_name'], $row['tt_id'], 'territory', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups);
         }
     }
 
     // 2. t_territory_record에서 배정 기록 조회 (선택한 모임 기준)
-    $sql = "SELECT r.ttr_assigned_num, t.tt_name
+    $sql = "SELECT r.ttr_assigned_num, t.tt_id, t.tt_name
             FROM t_territory_record r
             JOIN t_territory t ON r.tt_id = t.tt_id
             WHERE r.ttr_assigned_date = '{$selected_date}' AND r.ttr_assigned_num != '' AND r.m_id = {$selected_meeting}";
@@ -193,7 +189,7 @@ if ($selected_meeting > 0) {
                 return !empty($id) && is_numeric($id);
             });
             $group_ids = array_map('intval', $group_ids);
-            processAssignment($group_ids, $row['tt_name'], $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups);
+            processAssignment($group_ids, $row['tt_name'], $row['tt_id'], 'territory', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups);
         }
     }
 }
@@ -444,6 +440,25 @@ foreach (['M', 'W'] as $sex) {
             margin-bottom: 12px;
             padding: 8px 12px;
             border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+        }
+        .section-title .toggle-icon {
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+        .section-title .toggle-icon.open {
+            transform: rotate(90deg);
+        }
+        .matrix-wrap {
+            display: none;
+            margin-bottom: 8px;
+        }
+        .matrix-wrap.open {
+            display: block;
         }
         .section-title.male {
             background: #dbeafe;
@@ -553,9 +568,25 @@ foreach (['M', 'W'] as $sex) {
             font-size: 12px;
             font-weight: 600;
         }
+        .group-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
         .group-members {
             font-size: 14px;
             font-weight: 500;
+        }
+        .territory-name {
+            font-size: 11px;
+            color: #6b7280;
+        }
+        .member-list-simple {
+            font-size: 12px;
+            color: #666;
+            margin: -8px 0 10px;
+            padding: 0 12px;
+            line-height: 1.6;
         }
         .group-pair-count {
             font-size: 12px;
@@ -790,10 +821,16 @@ foreach (['M', 'W'] as $sex) {
             <!-- 형제 섹션 -->
             <?php if (count($members['M']) > 0): ?>
             <div class="section">
-                <div class="section-title male">형제 (<?php echo count($members['M']); ?>명)</div>
+                <div class="section-title male" <?php if ($is_elder): ?>onclick="toggleMatrix('matrix-M')"<?php endif; ?>>형제 (<?php echo count($members['M']); ?>명) <?php if ($is_elder): ?><span class="toggle-icon" id="icon-matrix-M">&#9654;</span><?php endif; ?></div>
+                <div class="member-list-simple"><?php
+                    $names_m = array_map(function($m) { return htmlspecialchars($m['mb_name']); }, $members['M']);
+                    echo implode(', ', $names_m);
+                ?></div>
+                <?php if ($is_elder): ?>
                 <?php if (count($members['M']) == 1): ?>
                     <div class="single-member"><?php echo htmlspecialchars($members['M'][0]['mb_name']); ?></div>
                 <?php else: ?>
+                    <div class="matrix-wrap" id="matrix-M">
                     <div class="matrix-container">
                         <table class="pair-matrix">
                             <thead>
@@ -825,7 +862,9 @@ foreach (['M', 'W'] as $sex) {
                             </tbody>
                         </table>
                     </div>
+                    </div>
                 <?php endif; ?>
+                <?php endif; /* $is_elder */ ?>
 
                 <!-- 형제 추천 -->
                 <?php if (!empty($assigned_groups['M']) || !empty($recommended_groups['M']) || $single_unassigned['M']): ?>
@@ -835,14 +874,19 @@ foreach (['M', 'W'] as $sex) {
                         <div class="assigned-title">배정 완료 (<?php echo count($assigned_groups['M']); ?>팀)</div>
                         <div class="group-list">
                             <?php foreach ($assigned_groups['M'] as $idx => $group): ?>
-                                <div class="group-card">
+                                <div class="group-card clickable" onclick="goToAssignLoad('<?php echo $group['tt_id']; ?>', '<?php echo $group['tt_type']; ?>')">
                                     <span class="group-number" style="background:#eab308;"><?php echo $idx + 1; ?></span>
-                                    <span class="group-members">
-                                        <?php
-                                            $names = array_map(function($m) { return $m['name']; }, $group['members']);
-                                            echo htmlspecialchars(implode(', ', $names));
-                                        ?>
-                                    </span>
+                                    <div class="group-detail">
+                                        <span class="group-members">
+                                            <?php
+                                                $names = array_map(function($m) { return $m['name']; }, $group['members']);
+                                                echo htmlspecialchars(implode(', ', $names));
+                                            ?>
+                                        </span>
+                                        <?php if (!empty($group['territory'])): ?>
+                                        <span class="territory-name"><?php echo htmlspecialchars($group['territory']); ?></span>
+                                        <?php endif; ?>
+                                    </div>
                                     <span class="type-badge"><?php echo $group['type']; ?></span>
                                 </div>
                             <?php endforeach; ?>
@@ -889,10 +933,16 @@ foreach (['M', 'W'] as $sex) {
             <!-- 자매 섹션 -->
             <?php if (count($members['W']) > 0): ?>
             <div class="section">
-                <div class="section-title female">자매 (<?php echo count($members['W']); ?>명)</div>
+                <div class="section-title female" <?php if ($is_elder): ?>onclick="toggleMatrix('matrix-W')"<?php endif; ?>>자매 (<?php echo count($members['W']); ?>명) <?php if ($is_elder): ?><span class="toggle-icon" id="icon-matrix-W">&#9654;</span><?php endif; ?></div>
+                <div class="member-list-simple"><?php
+                    $names_w = array_map(function($m) { return htmlspecialchars($m['mb_name']); }, $members['W']);
+                    echo implode(', ', $names_w);
+                ?></div>
+                <?php if ($is_elder): ?>
                 <?php if (count($members['W']) == 1): ?>
                     <div class="single-member"><?php echo htmlspecialchars($members['W'][0]['mb_name']); ?></div>
                 <?php else: ?>
+                    <div class="matrix-wrap" id="matrix-W">
                     <div class="matrix-container">
                         <table class="pair-matrix">
                             <thead>
@@ -924,7 +974,9 @@ foreach (['M', 'W'] as $sex) {
                             </tbody>
                         </table>
                     </div>
+                    </div>
                 <?php endif; ?>
+                <?php endif; /* $is_elder */ ?>
 
                 <!-- 자매 추천 -->
                 <?php if (!empty($assigned_groups['W']) || !empty($recommended_groups['W']) || $single_unassigned['W']): ?>
@@ -934,14 +986,19 @@ foreach (['M', 'W'] as $sex) {
                         <div class="assigned-title">배정 완료 (<?php echo count($assigned_groups['W']); ?>팀)</div>
                         <div class="group-list">
                             <?php foreach ($assigned_groups['W'] as $idx => $group): ?>
-                                <div class="group-card">
+                                <div class="group-card clickable" onclick="goToAssignLoad('<?php echo $group['tt_id']; ?>', '<?php echo $group['tt_type']; ?>')">
                                     <span class="group-number" style="background:#eab308;"><?php echo $idx + 1; ?></span>
-                                    <span class="group-members">
-                                        <?php
-                                            $names = array_map(function($m) { return $m['name']; }, $group['members']);
-                                            echo htmlspecialchars(implode(', ', $names));
-                                        ?>
-                                    </span>
+                                    <div class="group-detail">
+                                        <span class="group-members">
+                                            <?php
+                                                $names = array_map(function($m) { return $m['name']; }, $group['members']);
+                                                echo htmlspecialchars(implode(', ', $names));
+                                            ?>
+                                        </span>
+                                        <?php if (!empty($group['territory'])): ?>
+                                        <span class="territory-name"><?php echo htmlspecialchars($group['territory']); ?></span>
+                                        <?php endif; ?>
+                                    </div>
                                     <span class="type-badge"><?php echo $group['type']; ?></span>
                                 </div>
                             <?php endforeach; ?>
@@ -1062,6 +1119,15 @@ foreach (['M', 'W'] as $sex) {
         localStorage.setItem('ministry_group', document.getElementById('group').value);
     });
 
+    function toggleMatrix(id) {
+        var wrap = document.getElementById(id);
+        var icon = document.getElementById('icon-' + id);
+        if (wrap) {
+            wrap.classList.toggle('open');
+            icon.classList.toggle('open');
+        }
+    }
+
     function updateMeetings(date) {
         fetch('api/meetings.php?date=' + date)
             .then(response => response.json())
@@ -1080,6 +1146,23 @@ foreach (['M', 'W'] as $sex) {
                     });
                 }
             });
+    }
+
+    function goToAssignLoad(ttId, ttType) {
+        var date = document.getElementById('date').value;
+        var meetingSelect = document.getElementById('meeting');
+        var selectedOption = meetingSelect.options[meetingSelect.selectedIndex];
+        var msId = selectedOption ? selectedOption.dataset.msid : '';
+        if (!msId || msId === '0' || msId === 'undefined') {
+            alert('모임 정보를 찾을 수 없습니다.');
+            return;
+        }
+        var url = '../pages/guide_assign_step.php?s_date=' + date + '&ms_id=' + msId + '&load_tt_id=' + ttId + '&load_tt_type=' + ttType;
+        if (window.top !== window.self) {
+            window.top.location.href = url;
+        } else {
+            window.location.href = url;
+        }
     }
 
     function goToAssign(memberIds) {
