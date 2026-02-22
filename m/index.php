@@ -408,7 +408,12 @@ foreach (['M', 'W'] as $sex) {
                 padding: 6px 8px;
                 font-size: 13px;
             }
-            .date-selector .filter-group {
+            .date-selector .filter-group:nth-child(1),
+            .date-selector .filter-group:nth-child(2) {
+                flex: 0 0 100%;
+            }
+            .date-selector .filter-group:nth-child(3),
+            .date-selector .filter-group:nth-child(4) {
                 flex: 0 0 auto;
             }
         }
@@ -789,25 +794,6 @@ foreach (['M', 'W'] as $sex) {
             <button type="submit" class="search-btn">조회</button>
         </form>
 
-        <div class="legend">
-            <div class="legend-item">
-                <div class="legend-color" style="background: #fef2f2;"></div>
-                <span>0회</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #fefce8;"></div>
-                <span>1회</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #f0fdf4;"></div>
-                <span>2회</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: #eff6ff;"></div>
-                <span>3회 이상</span>
-            </div>
-        </div>
-
         <?php if (empty($meetings)): ?>
             <div class="no-data">
                 <?php echo htmlspecialchars($selected_date); ?> 에 호별 봉사 모임이 없습니다.
@@ -1084,6 +1070,13 @@ foreach (['M', 'W'] as $sex) {
                     <div class="help-label">다시 추천</div>
                     <div class="help-text">
                         같은 점수의 후보가 여러 명일 때 랜덤으로 선택하므로, 버튼을 누르면 다른 조합이 나올 수 있습니다.
+                    </div>
+                </div>
+                <div class="help-item">
+                    <div class="help-label">추천 짝 / 배정 완료 카드 클릭</div>
+                    <div class="help-text">
+                        <b>추천 짝</b> 카드를 누르면 해당 멤버들이 미리 선택된 상태로 구역 배정 화면으로 이동합니다.<br>
+                        <b>배정 완료</b> 카드를 누르면 이미 배정된 구역의 상세 정보를 확인할 수 있습니다.
                     </div>
                 </div>
             </div>
