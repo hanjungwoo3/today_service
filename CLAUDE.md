@@ -151,6 +151,47 @@ Local git config is already set for `hanjungwoo3` account.
 - `api/meetings.php` - 모임 목록 AJAX API
 - `config.php` - 로컬 개발 모드 설정
 
+### Territory Messaging (구역 쪽지)
+
+**Architecture:**
+- 배정된 구역 멤버 간 간단한 쪽지(채팅) 기능
+- MySQL backend (독립 테이블 2개)
+- 홈 화면 배정 카드에서 인라인 패널로 동작
+- 적응형 폴링 (5초→10초→30초→60초), 패널 닫으면 폴링 중지
+
+**DB Tables (upstream과 무관, 독립 테이블):**
+- `t_territory_message` — 쪽지 내용 (tm_id, tt_id, mb_id, mb_name, tm_message, tm_datetime)
+- `t_territory_message_read` — 사용자별 읽음 포인터 (tt_id, mb_id, last_read_id)
+
+**Key Files:**
+- `pages/territory_msg_api.php` — 메시지 CRUD API (unread_counts, load, poll, send)
+- `js/territory_msg.js` — 클라이언트 패널/폴링/전송 로직 (TerritoryMsg 모듈)
+
+**Auto Cleanup:**
+- API 호출 1/50 확률로 오래된 메시지 자동 정리
+- 배정일(`tt_assigned_date`) 지난 구역 메시지 삭제
+- 안전망: 하루 이상 된 메시지 삭제
+
+**서버 배포 시 테이블 생성 필요:**
+```sql
+CREATE TABLE t_territory_message (
+    tm_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    tt_id INT UNSIGNED NOT NULL,
+    mb_id INT UNSIGNED NOT NULL,
+    mb_name VARCHAR(50) NOT NULL,
+    tm_message TEXT NOT NULL,
+    tm_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_tt_datetime (tt_id, tm_datetime)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE t_territory_message_read (
+    tt_id INT UNSIGNED NOT NULL,
+    mb_id INT UNSIGNED NOT NULL,
+    last_read_id INT UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (tt_id, mb_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
 ### Timer Application (t/)
 
 **Architecture:**
@@ -245,6 +286,8 @@ Upstream 머지 시 아래 파일들은 충돌이 발생하지 않도록 주의�
 | `s/duty_admin.php` | 청소/마이크/안내인/연사음료 관리자 편집 |
 | `s/duty_api.php` | 청소/마이크/안내인/연사음료 API (JSON 스토리지) |
 | `s/duty_print.php` | 청소/마이크/안내인/연사음료 인쇄용 |
+| `pages/territory_msg_api.php` | 구역 쪽지 API (MySQL, 4개 액션: unread_counts/load/poll/send) |
+| `js/territory_msg.js` | 구역 쪽지 클라이언트 (인라인 패널, 적응형 폴링, TerritoryMsg 모듈) |
 
 ### 기존 파일 수정 내역 (upstream 머지 시 충돌 가능)
 
@@ -252,11 +295,13 @@ Upstream 머지 시 아래 파일들은 충돌이 발생하지 않도록 주의�
 |------|--------|----------|-----------|
 | `.gitignore` | +6줄 | 낮음 | `.dev/`, `docs/` 무시 규칙 추가 (파일 끝에 append) |
 | `config.php` | +4/-2줄 | **중간** | `BASE_PATH` 계산 조건에 `/s/`, `/c/` 경로 추가 |
-| `index.php` | +3줄 | 낮음 | `custom_board_top.php`, `custom_home_assignments.php` include (`file_exists` 가드) |
+| `index.php` | +25줄 | 낮음 | `custom_board_top.php`, `custom_home_assignments.php` include + 구역 쪽지 패널 컨테이너/JS/CSS |
 | `pages/admin_member_form.php` | +1줄 | 낮음 | `$mb` 변수 기본값 초기화 (신규 등록 시 undefined 방지) |
 | `pages/guide_assign_step.php` | +40줄 | **중간** | 탭 내비에 "호별봉사 짝 배정" 탭 추가 + preselect 자동선택 JS |
 | `m/index.php` | +85/-7줄 | **중간** | SQL에 `ms_id` 추가, 클릭 가능한 추천짝 카드, `goToAssign()`, localStorage 필터 저장, 툴바 헤더 숨김 |
 | `m/api/meetings.php` | +2/-1줄 | 낮음 | SQL/응답에 `ms_id` 필드 추가 |
+| `pages/today_service_list.php` | +5줄 | 낮음 | 배정 카드에 구역 쪽지 버튼 추가 |
+| `include/territory_view_list.php` | +1줄 | 낮음 | `$new_compare_address` 변수 초기화 (PHP 8 경고 수정) |
 
 #### 머지 후 수동 확인 필요 사항
 

@@ -260,7 +260,12 @@ if ($result->num_rows > 0) {
                 echo '<div class="assigned_group_name mt-1">' . $assigned_group . '</div>'; ?>
 
             </div>
-            <div class="align-self-center flex-shrink-0">
+            <div class="align-self-center flex-shrink-0 d-flex">
+              <button type="button" class="btn btn-sm btn-outline-info mr-1 territory-msg-btn"
+                data-tt-id="<?= $tt_id ?>" data-tt-num="<?= htmlspecialchars($row['tt_num']) ?>">
+                <i class="bi bi-chat-dots"></i>
+                <span class="badge badge-danger territory-msg-badge" id="msg-badge-<?= $tt_id ?>" style="display:none;font-size:10px;">0</span>
+              </button>
               <button type="button" class="btn btn-outline-secondary"
                 onclick="open_territory_view(<?= $tt_id ?>,'start')">시작</button>
             </div>

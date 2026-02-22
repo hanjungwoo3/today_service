@@ -13,6 +13,7 @@ if ($tt_id):
   $is_absence_status = strpos($tt_status_row['tt_status'], 'absence') !== false;
 
   $compare_address = '';
+  $new_compare_address = '';
   $sql = "SELECT * FROM " . HOUSE_TABLE . " WHERE tt_id = {$tt_id} order by h_order";
   $result = $mysqli->query($sql);
   while ($r = $result->fetch_assoc()):
