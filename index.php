@@ -126,11 +126,12 @@ $cancle = $mysqli->query($sql);
     e.stopPropagation();
     var ttId = parseInt($(this).data('tt-id'));
     var ttNum = $(this).data('tt-num') + '';
-    TerritoryMsg.openPanel(ttId, ttNum, _tmsgMyMbId);
+    var msgType = $(this).data('msg-type') || 'T';
+    TerritoryMsg.openPanel(ttId, ttNum, _tmsgMyMbId, msgType);
   });
 </script>
 <style>
-.tmsg-panel { margin: 0 15px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; overflow: hidden; }
+.tmsg-panel { margin: 0 0 8px; border: 1px solid #ddd; border-radius: 8px; background: #fff; overflow: hidden; }
 .tmsg-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f8f9fa; border-bottom: 1px solid #eee; }
 .tmsg-title { font-size: 14px; font-weight: 600; }
 .tmsg-header-btns { display: flex; align-items: center; gap: 4px; }

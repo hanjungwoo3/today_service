@@ -262,7 +262,7 @@ if ($result->num_rows > 0) {
             </div>
             <div class="align-self-center flex-shrink-0 d-flex">
               <button type="button" class="btn btn-sm btn-outline-info mr-1 territory-msg-btn"
-                data-tt-id="<?= $tt_id ?>" data-tt-num="<?= htmlspecialchars($row['tt_num']) ?>">
+                data-tt-id="<?= $tt_id ?>" data-tt-num="<?= htmlspecialchars($row['tt_num']) ?>" data-msg-type="T">
                 <i class="bi bi-chat-dots"></i>
                 <span class="badge badge-danger territory-msg-badge" id="msg-badge-<?= $tt_id ?>" style="display:none;font-size:10px;">0</span>
               </button>
@@ -295,6 +295,13 @@ if ($result->num_rows > 0) {
                 </div>
                 <?php if ($d_assigned_group)
                   echo '<div class="assigned_group_name mt-1">' . $d_assigned_group . '</div>'; ?>
+              </div>
+              <div class="align-self-center flex-shrink-0">
+                <button type="button" class="btn btn-sm btn-outline-info territory-msg-btn"
+                  data-tt-id="<?= $row['d_id'] ?>" data-tt-num="<?= htmlspecialchars($dp_name) ?>" data-msg-type="D">
+                  <i class="bi bi-chat-dots"></i>
+                  <span class="badge badge-danger territory-msg-badge" id="msg-badge-d-<?= $row['d_id'] ?>" style="display:none;font-size:10px;">0</span>
+                </button>
               </div>
             </div>
             <div class="bg-light p-2">

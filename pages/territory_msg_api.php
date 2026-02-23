@@ -16,23 +16,36 @@ if (!$current_mb_id) {
 $current_mb_name = get_member_name($current_mb_id);
 $action = isset($_POST['action']) ? $_POST['action'] : '';
 
-// 권한 확인: 해당 구역에 배정된 사용자인지
-function verify_territory_access($tt_id, $mb_id) {
+// 권한 확인: 해당 구역에 배정된 사용자인지 (T=호별, D=전시대)
+function verify_territory_access($tt_id, $mb_id, $type = 'T') {
     global $mysqli;
     $tt_id = intval($tt_id);
     $mb_id = intval($mb_id);
-    $sql = "SELECT tt_id FROM " . TERRITORY_TABLE . " WHERE tt_id = {$tt_id} AND FIND_IN_SET({$mb_id}, tt_assigned)";
+    if ($type === 'D') {
+        $sql = "SELECT d_id FROM " . DISPLAY_TABLE . " WHERE d_id = {$tt_id} AND FIND_IN_SET({$mb_id}, d_assigned)";
+    } else {
+        $sql = "SELECT tt_id FROM " . TERRITORY_TABLE . " WHERE tt_id = {$tt_id} AND FIND_IN_SET({$mb_id}, tt_assigned)";
+    }
     $result = $mysqli->query($sql);
     return ($result && $result->num_rows > 0);
 }
 
+$msg_type = isset($_POST['type']) ? $_POST['type'] : 'T';
+if (!in_array($msg_type, ['T', 'D'])) $msg_type = 'T';
+
 // 오래된 메시지 자동 정리 (1/50 확률로 실행)
 if (rand(1, 50) === 1) {
-    // 1) 배정일이 지난 구역의 메시지 삭제
+    // 1) 배정일이 지난 호별구역 메시지 삭제
     $cleanup_sql = "DELETE m FROM " . TERRITORY_MSG_TABLE . " m
-                    INNER JOIN " . TERRITORY_TABLE . " t ON m.tt_id = t.tt_id
+                    INNER JOIN " . TERRITORY_TABLE . " t ON m.tt_id = t.tt_id AND m.tm_type = 'T'
                     WHERE t.tt_assigned_date < CURDATE()";
     $mysqli->query($cleanup_sql);
+
+    // 1-2) 배정일이 지난 전시대 메시지 삭제
+    $cleanup_sql_d = "DELETE m FROM " . TERRITORY_MSG_TABLE . " m
+                      INNER JOIN " . DISPLAY_TABLE . " d ON m.tt_id = d.d_id AND m.tm_type = 'D'
+                      WHERE d.d_assigned_date < CURDATE()";
+    $mysqli->query($cleanup_sql_d);
 
     // 2) 안전망: 하루 이상 된 메시지 삭제 (구역이 삭제된 경우 등)
     $cleanup_sql2 = "DELETE FROM " . TERRITORY_MSG_TABLE . "
@@ -41,7 +54,7 @@ if (rand(1, 50) === 1) {
 
     // 읽음 테이블도 정리
     $cleanup_sql3 = "DELETE r FROM " . TERRITORY_MSG_READ_TABLE . " r
-                     LEFT JOIN " . TERRITORY_MSG_TABLE . " m ON r.tt_id = m.tt_id
+                     LEFT JOIN " . TERRITORY_MSG_TABLE . " m ON r.tt_id = m.tt_id AND r.tm_type = m.tm_type
                      WHERE m.tt_id IS NULL";
     $mysqli->query($cleanup_sql3);
 }
@@ -58,12 +71,14 @@ switch ($action) {
         }
         $tt_ids_csv = implode(',', $tt_ids);
         $mb_id = intval($current_mb_id);
+        $safe_type = $mysqli->real_escape_string($msg_type);
 
         $sql = "SELECT m.tt_id, COUNT(*) as unread
                 FROM " . TERRITORY_MSG_TABLE . " m
                 LEFT JOIN " . TERRITORY_MSG_READ_TABLE . " r
-                    ON m.tt_id = r.tt_id AND r.mb_id = {$mb_id}
+                    ON m.tt_id = r.tt_id AND r.tm_type = m.tm_type AND r.mb_id = {$mb_id}
                 WHERE m.tt_id IN ({$tt_ids_csv})
+                  AND m.tm_type = '{$safe_type}'
                   AND m.tm_id > COALESCE(r.last_read_id, 0)
                 GROUP BY m.tt_id";
         $result = $mysqli->query($sql);
@@ -80,15 +95,16 @@ switch ($action) {
     // 쪽지 패널 열기: 최근 50건 로드
     case 'load':
         $tt_id = intval(isset($_POST['tt_id']) ? $_POST['tt_id'] : 0);
-        if (!verify_territory_access($tt_id, $current_mb_id)) {
+        if (!verify_territory_access($tt_id, $current_mb_id, $msg_type)) {
             http_response_code(403);
             echo json_encode(['error' => '권한이 없습니다.']);
             exit;
         }
+        $safe_type = $mysqli->real_escape_string($msg_type);
 
         $sql = "SELECT tm_id, tt_id, mb_id, mb_name, tm_message, tm_datetime
                 FROM " . TERRITORY_MSG_TABLE . "
-                WHERE tt_id = {$tt_id}
+                WHERE tt_id = {$tt_id} AND tm_type = '{$safe_type}'
                 ORDER BY tm_id DESC LIMIT 50";
         $result = $mysqli->query($sql);
 
@@ -107,8 +123,8 @@ switch ($action) {
         // 읽음 포인터 갱신
         if ($last_id > 0) {
             $mb_id = intval($current_mb_id);
-            $sql = "INSERT INTO " . TERRITORY_MSG_READ_TABLE . " (tt_id, mb_id, last_read_id)
-                    VALUES ({$tt_id}, {$mb_id}, {$last_id})
+            $sql = "INSERT INTO " . TERRITORY_MSG_READ_TABLE . " (tt_id, tm_type, mb_id, last_read_id)
+                    VALUES ({$tt_id}, '{$safe_type}', {$mb_id}, {$last_id})
                     ON DUPLICATE KEY UPDATE last_read_id = GREATEST(last_read_id, {$last_id})";
             $mysqli->query($sql);
         }
@@ -121,15 +137,16 @@ switch ($action) {
         $tt_id = intval(isset($_POST['tt_id']) ? $_POST['tt_id'] : 0);
         $last_id = intval(isset($_POST['last_id']) ? $_POST['last_id'] : 0);
 
-        if (!verify_territory_access($tt_id, $current_mb_id)) {
+        if (!verify_territory_access($tt_id, $current_mb_id, $msg_type)) {
             http_response_code(403);
             echo json_encode(['error' => '권한이 없습니다.']);
             exit;
         }
+        $safe_type = $mysqli->real_escape_string($msg_type);
 
         $sql = "SELECT tm_id, tt_id, mb_id, mb_name, tm_message, tm_datetime
                 FROM " . TERRITORY_MSG_TABLE . "
-                WHERE tt_id = {$tt_id} AND tm_id > {$last_id}
+                WHERE tt_id = {$tt_id} AND tm_type = '{$safe_type}' AND tm_id > {$last_id}
                 ORDER BY tm_id ASC";
         $result = $mysqli->query($sql);
 
@@ -147,8 +164,8 @@ switch ($action) {
         // 읽음 포인터 갱신
         if ($new_last_id > $last_id) {
             $mb_id = intval($current_mb_id);
-            $sql = "INSERT INTO " . TERRITORY_MSG_READ_TABLE . " (tt_id, mb_id, last_read_id)
-                    VALUES ({$tt_id}, {$mb_id}, {$new_last_id})
+            $sql = "INSERT INTO " . TERRITORY_MSG_READ_TABLE . " (tt_id, tm_type, mb_id, last_read_id)
+                    VALUES ({$tt_id}, '{$safe_type}', {$mb_id}, {$new_last_id})
                     ON DUPLICATE KEY UPDATE last_read_id = GREATEST(last_read_id, {$new_last_id})";
             $mysqli->query($sql);
         }
@@ -161,7 +178,7 @@ switch ($action) {
         $tt_id = intval(isset($_POST['tt_id']) ? $_POST['tt_id'] : 0);
         $message = isset($_POST['message']) ? trim($_POST['message']) : '';
 
-        if (!verify_territory_access($tt_id, $current_mb_id)) {
+        if (!verify_territory_access($tt_id, $current_mb_id, $msg_type)) {
             http_response_code(403);
             echo json_encode(['error' => '권한이 없습니다.']);
             exit;
@@ -175,16 +192,17 @@ switch ($action) {
         $mb_id = intval($current_mb_id);
         $escaped_name = $mysqli->real_escape_string($current_mb_name);
         $escaped_msg = $mysqli->real_escape_string($message);
+        $safe_type = $mysqli->real_escape_string($msg_type);
 
-        $sql = "INSERT INTO " . TERRITORY_MSG_TABLE . " (tt_id, mb_id, mb_name, tm_message)
-                VALUES ({$tt_id}, {$mb_id}, '{$escaped_name}', '{$escaped_msg}')";
+        $sql = "INSERT INTO " . TERRITORY_MSG_TABLE . " (tt_id, tm_type, mb_id, mb_name, tm_message)
+                VALUES ({$tt_id}, '{$safe_type}', {$mb_id}, '{$escaped_name}', '{$escaped_msg}')";
 
         if ($mysqli->query($sql)) {
             $tm_id = intval($mysqli->insert_id);
 
             // 읽음 포인터 갱신 (자기 메시지는 읽은 것으로)
-            $sql = "INSERT INTO " . TERRITORY_MSG_READ_TABLE . " (tt_id, mb_id, last_read_id)
-                    VALUES ({$tt_id}, {$mb_id}, {$tm_id})
+            $sql = "INSERT INTO " . TERRITORY_MSG_READ_TABLE . " (tt_id, tm_type, mb_id, last_read_id)
+                    VALUES ({$tt_id}, '{$safe_type}', {$mb_id}, {$tm_id})
                     ON DUPLICATE KEY UPDATE last_read_id = GREATEST(last_read_id, {$tm_id})";
             $mysqli->query($sql);
 

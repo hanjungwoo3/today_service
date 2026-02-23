@@ -160,8 +160,9 @@ Local git config is already set for `hanjungwoo3` account.
 - 적응형 폴링 (5초→10초→30초→60초), 패널 닫으면 폴링 중지
 
 **DB Tables (upstream과 무관, 독립 테이블):**
-- `t_territory_message` — 쪽지 내용 (tm_id, tt_id, mb_id, mb_name, tm_message, tm_datetime)
-- `t_territory_message_read` — 사용자별 읽음 포인터 (tt_id, mb_id, last_read_id)
+- `t_territory_message` — 쪽지 내용 (tm_id, tt_id, tm_type, mb_id, mb_name, tm_message, tm_datetime)
+- `t_territory_message_read` — 사용자별 읽음 포인터 (tt_id, tm_type, mb_id, last_read_id)
+- `tm_type`: 'T'=호별구역, 'D'=전시대
 
 **Key Files:**
 - `pages/territory_msg_api.php` — 메시지 CRUD API (unread_counts, load, poll, send)
@@ -177,18 +178,20 @@ Local git config is already set for `hanjungwoo3` account.
 CREATE TABLE t_territory_message (
     tm_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     tt_id INT UNSIGNED NOT NULL,
+    tm_type CHAR(1) NOT NULL DEFAULT 'T',
     mb_id INT UNSIGNED NOT NULL,
     mb_name VARCHAR(50) NOT NULL,
     tm_message TEXT NOT NULL,
     tm_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_tt_datetime (tt_id, tm_datetime)
+    INDEX idx_tt_type_datetime (tt_id, tm_type, tm_datetime)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE t_territory_message_read (
     tt_id INT UNSIGNED NOT NULL,
+    tm_type CHAR(1) NOT NULL DEFAULT 'T',
     mb_id INT UNSIGNED NOT NULL,
     last_read_id INT UNSIGNED NOT NULL DEFAULT 0,
-    PRIMARY KEY (tt_id, mb_id)
+    PRIMARY KEY (tt_id, tm_type, mb_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
