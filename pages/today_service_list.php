@@ -260,9 +260,10 @@ if ($result->num_rows > 0) {
                 echo '<div class="assigned_group_name mt-1">' . $assigned_group . '</div>'; ?>
 
             </div>
-            <div class="align-self-center flex-shrink-0 d-flex">
-              <button type="button" class="btn btn-sm btn-outline-info mr-1 territory-msg-btn"
-                data-tt-id="<?= $tt_id ?>" data-tt-num="<?= htmlspecialchars($row['tt_num']) ?>" data-msg-type="T">
+            <div class="align-self-stretch flex-shrink-0 d-flex flex-column justify-content-between align-items-end pl-1">
+              <button type="button" class="btn btn-sm text-info territory-msg-btn p-0 border-0"
+                data-tt-id="<?= $tt_id ?>" data-tt-num="<?= htmlspecialchars($row['tt_num']) ?>" data-msg-type="T"
+                style="font-size:15px;line-height:1;">
                 <i class="bi bi-chat-dots"></i>
                 <span class="badge badge-danger territory-msg-badge" id="msg-badge-<?= $tt_id ?>" style="display:none;font-size:10px;">0</span>
               </button>
@@ -283,26 +284,23 @@ if ($result->num_rows > 0) {
         ?>
         <div class="list-group mb-2">
           <div class="list-group-item p-2 border-light">
-            <div class="d-flex flex-nowrap justify-content-between">
-              <div>
-                <div>
-                  <span class="badge badge-pill badge-primary badge-outline px-1 align-middle">전시대</span>
-                </div>
-                <div>
-                  <span class="align-middle"><?= $dp_name ?></span>
-                  <?php if ($row['dp_address'])
-                    echo kakao_menu($row['dp_address']); ?>
-                </div>
-                <?php if ($d_assigned_group)
-                  echo '<div class="assigned_group_name mt-1">' . $d_assigned_group . '</div>'; ?>
-              </div>
-              <div class="align-self-center flex-shrink-0">
-                <button type="button" class="btn btn-sm btn-outline-info territory-msg-btn"
-                  data-tt-id="<?= $row['d_id'] ?>" data-tt-num="<?= htmlspecialchars($dp_name) ?>" data-msg-type="D">
+            <div>
+              <div class="d-flex justify-content-between align-items-start">
+                <span class="badge badge-pill badge-primary badge-outline px-1 align-middle">전시대</span>
+                <button type="button" class="btn btn-sm text-info territory-msg-btn p-0 border-0 flex-shrink-0"
+                  data-tt-id="<?= $row['d_id'] ?>" data-tt-num="<?= htmlspecialchars($dp_name) ?>" data-msg-type="D"
+                  style="font-size:15px;line-height:1;">
                   <i class="bi bi-chat-dots"></i>
                   <span class="badge badge-danger territory-msg-badge" id="msg-badge-d-<?= $row['d_id'] ?>" style="display:none;font-size:10px;">0</span>
                 </button>
               </div>
+              <div>
+                <span class="align-middle"><?= $dp_name ?></span>
+                <?php if ($row['dp_address'])
+                  echo kakao_menu($row['dp_address']); ?>
+              </div>
+              <?php if ($d_assigned_group)
+                echo '<div class="assigned_group_name mt-1">' . $d_assigned_group . '</div>'; ?>
             </div>
             <div class="bg-light p-2">
               <?php
