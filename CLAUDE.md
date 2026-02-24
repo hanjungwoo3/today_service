@@ -156,10 +156,10 @@ Local git config is already set for `hanjungwoo3` account.
 **Architecture:**
 - 배정된 구역 멤버 간 간단한 쪽지(채팅) 기능
 - MySQL backend (독립 테이블 2개)
-- 홈 화면 배정 카드에서 인라인 패널로 동작
+- 팝업 채팅 창 방식 (fixed position overlay) — 페이지 DOM과 완전 독립
+- `footer.php`에 포함되어 모든 페이지에서 동작 가능
 - 적응형 폴링 (5초→10초→30초→60초), 패널 닫으면 폴링 중지
-- 패널 열림 시 10초 목록 갱신 스킵 (입력 포커스/키패드 보호), 닫으면 즉시 갱신
-- 외부 갱신(참석/불참 등) 발생 시 패널 자동 닫힘 (상태 불일치 방지)
+- 데스크톱: 우하단 340px 팝업, 모바일: 하단 전폭 패널 (55vh)
 
 **DB Tables (upstream과 무관, 독립 테이블):**
 - `t_territory_message` — 쪽지 내용 (tm_id, tt_id, tm_type, mb_id, mb_name, tm_message, tm_datetime)
@@ -168,7 +168,8 @@ Local git config is already set for `hanjungwoo3` account.
 
 **Key Files:**
 - `pages/territory_msg_api.php` — 메시지 CRUD API (unread_counts, load, poll, send)
-- `js/territory_msg.js` — 클라이언트 패널/폴링/전송 로직 (TerritoryMsg 모듈)
+- `js/territory_msg.js` — 클라이언트 팝업/폴링/전송 로직 (TerritoryMsg 모듈)
+- `footer.php` — 팝업 컨테이너 (#tmsg-popup), JS 로드, CSS, 클릭 핸들러
 
 **Auto Cleanup:**
 - API 호출 1/50 확률로 오래된 메시지 자동 정리
@@ -292,7 +293,7 @@ Upstream 머지 시 아래 파일들은 충돌이 발생하지 않도록 주의�
 | `s/duty_api.php` | 청소/마이크/안내인/연사음료 API (JSON 스토리지) |
 | `s/duty_print.php` | 청소/마이크/안내인/연사음료 인쇄용 |
 | `pages/territory_msg_api.php` | 구역 쪽지 API (MySQL, 4개 액션: unread_counts/load/poll/send) |
-| `js/territory_msg.js` | 구역 쪽지 클라이언트 (인라인 패널, 적응형 폴링, TerritoryMsg 모듈) |
+| `js/territory_msg.js` | 구역 쪽지 클라이언트 (팝업 채팅 창, 적응형 폴링, TerritoryMsg 모듈) |
 
 ### 기존 파일 수정 내역 (upstream 머지 시 충돌 가능)
 
@@ -300,7 +301,8 @@ Upstream 머지 시 아래 파일들은 충돌이 발생하지 않도록 주의�
 |------|--------|----------|-----------|
 | `.gitignore` | +6줄 | 낮음 | `.dev/`, `docs/` 무시 규칙 추가 (파일 끝에 append) |
 | `config.php` | +4/-2줄 | **중간** | `BASE_PATH` 계산 조건에 `/s/`, `/c/` 경로 추가 |
-| `index.php` | +25줄 | 낮음 | `custom_board_top.php`, `custom_home_assignments.php` include + 구역 쪽지 패널 컨테이너/JS/CSS |
+| `index.php` | +5줄 | 낮음 | `custom_board_top.php`, `custom_home_assignments.php` include |
+| `footer.php` | +35줄 | 낮음 | 구역 쪽지 팝업 컨테이너/JS/CSS (</body> 직전) |
 | `pages/admin_member_form.php` | +1줄 | 낮음 | `$mb` 변수 기본값 초기화 (신규 등록 시 undefined 방지) |
 | `pages/guide_assign_step.php` | +40줄 | **중간** | 탭 내비에 "호별봉사 짝 배정" 탭 추가 + preselect 자동선택 JS |
 | `m/index.php` | +85/-7줄 | **중간** | SQL에 `ms_id` 추가, 클릭 가능한 추천짝 카드, `goToAssign()`, localStorage 필터 저장, 툴바 헤더 숨김 |

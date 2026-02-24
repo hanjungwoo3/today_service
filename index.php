@@ -68,7 +68,6 @@ $cancle = $mysqli->query($sql);
 </div>
 
 <div id="today-service-list"></div>
-<div id="territory-msg-container" style="display:none;"></div>
 
 <?php if(file_exists('include/custom_board_top.php')) include 'include/custom_board_top.php'; ?>
 <?php if(file_exists('include/custom_home_assignments.php')) include 'include/custom_home_assignments.php'; ?>
@@ -106,10 +105,9 @@ $cancle = $mysqli->query($sql);
     // 최초 로딩 시 로컬 날짜 기준으로 목록 불러오기
     pageload_custom(BASE_PATH+'/pages/today_service_list.php?s_date='+localYmd,'#today-service-list');
 
-    // 10초마다 오늘의 봉사 업데이트 (비가시 상태 또는 쪽지 패널 열림 시 스킵)
+    // 10초마다 오늘의 봉사 업데이트
     setInterval(function(){
       if (document.hidden) return;
-      if (typeof TerritoryMsg !== 'undefined' && TerritoryMsg.isOpen()) return;
       const current = getLocalDateYMD();
       pageload_custom(BASE_PATH+'/pages/today_service_list.php?s_date='+current,'#today-service-list');
     },10000);
@@ -119,41 +117,6 @@ $cancle = $mysqli->query($sql);
   });
 </script>
 
-<!-- 구역 쪽지 -->
-<script src="<?=BASE_PATH?>/js/territory_msg.js"></script>
-<script>
-  var _tmsgMyMbId = <?= intval($mb_id) ?>;
-  $(document).on('click', '.territory-msg-btn', function(e) {
-    e.stopPropagation();
-    var ttId = parseInt($(this).data('tt-id'));
-    var ttNum = $(this).data('tt-num') + '';
-    var msgType = $(this).data('msg-type') || 'T';
-    TerritoryMsg.openPanel(ttId, ttNum, _tmsgMyMbId, msgType);
-  });
-</script>
-<style>
-.tmsg-panel { margin: 0 0 8px; border: 1px solid #ddd; border-radius: 8px; background: #fff; overflow: hidden; }
-.tmsg-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f8f9fa; border-bottom: 1px solid #eee; }
-.tmsg-title { font-size: 14px; font-weight: 600; }
-.tmsg-header-btns { display: flex; align-items: center; gap: 4px; }
-.tmsg-refresh { border: none; background: none; font-size: 16px; color: #666; padding: 0 4px; cursor: pointer; }
-.tmsg-refresh:hover { color: #333; }
-.tmsg-close { border: none; background: none; font-size: 20px; color: #999; padding: 0 4px; cursor: pointer; line-height: 1; }
-.tmsg-close:hover { color: #333; }
-.tmsg-body { max-height: 250px; overflow-y: auto; padding: 8px 12px; }
-.tmsg-footer { display: flex; padding: 8px; border-top: 1px solid #eee; gap: 6px; }
-.tmsg-footer input { flex: 1; border: 1px solid #ddd; border-radius: 4px; padding: 6px 10px; font-size: 14px; outline: none; }
-.tmsg-footer input:focus { border-color: #80bdff; }
-#tmsg-send { border: none; background: #5c7cfa; color: #fff; border-radius: 4px; padding: 6px 12px; cursor: pointer; }
-#tmsg-send:hover { background: #4c6ef5; }
-.tmsg-item { margin-bottom: 10px; font-size: 15px; }
-.tmsg-item.mine { text-align: right; }
-.tmsg-name { font-size: 12px; color: #888; margin-bottom: 2px; }
-.tmsg-text { display: inline-block; padding: 8px 12px; border-radius: 12px; background: #f0f0f0; max-width: 80%; word-break: break-word; text-align: left; }
-.tmsg-item.mine .tmsg-text { background: #d4edff; }
-.tmsg-time { font-size: 11px; color: #aaa; margin-top: 2px; }
-.tmsg-empty, .tmsg-loading { text-align: center; color: #999; padding: 20px 0; font-size: 13px; }
-</style>
 <?php endif; ?>
 
 <?php include_once('footer.php');?>

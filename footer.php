@@ -177,6 +177,54 @@
       </div>
     </div>
 
+    <!-- 구역 쪽지 팝업 -->
+    <?php if(!is_moveout(mb_id())): ?>
+    <div id="tmsg-backdrop"></div>
+    <div id="tmsg-popup" style="display:none;"></div>
+    <script src="<?=BASE_PATH?>/js/territory_msg.js"></script>
+    <script>
+      var _tmsgMyMbId = <?= intval(mb_id()) ?>;
+      $(document).on('click', '.territory-msg-btn', function(e) {
+        e.stopPropagation();
+        var ttId = parseInt($(this).data('tt-id'));
+        var ttNum = $(this).data('tt-num') + '';
+        var msgType = $(this).data('msg-type') || 'T';
+        TerritoryMsg.openPanel(ttId, ttNum, _tmsgMyMbId, msgType);
+      });
+    </script>
+    <style>
+    #tmsg-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 9999; display: none; }
+    #tmsg-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; width: 340px; }
+    .tmsg-popup-inner { border-radius: 12px; background: #fff; box-shadow: 0 4px 24px rgba(0,0,0,0.18); overflow: hidden; display: flex; flex-direction: column; max-height: 440px; }
+    .tmsg-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #f8f9fa; border-bottom: 1px solid #eee; }
+    .tmsg-title { font-size: 15px; font-weight: 600; }
+    .tmsg-header-btns { display: flex; align-items: center; gap: 4px; }
+    .tmsg-refresh { border: none; background: none; font-size: 16px; color: #666; padding: 0 4px; cursor: pointer; }
+    .tmsg-refresh:hover { color: #333; }
+    .tmsg-close { border: none; background: none; font-size: 22px; color: #999; padding: 0 4px; cursor: pointer; line-height: 1; }
+    .tmsg-close:hover { color: #333; }
+    .tmsg-body { flex: 1; overflow-y: auto; padding: 10px 14px; min-height: 200px; max-height: 300px; }
+    .tmsg-footer { display: flex; padding: 8px 10px; border-top: 1px solid #eee; gap: 6px; }
+    .tmsg-footer input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 14px; font-size: 14px; outline: none; }
+    .tmsg-footer input:focus { border-color: #80bdff; }
+    #tmsg-send { border: none; background: #5c7cfa; color: #fff; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    #tmsg-send:hover { background: #4c6ef5; }
+    .tmsg-item { margin-bottom: 10px; font-size: 15px; }
+    .tmsg-item.mine { text-align: right; }
+    .tmsg-name { font-size: 12px; color: #888; margin-bottom: 2px; }
+    .tmsg-text { display: inline-block; padding: 8px 12px; border-radius: 16px; background: #f0f0f0; max-width: 80%; word-break: break-word; text-align: left; }
+    .tmsg-item.mine .tmsg-text { background: #d4edff; }
+    .tmsg-time { font-size: 11px; color: #aaa; margin-top: 2px; }
+    .tmsg-empty, .tmsg-loading { text-align: center; color: #999; padding: 20px 0; font-size: 13px; }
+    @media (max-width: 576px) {
+      #tmsg-popup { top: auto; bottom: 0; left: 0; right: 0; width: 100%; transform: none; }
+      .tmsg-popup-inner { border-radius: 16px 16px 0 0; max-height: 55vh; }
+      .tmsg-body { max-height: 40vh; }
+    }
+    </style>
+    <?php endif; ?>
+    <!-- 구역 쪽지 팝업 끝 -->
+
     <div class="preloader">
       <img src="<?=BASE_PATH?>/img/preloader2.gif">
     </div>

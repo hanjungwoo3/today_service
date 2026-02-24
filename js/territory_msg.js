@@ -1,6 +1,6 @@
 /**
  * 구역 배정 쪽지 (Territory Messaging)
- * - 배정 카드에서 인라인 채팅 패널
+ * - 팝업 채팅 창 (fixed position overlay)
  * - 적응형 폴링 (5s → 10s → 30s → 60s)
  * - type: 'T'=호별구역, 'D'=전시대
  */
@@ -14,6 +14,7 @@ var TerritoryMsg = (function() {
     var _myMbId = 0;
 
     var POLL_INTERVALS = [5000, 5000, 10000, 10000, 30000, 30000, 60000];
+    var _prevUnreadTotal = -1; // 새 쪽지 알림용 이전 안 읽은 수 (-1: 초기화 전)
 
     function _getInterval() {
         var idx = Math.min(_noChangeCount, POLL_INTERVALS.length - 1);
@@ -24,7 +25,7 @@ var TerritoryMsg = (function() {
         _noChangeCount = 0;
     }
 
-    // 뱃지 갱신: 타입별로 분리하여 안 읽은 수 업데이트
+    // 뱃지 갱신: 타입별로 분리하여 안 읽은 수 업데이트 + 새 쪽지 알림
     function refreshBadges() {
         var btns = document.querySelectorAll('.territory-msg-btn');
         if (btns.length === 0) return;
@@ -37,46 +38,74 @@ var TerritoryMsg = (function() {
             grouped[type].push(btn.getAttribute('data-tt-id'));
         });
 
+        var types = Object.keys(grouped);
+        var totalUnread = 0;
+        var completed = 0;
+
         // 타입별로 API 호출
-        Object.keys(grouped).forEach(function(type) {
+        types.forEach(function(type) {
             $.ajax({
                 url: BASE_PATH + '/pages/territory_msg_api.php',
                 type: 'POST',
                 dataType: 'json',
                 data: { action: 'unread_counts', tt_ids: grouped[type].join(','), type: type },
                 success: function(res) {
-                    if (!res.counts) return;
-                    btns.forEach(function(btn) {
-                        var btnType = btn.getAttribute('data-msg-type') || 'T';
-                        if (btnType !== type) return;
-                        var ttId = btn.getAttribute('data-tt-id');
-                        var badge = btn.querySelector('.territory-msg-badge');
-                        if (!badge) return;
-                        var count = res.counts[ttId] || 0;
-                        if (count > 0) {
-                            badge.textContent = count > 99 ? '99+' : count;
-                            badge.style.display = '';
-                        } else {
-                            badge.style.display = 'none';
+                    if (res.counts) {
+                        btns.forEach(function(btn) {
+                            var btnType = btn.getAttribute('data-msg-type') || 'T';
+                            if (btnType !== type) return;
+                            var ttId = btn.getAttribute('data-tt-id');
+                            var badge = btn.querySelector('.territory-msg-badge');
+                            var count = res.counts[ttId] || 0;
+                            totalUnread += count;
+                            if (!badge) return;
+                            if (count > 0) {
+                                badge.textContent = count > 99 ? '99+' : count;
+                                badge.style.display = '';
+                            } else {
+                                badge.style.display = 'none';
+                            }
+                        });
+                    }
+                    completed++;
+                    if (completed >= types.length) {
+                        // 안 읽은 수가 증가했으면 알림 표시
+                        if (_prevUnreadTotal >= 0 && totalUnread > _prevUnreadTotal) {
+                            _showNewMsgToast();
                         }
-                    });
+                        _prevUnreadTotal = totalUnread;
+                    }
                 }
             });
         });
     }
 
-    // 클릭한 카드 바로 아래로 패널 컨테이너 이동
-    function _positionContainer(ttId, type) {
-        var container = document.getElementById('territory-msg-container');
-        if (!container) return;
-        var selector = '.territory-msg-btn[data-tt-id="' + ttId + '"][data-msg-type="' + type + '"]';
-        var btn = document.querySelector(selector);
-        if (btn) {
-            var card = btn.closest('.list-group');
-            if (card) {
-                card.parentNode.insertBefore(container, card.nextSibling);
-            }
-        }
+    // 새 쪽지 도착 토스트 알림 (모달 위에도 표시)
+    function _showNewMsgToast() {
+        // 팝업이 열려있으면 알림 불필요 (이미 실시간 폴링 중)
+        if (_activeTtId) return;
+
+        var existing = document.getElementById('tmsg-toast');
+        if (existing) existing.remove();
+
+        var toast = document.createElement('div');
+        toast.id = 'tmsg-toast';
+        toast.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:99999;' +
+            'background:#333;color:#fff;padding:10px 20px;border-radius:24px;font-size:14px;' +
+            'box-shadow:0 4px 12px rgba(0,0,0,0.3);cursor:pointer;opacity:0;transition:opacity 0.3s;';
+        toast.innerHTML = '<i class="bi bi-chat-dots"></i> 새 쪽지가 도착했습니다';
+        toast.onclick = function() {
+            // 모달 열려있으면 닫기
+            $('.modal.show').modal('hide');
+            toast.remove();
+        };
+
+        document.body.appendChild(toast);
+        requestAnimationFrame(function() { toast.style.opacity = '1'; });
+        setTimeout(function() {
+            toast.style.opacity = '0';
+            setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
+        }, 4000);
     }
 
     // 패널 열기
@@ -99,16 +128,17 @@ var TerritoryMsg = (function() {
         _lastId = 0;
         _resetInterval();
 
-        var container = document.getElementById('territory-msg-container');
-        if (!container) return;
+        var popup = document.getElementById('tmsg-popup');
+        if (!popup) return;
 
-        // 클릭한 카드 바로 아래에 위치시키기
-        _positionContainer(ttId, type);
+        // 배경 딤 표시
+        var backdrop = document.getElementById('tmsg-backdrop');
+        if (backdrop) backdrop.style.display = 'block';
 
         var titleLabel = type === 'D' ? '전시대 쪽지' : _escHtml(ttNum) + ' 구역 쪽지';
 
-        container.innerHTML =
-            '<div class="tmsg-panel">' +
+        popup.innerHTML =
+            '<div class="tmsg-popup-inner">' +
                 '<div class="tmsg-header">' +
                     '<span class="tmsg-title">' + titleLabel + '</span>' +
                     '<span class="tmsg-header-btns">' +
@@ -125,7 +155,7 @@ var TerritoryMsg = (function() {
                 '</div>' +
             '</div>';
 
-        container.style.display = '';
+        popup.style.display = '';
 
         // Enter 키 전송
         document.getElementById('tmsg-input').addEventListener('keypress', function(e) {
@@ -171,41 +201,33 @@ var TerritoryMsg = (function() {
         });
     }
 
-    // 내부 닫기 (상태 초기화만, 목록 갱신 안 함)
-    function _closePanelQuiet() {
+    // 패널 닫기
+    function closePanel() {
         _stopPolling();
         _activeTtId = null;
         _activeTtNum = '';
         _activeType = 'T';
         _lastId = 0;
 
-        var container = document.getElementById('territory-msg-container');
-        if (container) {
-            container.innerHTML = '';
-            container.style.display = 'none';
+        var popup = document.getElementById('tmsg-popup');
+        if (popup) {
+            popup.innerHTML = '';
+            popup.style.display = 'none';
         }
+
+        // 배경 딤 숨기기
+        var backdrop = document.getElementById('tmsg-backdrop');
+        if (backdrop) backdrop.style.display = 'none';
     }
 
-    // 패널 닫기 (+ 목록 갱신)
-    function closePanel() {
-        _closePanelQuiet();
-
-        // 패널 열려있는 동안 스킵된 목록 갱신을 즉시 실행
-        var serviceList = document.getElementById('today-service-list');
-        if (serviceList && typeof pageload_custom === 'function') {
-            var localYmd = new Date().toISOString().slice(0, 10);
-            pageload_custom(BASE_PATH + '/pages/today_service_list.php?s_date=' + localYmd, '#today-service-list');
-        }
-    }
-
-    // 수동 새로고침 (목록 갱신 없이 패널만 재로드)
+    // 수동 새로고침
     function reloadPanel() {
         if (!_activeTtId) return;
         var ttId = _activeTtId;
         var ttNum = _activeTtNum;
         var myMbId = _myMbId;
         var type = _activeType;
-        _closePanelQuiet();
+        closePanel();
         openPanel(ttId, ttNum, myMbId, type);
     }
 
@@ -381,6 +403,11 @@ var TerritoryMsg = (function() {
         return div.innerHTML;
     }
 
+    // 배경 딤 클릭 시 패널 닫기
+    $(document).on('click', '#tmsg-backdrop', function() {
+        closePanel();
+    });
+
     // visibilitychange: 탭 비활성 시 폴링 중지, 활성 시 재개
     document.addEventListener('visibilitychange', function() {
         if (document.hidden) {
@@ -390,37 +417,15 @@ var TerritoryMsg = (function() {
         }
     });
 
-    // AJAX 요청 전: 목록 갱신 시 패널 닫기 + 컨테이너 대피
-    $(document).ajaxSend(function(event, xhr, settings) {
-        if (settings.url && settings.url.indexOf('today_service_list.php') !== -1) {
-            // 패널 열려있으면 상태 초기화 (참석/불참 등 외부 갱신과 충돌 방지)
-            if (_activeTtId) {
-                _stopPolling();
-                _activeTtId = null;
-                _activeTtNum = '';
-                _activeType = 'T';
-                _lastId = 0;
-            }
-            var container = document.getElementById('territory-msg-container');
-            if (container) {
-                container.innerHTML = '';
-                container.style.display = 'none';
-            }
-            // 컨테이너가 #today-service-list 안에 있으면 밖으로 대피
-            var serviceList = document.getElementById('today-service-list');
-            if (container && serviceList && serviceList.contains(container)) {
-                serviceList.parentNode.insertBefore(container, serviceList.nextSibling);
-            }
-        }
+    // Bootstrap 모달 열릴 때 팝업 닫기 (모달이 포커스를 가져가므로)
+    $(document).on('show.bs.modal', function() {
+        if (_activeTtId) closePanel();
     });
 
-    // AJAX 완료 후: 뱃지 새로고침 + 패널 위치 재조정
+    // AJAX 완료 후: 뱃지 새로고침
     $(document).ajaxComplete(function(event, xhr, settings) {
         if (settings.url && settings.url.indexOf('today_service_list.php') !== -1) {
             refreshBadges();
-            if (_activeTtId) {
-                _positionContainer(_activeTtId, _activeType);
-            }
         }
     });
 
