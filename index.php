@@ -146,12 +146,12 @@ $cancle = $mysqli->query($sql);
 .tmsg-footer input:focus { border-color: #80bdff; }
 #tmsg-send { border: none; background: #5c7cfa; color: #fff; border-radius: 4px; padding: 6px 12px; cursor: pointer; }
 #tmsg-send:hover { background: #4c6ef5; }
-.tmsg-item { margin-bottom: 8px; font-size: 13px; }
+.tmsg-item { margin-bottom: 10px; font-size: 15px; }
 .tmsg-item.mine { text-align: right; }
-.tmsg-name { font-size: 11px; color: #888; margin-bottom: 2px; }
-.tmsg-text { display: inline-block; padding: 6px 10px; border-radius: 12px; background: #f0f0f0; max-width: 80%; word-break: break-word; text-align: left; }
+.tmsg-name { font-size: 12px; color: #888; margin-bottom: 2px; }
+.tmsg-text { display: inline-block; padding: 8px 12px; border-radius: 12px; background: #f0f0f0; max-width: 80%; word-break: break-word; text-align: left; }
 .tmsg-item.mine .tmsg-text { background: #d4edff; }
-.tmsg-time { font-size: 10px; color: #aaa; margin-top: 2px; }
+.tmsg-time { font-size: 11px; color: #aaa; margin-top: 2px; }
 .tmsg-empty, .tmsg-loading { text-align: center; color: #999; padding: 20px 0; font-size: 13px; }
 </style>
 <?php endif; ?>
