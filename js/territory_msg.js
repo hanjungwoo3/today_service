@@ -171,8 +171,8 @@ var TerritoryMsg = (function() {
         });
     }
 
-    // 패널 닫기
-    function closePanel() {
+    // 내부 닫기 (상태 초기화만, 목록 갱신 안 함)
+    function _closePanelQuiet() {
         _stopPolling();
         _activeTtId = null;
         _activeTtNum = '';
@@ -186,14 +186,26 @@ var TerritoryMsg = (function() {
         }
     }
 
-    // 수동 새로고침
+    // 패널 닫기 (+ 목록 갱신)
+    function closePanel() {
+        _closePanelQuiet();
+
+        // 패널 열려있는 동안 스킵된 목록 갱신을 즉시 실행
+        var serviceList = document.getElementById('today-service-list');
+        if (serviceList && typeof pageload_custom === 'function') {
+            var localYmd = new Date().toISOString().slice(0, 10);
+            pageload_custom(BASE_PATH + '/pages/today_service_list.php?s_date=' + localYmd, '#today-service-list');
+        }
+    }
+
+    // 수동 새로고침 (목록 갱신 없이 패널만 재로드)
     function reloadPanel() {
         if (!_activeTtId) return;
         var ttId = _activeTtId;
         var ttNum = _activeTtNum;
         var myMbId = _myMbId;
         var type = _activeType;
-        closePanel();
+        _closePanelQuiet();
         openPanel(ttId, ttNum, myMbId, type);
     }
 
@@ -235,6 +247,8 @@ var TerritoryMsg = (function() {
                     _lastId = Math.max(_lastId, res.tm_id);
                 }
                 _resetInterval();
+                _stopPolling();
+                _poll(); // 즉시 새 메시지 확인
             }
         });
     }
@@ -376,10 +390,23 @@ var TerritoryMsg = (function() {
         }
     });
 
-    // AJAX 요청 전: 컨테이너를 #today-service-list 밖으로 대피
+    // AJAX 요청 전: 목록 갱신 시 패널 닫기 + 컨테이너 대피
     $(document).ajaxSend(function(event, xhr, settings) {
         if (settings.url && settings.url.indexOf('today_service_list.php') !== -1) {
+            // 패널 열려있으면 상태 초기화 (참석/불참 등 외부 갱신과 충돌 방지)
+            if (_activeTtId) {
+                _stopPolling();
+                _activeTtId = null;
+                _activeTtNum = '';
+                _activeType = 'T';
+                _lastId = 0;
+            }
             var container = document.getElementById('territory-msg-container');
+            if (container) {
+                container.innerHTML = '';
+                container.style.display = 'none';
+            }
+            // 컨테이너가 #today-service-list 안에 있으면 밖으로 대피
             var serviceList = document.getElementById('today-service-list');
             if (container && serviceList && serviceList.contains(container)) {
                 serviceList.parentNode.insertBefore(container, serviceList.nextSibling);
@@ -402,6 +429,7 @@ var TerritoryMsg = (function() {
         openPanel: openPanel,
         closePanel: closePanel,
         reloadPanel: reloadPanel,
-        sendMessage: sendMessage
+        sendMessage: sendMessage,
+        isOpen: function() { return _activeTtId !== null; }
     };
 })();

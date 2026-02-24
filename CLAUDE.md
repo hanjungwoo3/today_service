@@ -158,6 +158,8 @@ Local git config is already set for `hanjungwoo3` account.
 - MySQL backend (독립 테이블 2개)
 - 홈 화면 배정 카드에서 인라인 패널로 동작
 - 적응형 폴링 (5초→10초→30초→60초), 패널 닫으면 폴링 중지
+- 패널 열림 시 10초 목록 갱신 스킵 (입력 포커스/키패드 보호), 닫으면 즉시 갱신
+- 외부 갱신(참석/불참 등) 발생 시 패널 자동 닫힘 (상태 불일치 방지)
 
 **DB Tables (upstream과 무관, 독립 테이블):**
 - `t_territory_message` — 쪽지 내용 (tm_id, tt_id, tm_type, mb_id, mb_name, tm_message, tm_datetime)

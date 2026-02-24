@@ -106,11 +106,12 @@ $cancle = $mysqli->query($sql);
     // 최초 로딩 시 로컬 날짜 기준으로 목록 불러오기
     pageload_custom(BASE_PATH+'/pages/today_service_list.php?s_date='+localYmd,'#today-service-list');
 
-    // 10초마다 오늘의 봉사 업데이트 (항상 로컬 날짜 기준, 비가시 상태면 스킵)
+    // 10초마다 오늘의 봉사 업데이트 (비가시 상태 또는 쪽지 패널 열림 시 스킵)
     setInterval(function(){
       if (document.hidden) return;
+      if (typeof TerritoryMsg !== 'undefined' && TerritoryMsg.isOpen()) return;
       const current = getLocalDateYMD();
-      pageload_custom(BASE_PATH+'/pages/today_service_list.php?s_date='+current,'#today-service-list'); 
+      pageload_custom(BASE_PATH+'/pages/today_service_list.php?s_date='+current,'#today-service-list');
     },10000);
 
     // 화면 표시
