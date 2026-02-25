@@ -10,7 +10,7 @@
 @media (max-width: 768px) {
   #container { max-width: 600px; margin: 0 auto; }
 }
-iframe.auto-height { width:100%; border:none; min-height:calc(100vh - 110px); }
+iframe.auto-height { width:100%; border:none; min-height:calc(100vh - 110px); overflow:hidden; }
 </style>
 <?php
   $_meetParams = 'embed=1';
@@ -32,6 +32,7 @@ iframe.auto-height { width:100%; border:none; min-height:calc(100vh - 110px); }
     resize();
     try { new MutationObserver(resize).observe(f.contentWindow.document.body, {childList:true, subtree:true}); } catch(e){}
   });
+  window.addEventListener('resize', resize);
 })();
 </script>
 

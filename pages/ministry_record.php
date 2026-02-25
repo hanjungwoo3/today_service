@@ -7,7 +7,7 @@
 <?php echo footer_menu('오늘의 봉사'); ?>
 
 <style>
-iframe.auto-height { width:100%; border:none; min-height:calc(100vh - 110px); }
+iframe.auto-height { width:100%; border:none; min-height:calc(100vh - 110px); overflow:hidden; }
 </style>
 <?php
   $iframe_params = [];
@@ -45,6 +45,7 @@ iframe.auto-height { width:100%; border:none; min-height:calc(100vh - 110px); }
     resize();
     try { new MutationObserver(resize).observe(f.contentWindow.document.body, {childList:true, subtree:true}); } catch(e){}
   });
+  window.addEventListener('resize', resize);
 })();
 </script>
 

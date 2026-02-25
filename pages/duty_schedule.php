@@ -8,7 +8,7 @@
 
 <style>
 body { background: #f5f5f5 !important; }
-iframe.auto-height { width:100%; border:none; min-height:calc(100vh - 110px); }
+iframe.auto-height { width:100%; border:none; min-height:calc(100vh - 110px); overflow:hidden; }
 </style>
 <div id="container" class="container-fluid p-0">
   <iframe class="auto-height" src="<?=BASE_PATH?>/s/duty_view.php?embed=1"></iframe>
@@ -24,6 +24,7 @@ iframe.auto-height { width:100%; border:none; min-height:calc(100vh - 110px); }
     resize();
     try { new MutationObserver(resize).observe(f.contentWindow.document.body, {childList:true, subtree:true}); } catch(e){}
   });
+  window.addEventListener('resize', resize);
 })();
 </script>
 
