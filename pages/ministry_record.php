@@ -33,10 +33,12 @@ iframe.auto-height { width:100%; border:none; min-height:calc(100vh - 110px); }
       var doc = f.contentWindow.document;
       // iframe 내부 min-height 제거 → scrollHeight가 실제 콘텐츠 높이 반영
       doc.documentElement.style.minHeight = '0';
+      doc.documentElement.style.overflowX = 'hidden';
       doc.body.style.minHeight = '0';
+      doc.body.style.overflowX = 'hidden';
       var shell = doc.querySelector('.app-shell');
       if (shell) shell.style.minHeight = '0';
-      // matrix-container 내부 스크롤 제거 → 바깥 스크롤로 통합
+      // 세로 max-height 제거 → 바깥 스크롤로 통합 (가로 스크롤은 container 내부 유지)
       var mc = doc.querySelectorAll('.matrix-container');
       mc.forEach(function(el){ el.style.maxHeight = 'none'; });
     } catch(e){}
