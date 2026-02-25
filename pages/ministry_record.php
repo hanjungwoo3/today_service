@@ -23,9 +23,23 @@ iframe.auto-height { width:100%; border:none; min-height:calc(100vh - 110px); }
 (function(){
   var f = document.querySelector('iframe.auto-height');
   function resize(){
-    try { f.style.height = f.contentWindow.document.documentElement.scrollHeight + 'px'; } catch(e){}
+    try {
+      var doc = f.contentWindow.document;
+      f.style.height = doc.documentElement.scrollHeight + 'px';
+    } catch(e){}
   }
   f.addEventListener('load', function(){
+    try {
+      var doc = f.contentWindow.document;
+      // iframe 내부 min-height 제거 → scrollHeight가 실제 콘텐츠 높이 반영
+      doc.documentElement.style.minHeight = '0';
+      doc.body.style.minHeight = '0';
+      var shell = doc.querySelector('.app-shell');
+      if (shell) shell.style.minHeight = '0';
+      // matrix-container 내부 스크롤 제거 → 바깥 스크롤로 통합
+      var mc = doc.querySelectorAll('.matrix-container');
+      mc.forEach(function(el){ el.style.maxHeight = 'none'; });
+    } catch(e){}
     resize();
     try { new MutationObserver(resize).observe(f.contentWindow.document.body, {childList:true, subtree:true}); } catch(e){}
   });
