@@ -359,7 +359,7 @@ usort($_allItems, function($a, $b) {
     border-radius: 8px;
 }
 .home-assignments-title {
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 700;
     color: #666;
     margin-bottom: 4px;
@@ -372,7 +372,7 @@ usort($_allItems, function($a, $b) {
     background: #f9f9f9;
     border-radius: 4px;
     border: 1px solid #ddd;
-    font-size: 13px;
+    font-size: 15px;
     line-height: 1.5;
     text-decoration: none;
     color: inherit;
@@ -383,7 +383,7 @@ usort($_allItems, function($a, $b) {
     position: absolute;
     top: 4px;
     right: 6px;
-    font-size: 11px;
+    font-size: 13px;
     color: #999;
     font-weight: 600;
 }
@@ -414,7 +414,7 @@ usort($_allItems, function($a, $b) {
 }
 .home-assignment-section {
     color: #999;
-    font-size: 12px;
+    font-size: 14px;
     margin-bottom: 2px;
 }
 .home-assignment-line:first-child .home-assignment-section {
@@ -425,7 +425,7 @@ usort($_allItems, function($a, $b) {
 }
 .home-assignment-title {
     color: #333;
-    font-size: 12px;
+    font-size: 14px;
     word-break: keep-all;
     overflow-wrap: break-word;
     line-height: 1.4;

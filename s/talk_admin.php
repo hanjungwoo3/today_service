@@ -62,7 +62,7 @@ foreach ($allTalks as $talk) {
             font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
             background: #f5f5f5;
             color: #333;
-            font-size: 14px;
+            font-size: 16px;
             position: relative;
         }
         body::before {
@@ -91,7 +91,7 @@ foreach ($allTalks as $talk) {
             margin-bottom: 8px;
         }
         .page-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: #333;
         }
@@ -155,7 +155,7 @@ foreach ($allTalks as $talk) {
             background: #4CAF50;
             color: white;
             padding: 10px 6px;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 600;
             text-align: center;
             white-space: nowrap;
@@ -163,7 +163,7 @@ foreach ($allTalks as $talk) {
         .talk-table td {
             padding: 8px 6px;
             border-bottom: 1px solid #e8e8e8;
-            font-size: 13px;
+            font-size: 15px;
             vertical-align: top;
             cursor: pointer;
         }
@@ -316,7 +316,7 @@ foreach ($allTalks as $talk) {
             text-align: center;
             padding: 40px;
             color: #999;
-            font-size: 15px;
+            font-size: 17px;
         }
 
         /* 자동저장 토스트 */
@@ -349,9 +349,9 @@ foreach ($allTalks as $talk) {
         }
         @media (max-width: 768px) {
             .container { padding: 6px; }
-            .talk-table { font-size: 12px; min-width: 420px; }
-            .talk-table th { padding: 6px 3px; font-size: 11px; }
-            .talk-table td { padding: 5px 3px; font-size: 12px; }
+            .talk-table { font-size: 14px; min-width: 420px; }
+            .talk-table th { padding: 6px 3px; font-size: 13px; }
+            .talk-table td { padding: 5px 3px; font-size: 14px; }
             .col-date { width: 1%; white-space: nowrap; }
             .col-speaker, .col-congregation { display: none; }
             .col-chairman, .col-reader, .col-prayer { width: 1%; white-space: nowrap; }
@@ -359,7 +359,7 @@ foreach ($allTalks as $talk) {
             .topic-text { font-weight: 700; }
             .desktop-only { display: none !important; }
             .mobile-only-label { display: inline-block !important; }
-            .page-title { font-size: 15px; }
+            .page-title { font-size: 17px; }
         }
     </style>
 </head>

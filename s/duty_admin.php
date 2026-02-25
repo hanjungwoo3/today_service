@@ -37,7 +37,7 @@ $months = $data['months'];
             font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
             background: #f5f5f5;
             color: #333;
-            font-size: 14px;
+            font-size: 16px;
             position: relative;
         }
         body::before {
@@ -65,7 +65,7 @@ $months = $data['months'];
             padding: 12px 0;
             margin-bottom: 8px;
         }
-        .page-title { font-size: 18px; font-weight: 700; color: #333; }
+        .page-title { font-size: 20px; font-weight: 700; color: #333; }
         .header-actions { display: flex; gap: 6px; align-items: center; }
         .header-btn {
             padding: 6px 12px;
@@ -73,7 +73,7 @@ $months = $data['months'];
             border-radius: 4px;
             background: white;
             color: #555;
-            font-size: 12px;
+            font-size: 14px;
             text-decoration: none;
             cursor: pointer;
             white-space: nowrap;
@@ -98,7 +98,7 @@ $months = $data['months'];
         .month-header {
             padding: 6px 10px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 24px;
             color: #333;
             display: flex;
             align-items: center;
@@ -107,74 +107,73 @@ $months = $data['months'];
         }
         .month-header .header-info {
             display: flex;
-            gap: 6px;
-            font-size: 14px;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 15px;
             font-weight: 500;
             color: #333;
             margin-left: auto;
-            align-items: center;
         }
         .month-header .header-info .cleaning-group {
             color: #2e7d32;
             font-weight: 700;
+            font-size: 20px;
         }
-        .month-body { padding: 1px; }
+        .month-body { padding: 0; }
 
-        .half-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0;
-            background: #f8f9ff;
-            border: 1px solid #e8ecf0;
-            border-radius: 6px;
-            overflow: hidden;
-            font-size: 12px;
+        .half-section {
+            padding: 5px 10px;
+            border-bottom: 1px solid #e8ecf0;
         }
-        .half-table th {
-            background: #eef1f6;
-            font-size: 10px;
-            font-weight: 600;
-            color: #888;
-            padding: 2px 3px;
-            text-align: center;
-            border: 1px solid #e8ecf0;
+        .half-section:last-child {
+            border-bottom: none;
         }
-        .half-table th.active-half {
-            background: #fee2e2;
-            color: #ef4444;
-        }
-        .half-table td.active-half {
+        .half-section.active-half {
             background: #fff5f5;
         }
-        .half-table td {
-            padding: 2px 3px;
-            border: 1px solid #e8ecf0;
-            text-align: left;
-            vertical-align: middle;
-        }
-        .half-table td.row-label {
+        .half-title {
+            font-size: 13px;
             font-weight: 600;
-            color: #555;
-            font-size: 11px;
-            text-align: right;
+            color: #999;
+            margin-bottom: 2px;
+        }
+        .half-section.active-half .half-title {
+            color: #ef4444;
+        }
+        .half-row {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            padding: 1px 0;
+            font-size: 16px;
             white-space: nowrap;
-            background: #eef1f6;
+        }
+        .row-label {
+            font-weight: 600;
+            color: #777;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .row-label::after {
+            content: ':';
+        }
+        .row-value {
+            color: #333;
         }
 
         /* 인라인 편집 */
-        td.editable, span.editable { cursor: pointer; }
-        td.editable:hover, span.editable:hover {
+        .editable { cursor: pointer; }
+        .editable:hover {
             background: #e3f2fd;
             outline: 1px dashed #90caf9;
             border-radius: 2px;
         }
-        td.editing { padding: 1px; }
-        td.editing input[type="text"] {
+        .editable.editing input[type="text"] {
             width: 100%;
             padding: 2px 3px;
             border: 1px solid #42a5f5;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 15px;
             font-family: inherit;
             outline: none;
             background: white;
@@ -185,7 +184,7 @@ $months = $data['months'];
             padding: 1px 3px;
             border: 1px solid #42a5f5;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 15px;
             font-family: inherit;
             outline: none;
             background: white;
@@ -204,7 +203,7 @@ $months = $data['months'];
             padding: 1px 3px;
             border: 1px solid #42a5f5;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 13px;
             font-family: inherit;
             outline: none;
             background: white;
@@ -224,8 +223,8 @@ $months = $data['months'];
         }
         .action-card.normal { background: #f8f9ff; border: 1px solid #e0e0e0; }
         .action-card.info { background: #f0f8ff; border: 1px solid #b3d9ff; }
-        .action-card-title { font-weight: 600; font-size: 14px; color: #333; margin-bottom: 6px; }
-        .action-card-desc { font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4; }
+        .action-card-title { font-weight: 600; font-size: 16px; color: #333; margin-bottom: 6px; }
+        .action-card-desc { font-size: 14px; color: #666; margin-bottom: 8px; line-height: 1.4; }
         .action-card-btn {
             width: 100%;
             display: block;
@@ -233,7 +232,7 @@ $months = $data['months'];
             text-decoration: none;
             padding: 8px 16px;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             border: none;
             cursor: pointer;
@@ -249,7 +248,7 @@ $months = $data['months'];
             right: 12px;
             padding: 8px 16px;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 600;
             z-index: 9999;
             opacity: 0;
@@ -293,38 +292,24 @@ $months = $data['months'];
         <div class="month-header">
             <span><?php echo $m; ?>월</span>
             <span class="header-info">
-                <span>청소집단:<span class="header-editable cleaning-group" data-month="<?php echo $m; ?>" data-field="cleaning_group"><?php echo htmlspecialchars($month['cleaning_group'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span></span>
+                <span>청소:<span class="header-editable cleaning-group" data-month="<?php echo $m; ?>" data-field="cleaning_group"><?php echo htmlspecialchars($month['cleaning_group'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span></span>
                 <span>음료:<span class="header-editable" data-month="<?php echo $m; ?>" data-field="drink_main"><?php echo htmlspecialchars($month['drink_main'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>
                 (<span class="header-editable" data-month="<?php echo $m; ?>" data-field="drink_assist"><?php echo htmlspecialchars($month['drink_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>)</span>
             </span>
         </div>
         <div class="month-body">
-            <table class="half-table">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th class="<?php echo trim($firstHalfActive); ?>">상반기 (1-15일)</th>
-                        <th class="<?php echo trim($secondHalfActive); ?>">하반기 (16-말일)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="row-label">마이크</td>
-                        <td class="<?php echo trim($firstHalfActive); ?>"><span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic1"><?php echo htmlspecialchars($fh['mic1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>, <span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic2"><?php echo htmlspecialchars($fh['mic2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span> (<span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic_assist"><?php echo htmlspecialchars($fh['mic_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>)</td>
-                        <td class="<?php echo trim($secondHalfActive); ?>"><span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic1"><?php echo htmlspecialchars($sh['mic1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>, <span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic2"><?php echo htmlspecialchars($sh['mic2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span> (<span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic_assist"><?php echo htmlspecialchars($sh['mic_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>)</td>
-                    </tr>
-                    <tr>
-                        <td class="row-label">청중석 안내</td>
-                        <td class="<?php echo trim($firstHalfActive); ?>"><span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_hall1"><?php echo htmlspecialchars($fh['att_hall1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>, <span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_hall2"><?php echo htmlspecialchars($fh['att_hall2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span></td>
-                        <td class="<?php echo trim($secondHalfActive); ?>"><span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_hall1"><?php echo htmlspecialchars($sh['att_hall1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>, <span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_hall2"><?php echo htmlspecialchars($sh['att_hall2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span></td>
-                    </tr>
-                    <tr>
-                        <td class="row-label">출입구 안내</td>
-                        <td class="editable<?php echo $firstHalfActive; ?>" data-month="<?php echo $m; ?>" data-half="first" data-field="att_entrance"><?php echo htmlspecialchars($fh['att_entrance'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                        <td class="editable<?php echo $secondHalfActive; ?>" data-month="<?php echo $m; ?>" data-half="second" data-field="att_entrance"><?php echo htmlspecialchars($sh['att_entrance'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="half-section<?php echo $firstHalfActive; ?>">
+                <div class="half-title">상반기 (1-15일)</div>
+                <div class="half-row"><span class="row-label">마이크</span> <span class="row-value"><span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic1"><?php echo htmlspecialchars($fh['mic1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>, <span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic2"><?php echo htmlspecialchars($fh['mic2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span> (<span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="mic_assist"><?php echo htmlspecialchars($fh['mic_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>)</span></div>
+                <div class="half-row"><span class="row-label">청중석 안내</span> <span class="row-value"><span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_hall1"><?php echo htmlspecialchars($fh['att_hall1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>, <span class="editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_hall2"><?php echo htmlspecialchars($fh['att_hall2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span></span></div>
+                <div class="half-row"><span class="row-label">출입구 안내</span> <span class="row-value editable" data-month="<?php echo $m; ?>" data-half="first" data-field="att_entrance"><?php echo htmlspecialchars($fh['att_entrance'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span></div>
+            </div>
+            <div class="half-section<?php echo $secondHalfActive; ?>">
+                <div class="half-title">하반기 (16-말일)</div>
+                <div class="half-row"><span class="row-label">마이크</span> <span class="row-value"><span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic1"><?php echo htmlspecialchars($sh['mic1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>, <span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic2"><?php echo htmlspecialchars($sh['mic2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span> (<span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="mic_assist"><?php echo htmlspecialchars($sh['mic_assist'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>)</span></div>
+                <div class="half-row"><span class="row-label">청중석 안내</span> <span class="row-value"><span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_hall1"><?php echo htmlspecialchars($sh['att_hall1'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span>, <span class="editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_hall2"><?php echo htmlspecialchars($sh['att_hall2'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span></span></div>
+                <div class="half-row"><span class="row-label">출입구 안내</span> <span class="row-value editable" data-month="<?php echo $m; ?>" data-half="second" data-field="att_entrance"><?php echo htmlspecialchars($sh['att_entrance'] ?? '') ?: '<span class="cell-empty">-</span>'; ?></span></div>
+            </div>
         </div>
     </div>
     <?php endfor; ?>
@@ -451,13 +436,13 @@ $months = $data['months'];
     }
 
     function getNextEditable(el) {
-        var all = Array.from(document.querySelectorAll('.half-table .editable'));
+        var all = Array.from(document.querySelectorAll('.half-section .editable'));
         var idx = all.indexOf(el);
         return idx >= 0 && idx < all.length - 1 ? all[idx + 1] : null;
     }
 
     function getPrevEditable(el) {
-        var all = Array.from(document.querySelectorAll('.half-table .editable'));
+        var all = Array.from(document.querySelectorAll('.half-section .editable'));
         var idx = all.indexOf(el);
         return idx > 0 ? all[idx - 1] : null;
     }
@@ -465,14 +450,10 @@ $months = $data['months'];
     // 테이블 셀 클릭
     document.addEventListener('click', function(e) {
         var spanEditable = e.target.closest('span.editable');
-        var td = e.target.closest('td.editable');
         var headerEl = e.target.closest('.header-editable');
 
         if (spanEditable) {
             startEdit(spanEditable);
-            e.stopPropagation();
-        } else if (td) {
-            startEdit(td);
             e.stopPropagation();
         } else if (headerEl) {
             startEdit(headerEl);

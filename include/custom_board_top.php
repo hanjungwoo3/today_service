@@ -45,8 +45,13 @@
 .custom-nav-icon.nav-guide { color: #9e7640; }
 .custom-nav-icon.nav-duty { color: #4a8a8b; }
 .custom-nav-icon.nav-record { color: #7a6a9e; }
+.nav-bg-meeting .custom-nav-label { color: #3a5a82; }
+.nav-bg-talk .custom-nav-label { color: #477449; }
+.nav-bg-guide .custom-nav-label { color: #7d5e33; }
+.nav-bg-duty .custom-nav-label { color: #3a6e6f; }
+.nav-bg-record .custom-nav-label { color: #5f527d; }
 .custom-nav-label {
-    font-size: 12.5px;
+    font-size: 14.5px;
     font-weight: 600;
     line-height: 1.35;
     color: #444;
@@ -60,7 +65,7 @@
 }
 @media (max-width: 400px) {
     .custom-nav-item { padding: 10px 4px; }
-    .custom-nav-label { font-size: 11.5px; }
+    .custom-nav-label { font-size: 13.5px; }
 }
 </style>
 

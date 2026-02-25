@@ -38,7 +38,7 @@ body {
 
 .toolbar h1 {
   margin: 0;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   color: #1f2937;
   flex: 1;
@@ -71,7 +71,7 @@ button {
   border-radius: 8px;
   padding: 6px 12px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 15px;
   color: #1f2937;
   background: linear-gradient(135deg, #eff6ff, #dbeafe);
   cursor: pointer;
@@ -96,7 +96,7 @@ button:hover {
   padding: 6px 2px;
   text-align: center;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 15px;
   color: #475569;
   border-bottom: 1px solid #e2e8f0;
 }
@@ -122,17 +122,17 @@ button:hover {
   justify-content: space-between;
   align-items: center;
   font-weight: 600;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .day-number {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .day-number.default {
@@ -179,7 +179,7 @@ button:hover {
   border: 1px solid #cbd5f5;
   border-radius: 6px;
   padding: 3px 5px;
-  font-size: 12px;
+  font-size: 14px;
   color: #2563eb;
   background: #f1f5ff;
   font-weight: 600;
@@ -204,7 +204,7 @@ button:hover {
   border: 1px solid #dbeafe;
   border-radius: 6px;
   padding: 3px 5px;
-  font-size: 12px;
+  font-size: 14px;
   background: #f9fbff;
   transition: border 0.2s ease, background 0.2s ease;
 }
@@ -250,7 +250,7 @@ button:hover {
 
 .guide-title {
   margin: 0 0 12px 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: #1f2937;
 }
@@ -270,7 +270,7 @@ button:hover {
 
 .guide-day-title {
   margin: 0 0 8px 0;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   color: #334155;
   text-align: center;
@@ -291,7 +291,7 @@ button:hover {
 }
 
 .guide-time-label {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: #9ca3af;
   padding-top: 4px;
@@ -302,7 +302,7 @@ button:hover {
   border: 1px solid #cbd5e1;
   border-radius: 4px;
   padding: 3px 5px;
-  font-size: 9px;
+  font-size: 11px;
   background: #fff;
   font-family: inherit;
 }
@@ -318,7 +318,7 @@ button:hover {
   border: 1px solid #cbd5e1;
   border-radius: 4px;
   padding: 4px 6px;
-  font-size: 12px;
+  font-size: 14px;
   background: #fff;
   font-family: inherit;
   resize: vertical;
@@ -419,7 +419,7 @@ button:hover {
   color: #991b1b !important;
   font-weight: 700 !important;
   border: 1px solid #fca5a5 !important;
-  font-size: 15px !important;
+  font-size: 17px !important;
   padding: 10px 24px !important;
   border-radius: 10px !important;
   box-shadow: 0 4px 6px rgba(153, 27, 27, 0.1);
@@ -452,7 +452,7 @@ button:hover {
   background: #f8fafc;
   color: #475569;
   font-weight: 500;
-  font-size: 12px;
+  font-size: 14px;
   padding: 6px 12px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -468,7 +468,7 @@ button:hover {
 
 .utility-description {
   margin: 0;
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.5;
   color: #64748b;
   padding-left: 4px;
@@ -485,7 +485,7 @@ button:hover {
   flex: 1;
   min-width: 200px;
   padding: 6px 10px;
-  font-size: 11px;
+  font-size: 13px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
   background: #f8fafc;
@@ -510,7 +510,7 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: 14px;
   color: #475569;
 }
 
@@ -531,7 +531,7 @@ button:hover {
 }
 
 .backup-item {
-  font-size: 13px;
+  font-size: 15px;
   color: #334155;
   padding: 4px 0;
 }
@@ -564,11 +564,11 @@ button:hover {
   }
   
   .toolbar h1 {
-    font-size: 16px;
+    font-size: 18px;
   }
-  
+
   button {
-    font-size: 12px;
+    font-size: 14px;
     padding: 5px 10px;
   }
   

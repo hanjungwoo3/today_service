@@ -67,7 +67,7 @@ $today = (new DateTime())->format('Y-m-d');
             font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
             background: #f5f5f5;
             color: #333;
-            font-size: 14px;
+            font-size: 16px;
         }
         .container {
             max-width: 1024px;
@@ -82,7 +82,7 @@ $today = (new DateTime())->format('Y-m-d');
             margin-bottom: 8px;
         }
         .page-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: #333;
         }
@@ -97,7 +97,7 @@ $today = (new DateTime())->format('Y-m-d');
             border-radius: 4px;
             background: white;
             color: #555;
-            font-size: 12px;
+            font-size: 14px;
             text-decoration: none;
             cursor: pointer;
             white-space: nowrap;
@@ -117,7 +117,7 @@ $today = (new DateTime())->format('Y-m-d');
             background: #4CAF50;
             color: white;
             padding: 10px 6px;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 600;
             text-align: center;
             white-space: nowrap;
@@ -125,7 +125,7 @@ $today = (new DateTime())->format('Y-m-d');
         .talk-table td {
             padding: 8px 6px;
             border-bottom: 1px solid #e8e8e8;
-            font-size: 13px;
+            font-size: 16px;
             vertical-align: top;
         }
         .talk-table tr:last-child td { border-bottom: none; }
@@ -152,7 +152,7 @@ $today = (new DateTime())->format('Y-m-d');
             display: inline-block;
             padding: 1px 6px;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 700;
             margin-bottom: 2px;
         }
@@ -173,7 +173,7 @@ $today = (new DateTime())->format('Y-m-d');
             text-align: center;
             padding: 40px;
             color: #999;
-            font-size: 15px;
+            font-size: 17px;
         }
         .bottom-actions {
             margin-top: 16px;
@@ -188,12 +188,12 @@ $today = (new DateTime())->format('Y-m-d');
         .action-card.normal { background: #f8f9ff; border: 1px solid #e0e0e0; }
         .action-card-title {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 16px;
             color: #333;
             margin-bottom: 6px;
         }
         .action-card-desc {
-            font-size: 12px;
+            font-size: 14px;
             color: #666;
             margin-bottom: 8px;
             line-height: 1.4;
@@ -205,7 +205,7 @@ $today = (new DateTime())->format('Y-m-d');
             text-decoration: none;
             padding: 8px 16px;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             border: none;
             cursor: pointer;
@@ -221,9 +221,9 @@ $today = (new DateTime())->format('Y-m-d');
         }
         @media (max-width: 768px) {
             .container { padding: 6px; }
-            .talk-table { font-size: 12px; min-width: 420px; }
-            .talk-table th { padding: 6px 3px; font-size: 11px; }
-            .talk-table td { padding: 5px 3px; font-size: 12px; }
+            .talk-table { font-size: 14px; min-width: 420px; }
+            .talk-table th { padding: 6px 3px; font-size: 13px; }
+            .talk-table td { padding: 5px 3px; font-size: 15px; }
             .col-date { width: 1%; white-space: nowrap; }
             .date-text { font-weight: normal; }
             .col-speaker, .col-congregation { display: none; }
@@ -325,18 +325,17 @@ $today = (new DateTime())->format('Y-m-d');
     </table>
     </div><!-- /.table-scroll-wrap -->
 
-    <div class="bottom-actions">
-        <?php if ($is_elder): ?>
-        <div class="action-card normal">
-            <div class="action-card-title">관리자모드</div>
-            <p class="action-card-desc">강연 일정을 추가, 수정, 삭제할 수 있습니다. 변경 사항은 자동 저장됩니다.</p>
-            <a href="talk_admin.php" class="action-card-btn admin">관리자모드로 보기</a>
+    <?php if ($is_elder): ?>
+    <div style="margin-top: 16px; border-top: 1px solid #e0e0e0; padding-top: 12px;">
+        <div style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px;">
+            <div style="font-weight: 600; font-size: 14px; color: #333; margin-bottom: 6px;">관리자모드</div>
+            <p style="font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.4;">강연 일정을 추가, 수정, 삭제할 수 있습니다. 변경 사항은 자동 저장됩니다.</p>
+            <a href="talk_admin.php" style="width: 100%; display: block; text-align: center; text-decoration: none; padding: 8px 16px; border-radius: 4px; font-size: 14px; font-weight: 600; background: #e0e0e0; color: #333; border: none; cursor: pointer; box-sizing: border-box;">관리자모드로 보기</a>
         </div>
-        <?php endif; ?>
-
-        <div id="newWindowGroup" class="action-card normal">
-            <a href="#" id="newWindowBtn" class="action-card-btn admin">↗ 새창으로 보기</a>
-        </div>
+    </div>
+    <?php endif; ?>
+    <div id="newWindowGroup" style="display: none; margin-top: 10px;">
+        <a href="#" id="newWindowBtn" style="width: 100%; display: block; text-align: center; text-decoration: none; padding: 8px 16px; border-radius: 4px; font-size: 14px; font-weight: 600; background: #e0e0e0; color: #333; border: none; cursor: pointer; box-sizing: border-box;">↗ 새창으로 보기</a>
     </div>
 </div>
 

@@ -49,7 +49,7 @@ function hl($name, $loggedIn) {
             font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
             background: #f5f5f5;
             color: #333;
-            font-size: 14px;
+            font-size: 16px;
         }
         .container {
             max-width: 720px;
@@ -68,7 +68,7 @@ function hl($name, $loggedIn) {
             padding: 12px 0;
             margin-bottom: 8px;
         }
-        .page-title { font-size: 18px; font-weight: 700; color: #333; }
+        .page-title { font-size: 20px; font-weight: 700; color: #333; }
 
         .month-card {
             background: white;
@@ -82,7 +82,7 @@ function hl($name, $loggedIn) {
         .month-header {
             padding: 6px 10px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 24px;
             color: #333;
             display: flex;
             align-items: center;
@@ -91,8 +91,9 @@ function hl($name, $loggedIn) {
         }
         .month-header .header-info {
             display: flex;
-            gap: 6px;
-            font-size: 14px;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 15px;
             font-weight: 500;
             color: #333;
             margin-left: auto;
@@ -100,53 +101,50 @@ function hl($name, $loggedIn) {
         .month-header .header-info .cleaning-group {
             color: #2e7d32;
             font-weight: 700;
+            font-size: 20px;
         }
         .month-card.current .month-header {
             color: #ef4444;
         }
-        .month-body { padding: 1px; }
-        .half-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0;
-            background: #f8f9ff;
-            border: 1px solid #e8ecf0;
-            border-radius: 6px;
-            overflow: hidden;
-            font-size: 12px;
-        }
-        .half-table th {
-            background: #eef1f6;
-            font-size: 10px;
-            font-weight: 600;
-            color: #888;
-            padding: 2px 3px;
-            text-align: center;
+        .month-body { padding: 0; }
+        .half-section {
+            padding: 5px 10px;
             border-bottom: 1px solid #e8ecf0;
         }
-        .half-table th.active-half {
-            background: #fee2e2;
-            color: #ef4444;
+        .half-section:last-child {
+            border-bottom: none;
         }
-        .half-table td.active-half {
+        .half-section.active-half {
             background: #fff5f5;
         }
-        .half-table td {
-            padding: 2px 3px;
-            border: 1px solid #e8ecf0;
-            text-align: left;
-            vertical-align: middle;
-        }
-        .half-table th {
-            border: 1px solid #e8ecf0;
-        }
-        .half-table td.row-label {
+        .half-title {
+            font-size: 13px;
             font-weight: 600;
-            color: #555;
-            font-size: 11px;
-            text-align: right;
+            color: #999;
+            margin-bottom: 2px;
+        }
+        .half-section.active-half .half-title {
+            color: #ef4444;
+        }
+        .half-row {
+            display: flex;
+            gap: 6px;
+            align-items: baseline;
+            padding: 1px 0;
+            font-size: 16px;
             white-space: nowrap;
-            background: #eef1f6;
+        }
+        .row-label {
+            font-weight: 600;
+            color: #777;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        .row-label::after {
+            content: ':';
+        }
+        .row-value {
+            color: #333;
         }
         .cleaning-group {
             color: #2e7d32;
@@ -197,7 +195,7 @@ function hl($name, $loggedIn) {
             <span><?php echo $m; ?>월</span>
             <span class="header-info">
                 <?php $cg = trim($month['cleaning_group'] ?? ''); if (!empty($cg)): ?>
-                    <span>청소집단:<span class="cleaning-group"><?php echo htmlspecialchars($cg); ?></span></span>
+                    <span>청소:<span class="cleaning-group"><?php echo htmlspecialchars($cg); ?></span></span>
                 <?php endif; ?>
                 <?php if (!empty(trim($drinkDisplay))): ?>
                     <span>음료:<?php echo $drinkDisplay; ?></span>
@@ -231,41 +229,23 @@ function hl($name, $loggedIn) {
                     );
                 }
             ?>
-            <table class="half-table">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th class="<?php echo trim($halfData[0]['activeClass']); ?>"><?php echo $halfData[0]['label']; ?></th>
-                        <th class="<?php echo trim($halfData[1]['activeClass']); ?>"><?php echo $halfData[1]['label']; ?></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="row-label">마이크</td>
-                        <td class="<?php echo trim($halfData[0]['activeClass']); ?>"><?php echo $halfData[0]['mic']; ?></td>
-                        <td class="<?php echo trim($halfData[1]['activeClass']); ?>"><?php echo $halfData[1]['mic']; ?></td>
-                    </tr>
-                    <tr>
-                        <td class="row-label">청중석 안내</td>
-                        <td class="<?php echo trim($halfData[0]['activeClass']); ?>"><?php echo $halfData[0]['hall']; ?></td>
-                        <td class="<?php echo trim($halfData[1]['activeClass']); ?>"><?php echo $halfData[1]['hall']; ?></td>
-                    </tr>
-                    <tr>
-                        <td class="row-label">출입구 안내</td>
-                        <td class="<?php echo trim($halfData[0]['activeClass']); ?>"><?php echo $halfData[0]['entrance']; ?></td>
-                        <td class="<?php echo trim($halfData[1]['activeClass']); ?>"><?php echo $halfData[1]['entrance']; ?></td>
-                    </tr>
-                </tbody>
-            </table>
+            <?php foreach ($halfData as $hd): ?>
+            <div class="half-section<?php echo $hd['activeClass']; ?>">
+                <div class="half-title"><?php echo $hd['label']; ?></div>
+                <div class="half-row"><span class="row-label">마이크</span> <span class="row-value"><?php echo $hd['mic']; ?></span></div>
+                <div class="half-row"><span class="row-label">청중석 안내</span> <span class="row-value"><?php echo $hd['hall']; ?></span></div>
+                <div class="half-row"><span class="row-label">출입구 안내</span> <span class="row-value"><?php echo $hd['entrance']; ?></span></div>
+            </div>
+            <?php endforeach; ?>
         </div>
     </div>
     <?php endfor; ?>
 
     <?php if ($is_elder): ?>
     <div class="admin-link" style="background: #f8f9ff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 10px; overflow: hidden;">
-        <div style="font-weight: 600; font-size: 13px; color: #333; margin-bottom: 4px;">관리자모드</div>
-        <p style="font-size: 11px; color: #666; margin-bottom: 6px; line-height: 1.4;">청소 집단, 마이크, 안내인, 연사음료 배정을 수정할 수 있습니다.</p>
-        <a href="duty_admin.php?year=<?php echo $year; ?>" style="display: block; text-align: center; padding: 6px 12px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 12px;">관리자모드로 보기</a>
+        <div style="font-weight: 600; font-size: 15px; color: #333; margin-bottom: 4px;">관리자모드</div>
+        <p style="font-size: 13px; color: #666; margin-bottom: 6px; line-height: 1.4;">청소 집단, 마이크, 안내인, 연사음료 배정을 수정할 수 있습니다.</p>
+        <a href="duty_admin.php?year=<?php echo $year; ?>" style="display: block; text-align: center; padding: 6px 12px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">관리자모드로 보기</a>
     </div>
     <?php endif; ?>
     </div>

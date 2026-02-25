@@ -77,7 +77,7 @@ $today = new DateTime('now');
       .header .nav-btn {
         color: #fff;
         text-decoration: none;
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 600;
         padding: 4px 8px;
         border-radius: 4px;
@@ -92,7 +92,7 @@ $today = new DateTime('now');
       .header .title {
         color: #fff;
         text-decoration: none;
-        font-size: 17px;
+        font-size: 19px;
         font-weight: 700;
         flex: 1;
         transition: opacity 0.2s;
@@ -113,7 +113,7 @@ $today = new DateTime('now');
       .weekday {
         padding: 6px 2px;
         text-align: center;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 600;
         color: #64748b;
         border-right: 1px solid #e2e8f0;
@@ -134,7 +134,7 @@ $today = new DateTime('now');
         border-right: 1px solid #e2e8f0;
         border-bottom: 1px solid #e2e8f0;
         padding: 3px;
-        font-size: 12px;
+        font-size: 14px;
         display: flex;
         flex-direction: column;
         position: relative;
@@ -178,7 +178,7 @@ $today = new DateTime('now');
         height: 20px;
         border-radius: 50%;
         font-weight: 600;
-        font-size: 13px;
+        font-size: 15px;
         margin-bottom: 2px;
         position: relative;
         z-index: 2;
@@ -231,7 +231,7 @@ $today = new DateTime('now');
       }
 
       .name {
-        font-size: 13px;
+        font-size: 15px;
         color: #1e293b;
         padding: 0;
         font-weight: 500;
@@ -286,7 +286,7 @@ $today = new DateTime('now');
       }
 
       .note-item {
-        font-size: 12px;
+        font-size: 16px;
         line-height: 1.4;
       }
 
@@ -307,9 +307,10 @@ $today = new DateTime('now');
       }
 
       .schedule-table {
-        width: 100%;
+        width: max-content;
+        min-width: 100%;
         border-collapse: collapse;
-        font-size: 12px;
+        font-size: 15px;
         background: #fff;
         border: 1px solid #e2e8f0;
       }
@@ -338,8 +339,9 @@ $today = new DateTime('now');
       }
 
       .schedule-table .schedule-cell {
-        font-size: 9px;
+        font-size: 14px;
         min-height: 30px;
+        white-space: nowrap;
       }
 
       .schedule-table .color-white {
@@ -382,11 +384,11 @@ $today = new DateTime('now');
         }
 
         .header .title {
-          font-size: 15px;
+          font-size: 17px;
         }
 
         .header .nav-btn {
-          font-size: 13px;
+          font-size: 15px;
           padding: 3px 6px;
         }
 

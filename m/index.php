@@ -388,12 +388,17 @@ foreach (['M', 'W'] as $sex) {
             align-items: center;
             gap: 6px;
         }
+        .date-selector label {
+            font-size: 16px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
         .date-selector input[type="date"],
         .date-selector select {
             padding: 8px 12px;
             border: 1px solid #e0e7ff;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 16px;
             background: #fff;
         }
         @media (max-width: 768px) {
@@ -401,12 +406,12 @@ foreach (['M', 'W'] as $sex) {
                 gap: 6px 10px;
             }
             .date-selector label {
-                font-size: 14px;
+                font-size: 15px;
             }
             .date-selector input[type="date"],
             .date-selector select {
                 padding: 6px 8px;
-                font-size: 13px;
+                font-size: 15px;
             }
             .date-selector .filter-group:nth-child(1),
             .date-selector .filter-group:nth-child(2) {
@@ -421,7 +426,7 @@ foreach (['M', 'W'] as $sex) {
             padding: 8px 12px;
             background: #f0fdf4;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 16px;
             color: #166534;
         }
         .search-btn {
@@ -432,6 +437,7 @@ foreach (['M', 'W'] as $sex) {
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 16px;
         }
         .search-btn:hover {
             background: #2563eb;
@@ -440,7 +446,7 @@ foreach (['M', 'W'] as $sex) {
             margin-bottom: 30px;
         }
         .section-title {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             margin-bottom: 12px;
             padding: 8px 12px;
@@ -481,7 +487,7 @@ foreach (['M', 'W'] as $sex) {
         .pair-matrix {
             border-collapse: separate;
             border-spacing: 0;
-            font-size: 12px;
+            font-size: 14px;
         }
         .pair-matrix th, .pair-matrix td {
             border: 1px solid #e0e7ff;
@@ -547,6 +553,7 @@ foreach (['M', 'W'] as $sex) {
             border: 1px solid #e0e7ff;
             border-radius: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            white-space: nowrap;
         }
         .group-card.clickable {
             cursor: pointer;
@@ -579,23 +586,26 @@ foreach (['M', 'W'] as $sex) {
             gap: 2px;
         }
         .group-members {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 500;
+            white-space: nowrap;
         }
         .territory-name {
-            font-size: 11px;
+            font-size: 13px;
             color: #6b7280;
+            white-space: nowrap;
         }
         .member-list-simple {
-            font-size: 12px;
+            font-size: 14px;
             color: #666;
             margin: -8px 0 10px;
             padding: 0 12px;
             line-height: 1.6;
         }
         .group-pair-count {
-            font-size: 12px;
+            font-size: 14px;
             color: #6b7280;
+            white-space: nowrap;
         }
         .recommend-box {
             margin-top: 16px;
@@ -604,7 +614,7 @@ foreach (['M', 'W'] as $sex) {
             border-radius: 10px;
         }
         .recommend-title {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             color: #166534;
             margin-bottom: 10px;
@@ -627,13 +637,14 @@ foreach (['M', 'W'] as $sex) {
             color: #6b7280;
             background: #f9fafb;
             border-radius: 8px;
+            font-size: 16px;
         }
         .single-member {
             padding: 10px 14px;
             background: #fff;
             border: 1px solid #e0e7ff;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 500;
             display: inline-block;
         }
@@ -649,7 +660,7 @@ foreach (['M', 'W'] as $sex) {
             border-radius: 10px;
         }
         .assigned-title {
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 600;
             color: #854d0e;
             margin-bottom: 8px;
@@ -660,18 +671,19 @@ foreach (['M', 'W'] as $sex) {
             border-radius: 10px;
         }
         .unassigned-title {
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 600;
             color: #166534;
             margin-bottom: 8px;
         }
         .type-badge {
-            font-size: 10px;
+            font-size: 12px;
             padding: 2px 5px;
             border-radius: 4px;
             margin-left: 4px;
             background: #e5e7eb;
             color: #4b5563;
+            white-space: nowrap;
         }
         .help-section {
             margin-top: 40px;

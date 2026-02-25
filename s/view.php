@@ -403,7 +403,7 @@ $embed = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         .bible-reading {
             text-align: center;
-            font-size: 15px;
+            font-size: 17px;
             font-weight: 600;
             color: #555;
             margin-bottom: 6px;
@@ -420,7 +420,7 @@ $embed = isset($_GET['embed']) && $_GET['embed'] == '1';
             background: white;
             padding: 5px 8px;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 700;
             margin-bottom: 4px;
             display: flex;
@@ -486,7 +486,7 @@ $embed = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         .program-title {
             font-weight: 600;
-            font-size: 13px;
+            font-size: 15px;
             color: #333;
             flex: 1;
             word-break: break-word;
@@ -507,7 +507,7 @@ $embed = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         .program-duration {
             color: #888;
-            font-size: 12px;
+            font-size: 14px;
             flex-shrink: 0;
             white-space: nowrap;
             margin-right: 8px;
@@ -518,7 +518,7 @@ $embed = isset($_GET['embed']) && $_GET['embed'] == '1';
             color: #333;
             padding: 4px 8px;
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             min-width: 60px;
             text-align: center;
@@ -554,7 +554,7 @@ $embed = isset($_GET['embed']) && $_GET['embed'] == '1';
 
         .assignment-label {
             font-weight: 600;
-            font-size: 12px;
+            font-size: 14px;
             color: #555;
         }
 
@@ -564,7 +564,7 @@ $embed = isset($_GET['embed']) && $_GET['embed'] == '1';
             padding: 3px 8px;
             border-radius: 10px;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 16px;
             min-width: 50px;
             text-align: center;
         }

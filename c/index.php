@@ -65,7 +65,7 @@ if ($status === 'saved') {
         <input type="hidden" name="month" value="<?php echo htmlspecialchars((string)$month, ENT_QUOTES); ?>" />
 
         <div style="overflow-x: auto;">
-        <div style="min-width: 500px;">
+        <div style="min-width: 620px;">
         <div class="calendar-grid">
           <?php foreach (array('일','월','화','수','목','금','토') as $weekday): ?>
             <div class="weekday-header"><?php echo $weekday; ?></div>

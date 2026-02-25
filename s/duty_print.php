@@ -84,13 +84,13 @@ $months = $data['months'];
             padding-bottom: 4px;
             border-bottom: 2px solid #333;
         }
-        .doc-header .doc-site { font-size: 15px; font-weight: 700; }
-        .doc-header .doc-title { font-size: 15px; font-weight: 700; color: #555; }
+        .doc-header .doc-site { font-size: 17px; font-weight: 700; }
+        .doc-header .doc-title { font-size: 17px; font-weight: 700; color: #555; }
 
         .month-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
         }
         .month-card {
             border: 1px solid #ccc;
@@ -100,7 +100,7 @@ $months = $data['months'];
         .month-header {
             padding: 5px 8px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 24px;
             color: #333;
             display: flex;
             align-items: center;
@@ -110,8 +110,9 @@ $months = $data['months'];
         }
         .month-header .header-info {
             display: flex;
-            gap: 6px;
-            font-size: 14px;
+            flex-direction: column;
+            align-items: flex-end;
+            font-size: 15px;
             font-weight: 500;
             color: #333;
             margin-left: auto;
@@ -119,36 +120,41 @@ $months = $data['months'];
         .month-header .header-info .cleaning-group {
             color: #2e7d32;
             font-weight: 700;
+            font-size: 20px;
         }
         .month-body { padding: 0; }
 
-        .half-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
+        .half-section {
+            padding: 4px 8px;
+            border-bottom: 1px solid #ddd;
         }
-        .half-table th {
-            background: #eef1f6;
-            font-size: 11px;
+        .half-section:last-child {
+            border-bottom: none;
+        }
+        .half-title {
+            font-size: 14px;
             font-weight: 600;
-            color: #888;
-            padding: 3px 5px;
-            text-align: center;
-            border: 1px solid #ddd;
+            color: #999;
+            margin-bottom: 1px;
         }
-        .half-table td {
-            padding: 3px 5px;
-            border: 1px solid #ddd;
-            text-align: left;
-            vertical-align: middle;
+        .half-row {
+            display: flex;
+            gap: 5px;
+            align-items: baseline;
+            padding: 1px 0;
+            font-size: 16px;
         }
-        .half-table td.row-label {
+        .row-label {
             font-weight: 600;
             color: #555;
-            font-size: 12px;
-            text-align: right;
+            font-size: 15px;
             white-space: nowrap;
-            background: #eef1f6;
+        }
+        .row-label::after {
+            content: ':';
+        }
+        .row-value {
+            color: #333;
         }
 
         @media print {
@@ -199,7 +205,7 @@ $months = $data['months'];
                 <span><?php echo $m; ?>월</span>
                 <span class="header-info">
                     <?php $cg = trim($month['cleaning_group'] ?? ''); if (!empty($cg)): ?>
-                        <span>청소집단:<span class="cleaning-group"><?php echo htmlspecialchars($cg); ?></span></span>
+                        <span>청소:<span class="cleaning-group"><?php echo htmlspecialchars($cg); ?></span></span>
                     <?php endif; ?>
                     <?php if (!empty(trim($drinkDisplay))): ?>
                         <span>음료:<?php echo $drinkDisplay; ?></span>
@@ -207,43 +213,28 @@ $months = $data['months'];
                 </span>
             </div>
             <div class="month-body">
-                <table class="half-table">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>상반기 (1-15일)</th>
-                            <th>하반기 (16-말일)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                            $fm1 = trim($fh['mic1'] ?? ''); $fm2 = trim($fh['mic2'] ?? ''); $fma = trim($fh['mic_assist'] ?? '');
-                            $fMic = implode(', ', array_filter([$fm1, $fm2]));
-                            if (!empty($fma)) $fMic .= ' (' . htmlspecialchars($fma) . ')'; else $fMic = htmlspecialchars($fMic);
-                            $sm1 = trim($sh['mic1'] ?? ''); $sm2 = trim($sh['mic2'] ?? ''); $sma = trim($sh['mic_assist'] ?? '');
-                            $sMic = implode(', ', array_filter([$sm1, $sm2]));
-                            if (!empty($sma)) $sMic .= ' (' . htmlspecialchars($sma) . ')'; else $sMic = htmlspecialchars($sMic);
-
-                            $fHall = implode(', ', array_filter([trim($fh['att_hall1'] ?? ''), trim($fh['att_hall2'] ?? '')]));
-                            $sHall = implode(', ', array_filter([trim($sh['att_hall1'] ?? ''), trim($sh['att_hall2'] ?? '')]));
-                        ?>
-                        <tr>
-                            <td class="row-label">마이크</td>
-                            <td><?php echo $fMic; ?></td>
-                            <td><?php echo $sMic; ?></td>
-                        </tr>
-                        <tr>
-                            <td class="row-label">청중석 안내</td>
-                            <td><?php echo htmlspecialchars($fHall); ?></td>
-                            <td><?php echo htmlspecialchars($sHall); ?></td>
-                        </tr>
-                        <tr>
-                            <td class="row-label">출입구 안내</td>
-                            <td><?php echo htmlspecialchars($fh['att_entrance'] ?? ''); ?></td>
-                            <td><?php echo htmlspecialchars($sh['att_entrance'] ?? ''); ?></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <?php
+                    $fm1 = trim($fh['mic1'] ?? ''); $fm2 = trim($fh['mic2'] ?? ''); $fma = trim($fh['mic_assist'] ?? '');
+                    $fMic = implode(', ', array_filter([$fm1, $fm2]));
+                    if (!empty($fma)) $fMic .= ' (' . htmlspecialchars($fma) . ')'; else $fMic = htmlspecialchars($fMic);
+                    $sm1 = trim($sh['mic1'] ?? ''); $sm2 = trim($sh['mic2'] ?? ''); $sma = trim($sh['mic_assist'] ?? '');
+                    $sMic = implode(', ', array_filter([$sm1, $sm2]));
+                    if (!empty($sma)) $sMic .= ' (' . htmlspecialchars($sma) . ')'; else $sMic = htmlspecialchars($sMic);
+                    $fHall = implode(', ', array_filter([trim($fh['att_hall1'] ?? ''), trim($fh['att_hall2'] ?? '')]));
+                    $sHall = implode(', ', array_filter([trim($sh['att_hall1'] ?? ''), trim($sh['att_hall2'] ?? '')]));
+                ?>
+                <div class="half-section">
+                    <div class="half-title">상반기 (1-15일)</div>
+                    <div class="half-row"><span class="row-label">마이크</span> <span class="row-value"><?php echo $fMic ?: '-'; ?></span></div>
+                    <div class="half-row"><span class="row-label">청중석 안내</span> <span class="row-value"><?php echo htmlspecialchars($fHall) ?: '-'; ?></span></div>
+                    <div class="half-row"><span class="row-label">출입구 안내</span> <span class="row-value"><?php echo htmlspecialchars($fh['att_entrance'] ?? '') ?: '-'; ?></span></div>
+                </div>
+                <div class="half-section">
+                    <div class="half-title">하반기 (16-말일)</div>
+                    <div class="half-row"><span class="row-label">마이크</span> <span class="row-value"><?php echo $sMic ?: '-'; ?></span></div>
+                    <div class="half-row"><span class="row-label">청중석 안내</span> <span class="row-value"><?php echo htmlspecialchars($sHall) ?: '-'; ?></span></div>
+                    <div class="half-row"><span class="row-label">출입구 안내</span> <span class="row-value"><?php echo htmlspecialchars($sh['att_entrance'] ?? '') ?: '-'; ?></span></div>
+                </div>
             </div>
         </div>
         <?php endfor; ?>
