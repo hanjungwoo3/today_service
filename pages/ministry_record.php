@@ -12,6 +12,7 @@
   if (!empty($_GET['meeting'])) $iframe_params['meeting'] = $_GET['meeting'];
   $iframe_qs = !empty($iframe_params) ? '?' . http_build_query($iframe_params) : '';
 ?>
+<style>html, body { overflow: hidden; }</style>
 <div id="container" class="container-fluid p-0">
   <iframe src="<?=BASE_PATH?>/m/<?=$iframe_qs?>"
           style="width:100%; height:calc(100vh - 110px); border:none;">

@@ -7,6 +7,7 @@
 <?php echo footer_menu('오늘의 봉사'); ?>
 
 <style>
+html, body { overflow: hidden; }
 body { background: #f5f5f5 !important; }
 </style>
 <div id="container" class="container-fluid p-0">

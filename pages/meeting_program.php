@@ -7,6 +7,7 @@
 <?php echo footer_menu('오늘의 봉사'); ?>
 
 <style>
+html, body { overflow: hidden; }
 @media (max-width: 768px) {
   #container { max-width: 600px; margin: 0 auto; }
 }

@@ -12,6 +12,7 @@
       $_calParams = '?year=' . (int)$_GET['year'] . '&month=' . (int)$_GET['month'];
   }
 ?>
+<style>html, body { overflow: hidden; }</style>
 <div id="container" class="container-fluid p-0">
   <iframe src="<?=BASE_PATH?>/c/view.php<?=$_calParams?>"
           style="width:100%; height:calc(100vh - 110px); border:none;">
