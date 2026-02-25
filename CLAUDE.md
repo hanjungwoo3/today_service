@@ -159,7 +159,9 @@ Local git config is already set for `hanjungwoo3` account.
 - 팝업 채팅 창 방식 (fixed position overlay) — 페이지 DOM과 완전 독립
 - `footer.php`에 포함되어 모든 페이지에서 동작 가능
 - 적응형 폴링 (5초→10초→30초→60초), 패널 닫으면 폴링 중지
-- 데스크톱: 우하단 340px 팝업, 모바일: 하단 전폭 패널 (55vh)
+- 데스크톱: 화면 중앙 340px 모달 + 반투명 백드롭, 모바일: 하단 전폭 패널 (55vh)
+- Bootstrap 모달이 열리면 자동으로 쪽지 패널 닫힘 (`show.bs.modal` 이벤트)
+- 새 쪽지 도착 시 토스트 알림 (z-index 99999, Bootstrap 모달 위에 표시)
 
 **DB Tables (upstream과 무관, 독립 테이블):**
 - `t_territory_message` — 쪽지 내용 (tm_id, tt_id, tm_type, mb_id, mb_name, tm_message, tm_datetime)
@@ -169,7 +171,7 @@ Local git config is already set for `hanjungwoo3` account.
 **Key Files:**
 - `pages/territory_msg_api.php` — 메시지 CRUD API (unread_counts, load, poll, send)
 - `js/territory_msg.js` — 클라이언트 팝업/폴링/전송 로직 (TerritoryMsg 모듈)
-- `footer.php` — 팝업 컨테이너 (#tmsg-popup), JS 로드, CSS, 클릭 핸들러
+- `footer.php` — 팝업 컨테이너 (#tmsg-popup), 백드롭 (#tmsg-backdrop), JS 로드, CSS, 클릭 핸들러
 
 **Auto Cleanup:**
 - API 호출 1/50 확률로 오래된 메시지 자동 정리
@@ -324,6 +326,18 @@ Upstream 머지 시 아래 파일들은 충돌이 발생하지 않도록 주의�
 | `s/` | 평일집회/주말집회/청소마이크 프로그램 관리 |
 | `m/` | 호별봉사 전도인 기록 |
 | `t/` | 프레젠테이션 타이머 |
+
+### Upstream 머지 시 주의사항 (v2.5.14 경험 기반)
+
+1. **modify/delete 충돌 주의**: upstream에서 `c/`, `m/`, `s/`, `t/` 파일이 삭제되면 git이 modify/delete 충돌을 발생시킨다. `git checkout --ours`로 우리 쪽을 유지해야 하는데, **upstream에도 있던 파일**(예: `s/scraper.php`)이 함께 삭제될 수 있다. 머지 후 반드시 `git diff HEAD~1 HEAD --name-status -- c/ m/ s/ t/ | grep "^D"`로 의도치 않은 삭제 확인 필요.
+2. **`index.php`**: v2.5.14에서 취소 봉사 쿼리가 서브쿼리 → INNER JOIN으로 변경됨. `custom_board_top.php`, `custom_home_assignments.php` include 라인 유지 확인.
+3. **`config.php`**: `/s/`, `/c/` 경로 조건이 `BASE_PATH` 분기문에 포함되어야 함.
+
+## Upstream Version
+
+현재 적용된 upstream 버전: **v2.5.14**
+- upstream 브랜치: 원본 배포 파일 (커스텀 변경 없음)
+- main 브랜치: upstream + 커스텀 파일/수정
 
 ## Korean Holiday Integration
 
