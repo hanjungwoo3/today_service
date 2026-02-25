@@ -1,31 +1,36 @@
-<?php include_once('../config.php');?>
+<?php include_once('../config.php'); ?>
 
 <?php
 $c_territory_type = unserialize(TERRITORY_TYPE);
 
-$sql = "SELECT * FROM ".TELEPHONE_TABLE." WHERE tp_id = {$tp_id}";
+$sql = "SELECT * FROM " . TELEPHONE_TABLE . " WHERE tp_id = {$tp_id}";
 $result = $mysqli->query($sql);
 $row = $result->fetch_assoc();
 
-if(!empty_date($row['tp_assigned_date']) || $row['mb_id']){
-  if($row['tp_assigned']){
-    $assigned_group_arr = get_assigned_group_name($row['tp_assigned'],$row['tp_assigned_group']);
-    $minister = (is_array($assigned_group_arr) == 1)?implode(' <span class="mx-1">|</span> ', $assigned_group_arr):$assigned_group_arr;
+if (!empty_date($row['tp_assigned_date']) || $row['mb_id']) {
+  if ($row['tp_assigned']) {
+    $assigned_group_arr = get_assigned_group_name($row['tp_assigned'], $row['tp_assigned_group']);
+    $minister = (is_array($assigned_group_arr) == 1) ? implode(' <span class="mx-1">|</span> ', $assigned_group_arr) : $assigned_group_arr;
   }
-  if($row['mb_id']) $minister = get_member_name($row['mb_id']);
+  if ($row['mb_id'])
+    $minister = get_member_name($row['mb_id']);
 }
 ?>
 
-<div class="telephone-view" tp_id="<?=$tp_id?>" update_page="<?=$update_page?>" update_wrap_id="<?=$update_wrap_id?>">
+<div class="telephone-view" tp_id="<?= $tp_id ?>" update_page="<?= $update_page ?>" update_wrap_id="<?= $update_wrap_id ?>">
   <div class="telephone-view-header">
     <div class="telephone_header">
       <p class="mb-0 text-center text-secondary">모든기록 실시간 저장 중</p>
       <div class="px-3 py-2 align-middle clearfix">
-        <button type="button" class="btn btn-sm btn-outline-danger align-middle" onclick="memo_work('telephone',<?=$tp_id?>);"><i class="bi bi-pencil"></i> 특이사항 전달</button>
-        <button type="button" class="btn btn-sm btn-outline-primary mb-0 align-middle float-right" onclick="close_telephone_view(<?=$tp_id?>);" name="button" data-dismiss="modal"><i class="bi bi-door-open"></i>나가기</button>
+        <button type="button" class="btn btn-sm btn-outline-danger align-middle"
+          onclick="memo_work('telephone',<?= $tp_id ?>);"><i class="bi bi-pencil"></i> 특이사항 전달</button>
+        <button type="button" class="btn btn-sm btn-outline-primary mb-0 align-middle float-right"
+          onclick="close_telephone_view(<?= $tp_id ?>);" name="button" data-dismiss="modal"><i
+            class="bi bi-door-open"></i>나가기</button>
       </div>
-      <div class="p-3 align-middle clearfix border-top" role="alert" data-toggle="collapse" href="#collapseView" aria-expanded="false" aria-controls="collapseView">
-        <span class="align-middle h6" >[<?=$row['tp_num']?>] <?=$row['tp_name']?></span>
+      <div class="p-3 align-middle clearfix border-top" role="alert" data-toggle="collapse" href="#collapseView"
+        aria-expanded="false" aria-controls="collapseView">
+        <span class="align-middle h6">[<?= $row['tp_num'] ?>] <?= $row['tp_name'] ?></span>
         <i class="bi bi-caret-down-square-fill float-right"></i>
       </div>
     </div>
@@ -38,17 +43,19 @@ if(!empty_date($row['tp_assigned_date']) || $row['mb_id']){
         </colgroup>
         <tbody>
           <tr>
-            <th class="bg-light text-center"><?=get_status_text($row['tp_status'])?></th>
-            <td class="text-center"><?=!empty_date($row['tp_start_date'])?$row['tp_start_date']:'';?> ~ <?=!empty_date($row['tp_end_date'])?$row['tp_end_date']:'';?></td>
+            <th class="bg-light text-center"><?= get_status_text($row['tp_status']) ?></th>
+            <td class="text-center"><?= !empty_date($row['tp_start_date']) ? $row['tp_start_date'] : ''; ?> ~
+              <?= !empty_date($row['tp_end_date']) ? $row['tp_end_date'] : ''; ?></td>
           </tr>
           <tr>
-            <td colspan="2" class="text-center"><?=$minister?$minister:'-';?></td>
+            <td colspan="2" class="text-center"><?= $minister ? $minister : '-'; ?></td>
           </tr>
         </tbody>
       </table>
     </div>
     <div class="px-3 py-2 align-left clearfix border-top">
-      <button type="button" class="btn btn-sm btn-outline-secondary align-middle mb-0 mr-2" onclick="telephone_work('record',<?=$tp_id?>,'','','');"><i class="bi bi-list-task"></i> 봉사 기록</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary align-middle mb-0 mr-2"
+        onclick="telephone_work('record',<?= $tp_id ?>,'','','');"><i class="bi bi-list-task"></i> 봉사 기록</button>
     </div>
     <table id="fixed-head" class="table table-sm">
       <colgroup>
@@ -60,8 +67,8 @@ if(!empty_date($row['tp_assigned_date']) || $row['mb_id']){
       </colgroup>
       <thead class="thead-light">
         <tr>
-          <th><?=$c_territory_type['type_6'][3]?$c_territory_type['type_6'][3]:'상호'?></th>
-          <th><?=$c_territory_type['type_6'][2]?$c_territory_type['type_6'][2]:'업종'?></th>
+          <th><?= $c_territory_type['type_6'][3] ? $c_territory_type['type_6'][3] : '상호' ?></th>
+          <th><?= $c_territory_type['type_6'][2] ? $c_territory_type['type_6'][2] : '업종' ?></th>
           <th rowspan="2">만남</th>
           <th rowspan="2">부재</th>
           <th rowspan="2">특이<br>사항</th>
@@ -91,59 +98,97 @@ if(!empty_date($row['tp_assigned_date']) || $row['mb_id']){
 </div>
 
 <script type="text/javascript">
-var timeout = '';
-function telephone_view_update(){
-  var tp_id = $('#telephone-view-modal .telephone-view').attr('tp_id');
-  $.ajax({
-                    url: BASE_PATH+'/include/telephone_view_list.php',
-    data: {
-      'tp_id': tp_id
-    },
-    type: 'POST',
-    dataType: 'html',
-    beforeSend: function(xhr){
-      $('.telephone-view .telephone-view-body table tbody').css('opacity','0.5');
-      var h=($('.telephone-view-body').height()/2)+$('.telephone-view-body').scrollTop();
-      $(".loading_img").css({'top':h-30});
-      $('.loading_img').show();
-    },
-    success: function(result){
-      $('.telephone-view .telephone-view-body table tbody').html(result);
-    },
-    complete: function(xhr, textStatus){
-      $('.loading_img').hide();
-      $('.telephone-view table tbody').css('opacity','1');
-    }
+  var timeout = '';
+  function telephone_view_update(silent = false) {
+    var tp_id = $('#telephone-view-modal .telephone-view').attr('tp_id');
+
+    silent = true;
+
+    $.ajax({
+      url: BASE_PATH + '/include/telephone_view_list.php',
+      data: {
+        'tp_id': tp_id
+      },
+      type: 'POST',
+      dataType: 'html',
+      success: function (result) {
+        var $tbody = $('.telephone-view .telephone-view-body table tbody');
+
+        if ($tbody.children().length === 0) {
+          $tbody.html(result);
+          return;
+        }
+
+        var $temp = $('<tbody>').html(result);
+        var $currentRows = $tbody.find('tr');
+        var $newRows = $temp.find('tr');
+
+        if ($currentRows.length !== $newRows.length) {
+          $tbody.html(result);
+          return;
+        }
+
+        $newRows.each(function (index) {
+          var $newRow = $(this);
+          var $currentRow = $currentRows.eq(index);
+
+          // 1. 체크박스(방문/부재) 동기화
+          var $newChecks = $newRow.find('input.visit-check');
+          var $currentChecks = $currentRow.find('input.visit-check');
+
+          if ($newChecks.length > 0 && $currentChecks.length > 0) {
+            $newChecks.each(function (checkIndex) {
+              var newValue = $(this).prop('checked');
+              var $targetCheck = $currentChecks.eq(checkIndex);
+
+              if ($targetCheck.prop('disabled') && !$(this).prop('disabled')) {
+                return;
+              }
+
+              if ($targetCheck.prop('checked') !== newValue) {
+                $targetCheck.prop('checked', newValue);
+
+                if ($(this).prop('disabled')) {
+                  $targetCheck.prop('disabled', true);
+                  $targetCheck.closest('label').addClass('disabled').attr('title', $(this).closest('label').attr('title'));
+                  $targetCheck.siblings('.visit-check-mark').addClass('disabled');
+                } else if (!$targetCheck.hasClass('disabled') && !$(this).prop('disabled')) {
+                  $targetCheck.prop('disabled', false);
+                  $targetCheck.closest('label').removeClass('disabled').removeAttr('title');
+                  $targetCheck.siblings('.visit-check-mark').removeClass('disabled');
+                }
+              }
+            });
+          }
+
+          // 2. 특이사항 아이콘 및 칩 동기화
+          var $newBtn = $newRow.find('.condition-btn-margin');
+          var $currentBtn = $currentRow.find('.condition-btn-margin');
+
+          if ($newBtn.length > 0 && $currentBtn.length > 0) {
+            if ($newBtn.get(0).outerHTML !== $currentBtn.get(0).outerHTML) {
+              $currentBtn.parent().html($newBtn.parent().html());
+            }
+          }
+        });
+      },
+      complete: function (xhr, textStatus) {
+        timeout = setTimeout(telephone_view_update, 10000);
+      }
+    });
+  }
+
+  $(document).ready(function () {
+    telephone_view_update();
+
+    $('#collapseView').on('show.bs.collapse', function () {
+      $('.telephone_header div i').removeClass('bi-caret-down-square-fill');
+      $('.telephone_header div i').addClass('bi-caret-up-square-fill');
+    });
+
+    $('#collapseView').on('hide.bs.collapse', function () {
+      $('.telephone_header div i').removeClass('bi-caret-up-square-fill');
+      $('.telephone_header div i').addClass('bi-caret-down-square-fill');
+    });
   });
-  timeout = setTimeout(telephone_view_update,20000);
-}
-
-function recalcTelephoneBodyTop(){
-  var height = $('.telephone-view-header').outerHeight();
-  $('.telephone-view-body').css('top', height+'px');
-}
-
-$(document).ready(function(){
-  telephone_view_update();
-  recalcTelephoneBodyTop();
-
-  $( window ).bind("resize", function(){
-    recalcTelephoneBodyTop();
-  });
-
-  $('#collapseView').on('shown.bs.collapse hidden.bs.collapse', function () {
-    $('.telephone-view-body').toggleClass('collapsed');
-    recalcTelephoneBodyTop();
-  });
-
-  $('#collapseView').on('show.bs.collapse', function () {
-    $('.telephone_header div i').removeClass('bi-caret-down-square-fill');
-    $('.telephone_header div i').addClass('bi-caret-up-square-fill');
-  });
-
-  $('#collapseView').on('hide.bs.collapse', function () {
-    $('.telephone_header div i').removeClass('bi-caret-up-square-fill');
-    $('.telephone_header div i').addClass('bi-caret-down-square-fill');
-  });
-});
 </script>

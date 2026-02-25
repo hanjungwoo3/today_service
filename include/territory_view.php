@@ -210,11 +210,14 @@ if ($row['tt_type'] == '아파트') {
 </div>
 
 <script type="text/javascript">
-  var timeout = '';
   function territory_view_update(silent = false) {
 
     var tt_type = '<?= $row['tt_type'] ?>';
     var tt_id = $('#territory-view-modal .territory-view').attr('tt_id');
+
+    // 무조건 silent를 강제로 적용하여 20초 갱신 시 화면 반투명화와 로딩GIF를 없앱니다.
+    silent = true;
+
     $.ajax({
       url: BASE_PATH + '/include/territory_view_list.php',
       data: {
@@ -223,45 +226,85 @@ if ($row['tt_type'] == '아파트') {
       },
       type: 'POST',
       dataType: 'html',
-      beforeSend: function (xhr) {
-        if (!silent) {
-          $('.territory-view .territory-view-body table tbody').css('opacity', '0.5');
-          var h = ($('.territory-view-body').height() / 2) + $('.territory-view-body').scrollTop();
-          $(".loading_img").css({ 'top': h - 30 });
-          $('.loading_img').show();
-        }
-      },
       success: function (result) {
-        $('.territory-view .territory-view-body table tbody').html(result);
+        var $tbody = $('.territory-view .territory-view-body table tbody');
+
+        // 최초 로드 시(내용이 없을 때)에는 덮어쓰기
+        if ($tbody.children().length === 0) {
+          $tbody.html(result);
+          return;
+        }
+
+        // 이미 렌더링 된 상태라면, 임시 DOM을 만들어 파싱
+        var $temp = $('<tbody>').html(result);
+        var changed = false;
+
+        // 원본과 서버 결과의 행들을 비교 (행 개수가 동일하다는 전제하에 Diff 수행)
+        var $currentRows = $tbody.find('tr');
+        var $newRows = $temp.find('tr');
+
+        if ($currentRows.length !== $newRows.length) {
+          // 데이터 구조가 완전히 달라졌다면 안전하게 전체 갱신
+          $tbody.html(result);
+          return;
+        }
+
+        $newRows.each(function (index) {
+          var $newRow = $(this);
+          var $currentRow = $currentRows.eq(index);
+
+          // 1. 체크박스(방문/부재) 동기화
+          var $newChecks = $newRow.find('input.visit-check');
+          var $currentChecks = $currentRow.find('input.visit-check');
+
+          if ($newChecks.length > 0 && $currentChecks.length > 0) {
+            $newChecks.each(function (checkIndex) {
+              var newValue = $(this).prop('checked');
+              var $targetCheck = $currentChecks.eq(checkIndex);
+
+              // 현재 체크박스가 잠겨있는 상태(내가 클릭해서 서버 요청 중)면 덮어쓰기 건너뜀
+              if ($targetCheck.prop('disabled') && !$(this).prop('disabled')) {
+                return;
+              }
+
+              if ($targetCheck.prop('checked') !== newValue) {
+                // UI를 조용히 업데이트
+                $targetCheck.prop('checked', newValue);
+
+                // 부재 상태(disabled) 변경사항이 있다면 반영 (서버에서 누군가 부재/이미 방문완료로 변경한 경우)
+                if ($(this).prop('disabled')) {
+                  $targetCheck.prop('disabled', true);
+                  $targetCheck.closest('label').addClass('disabled').attr('title', $(this).closest('label').attr('title'));
+                  $targetCheck.siblings('.visit-check-mark').addClass('disabled');
+                } else if (!$targetCheck.hasClass('disabled') && !$(this).prop('disabled')) {
+                  $targetCheck.prop('disabled', false);
+                  $targetCheck.closest('label').removeClass('disabled').removeAttr('title');
+                  $targetCheck.siblings('.visit-check-mark').removeClass('disabled');
+                }
+              }
+            });
+          }
+
+          // 2. 특이사항 아이콘 및 칩 동기화
+          var $newBtn = $newRow.find('.condition-btn-margin');
+          var $currentBtn = $currentRow.find('.condition-btn-margin');
+
+          if ($newBtn.length > 0 && $currentBtn.length > 0) {
+            if ($newBtn.get(0).outerHTML !== $currentBtn.get(0).outerHTML) {
+              // 부모의 html을 통째로 갈아끼워서 칩과 버튼을 모두 업데이트
+              $currentBtn.parent().html($newBtn.parent().html());
+            }
+          }
+        });
       },
       complete: function (xhr, textStatus) {
-        if (!silent) {
-          $('.loading_img').hide();
-          $('.territory-view table tbody').css('opacity', '1');
-        }
+        timeout = setTimeout(territory_view_update, 20000);
       }
     });
-    timeout = setTimeout(territory_view_update, 20000);
   }
 
   $(document).ready(function () {
     territory_view_update();
-
-    var height = $('.territory-view-header').outerHeight();
-    $('.territory-view-body').css('top', height + 'px');
-
-    $(window).bind("resize", function () {
-      var height = $('.territory-view-header').outerHeight();
-      $('.territory-view-body').css('top', height + 'px');
-    });
-
-    $('#collapseView').on('shown.bs.collapse', function () {
-      $('.territory-view-body').addClass('collapsed');
-    });
-
-    $('#collapseView').on('hidden.bs.collapse', function () {
-      $('.territory-view-body').removeClass('collapsed');
-    });
 
     $('#collapseView').on('show.bs.collapse', function () {
       $('.territory_header div i').removeClass('bi-caret-down-square-fill');

@@ -1309,7 +1309,7 @@ function get_meeting_id($meeting_date, $ms_id)
 		$ms_start_time = isset($ms['ms_start_time']) ? $ms['ms_start_time'] : '';
 		$ms_finish_time = isset($ms['ms_finish_time']) ? $ms['ms_finish_time'] : '';
 
-		$ms_limit = (isset($ms['ms_limit']) && $ms['ms_limit'] !== '') ? $ms['ms_limit'] : 0;
+		$ms_limit = (isset($ms['ms_limit']) && $ms['ms_limit'] !== '') ? $ms['ms_limit'] : -1;
 		$sql = "INSERT INTO " . MEETING_TABLE . " (ms_limit, mb_id, m_cancle, m_cancle_reason, m_contents, m_guide, m_date, ms_id, ms_time, ms_week, ms_type, ms_guide, ms_guide2, g_id, mp_id, mp_name, mp_address, m_start_time, m_finish_time)
         VALUES ('{$ms_limit}', '', 0, '', '', '', '{$meeting_date}', '{$ms['ms_id']}', '{$ms['ms_time']}', '{$ms['ms_week']}', '{$ms['ms_type']}', '{$ms['ms_guide']}', '{$ms['ms_guide2']}', '{$ms['g_id']}', '{$mp['mp_id']}', '{$mp['mp_name']}', '{$mp['mp_address']}', '{$ms_start_time}', '{$ms_finish_time}')";
 		$mysqli->query($sql);
