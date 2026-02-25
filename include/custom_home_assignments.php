@@ -446,7 +446,7 @@ usort($_allItems, function($a, $b) {
 </style>
 
 <div class="home-assignments-section">
-    <div class="home-assignments-title">📋 나에게 배정된 특권<?php if (!empty($_cleaningLines)): ?> <span style="font-size:11px; font-weight:500; color:#333;"><?php echo implode(' / ', $_cleaningLines); ?></span><?php endif; ?></div>
+    <div class="home-assignments-title">📋 오늘 이후 나에게 배정된 특권<?php if (!empty($_cleaningLines)): ?> <span style="font-size:11px; font-weight:500; color:#333;"><?php echo implode(' / ', $_cleaningLines); ?></span><?php endif; ?></div>
 
     <?php foreach ($_allItems as $_item): ?>
         <?php

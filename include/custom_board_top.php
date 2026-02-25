@@ -1,14 +1,14 @@
 <!-- 커스텀 상단 링크 -->
 <style>
 .custom-nav-section {
-    padding: 10px 0 14px;
+    padding: 10px 6px 14px;
     margin-bottom: 4px;
     border-bottom: 1px solid #e0e0e0;
 }
 .custom-nav-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
+    gap: 5px;
 }
 .custom-nav-item {
     display: flex;
