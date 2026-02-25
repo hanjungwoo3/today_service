@@ -7,10 +7,10 @@
 <?php echo footer_menu('오늘의 봉사'); ?>
 
 <style>
-html, body { overflow: hidden; }
 @media (max-width: 768px) {
   #container { max-width: 600px; margin: 0 auto; }
 }
+iframe.auto-height { width:100%; border:none; min-height:calc(100vh - 110px); }
 </style>
 <?php
   $_meetParams = 'embed=1';
@@ -19,9 +19,20 @@ html, body { overflow: hidden; }
   }
 ?>
 <div id="container" class="container-fluid p-0">
-  <iframe src="<?=BASE_PATH?>/s/view.php?<?=$_meetParams?>"
-          style="width:100%; height:calc(100vh - 110px); border:none;">
-  </iframe>
+  <iframe class="auto-height" src="<?=BASE_PATH?>/s/view.php?<?=$_meetParams?>"></iframe>
 </div>
+
+<script>
+(function(){
+  var f = document.querySelector('iframe.auto-height');
+  function resize(){
+    try { f.style.height = f.contentWindow.document.documentElement.scrollHeight + 'px'; } catch(e){}
+  }
+  f.addEventListener('load', function(){
+    resize();
+    try { new MutationObserver(resize).observe(f.contentWindow.document.body, {childList:true, subtree:true}); } catch(e){}
+  });
+})();
+</script>
 
 <?php include_once('../footer.php');?>
