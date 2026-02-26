@@ -454,6 +454,26 @@
     PRIMARY KEY (`wl_id`)
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8;");
 
+    /* 구역 쪽지 테이블 (커스텀 추가) */
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `t_territory_message` (
+    `tm_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `tt_id` int(10) unsigned NOT NULL,
+    `tm_type` char(1) NOT NULL DEFAULT 'T',
+    `mb_id` int(10) unsigned NOT NULL,
+    `mb_name` varchar(50) NOT NULL,
+    `tm_message` text NOT NULL,
+    `tm_datetime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`tm_id`),
+    KEY `idx_tt_type_datetime` (`tt_id`,`tm_type`,`tm_datetime`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `t_territory_message_read` (
+    `tt_id` int(10) unsigned NOT NULL,
+    `tm_type` char(1) NOT NULL DEFAULT 'T',
+    `mb_id` int(10) unsigned NOT NULL,
+    `last_read_id` int(10) unsigned NOT NULL DEFAULT '0',
+    PRIMARY KEY (`tt_id`,`tm_type`,`mb_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
 
     if ($type == 'new') {
 
