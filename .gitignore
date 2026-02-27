@@ -23,6 +23,7 @@ s/data/
 
 # Composer
 vendor/
+composer.phar
 
 # bkit PDCA files
 docs/
