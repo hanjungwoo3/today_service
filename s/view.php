@@ -19,6 +19,7 @@ if (file_exists(dirname(__FILE__) . '/../config.php')) {
 }
 
 require_once 'api.php';
+require_once 'duty_api.php';
 
 $manager = new MeetingDataManager();
 $currentYear = $manager->getCurrentYear();
@@ -595,6 +596,30 @@ $embed = isset($_GET['embed']) && $_GET['embed'] == '1';
             padding: 12px;
         }
 
+        /* duty 배정 섹션 */
+        .duty-section {
+            background: #f8f8f8;
+            border-radius: 4px;
+            padding: 6px 8px;
+            margin-bottom: 8px;
+            font-size: 15px;
+            color: #555;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px 0;
+        }
+        .duty-section .duty-label { color: #888; margin-right: 2px; }
+        .duty-section .duty-label::after { content: ':'; }
+        .duty-section .duty-assist { color: #999; font-size: 14px; }
+        .duty-section .duty-sep { color: #ccc; margin: 0 6px; }
+        .duty-section .my-name {
+            background: linear-gradient(135deg, #ef4444, #f97316);
+            color: white;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-weight: 700;
+        }
+
         @media print {
             body {
                 background: white;
@@ -901,6 +926,75 @@ $embed = isset($_GET['embed']) && $_GET['embed'] == '1';
                     <a href="<?php echo htmlspecialchars($data['url']); ?>" target="_blank"><?php echo htmlspecialchars($data['url']); ?></a>
                 </div>
             <?php endif; ?>
+
+            <?php
+            // duty 배정 표시 — 이번 주차만
+            $meetingWeekday = $manager->getMeetingWeekday();
+            $meetingDate = new DateTime();
+            $meetingDate->setISODate($year, $week, $meetingWeekday);
+            $mYear = (int)$meetingDate->format('Y');
+            $mMonth = (string)(int)$meetingDate->format('m');
+            $mDay = (int)$meetingDate->format('d');
+
+            $dutyManager2 = new DutyDataManager();
+            $dutyData = $dutyManager2->load($mYear);
+            $dutyMonth = isset($dutyData['months'][$mMonth]) ? $dutyData['months'][$mMonth] : null;
+
+            if ($dutyMonth):
+                $half = ($mDay <= 15) ? 'first_half' : 'second_half';
+                $h = isset($dutyMonth[$half]) ? $dutyMonth[$half] : array();
+
+                $hl = function($name) use ($loggedInUserName) {
+                    $name = trim($name);
+                    if ($name === '') return '';
+                    if ($name === $loggedInUserName) return '<span class="my-name">' . htmlspecialchars($name) . '</span>';
+                    return htmlspecialchars($name);
+                };
+
+                $parts = array();
+
+                $cg = trim($dutyMonth['cleaning_group'] ?? '');
+                if ($cg !== '') $parts[] = '<span class="duty-label">청소</span>' . $hl($cg);
+
+                $dm = trim($dutyMonth['drink_main'] ?? '');
+                $da = trim($dutyMonth['drink_assist'] ?? '');
+                if ($dm !== '') {
+                    $t = '<span class="duty-label">음료</span>' . $hl($dm);
+                    if ($da !== '') $t .= '<span class="duty-assist">(' . $hl($da) . ')</span>';
+                    $parts[] = $t;
+                }
+
+                $m1 = trim($h['mic1'] ?? ''); $m2 = trim($h['mic2'] ?? ''); $ma = trim($h['mic_assist'] ?? '');
+                if ($m1 !== '' || $m2 !== '') {
+                    $t = '<span class="duty-label">마이크</span>';
+                    $mm = array();
+                    if ($m1 !== '') $mm[] = $hl($m1);
+                    if ($m2 !== '') $mm[] = $hl($m2);
+                    $t .= implode(',', $mm);
+                    if ($ma !== '') $t .= '<span class="duty-assist">(' . $hl($ma) . ')</span>';
+                    $parts[] = $t;
+                }
+
+                $ah1 = trim($h['att_hall1'] ?? ''); $ah2 = trim($h['att_hall2'] ?? '');
+                if ($ah1 !== '' || $ah2 !== '') {
+                    $hh = array();
+                    if ($ah1 !== '') $hh[] = $hl($ah1);
+                    if ($ah2 !== '') $hh[] = $hl($ah2);
+                    $parts[] = '<span class="duty-label">청중석</span>' . implode(',', $hh);
+                }
+
+                $ae = trim($h['att_entrance'] ?? '');
+                if ($ae !== '') $parts[] = '<span class="duty-label">출입구</span>' . $hl($ae);
+
+                if ($parts):
+            ?>
+            <div class="duty-section">
+                <?php echo implode('<span class="duty-sep">|</span>', $parts); ?>
+            </div>
+            <?php
+                endif;
+            endif;
+            ?>
         <?php endif; ?>
 
         <?php if ($is_elder): ?>

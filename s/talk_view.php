@@ -21,6 +21,7 @@ if (file_exists(dirname(__FILE__) . '/../config.php')) {
 }
 
 require_once dirname(__FILE__) . '/talk_api.php';
+require_once dirname(__FILE__) . '/duty_api.php';
 
 $manager = new TalkDataManager();
 $data = $manager->load();
@@ -54,6 +55,16 @@ foreach ($talks as $talk) {
 }
 
 $today = (new DateTime())->format('Y-m-d');
+
+// duty 데이터 로드 (연도별 캐시)
+$dutyManager = new DutyDataManager();
+$dutyByYear = array();
+foreach ($visibleTalks as $talk) {
+    $year = (int)substr($talk['date'], 0, 4);
+    if (!isset($dutyByYear[$year])) {
+        $dutyByYear[$year] = $dutyManager->load($year);
+    }
+}
 ?>
 <!doctype html>
 <html lang="ko">
@@ -132,6 +143,7 @@ $today = (new DateTime())->format('Y-m-d');
         .talk-table tr:hover { background: #f9f9f9; }
 
         .col-date { width: 1%; text-align: center; white-space: nowrap; }
+        .date-short { display: none; }
         .col-speaker { width: 1%; text-align: center; white-space: nowrap; }
         .col-congregation { width: 1%; text-align: center; white-space: nowrap; }
         .col-topic { }
@@ -166,9 +178,26 @@ $today = (new DateTime())->format('Y-m-d');
         .desktop-only { }
         .mobile-only-label { display: none; }
         .past-row { opacity: 0.5; }
-        .next-row td { border-top: 2px solid #ef4444; border-bottom: 2px solid #ef4444; }
+        .next-row td { border-top: 2px solid #ef4444; }
         .next-row td:first-child { border-left: 2px solid #ef4444; }
         .next-row td:last-child { border-right: 2px solid #ef4444; }
+        .next-row:not(:has(+ .duty-sub)) td { border-bottom: 2px solid #ef4444; }
+        /* duty 서브행 */
+        .duty-sub td {
+            padding: 2px 6px 6px;
+            font-size: 15px;
+            color: #555;
+            background: #f8f8f8;
+            border-bottom: 2px solid #ef4444;
+            border-left: 2px solid #ef4444;
+            border-right: 2px solid #ef4444;
+        }
+        .duty-sub:hover td { background: #f0f0f0; }
+        .duty-label { color: #888; margin-right: 2px; }
+        .duty-label::after { content: ':'; }
+        .duty-assist { color: #999; font-size: 14px; }
+        .duty-sep { color: #ccc; margin: 0 6px; }
+
         .empty-state {
             text-align: center;
             padding: 40px;
@@ -221,10 +250,12 @@ $today = (new DateTime())->format('Y-m-d');
         }
         @media (max-width: 768px) {
             .container { padding: 6px; }
-            .talk-table { font-size: 14px; min-width: 420px; }
+            .talk-table { font-size: 14px; min-width: 0; width: 100%; }
             .talk-table th { padding: 6px 3px; font-size: 13px; }
             .talk-table td { padding: 5px 3px; font-size: 15px; }
             .col-date { width: 1%; white-space: nowrap; }
+            .date-full { display: none; }
+            .date-short { display: inline; }
             .date-text { font-weight: normal; }
             .col-speaker, .col-congregation { display: none; }
             .col-chairman, .col-reader, .col-prayer { width: 1%; white-space: nowrap; }
@@ -232,6 +263,8 @@ $today = (new DateTime())->format('Y-m-d');
             .topic-text { font-weight: 700; }
             .desktop-only { display: none !important; }
             .mobile-only-label { display: inline-block !important; }
+            .duty-sub td { font-size: 14px; padding: 2px 3px 5px; white-space: normal; }
+            .duty-sep { margin: 0 3px; }
         }
     </style>
 </head>
@@ -263,13 +296,14 @@ $today = (new DateTime())->format('Y-m-d');
                         $nextFound = true;
                     }
                     $d = new DateTime($talk['date']);
-                    $dateDisplay = $d->format('y/m/d');
+                    $dateDisplayFull = $d->format('y/m/d');
+                    $dateDisplayShort = $d->format('n/j');
                     $rowClass = '';
                     if ($talk['topic_type'] === 'circuit_visit') $rowClass = 'row-circuit';
                     elseif ($talk['topic_type'] === 'special_talk') $rowClass = 'row-special';
                 ?>
                 <tr class="<?php echo $isPast ? 'past-row' : ''; ?> <?php echo $isNext ? 'next-row' : ''; ?> <?php echo $rowClass; ?>">
-                    <td class="col-date"><span class="date-text"><?php echo $dateDisplay; ?></span></td>
+                    <td class="col-date"><span class="date-text"><span class="date-full"><?php echo $dateDisplayFull; ?></span><span class="date-short"><?php echo $dateDisplayShort; ?></span></span></td>
                     <td class="col-speaker">
                         <?php if (!empty(trim($talk['speaker'])) && trim($talk['speaker']) === $loggedInUserName): ?>
                             <span class="my-name"><?php echo htmlspecialchars($talk['speaker']); ?></span>
@@ -319,6 +353,78 @@ $today = (new DateTime())->format('Y-m-d');
                         <?php endif; ?>
                     </td>
                 </tr>
+                <?php
+                    // duty 서브행 — 다가오는 주(next-row)만 표시
+                    if ($isNext):
+                        $tYear = (int)$d->format('Y');
+                        $tMonth = (string)(int)$d->format('m');
+                        $tDay = (int)$d->format('d');
+                        $dutyMonth = isset($dutyByYear[$tYear]['months'][$tMonth]) ? $dutyByYear[$tYear]['months'][$tMonth] : null;
+                        if ($dutyMonth):
+                            $half = ($tDay <= 15) ? 'first_half' : 'second_half';
+                            $h = isset($dutyMonth[$half]) ? $dutyMonth[$half] : array();
+
+                            // 이름 하이라이트 헬퍼
+                            $hl = function($name) use ($loggedInUserName) {
+                                $name = trim($name);
+                                if ($name === '') return '';
+                                if ($name === $loggedInUserName) return '<span class="my-name">' . htmlspecialchars($name) . '</span>';
+                                return htmlspecialchars($name);
+                            };
+
+                            $parts = array();
+
+                            // 청소
+                            $cg = trim($dutyMonth['cleaning_group'] ?? '');
+                            if ($cg !== '') $parts[] = '<span class="duty-label">청소</span>' . $hl($cg);
+
+                            // 음료: 주(보조)
+                            $dm = trim($dutyMonth['drink_main'] ?? '');
+                            $da = trim($dutyMonth['drink_assist'] ?? '');
+                            if ($dm !== '') {
+                                $drinkText = '<span class="duty-label">음료</span>' . $hl($dm);
+                                if ($da !== '') $drinkText .= '<span class="duty-assist">(' . $hl($da) . ')</span>';
+                                $parts[] = $drinkText;
+                            }
+
+                            // 마이크: 주1,주2(보조)
+                            $m1 = trim($h['mic1'] ?? '');
+                            $m2 = trim($h['mic2'] ?? '');
+                            $ma = trim($h['mic_assist'] ?? '');
+                            if ($m1 !== '' || $m2 !== '') {
+                                $micText = '<span class="duty-label">마이크</span>';
+                                $micMain = array();
+                                if ($m1 !== '') $micMain[] = $hl($m1);
+                                if ($m2 !== '') $micMain[] = $hl($m2);
+                                $micText .= implode(',', $micMain);
+                                if ($ma !== '') $micText .= '<span class="duty-assist">(' . $hl($ma) . ')</span>';
+                                $parts[] = $micText;
+                            }
+
+                            // 청중석
+                            $ah1 = trim($h['att_hall1'] ?? '');
+                            $ah2 = trim($h['att_hall2'] ?? '');
+                            if ($ah1 !== '' || $ah2 !== '') {
+                                $hallMain = array();
+                                if ($ah1 !== '') $hallMain[] = $hl($ah1);
+                                if ($ah2 !== '') $hallMain[] = $hl($ah2);
+                                $parts[] = '<span class="duty-label">청중석</span>' . implode(',', $hallMain);
+                            }
+
+                            // 출입구
+                            $ae = trim($h['att_entrance'] ?? '');
+                            if ($ae !== '') $parts[] = '<span class="duty-label">출입구</span>' . $hl($ae);
+
+                            if ($parts):
+                ?>
+                <tr class="duty-sub">
+                    <td colspan="7"><?php echo implode('<span class="duty-sep">|</span>', $parts); ?></td>
+                </tr>
+                <?php
+                            endif;
+                        endif;
+                    endif;
+                ?>
                 <?php endforeach; ?>
             <?php endif; ?>
         </tbody>
