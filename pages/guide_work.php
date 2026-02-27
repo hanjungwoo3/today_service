@@ -352,6 +352,12 @@ function _send_assign_notification($ids, $type, $assigned_member_csv, $assigned_
   }
 
   foreach ($ids as $tt_id) {
+    $safe_type = $mysqli->real_escape_string($type);
+
+    // 기존 쪽지 및 읽음 기록 초기화 (새 배정이므로 이전 대화 삭제)
+    $mysqli->query("DELETE FROM " . TERRITORY_MSG_TABLE . " WHERE tt_id = {$tt_id} AND tm_type = '{$safe_type}'");
+    $mysqli->query("DELETE FROM " . TERRITORY_MSG_READ_TABLE . " WHERE tt_id = {$tt_id} AND tm_type = '{$safe_type}'");
+
     // 구역 이름 조회
     if ($type === 'D') {
       $sql = "SELECT dp_name as name FROM " . DISPLAY_TABLE . " WHERE d_id = {$tt_id} LIMIT 1";
@@ -365,7 +371,6 @@ function _send_assign_notification($ids, $type, $assigned_member_csv, $assigned_
     $label = ($type === 'D') ? '전시대' : '구역';
     $message = "{$territory_name} {$label}에 배정이 완료되었습니다.\n{$member_text}";
     $escaped_msg = $mysqli->real_escape_string($message);
-    $safe_type = $mysqli->real_escape_string($type);
 
     // 시스템 메시지 삽입 (mb_id=0, mb_name='오늘의봉사')
     $sql = "INSERT INTO " . TERRITORY_MSG_TABLE . " (tt_id, tm_type, mb_id, mb_name, tm_message)
