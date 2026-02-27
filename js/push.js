@@ -87,6 +87,9 @@ var PushNotify = (function() {
                             window._pushSubscribed = true;
                             showToast('알림이 활성화되었습니다.');
                             if (callback) callback(true);
+                        } else if (res.error) {
+                            alert(res.error);
+                            if (callback) callback(false);
                         }
                     },
                     error: function() {

@@ -50,7 +50,7 @@ switch ($action) {
         if ($mysqli->query($sql)) {
             echo json_encode(['success' => true]);
         } else {
-            echo json_encode(['error' => '구독 저장에 실패했습니다.']);
+            echo json_encode(['error' => '구독 저장에 실패했습니다. (' . $mysqli->error . ')']);
         }
         break;
 
