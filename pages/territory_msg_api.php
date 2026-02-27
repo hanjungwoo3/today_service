@@ -3,9 +3,6 @@ include_once(__DIR__ . '/../config.php');
 
 header('Content-Type: application/json; charset=utf-8');
 
-define('TERRITORY_MSG_TABLE', 't_territory_message');
-define('TERRITORY_MSG_READ_TABLE', 't_territory_message_read');
-
 $current_mb_id = mb_id();
 if (!$current_mb_id) {
     http_response_code(401);

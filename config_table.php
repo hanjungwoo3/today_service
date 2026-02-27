@@ -23,4 +23,6 @@ define('RETURN_VISIT_TABLE','t_return_visit'); // 재방문 기록
 define('WORK_LOG_TABLE','t_work_log'); // 작업
 define('OPTION_TABLE','t_option'); // 사이트 옵션
 define('PUSH_SUBSCRIPTION_TABLE','t_push_subscription'); // 푸시 구독
+define('TERRITORY_MSG_TABLE','t_territory_message'); // 구역 쪽지
+define('TERRITORY_MSG_READ_TABLE','t_territory_message_read'); // 구역 쪽지 읽음
 ?>

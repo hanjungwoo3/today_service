@@ -11,6 +11,10 @@ if ($work) {
     $assigned_date = get_meeting_date($m_id);
     $assigned_member = implode(',', $member);
 
+    // 배정 알림 대상 수집
+    $notify_territories = [];
+    $notify_displays = [];
+
     if (!empty($territories)) {
       foreach ($territories as $id) {
 
@@ -82,6 +86,7 @@ if ($work) {
 
           }
         }
+        $notify_territories[] = intval($id);
       }
     }
 
@@ -184,8 +189,18 @@ if ($work) {
 
           }
         }
+        // display의 d_id를 수집 (마지막 INSERT/UPDATE 결과)
+        $d_sql2 = "SELECT d_id FROM " . DISPLAY_TABLE . " WHERE dp_id = {$explode_id[0]} AND dp_num = {$explode_id[1]} AND m_id = {$m_id} LIMIT 1";
+        $d_res2 = $mysqli->query($d_sql2);
+        if ($d_res2 && $d_res2->num_rows > 0) {
+          $notify_displays[] = intval($d_res2->fetch_assoc()['d_id']);
+        }
       }
     }
+
+    // 배정 완료 시스템 메시지 발송
+    _send_assign_notification($notify_territories, 'T', $assigned_member, $assigned_group);
+    _send_assign_notification($notify_displays, 'D', $assigned_member, $assigned_group);
 
   } elseif ($work == 'assign_cancel') { // 구역 배정 취소
     if ($table == 'territory') {
@@ -315,6 +330,108 @@ if ($work) {
   } elseif ($work == 'update_meeting_contents') { // 모임내용 기록
     $sql = "UPDATE " . MEETING_TABLE . " SET m_contents = '{$m_contents}' WHERE m_id = {$m_id}";
     $mysqli->query($sql);
+  }
+}
+
+/**
+ * 구역 배정 완료 시 시스템 메시지 + Push 알림 발송
+ */
+function _send_assign_notification($ids, $type, $assigned_member_csv, $assigned_group) {
+  global $mysqli;
+  if (empty($ids)) return;
+
+  $member_ids = array_filter(array_map('intval', explode(',', $assigned_member_csv)));
+  if (empty($member_ids)) return;
+
+  // 멤버 이름 조회 (그룹 구분 포함)
+  $group_name = get_assigned_group_name($assigned_member_csv, $assigned_group);
+  if (is_array($group_name)) {
+    $member_text = implode(' | ', $group_name);
+  } else {
+    $member_text = $group_name;
+  }
+
+  foreach ($ids as $tt_id) {
+    // 구역 이름 조회
+    if ($type === 'D') {
+      $sql = "SELECT dp_name as name FROM " . DISPLAY_TABLE . " WHERE d_id = {$tt_id} LIMIT 1";
+    } else {
+      $sql = "SELECT CONCAT('[', tt_num, '] ', tt_name) as name FROM " . TERRITORY_TABLE . " WHERE tt_id = {$tt_id} LIMIT 1";
+    }
+    $res = $mysqli->query($sql);
+    if (!$res || !$res->num_rows) continue;
+    $territory_name = $res->fetch_assoc()['name'];
+
+    $label = ($type === 'D') ? '전시대' : '구역';
+    $message = "{$territory_name} {$label}에 배정이 완료되었습니다.\n{$member_text}";
+    $escaped_msg = $mysqli->real_escape_string($message);
+    $safe_type = $mysqli->real_escape_string($type);
+
+    // 시스템 메시지 삽입 (mb_id=0, mb_name='오늘의봉사')
+    $sql = "INSERT INTO " . TERRITORY_MSG_TABLE . " (tt_id, tm_type, mb_id, mb_name, tm_message)
+            VALUES ({$tt_id}, '{$safe_type}', 0, '오늘의봉사', '{$escaped_msg}')";
+    $mysqli->query($sql);
+
+    // Push 알림 발송
+    if (function_exists('send_push_to_territory_members')) {
+      send_push_to_territory_members($tt_id, $type, 0, '오늘의봉사', $message);
+    } else {
+      // territory_msg_api.php의 함수를 직접 사용할 수 없으므로 인라인 발송
+      _send_push_for_assign($tt_id, $type, $member_ids, $message);
+    }
+  }
+}
+
+/**
+ * 배정 알림용 Push 발송
+ */
+function _send_push_for_assign($tt_id, $type, $member_ids, $message) {
+  global $mysqli;
+
+  $vapid_public = get_site_option('vapid_public_key');
+  $vapid_private = get_site_option('vapid_private_key');
+  if (!$vapid_public || !$vapid_private) return;
+
+  $autoload = __DIR__ . '/../vendor/autoload.php';
+  if (!file_exists($autoload)) return;
+  require_once $autoload;
+
+  $ids_str = implode(',', $member_ids);
+  $sql = "SELECT ps_endpoint, ps_auth, ps_p256dh FROM " . PUSH_SUBSCRIPTION_TABLE . "
+          WHERE mb_id IN ({$ids_str})";
+  $result = $mysqli->query($sql);
+  if (!$result || !$result->num_rows) return;
+
+  $auth = [
+    'VAPID' => [
+      'subject' => 'https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost'),
+      'publicKey' => $vapid_public,
+      'privateKey' => $vapid_private,
+    ],
+  ];
+
+  $webPush = new \Minishlink\WebPush\WebPush($auth);
+
+  $payload = json_encode([
+    'title' => '구역 배정 알림',
+    'body' => mb_substr($message, 0, 100),
+    'url' => '/'
+  ]);
+
+  while ($sub = $result->fetch_assoc()) {
+    $subscription = \Minishlink\WebPush\Subscription::create([
+      'endpoint' => $sub['ps_endpoint'],
+      'publicKey' => $sub['ps_p256dh'],
+      'authToken' => $sub['ps_auth'],
+    ]);
+    $webPush->queueNotification($subscription, $payload);
+  }
+
+  foreach ($webPush->flush() as $report) {
+    if ($report->isSubscriptionExpired()) {
+      $expired_endpoint = $mysqli->real_escape_string($report->getEndpoint());
+      $mysqli->query("DELETE FROM " . PUSH_SUBSCRIPTION_TABLE . " WHERE ps_endpoint = '{$expired_endpoint}'");
+    }
   }
 }
 
