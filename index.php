@@ -82,6 +82,44 @@ $cancle = $mysqli->query($cancle_sql);
       </div>
     <?php endif; ?>
 
+    <?php if (get_site_option('vapid_public_key')): ?>
+      <div id="push-banner" class="list-group-item px-3 py-1 border-bottom border-light text-center" style="display:none; cursor:pointer; font-size:12px;" onclick="togglePushFromBanner()">
+        <span id="push-banner-icon" class="align-middle"><i class="bi bi-bell-slash"></i></span>
+        <span id="push-banner-text" class="align-middle">쪽지 알림 기능이 꺼져 있습니다.</span>
+      </div>
+      <script>
+      function updatePushBanner(subscribed) {
+          var icon = document.getElementById('push-banner-icon');
+          var text = document.getElementById('push-banner-text');
+          if (!icon) return;
+          if (subscribed) {
+              icon.innerHTML = '<i class="bi bi-bell-fill"></i>';
+              icon.style.color = '#f0ad4e';
+              text.textContent = '쪽지 알림 기능이 켜져 있습니다.';
+              text.style.color = '#555';
+          } else {
+              icon.innerHTML = '<i class="bi bi-bell-slash"></i>';
+              icon.style.color = '#aaa';
+              text.textContent = '쪽지 알림 기능이 꺼져 있습니다.';
+              text.style.color = '#aaa';
+          }
+      }
+      function togglePushFromBanner() {
+          PushNotify.toggle(function(subscribed) {
+              updatePushBanner(subscribed);
+          });
+      }
+      $(function() {
+          if (!PushNotify.isSupported()) return;
+          var banner = document.getElementById('push-banner');
+          if (banner) banner.style.display = '';
+          PushNotify.checkSubscription(function(subscribed) {
+              updatePushBanner(subscribed);
+          });
+      });
+      </script>
+    <?php endif; ?>
+
   </div>
 
   <div id="today-service-list"></div>

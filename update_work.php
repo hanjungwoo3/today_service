@@ -474,6 +474,19 @@
     PRIMARY KEY (`tt_id`,`tm_type`,`mb_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
+    // 푸시 알림 구독 테이블
+    $mysqli->query("CREATE TABLE IF NOT EXISTS `" . PUSH_SUBSCRIPTION_TABLE . "` (
+    `ps_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `mb_id` int(10) unsigned NOT NULL,
+    `ps_endpoint` text NOT NULL,
+    `ps_auth` varchar(255) NOT NULL,
+    `ps_p256dh` varchar(255) NOT NULL,
+    `ps_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`ps_id`),
+    KEY `idx_mb_id` (`mb_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+
 
     if ($type == 'new') {
 

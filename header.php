@@ -89,13 +89,14 @@ if(is_moveout(mb_id())){ // 전출전도인일때
     <script type="text/javascript" src="<?=BASE_PATH?>/js/charts.js"></script>
     <script type="text/javascript" src="<?=BASE_PATH?>/js/script.js?ver=<?=VERSION?>"></script>
     <script type="text/javascript" src="<?=BASE_PATH?>/js/script_h.js?ver=<?=VERSION?>"></script>
+    <script type="text/javascript" src="<?=BASE_PATH?>/js/push.js?ver=<?=VERSION?>"></script>
 
     <script>
     // BASE_PATH를 JavaScript에서 사용할 수 있도록 전역 변수 설정
     var BASE_PATH = '<?=BASE_PATH?>';
     
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('<?=BASE_PATH?>/js/service-worker.js')
+        navigator.serviceWorker.register('<?=BASE_PATH?>/sw.js')
         .then(registration => {
             console.log('Service Worker registered with scope:', registration.scope);
         })

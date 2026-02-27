@@ -155,6 +155,13 @@ if ($row['tt_type'] == '아파트') {
           <i class="bi bi-geo-alt"></i> 지도보기
         </button>
       <?php endif; ?>
+      <button type="button"
+        class="btn btn-sm text-info territory-msg-btn p-0 border-0 mb-0 align-middle ml-2"
+        data-tt-id="<?= $tt_id ?>" data-tt-num="<?= htmlspecialchars($row['tt_num']) ?>" data-msg-type="T"
+        style="font-size:15px;line-height:1;">
+        <i class="bi bi-chat-dots"></i>
+        <span class="badge badge-danger territory-msg-badge" id="msg-badge-<?= $tt_id ?>" style="display:none;font-size:10px;"></span>
+      </button>
     </div>
     <table id="fixed-head" class="table table-sm" style="table-layout: fixed;">
       <colgroup>

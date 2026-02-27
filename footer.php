@@ -186,6 +186,8 @@
       var _tmsgMyMbId = <?= intval(mb_id()) ?>;
       $(document).on('click', '.territory-msg-btn', function(e) {
         e.stopPropagation();
+        // 모달 안에서 쪽지 열 때 모달의 focusin 가로채기 해제
+        $(document).off('focusin.bs.modal');
         var ttId = parseInt($(this).data('tt-id'));
         var ttNum = $(this).data('tt-num') + '';
         var msgType = $(this).data('msg-type') || 'T';
@@ -224,6 +226,17 @@
     </style>
     <?php endif; ?>
     <!-- 구역 쪽지 팝업 끝 -->
+
+    <!-- 푸시 알림 초기화 -->
+    <?php
+    $vapid_public_key = get_site_option('vapid_public_key');
+    if (mb_id() > 0 && $vapid_public_key):
+    ?>
+    <script>
+    PushNotify.init('<?= htmlspecialchars($vapid_public_key) ?>', BASE_PATH);
+    </script>
+    <?php endif; ?>
+    <!-- 푸시 알림 끝 -->
 
     <div class="preloader">
       <img src="<?=BASE_PATH?>/img/preloader2.gif">

@@ -84,6 +84,8 @@ var TerritoryMsg = (function() {
     function _showNewMsgToast() {
         // 팝업이 열려있으면 알림 불필요 (이미 실시간 폴링 중)
         if (_activeTtId) return;
+        // Push 구독 중이면 토스트 생략 (Push 알림이 대신 처리)
+        if (window._pushSubscribed) return;
 
         var existing = document.getElementById('tmsg-toast');
         if (existing) existing.remove();
@@ -218,6 +220,9 @@ var TerritoryMsg = (function() {
         // 배경 딤 숨기기
         var backdrop = document.getElementById('tmsg-backdrop');
         if (backdrop) backdrop.style.display = 'none';
+
+        // 뱃지 즉시 갱신 (읽음 처리 반영)
+        refreshBadges();
     }
 
     // 수동 새로고침
@@ -271,6 +276,7 @@ var TerritoryMsg = (function() {
                 _resetInterval();
                 _stopPolling();
                 _poll(); // 즉시 새 메시지 확인
+                refreshBadges();
             }
         });
     }
@@ -318,6 +324,7 @@ var TerritoryMsg = (function() {
                     }
                     _lastId = res.last_id;
                     _resetInterval();
+                    refreshBadges();
                 } else {
                     _noChangeCount++;
                 }
@@ -421,6 +428,27 @@ var TerritoryMsg = (function() {
     $(document).on('show.bs.modal', function() {
         if (_activeTtId) closePanel();
     });
+
+    // Service Worker에서 Push 수신 시 채팅창 상태 응답 + 즉시 갱신
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'PUSH_CHECK') {
+                var chatOpen = !!_activeTtId;
+                // SW에 채팅창 상태 응답
+                if (event.ports && event.ports[0]) {
+                    event.ports[0].postMessage({ chatOpen: chatOpen });
+                }
+                // 뱃지 즉시 갱신
+                refreshBadges();
+                // 채팅창 열려있으면 새 메시지도 즉시 로드
+                if (chatOpen) {
+                    _resetInterval();
+                    _stopPolling();
+                    _poll();
+                }
+            }
+        });
+    }
 
     // AJAX 완료 후: 뱃지 새로고침
     $(document).ajaxComplete(function(event, xhr, settings) {

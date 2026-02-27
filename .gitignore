@@ -21,5 +21,8 @@ s/data/
 # Local development environment
 .dev/
 
+# Composer
+vendor/
+
 # bkit PDCA files
 docs/

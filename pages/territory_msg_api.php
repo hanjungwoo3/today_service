@@ -206,6 +206,9 @@ switch ($action) {
                     ON DUPLICATE KEY UPDATE last_read_id = GREATEST(last_read_id, {$tm_id})";
             $mysqli->query($sql);
 
+            // Push 알림 발송 (수신자에게)
+            send_push_to_territory_members($tt_id, $msg_type, $mb_id, $current_mb_name, $message);
+
             echo json_encode([
                 'success' => true,
                 'tm_id' => $tm_id,
@@ -218,5 +221,83 @@ switch ($action) {
 
     default:
         echo json_encode(['error' => '알 수 없는 액션입니다.']);
+}
+
+/**
+ * 구역 멤버에게 Push 알림 발송 (발신자 제외)
+ */
+function send_push_to_territory_members($tt_id, $type, $sender_mb_id, $sender_name, $message) {
+    global $mysqli;
+
+    $vapid_public = get_site_option('vapid_public_key');
+    $vapid_private = get_site_option('vapid_private_key');
+    if (!$vapid_public || !$vapid_private) return;
+
+    // 구역 배정 멤버 목록 조회
+    $tt_id = intval($tt_id);
+    if ($type === 'D') {
+        $sql = "SELECT d_assigned FROM " . DISPLAY_TABLE . " WHERE d_id = {$tt_id}";
+    } else {
+        $sql = "SELECT tt_assigned FROM " . TERRITORY_TABLE . " WHERE tt_id = {$tt_id}";
+    }
+    $result = $mysqli->query($sql);
+    if (!$result || !$result->num_rows) return;
+
+    $row = $result->fetch_assoc();
+    $assigned_csv = $type === 'D' ? $row['d_assigned'] : $row['tt_assigned'];
+    if (!$assigned_csv) return;
+
+    $member_ids = array_filter(array_map('intval', explode(',', $assigned_csv)));
+    // 발신자 제외
+    $member_ids = array_filter($member_ids, function($id) use ($sender_mb_id) {
+        return $id != intval($sender_mb_id);
+    });
+    if (empty($member_ids)) return;
+
+    // 수신자들의 push 구독 조회
+    $ids_str = implode(',', $member_ids);
+    $sql = "SELECT ps_endpoint, ps_auth, ps_p256dh FROM " . PUSH_SUBSCRIPTION_TABLE . "
+            WHERE mb_id IN ({$ids_str})";
+    $result = $mysqli->query($sql);
+    if (!$result || !$result->num_rows) return;
+
+    // web-push 라이브러리 로드
+    $autoload = __DIR__ . '/../vendor/autoload.php';
+    if (!file_exists($autoload)) return;
+    require_once $autoload;
+
+    $auth = [
+        'VAPID' => [
+            'subject' => 'https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost'),
+            'publicKey' => $vapid_public,
+            'privateKey' => $vapid_private,
+        ],
+    ];
+
+    $webPush = new \Minishlink\WebPush\WebPush($auth);
+
+    $body = mb_substr($message, 0, 100);
+    $payload = json_encode([
+        'title' => $sender_name . ' 님의 쪽지',
+        'body' => $body,
+        'url' => '/'
+    ]);
+
+    while ($sub = $result->fetch_assoc()) {
+        $subscription = \Minishlink\WebPush\Subscription::create([
+            'endpoint' => $sub['ps_endpoint'],
+            'publicKey' => $sub['ps_p256dh'],
+            'authToken' => $sub['ps_auth'],
+        ]);
+        $webPush->queueNotification($subscription, $payload);
+    }
+
+    // 일괄 발송 (실패한 구독은 DB에서 삭제)
+    foreach ($webPush->flush() as $report) {
+        if ($report->isSubscriptionExpired()) {
+            $expired_endpoint = $mysqli->real_escape_string($report->getEndpoint());
+            $mysqli->query("DELETE FROM " . PUSH_SUBSCRIPTION_TABLE . " WHERE ps_endpoint = '{$expired_endpoint}'");
+        }
+    }
 }
 ?>

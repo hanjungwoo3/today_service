@@ -333,6 +333,8 @@ function open_territory_view(tt_id, mode = 'view') {
       $('#territory-view-modal').modal();
       let viewportHeight = $('#territory-view-modal').outerHeight();
       $('#territory-view-modal .modal-dialog .modal-content').css({ height: viewportHeight });
+      // 모달 내 쪽지 뱃지 갱신
+      if (typeof TerritoryMsg !== 'undefined') TerritoryMsg.refreshBadges();
     }
   });
 }

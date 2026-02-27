@@ -22,4 +22,5 @@ define('HOUSE_MEMO_TABLE','t_house_memo'); // 세대 상태메모
 define('RETURN_VISIT_TABLE','t_return_visit'); // 재방문 기록
 define('WORK_LOG_TABLE','t_work_log'); // 작업
 define('OPTION_TABLE','t_option'); // 사이트 옵션
+define('PUSH_SUBSCRIPTION_TABLE','t_push_subscription'); // 푸시 구독
 ?>
