@@ -17,6 +17,7 @@ today_service/
 
 - 오늘의 봉사 배정 대시보드
 - 구역 배정/관리 및 구역 쪽지(채팅) 기능
+- Web Push 브라우저 알림 (쪽지 수신, 구역 배정 알림)
 - 회원·관리자 관리
 - 세션 기반 인증 (60분 만료)
 
@@ -53,6 +54,7 @@ today_service/
 
 - PHP 7.3+ 또는 8.3+ (캘린더 모듈은 8.1+ 필요)
 - MariaDB 5.5+ 또는 10.6+
+- Composer (Web Push 알림 기능 사용 시)
 
 ## 설치
 
@@ -72,7 +74,20 @@ cp config_sample.php config_custom.php
 - **DB 업데이트**: 기존 DB 스키마 마이그레이션 (버전별 ALTER TABLE)
 - **관리자 추가**: 비밀번호 분실 등으로 계정 추가 시 사용
 
-### 3. 하위 모듈 설정
+### 3. Web Push 알림 설정
+
+```bash
+# Composer 의존성 설치 (서버에 composer가 없으면 먼저 설치)
+# curl -sS https://getcomposer.org/installer | php
+composer install --no-dev
+```
+
+브라우저에서 관리자로 로그인 후 `/pages/push_generate_vapid.php` 접속하여 VAPID 키 생성 (최초 1회).
+
+> **참고:** 서버 PHP가 PATH에 없으면 `/usr/local/php/bin/php` 등 직접 경로 사용.
+> `allow_url_fopen`이 비활성화된 서버는 `php -d allow_url_fopen=1 composer.phar install --no-dev` 사용.
+
+### 4. 하위 모듈 설정
 
 **캘린더 (`c/`):**
 ```bash

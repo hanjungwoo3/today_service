@@ -178,6 +178,12 @@ Local git config is already set for `hanjungwoo3` account.
 - 배정일(`tt_assigned_date`) 지난 구역 메시지 삭제
 - 안전망: 하루 이상 된 메시지 삭제
 
+**배정 알림:**
+- 구역 배정 시 자동으로 시스템 메시지 삽입 (mb_id=0, mb_name='오늘의봉사')
+- 구역 이름 + 배정 멤버 목록 포함
+- 재배정 시 기존 쪽지/읽음 기록 초기화 후 새 시스템 메시지 삽입
+- Push 알림도 함께 발송 (`pages/guide_work.php` 내 `_send_assign_notification()`)
+
 **서버 배포 시 테이블 생성 필요:**
 ```sql
 CREATE TABLE t_territory_message (
@@ -199,6 +205,58 @@ CREATE TABLE t_territory_message_read (
     PRIMARY KEY (tt_id, tm_type, mb_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
+
+### Web Push Notification (브라우저 푸시 알림)
+
+**Architecture:**
+- Web Push API + VAPID 인증 기반 브라우저 알림
+- `minishlink/web-push` PHP 라이브러리 (Composer)
+- Service Worker가 push 이벤트를 수신하여 OS 알림 표시
+- 앱이 열려있고 채팅창이 활성화된 경우 알림 생략 (SW ↔ 클라이언트 MessageChannel 통신)
+- 구역 쪽지 발송 시 + 구역 배정 시 자동 push 발송
+
+**VAPID 키 관리:**
+- `t_option` 테이블에 `vapid_public_key`, `vapid_private_key` 저장
+- `pages/push_generate_vapid.php`에서 관리자가 키 생성/재생성
+- `get_site_option('vapid_public_key')`로 읽음
+
+**DB Table:**
+- `t_push_subscription` — 브라우저별 구독 정보 (ps_id, mb_id, ps_endpoint, ps_auth, ps_p256dh, ps_created)
+- 만료된 구독은 push 발송 시 자동 삭제
+
+**Key Files:**
+- `composer.json` — `minishlink/web-push ^9.0` 의존성 (platform PHP 8.1)
+- `js/push.js` — 클라이언트 구독/해제 로직 (PushNotify 모듈)
+- `js/service-worker.js` — push/notificationclick 이벤트 핸들러
+- `pages/push_api.php` — 구독 관리 API (subscribe, unsubscribe, status)
+- `pages/push_generate_vapid.php` — VAPID 키 생성 (관리자 전용, 일회성)
+- `footer.php` — 알림 토글 벨 버튼 UI, VAPID public key JS 전달
+- `header.php` — `js/push.js` 스크립트 로드
+
+**Push 발송 경로:**
+1. 구역 쪽지 발송 → `territory_msg_api.php` send → `send_push_to_territory_members()`
+2. 구역 배정 → `guide_work.php` → `_send_assign_notification()` → `_send_push_for_assign()`
+
+**서버 배포 순서:**
+```bash
+# 1. Composer 설치 (서버에 composer가 없는 경우)
+curl -sS https://getcomposer.org/installer | /usr/local/php/bin/php
+
+# 2. 의존성 설치
+/usr/local/php/bin/php -d allow_url_fopen=1 composer.phar install --no-dev
+
+# 3. 테이블 자동 생성 (update_work.php 접속)
+# 브라우저에서 update_work.php 실행 → t_push_subscription 테이블 자동 생성
+
+# 4. VAPID 키 생성 (최초 1회, 관리자 로그인 필요)
+# 브라우저에서 /pages/push_generate_vapid.php 접속 → "키 생성" 클릭
+```
+
+**참고:**
+- 서버 PHP에 `php` 명령이 PATH에 없을 수 있음 → `/usr/local/php/bin/php` 직접 사용
+- `allow_url_fopen`이 비활성화된 서버는 `-d allow_url_fopen=1` 플래그 필요
+- `vendor/` 디렉토리는 `.gitignore`에 포함 → 서버에서 직접 `composer install` 필요
+- VAPID 키 재생성 시 기존 모든 구독이 무효화됨
 
 ### Timer Application (t/)
 
@@ -294,29 +352,41 @@ Upstream 머지 시 아래 파일들은 충돌이 발생하지 않도록 주의�
 | `s/duty_admin.php` | 청소/마이크/안내인/연사음료 관리자 편집 |
 | `s/duty_api.php` | 청소/마이크/안내인/연사음료 API (JSON 스토리지) |
 | `s/duty_print.php` | 청소/마이크/안내인/연사음료 인쇄용 |
-| `pages/territory_msg_api.php` | 구역 쪽지 API (MySQL, 4개 액션: unread_counts/load/poll/send) |
+| `pages/territory_msg_api.php` | 구역 쪽지 API (MySQL, 4개 액션: unread_counts/load/poll/send) + Push 발송 |
 | `js/territory_msg.js` | 구역 쪽지 클라이언트 (팝업 채팅 창, 적응형 폴링, TerritoryMsg 모듈) |
+| `composer.json` | `minishlink/web-push ^9.0` Composer 의존성 (platform PHP 8.1) |
+| `js/push.js` | Web Push 클라이언트 (PushNotify 모듈: 구독/해제/상태확인) |
+| `pages/push_api.php` | Push 구독 관리 API (subscribe/unsubscribe/status) |
+| `pages/push_generate_vapid.php` | VAPID 키 생성 스크립트 (관리자 전용, 일회성) |
 
 ### 기존 파일 수정 내역 (upstream 머지 시 충돌 가능)
 
 | 파일 | 변경량 | 충돌위험 | 수정 내용 |
 |------|--------|----------|-----------|
-| `.gitignore` | +6줄 | 낮음 | `.dev/`, `docs/` 무시 규칙 추가 (파일 끝에 append) |
+| `.gitignore` | +8줄 | 낮음 | `.dev/`, `docs/`, `vendor/`, `composer.phar` 무시 규칙 추가 |
 | `config.php` | +4/-2줄 | **중간** | `BASE_PATH` 계산 조건에 `/s/`, `/c/` 경로 추가 |
 | `index.php` | +5줄 | 낮음 | `custom_board_top.php`, `custom_home_assignments.php` include |
-| `footer.php` | +35줄 | 낮음 | 구역 쪽지 팝업 컨테이너/JS/CSS (</body> 직전) |
+| `footer.php` | +70줄 | 낮음 | 구역 쪽지 팝업 컨테이너/JS/CSS + Push 알림 벨 버튼 UI (</body> 직전) |
 | `pages/admin_member_form.php` | +1줄 | 낮음 | `$mb` 변수 기본값 초기화 (신규 등록 시 undefined 방지) |
 | `pages/guide_assign_step.php` | +40줄 | **중간** | 탭 내비에 "호별봉사 짝 배정" 탭 추가 + preselect 자동선택 JS |
 | `m/index.php` | +85/-7줄 | **중간** | SQL에 `ms_id` 추가, 클릭 가능한 추천짝 카드, `goToAssign()`, localStorage 필터 저장, 툴바 헤더 숨김 |
 | `m/api/meetings.php` | +2/-1줄 | 낮음 | SQL/응답에 `ms_id` 필드 추가 |
 | `pages/today_service_list.php` | +5줄 | 낮음 | 배정 카드에 구역 쪽지 버튼 추가 |
 | `include/territory_view_list.php` | +1줄 | 낮음 | `$new_compare_address` 변수 초기화 (PHP 8 경고 수정) |
+| `header.php` | +2줄 | 낮음 | `js/push.js` 스크립트 로드 추가 |
+| `js/service-worker.js` | +90줄 | 낮음 | push/notificationclick 이벤트, SW↔클라이언트 MessageChannel 통신 |
+| `js/script.js` | +1줄 | 낮음 | `open_territory_view()` 성공 시 `TerritoryMsg.refreshBadges()` 호출 |
+| `pages/guide_work.php` | +120줄 | **중간** | 구역 배정 시 자동 시스템 메시지 + Push 발송 (`_send_assign_notification`, `_send_push_for_assign`) |
+| `config_table.php` | +2줄 | 낮음 | `PUSH_SUBSCRIPTION_TABLE` 상수 추가 |
+| `update_work.php` | +15줄 | 낮음 | `t_push_subscription` 테이블 자동 생성 |
 
 #### 머지 후 수동 확인 필요 사항
 
 1. **`config.php`** — `BASE_PATH` 계산 분기문이 upstream에서 변경되었는지 확인. `/s/`, `/c/` 경로 조건이 누락되면 하위 모듈 동작 불가
 2. **`pages/guide_assign_step.php`** — 탭 내비에 "호별봉사 짝 배정" 탭과 하단 preselect JS 블록 유지 확인
 3. **`m/index.php`** — 변경량이 가장 크므로 upstream 변경과 수동 비교 필요
+4. **`pages/guide_work.php`** — 구역 배정 알림 함수 (`_send_assign_notification`, `_send_push_for_assign`) 유지 확인
+5. **`vendor/`** — `.gitignore`에 포함되므로 서버에서 `composer install --no-dev` 별도 실행 필요
 
 ### 독립 모듈 (upstream과 무관)
 
