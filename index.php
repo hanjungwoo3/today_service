@@ -88,10 +88,12 @@ $cancle = $mysqli->query($cancle_sql);
         <span id="push-banner-text" class="align-middle">쪽지 알림 기능이 꺼져 있습니다.</span>
       </div>
       <script>
+      var _pushBusy = false;
       function updatePushBanner(subscribed) {
           var icon = document.getElementById('push-banner-icon');
           var text = document.getElementById('push-banner-text');
           if (!icon) return;
+          _pushBusy = false;
           if (subscribed) {
               icon.innerHTML = '<i class="bi bi-bell-fill"></i>';
               icon.style.color = '#f0ad4e';
@@ -100,11 +102,19 @@ $cancle = $mysqli->query($cancle_sql);
           } else {
               icon.innerHTML = '<i class="bi bi-bell-slash"></i>';
               icon.style.color = '#aaa';
-              text.textContent = '쪽지 알림 기능이 꺼져 있습니다.';
+              text.textContent = '쪽지 알림 기능이 꺼져 있습니다. 여기를 클릭해서 켜주세요.';
               text.style.color = '#aaa';
           }
       }
       function togglePushFromBanner() {
+          if (_pushBusy) return;
+          _pushBusy = true;
+          var icon = document.getElementById('push-banner-icon');
+          var text = document.getElementById('push-banner-text');
+          icon.innerHTML = '<i class="bi bi-arrow-repeat"></i>';
+          icon.style.color = '#888';
+          text.textContent = '처리중입니다...';
+          text.style.color = '#888';
           PushNotify.toggle(function(subscribed) {
               updatePushBanner(subscribed);
           });
