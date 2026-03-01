@@ -454,18 +454,20 @@ if (empty($meeting_array))
 <h5 class="border-bottom mt-4 mb-3 pb-2 clearfix"><span class="align-middle mt-2 d-inline-block">기간별 구역 진행률</span></h5>
 
 <form method="post" url="statistics_territory_past">
-  <div class="form-group row m-0 mb-1 align-items-center">
-    <label class="col-4 p-0 m-0">기간</label>
-    <div class="col-8 p-0"><input class="form-control w-100" type="date" name="date" value="<?= date("Y-m-d") ?>"
-        min="2018-08-22" max="<?= date("Y-m-d") ?>" /></div>
-  </div>
-  <div class="form-group row m-0 mb-3 align-items-center">
-    <label class="col-4 p-0 m-0 text-center">~</label>
-    <div class="col-8 p-0"><input class="form-control w-100" type="date" name="date2" value="<?= date("Y-m-d") ?>"
-        min="2018-08-22" max="<?= date("Y-m-d") ?>" /></div>
-  </div>
-  <div class="col-md-auto mb-2">
-    <button type="submit" class="btn btn-outline-secondary float-right"><i class="bi bi-search"></i> 검색</button>
+  <div class="row p-3 justify-content-md-end">
+    <div class="row col col-lg-3 col-sm-6 col-12 mb-2">
+      <div class="col-8 p-0"><input class="form-control w-100" type="date" name="date" value="<?= date("Y-m-d") ?>"
+          min="2018-08-22" max="<?= date("Y-m-d") ?>" /></div>
+      <div class="col-4">부터</div>
+    </div>
+    <div class="row col col-lg-3 col-sm-6 col-12 mb-2">
+      <div class="col-8 p-0"><input class="form-control w-100" type="date" name="date2" value="<?= date("Y-m-d") ?>"
+          min="2018-08-22" max="<?= date("Y-m-d") ?>" /></div>
+      <div class="col-4">까지</div>
+    </div>
+    <div class="col-md-auto mb-2">
+      <button type="submit" class="btn btn-outline-secondary float-right"><i class="bi bi-search"></i> 검색</button>
+    </div>
   </div>
 </form>
 <div id="statistics_territory_past"></div>

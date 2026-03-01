@@ -87,6 +87,7 @@ $record_start_row = array(); // 구역기록 출력 시작 행
 $record_start_column = array(); // 구역기록 출력 시작 열
 $end_date = array(); // 마지막으로 완료한 날짜
 $max_row = 4; // 테두리 적용 범위 계산용 (헤더 이후부터)
+$bottom_number = 4;
 
 // 초기 세팅
 $where = (isset($tt_type) && $tt_type == '편지') ? "tt_type = '편지'" : "tt_type != '편지'";
