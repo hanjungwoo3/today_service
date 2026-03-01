@@ -115,7 +115,7 @@ open http://localhost:9000
 
 ## 버전
 
-현재 upstream 버전: **v2.5.14**
+현재 upstream 버전: **v2.5.15**
 
 ## 라이선스
 

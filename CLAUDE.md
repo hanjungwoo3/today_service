@@ -397,15 +397,16 @@ Upstream 머지 시 아래 파일들은 충돌이 발생하지 않도록 주의�
 | `m/` | 호별봉사 전도인 기록 |
 | `t/` | 프레젠테이션 타이머 |
 
-### Upstream 머지 시 주의사항 (v2.5.14 경험 기반)
+### Upstream 머지 시 주의사항 (v2.5.15 경험 기반)
 
 1. **modify/delete 충돌 주의**: upstream에서 `c/`, `m/`, `s/`, `t/` 파일이 삭제되면 git이 modify/delete 충돌을 발생시킨다. `git checkout --ours`로 우리 쪽을 유지해야 하는데, **upstream에도 있던 파일**(예: `s/scraper.php`)이 함께 삭제될 수 있다. 머지 후 반드시 `git diff HEAD~1 HEAD --name-status -- c/ m/ s/ t/ | grep "^D"`로 의도치 않은 삭제 확인 필요.
 2. **`index.php`**: v2.5.14에서 취소 봉사 쿼리가 서브쿼리 → INNER JOIN으로 변경됨. `custom_board_top.php`, `custom_home_assignments.php` include 라인 유지 확인.
 3. **`config.php`**: `/s/`, `/c/` 경로 조건이 `BASE_PATH` 분기문에 포함되어야 함.
+4. **아이콘 삭제 주의**: upstream에서 삭제된 파일(`icons/` 등)이 커스텀 모듈에서 사용 중일 수 있음. v2.5.15에서 `icon-gem.png`, `icon-sheep.png`, `icon-wheat.png`이 삭제되었으나 `s/view.php`, `s/index.php`에서 사용하므로 복원 필요.
 
 ## Upstream Version
 
-현재 적용된 upstream 버전: **v2.5.14**
+현재 적용된 upstream 버전: **v2.5.15**
 - upstream 브랜치: 원본 배포 파일 (커스텀 변경 없음)
 - main 브랜치: upstream + 커스텀 파일/수정
 
