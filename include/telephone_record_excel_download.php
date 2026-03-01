@@ -69,15 +69,23 @@ $objPHPExcel = new PHPExcel();
 
 $sheet = $objPHPExcel->getActiveSheet();
 
-$styleArray = array(
+$styleArray = array( // 외곽 두꺼운 선
 	'borders' => array(
-		'allborders' => array(
+		'outline' => array(
+			'style' => PHPExcel_Style_Border::BORDER_THICK
+		)
+	)
+);
+
+$styleArray2 = array( // 외곽 중간 두께 (안쪽 영역 적용용)
+	'borders' => array(
+		'outline' => array(
 			'style' => PHPExcel_Style_Border::BORDER_MEDIUM
 		)
 	)
 );
 
-$styleArray2 = array(
+$styleArray3 = array( // 내부 얇은 선
 	'borders' => array(
 		'inside' => array(
 			'style' => PHPExcel_Style_Border::BORDER_THIN
@@ -85,11 +93,12 @@ $styleArray2 = array(
 	)
 );
 
-$number = 1;
+$number = 5;
 $record_start_row = array(); // 구역기록 출력 시작 행
 $record_start_column = array(); // 구역기록 출력 시작 열
 $end_date = array(); // 마지막으로 완료한 날짜
 $max_row = 4; // 테두리 적용 범위 계산용
+$bottom_number = 4; // 데이터가 없을 때의 초기값 대비
 
 // 초기 세팅
 $sql = "SELECT tp_id, tp_num FROM " . TELEPHONE_TABLE . " ORDER BY tp_num+0 ASC, tp_num ASC";
@@ -193,8 +202,8 @@ while ($row = $result->fetch_assoc()) {
 		$sheet->mergeCells($left_alpabet . $start_column . ':' . $right_alpabet . $start_column);
 
 		// 선 굵기
-		$sheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray); // 테두리 진한선
-		$sheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray2); // 내부 연한선
+		$sheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray2); // 테두리 진한선
+		$sheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray3); // 내부 연한선
 
 		// 구역기록 출력 시작 행 업데이트
 		$start_row++;
@@ -264,8 +273,8 @@ while ($row = $result->fetch_assoc()) {
 		$sheet->mergeCells($left_alpabet . $start_column . ':' . $right_alpabet . $start_column);
 
 		// 선 굵기
-		$sheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray); // 테두리 진한선
-		$sheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray2); // 내부 연한선
+		$sheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray2); // 테두리 진한선
+		$sheet->getStyle($left_alpabet . $start_column . ':' . $right_alpabet . ($start_column + 1))->applyFromArray($styleArray3); // 내부 연한선
 
 		// 구역기록 출력 시작 행 업데이트
 		$start_row++;
@@ -288,8 +297,8 @@ foreach ($end_date as $tp_id => $date) {
 	$sheet->setCellValue("B" . $start_column, $formatted_date);
 
 	// 선 굵기
-	$sheet->getStyle("A" . $start_column . ':' . "B" . ($start_column + 1))->applyFromArray($styleArray);
-	$sheet->getStyle("A" . $start_column . ':' . "B" . ($start_column + 1))->applyFromArray($styleArray2); // 내부 연한선
+	$sheet->getStyle("A" . $start_column . ':' . "B" . ($start_column + 1))->applyFromArray($styleArray2);
+	$sheet->getStyle("A" . $start_column . ':' . "B" . ($start_column + 1))->applyFromArray($styleArray3); // 내부 연한선
 
 }
 
@@ -316,8 +325,8 @@ $objPHPExcel->setActiveSheetIndex(0)
 	->setCellValue('A3', '구역 번호')
 	->setCellValue('B3', '마지막으로 완료한 날짜');
 
-$sheet->getStyle("A3:B4")->applyFromArray($styleArray); // 테두리 진한선
-$sheet->getStyle("A3:B4")->applyFromArray($styleArray2); // 내부 연한선
+$sheet->getStyle("A3:B4")->applyFromArray($styleArray2); // 테두리 진한선
+$sheet->getStyle("A3:B4")->applyFromArray($styleArray3); // 내부 연한선
 
 for ($i = 'C'; $i < $column_cnt; $i++) {
 	$left_alpabet = $i;
@@ -332,8 +341,8 @@ for ($i = 'C'; $i < $column_cnt; $i++) {
 		->setCellValue($left_alpabet . '4', '배정 날짜')
 		->setCellValue($right_alpabet . '4', '완료 날짜');
 
-	$sheet->getStyle($left_alpabet . '3:' . $right_alpabet . '4')->applyFromArray($styleArray); // 테두리 진한선
-	$sheet->getStyle($left_alpabet . '3:' . $right_alpabet . '4')->applyFromArray($styleArray2); // 내부 연한선
+	$sheet->getStyle($left_alpabet . '3:' . $right_alpabet . '4')->applyFromArray($styleArray2); // 테두리 진한선
+	$sheet->getStyle($left_alpabet . '3:' . $right_alpabet . '4')->applyFromArray($styleArray3); // 내부 연한선
 }
 
 $objPHPExcel->getActiveSheet()->duplicateStyleArray(
@@ -351,6 +360,10 @@ for ($i = 1; $i <= $max_row; $i++) {
 	$sheet->getRowDimension($i)->setRowHeight(16);
 }
 
+// 빈 칸 포함 전체 영역: 내부 얇은선 + 외곽 두꺼운선
+$sheet->getStyle('A3:' . $final_col . $max_row)->applyFromArray($styleArray3); // inside thin
+$sheet->getStyle('A3:' . $final_col . $max_row)->applyFromArray($styleArray);  // outline thick
+
 //폰트 스타일
 $sheet->getStyle("A1:C2")->getFont()->setBold(true);
 
@@ -361,6 +374,7 @@ $sheet->getStyle("A5:" . $right_alpabet . $bottom_number)->getFont()->setSize(10
 
 unset($styleArray);
 unset($styleArray2);
+unset($styleArray3);
 
 // Rename worksheet
 $objPHPExcel->getActiveSheet()->setTitle('구역배정기록(' . $tp_sdate . '_' . $tp_fdate . ')');
