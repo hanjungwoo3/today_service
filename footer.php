@@ -206,12 +206,12 @@
     .tmsg-close { border: none; background: none; font-size: 22px; color: #999; padding: 0 4px; cursor: pointer; line-height: 1; }
     .tmsg-close:hover { color: #333; }
     .tmsg-body { flex: 1; overflow-y: auto; padding: 10px 14px; min-height: 200px; max-height: 300px; }
-    .tmsg-footer { display: flex; padding: 8px 10px; border-top: 1px solid #eee; gap: 6px; }
-    .tmsg-footer input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 14px; font-size: 14px; outline: none; }
-    .tmsg-footer input:focus { border-color: #80bdff; }
+    .tmsg-footer { display: flex; padding: 8px 10px; border-top: 1px solid #eee; gap: 6px; align-items: flex-end; }
+    .tmsg-footer textarea { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 14px; font-size: 16px; outline: none; resize: none; line-height: 1.4; max-height: 96px; overflow-y: auto; }
+    .tmsg-footer textarea:focus { border-color: #80bdff; }
     #tmsg-send { border: none; background: #5c7cfa; color: #fff; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     #tmsg-send:hover { background: #4c6ef5; }
-    .tmsg-item { margin-bottom: 10px; font-size: 15px; }
+    .tmsg-item { margin-bottom: 10px; font-size: 16px; }
     .tmsg-item.mine { text-align: right; }
     .tmsg-name { font-size: 12px; color: #888; margin-bottom: 2px; }
     .tmsg-text { display: inline-block; padding: 8px 12px; border-radius: 16px; background: #f0f0f0; max-width: 80%; word-break: break-word; text-align: left; }

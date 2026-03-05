@@ -15,25 +15,41 @@ This is a PHP-based service management system with multiple sub-applications:
 
 ### Local Server (Podman + nginx + PHP)
 
-로컬 개발 환경은 Podman 컨테이너(nginx) + PHP 내장 서버로 구성:
+로컬 개발 환경은 Podman 컨테이너(nginx + MariaDB) + PHP 내장 서버로 구성.
+
+**"서버 실행해줘" 요청 시 아래 순서대로 모두 확인/실행:**
+
+1. **Podman VM 시작** — `podman machine start` (이미 실행 중이면 skip)
+2. **MariaDB 컨테이너** — `podman start mysql-test` (DB 없으면 PHP Fatal error 발생)
+3. **nginx SSL 컨테이너** — `podman start nginx-ssl` (SSL 역방향 프록시)
+4. **PHP 내장 서버** — `php -S 0.0.0.0:9000` (반드시 `0.0.0.0`으로 바인딩, `localhost`로 하면 Podman VM에서 접근 불가 → 502 에러)
+5. **포트포워딩 안내** — 443→8443 포트포워딩은 sudo 필요하므로 사용자에게 명령어 안내만 제공
 
 ```bash
-# PHP 내장 서버 (nginx에서 proxy_pass로 연결)
-php -S localhost:9000
+# 1. Podman VM
+podman machine start
 
-# nginx 컨테이너 (podman) — SSL 역방향 프록시
-# 포트: 0.0.0.0:8443 → 443 (macOS에서 443은 권한 필요하므로 8443 사용)
-# 프록시: https://ys1914.com:8443 → http://host.containers.internal:9000
+# 2. MariaDB
+podman start mysql-test
+
+# 3. nginx SSL 프록시 (https://ys1914.com:8443 → http://host.containers.internal:9000)
 podman start nginx-ssl
 
-# 포트포워딩: 443 → 8443 (sudo 필요 — 터미널에서 직접 실행)
-# 재부팅 시 초기화됨
+# 4. PHP 내장 서버 (0.0.0.0 필수!)
+php -S 0.0.0.0:9000
+
+# 5. 포트포워딩: 443 → 8443 (sudo 필요 — 터미널에서 직접 실행, 재부팅 시 초기화)
 echo "rdr pass on lo0 inet proto tcp from any to 127.0.0.1 port 443 -> 127.0.0.1 port 8443" | sudo pfctl -ef -
 ```
 
 - **접속 URL**: `https://ys1914.com` (포트포워딩 후) 또는 `https://ys1914.com:8443`
 - **hosts 파일**: `127.0.0.1 ys1914.com`
 - **DB**: MariaDB 컨테이너 (`mysql-test`, 포트 3306)
+
+**트러블슈팅:**
+- 502 Bad Gateway → PHP 서버가 `localhost`로 바인딩되어 있을 가능성. `0.0.0.0:9000`으로 재시작
+- DB 에러 (mysqli Connection refused) → `podman start mysql-test` 실행
+- Podman 연결 실패 → `podman machine start` 실행
 
 ### Git Configuration
 

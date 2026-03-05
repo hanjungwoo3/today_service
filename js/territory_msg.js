@@ -152,19 +152,27 @@ var TerritoryMsg = (function() {
                     '<div class="tmsg-loading">불러오는 중...</div>' +
                 '</div>' +
                 '<div class="tmsg-footer">' +
-                    '<input type="text" id="tmsg-input" placeholder="메시지 입력..." maxlength="500" autocomplete="off">' +
+                    '<textarea id="tmsg-input" placeholder="메시지 입력..." maxlength="500" rows="1" autocomplete="off"></textarea>' +
                     '<button type="button" id="tmsg-send" onclick="TerritoryMsg.sendMessage()"><i class="bi bi-send"></i></button>' +
                 '</div>' +
             '</div>';
 
         popup.style.display = '';
 
-        // Enter 키 전송
-        document.getElementById('tmsg-input').addEventListener('keypress', function(e) {
-            if (e.which === 13 || e.keyCode === 13) {
-                e.preventDefault();
-                TerritoryMsg.sendMessage();
-            }
+        // PC: Enter=전송 (Shift+Enter=줄바꿈), 모바일: Enter=줄바꿈 (버튼으로 전송)
+        var tmsgInput = document.getElementById('tmsg-input');
+        if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            tmsgInput.addEventListener('keydown', function(e) {
+                if ((e.which === 13 || e.keyCode === 13) && !e.shiftKey) {
+                    e.preventDefault();
+                    TerritoryMsg.sendMessage();
+                }
+            });
+        }
+        // 자동 높이 조절 (최대 4줄)
+        tmsgInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 96) + 'px';
         });
 
         // 메시지 로드
@@ -357,7 +365,7 @@ var TerritoryMsg = (function() {
 
         var textEl = document.createElement('div');
         textEl.className = 'tmsg-text';
-        textEl.textContent = msg.tm_message;
+        textEl.innerHTML = _escHtml(msg.tm_message).replace(/\n/g, '<br>');
         div.appendChild(textEl);
 
         var timeEl = document.createElement('div');
