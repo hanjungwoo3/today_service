@@ -181,7 +181,7 @@
     <?php if(!is_moveout(mb_id())): ?>
     <div id="tmsg-backdrop"></div>
     <div id="tmsg-popup" style="display:none;"></div>
-    <script src="<?=BASE_PATH?>/js/territory_msg.js"></script>
+    <script src="<?=BASE_PATH?>/js/territory_msg.js?v=<?=filemtime(__DIR__.'/js/territory_msg.js')?>"></script>
     <script>
       var _tmsgMyMbId = <?= intval(mb_id()) ?>;
       $(document).on('click', '.territory-msg-btn', function(e) {
