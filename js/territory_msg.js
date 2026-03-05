@@ -161,7 +161,7 @@ var TerritoryMsg = (function() {
 
         // PC: Enter=전송 (Shift+Enter=줄바꿈), 모바일: Enter=줄바꿈 (버튼으로 전송)
         var tmsgInput = document.getElementById('tmsg-input');
-        if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
             tmsgInput.addEventListener('keydown', function(e) {
                 if ((e.which === 13 || e.keyCode === 13) && !e.shiftKey) {
                     e.preventDefault();
