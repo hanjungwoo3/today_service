@@ -8,14 +8,6 @@ self.addEventListener('activate', event => {
     event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener('fetch', event => {
-    event.respondWith(
-        fetch(event.request).catch(() => {
-            return caches.match(event.request);
-        })
-    );
-});
-
 // Push 알림 수신
 self.addEventListener('push', event => {
     var data = { title: '오늘의 봉사', body: '새 알림이 있습니다.', url: '/' };
