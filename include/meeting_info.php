@@ -27,10 +27,10 @@ AND m.m_date = '{$s_date}'
 WHERE ms.ms_id = '{$ms_id}'";
 
 $result = $mysqli->query($sql);
-$row = $result->fetch_assoc();
+$row = $result->fetch_assoc() ?: [];
 
-$mp_name = $row['g_id'] ? '[' . get_group_name($row['g_id']) . '집단] ' : '';
-$mp_name .= $row['mp_name'];
+$mp_name = !empty($row['g_id']) ? '[' . get_group_name($row['g_id']) . '집단] ' : '';
+$mp_name .= $row['mp_name'] ?? '';
 $msw = get_meeting_data(get_meeting_id($s_date, $ms_id));
 $mb_ids = isset($msw['mb_id']) ? explode(',', $msw['mb_id']) : array();
 $g_name = !empty($msw['g_id']) ? get_group_name($msw['g_id']) : '';
@@ -52,7 +52,7 @@ if ($member_string) {
 }
 ?>
 <div class="mb-3">
-  <small class="badge badge-pill badge-light align-middle"><?= get_meeting_schedule_type_text($row['ms_type']) ?></small>
+  <small class="badge badge-pill badge-light align-middle"><?= get_meeting_schedule_type_text($row['ms_type'] ?? '') ?></small>
   <?php if (!empty($g_name))
     echo '<span class="badge badge-pill badge-light text-primary align-middle">집단 봉사⋮' . $g_name . '</span>'; ?>
   <?php if ($msw['m_cancle'] == 1): ?>
@@ -76,9 +76,9 @@ if ($member_string) {
 <div class="mb-3">
   <h6 class="text-secondary">일시</h6>
   <div class="">
-    <?= get_datetime_text($s_date . ' ' . $row['ms_time']); ?>
+    <?= get_datetime_text($s_date . ' ' . ($row['ms_time'] ?? '')); ?>
     <br>
-    <small><?= '(' . get_datetime_text($row['ms_start_time']) . ' ~ ' . get_datetime_text($row['ms_finish_time']) . ')' ?></small>
+    <small><?= '(' . get_datetime_text($row['ms_start_time'] ?? '') . ' ~ ' . get_datetime_text($row['ms_finish_time'] ?? '') . ')' ?></small>
   </div>
 </div>
 <div class="mb-3">
@@ -86,10 +86,10 @@ if ($member_string) {
   <div class="">
     <div class="mb-1"><?= $mp_name ?>
       </br>
-      <small><?= $row['mp_address'] ?></small>
+      <small><?= $row['mp_address'] ?? '' ?></small>
     </div>
     <button class="btn btn-sm btn-outline-secondary"
-      onclick="kakao_navi('<?= DEFAULT_ADDRESS . ' ' . $row['mp_address'] ?>','<?= $row['mp_name'] ?>');">
+      onclick="kakao_navi('<?= DEFAULT_ADDRESS . ' ' . ($row['mp_address'] ?? '') ?>','<?= $row['mp_name'] ?? '' ?>');">
       <i class="bi bi-cursor"></i> 길찾기
     </button>
   </div>
