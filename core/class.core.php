@@ -266,10 +266,6 @@ class Core
 
         $stmt->close();
 
-        if ($successId === 0) {
-            throw new \Exception('No rows affected. Update might have failed or no changes were made.');
-        }
-
         return $successId;
 
     }

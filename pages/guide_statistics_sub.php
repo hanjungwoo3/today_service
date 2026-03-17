@@ -67,11 +67,6 @@ if(is_nan($avg) || is_infinite($avg)) $avg = '0';
 $sql = "SELECT tt_type, tt_assigned_date, tt_end_date FROM ".MEETING_SCHEDULE_TABLE." ms INNER JOIN ".TERRITORY_TABLE." tt ON ms.ms_id = tt.ms_id
         WHERE ms.ma_id = '0' AND mb_id = '0' AND ms.ms_id = '{$ms_id}' AND tt_type != '편지' ORDER BY FIELD(tt_type, '일반', '아파트', '빌라', '격지')";
 $result = $mysqli->query($sql);
-while ($ty = $result->fetch_assoc()){
-  if(isset($type[$ty['tt_type']][0])){
-    $type[$ty['tt_type']][0]++;
-  }else{
-    $type[$ty['tt_type']][0] = 1;
 
 $territories = array();
 while ($row = $result->fetch_assoc()) {
