@@ -2,6 +2,8 @@
 
 <?php
 $c_territory_type = unserialize(TERRITORY_TYPE);
+if (!isset($update_page)) $update_page = '';
+if (!isset($update_wrap_id)) $update_wrap_id = '';
 
 // tt_id 안전 조회
 $tt_id = isset($_POST['tt_id']) ? intval($_POST['tt_id']) : (isset($_GET['tt_id']) ? intval($_GET['tt_id']) : 0);
