@@ -293,9 +293,9 @@ $result = $mysqli->query($sql);
                 <div><?php echo ($to_change < '2023-09') ? '봉사 기록' : '봉사 시간'; ?></div>
                 <div class="d-flex justify-content-center text-muted">
                   <div class="m-1"><input class="form-control d-inline p-0" name="hour" type="number" min="0" max="23"
-                      value="<?= check_value($mr['mr_hour']) ?>" placeholder="0"> 시간</div>
+                      value="<?= check_value($mr['mr_hour'] ?? '') ?>" placeholder="0"> 시간</div>
                   <div class="m-1"><input class="form-control d-inline p-0" name="min" type="number" min="0" max="59"
-                      value="<?= check_value($mr['mr_min']) ?>" placeholder="0"> 분</div>
+                      value="<?= check_value($mr['mr_min'] ?? '') ?>" placeholder="0"> 분</div>
                 </div>
               </div>
 
@@ -304,7 +304,7 @@ $result = $mysqli->query($sql);
                   <div>출판물</div>
                   <div class="my-1 mx-auto">
                     <input class="form-control d-inline p-0" name="pub" type="number" min="0"
-                      value="<?= check_value($mr['mr_pub']) ?>" placeholder="0">
+                      value="<?= check_value($mr['mr_pub'] ?? '') ?>" placeholder="0">
                   </div>
                 </div>
 
@@ -312,7 +312,7 @@ $result = $mysqli->query($sql);
                   <div>동영상</div>
                   <div class="my-1 mx-auto">
                     <input class="form-control d-inline p-0" name="video" type="number" min="0"
-                      value="<?= check_value($mr['mr_video']) ?>" placeholder="0">
+                      value="<?= check_value($mr['mr_video'] ?? '') ?>" placeholder="0">
                   </div>
                 </div>
 
@@ -320,7 +320,7 @@ $result = $mysqli->query($sql);
                   <div>재방문</div>
                   <div class="my-1 mx-auto">
                     <input class="form-control d-inline p-0" name="return_visit" type="number" min="0"
-                      value="<?= check_value($mr['mr_return']) ?>" placeholder="0">
+                      value="<?= check_value($mr['mr_return'] ?? '') ?>" placeholder="0">
                   </div>
                 </div>
               <?php endif; ?>
@@ -329,7 +329,7 @@ $result = $mysqli->query($sql);
                 <div>연구</div>
                 <div class="my-1 mx-auto">
                   <input class="form-control d-inline p-0" name="study" type="number" min="0"
-                    value="<?= check_value($mr['mr_study']) ?>" placeholder="0">
+                    value="<?= check_value($mr['mr_study'] ?? '') ?>" placeholder="0">
                 </div>
               </div>
 
