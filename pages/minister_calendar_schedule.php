@@ -57,7 +57,7 @@ $week_val = date('N', strtotime($s_date));
 // 지정된 날짜 내 봉사보고
 $mr_sql = "SELECT * FROM " . MINISTER_REPORT_TABLE . " WHERE mb_id = '{$mb_id}' AND mr_date = '{$s_date}'";
 $mr_result = $mysqli->query($mr_sql);
-$mr = $mr_result->fetch_assoc();
+$mr = $mr_result->fetch_assoc() ?: [];
 
 // 지정된 날짜 내 총 봉사보고
 $mrt_sql = "SELECT * FROM " . MINISTER_REPORT_TABLE . " WHERE mr_date >= '{$st_month}' AND mr_date <= '{$fi_month}' AND mb_id = '{$mb_id}'";
