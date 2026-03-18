@@ -2,16 +2,16 @@
 <?php include_once('config.php');?>
 
 <?php
-$m_name = xss_filter($_POST["m_name"]);
-$m_pw = xss_filter($_POST["m_pw"]);
+$m_name = xss_filter($_POST["m_name"] ?? '');
+$m_pw = xss_filter($_POST["m_pw"] ?? '');
 if(isset($_POST["m_logincheck"])){
 	$m_logincheck = xss_filter($_POST["m_logincheck"]);
 }else{
 	$m_logincheck = 'off';
 }
-$m_token = xss_filter($_POST["m_token"]);
+$m_token = xss_filter($_POST["m_token"] ?? '');
 
-if ($m_token != $_SESSION['m_token']){
+if ($m_token != ($_SESSION['m_token'] ?? '')){
 	echo "<SCRIPT LANGUAGE='JavaScript'>
 		alert('로그인 오류');
 		history.back();
