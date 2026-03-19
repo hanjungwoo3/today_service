@@ -1,104 +1,128 @@
 <?php include_once('../config.php'); ?>
 
 <?php
-//구역카드 요일별 구역타입 비율
+$week_categories = array();
+for ($w = 1; $w <= 7; $w++) {
+  $week_categories[] = "(SELECT count(DISTINCT tt_id) FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . TERRITORY_TABLE . " tt ON ms.ms_id = tt.ms_id WHERE ms.ma_id = '0' AND ms_week = '{$w}' AND mb_id = '0' AND tt_type = '편지') s{$w}";
+}
 $sql = "SELECT * FROM (SELECT
       (SELECT count(DISTINCT tt_id) FROM " . TERRITORY_TABLE . " WHERE tt_type = '편지') sum,
-      (SELECT count(DISTINCT tt_id) FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . TERRITORY_TABLE . " tt ON ms.ms_id = tt.ms_id WHERE ms.ma_id = '0' AND ms_week = '1' AND mb_id = '0' AND tt_type = '편지') s1,
-      (SELECT count(DISTINCT tt_id) FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . TERRITORY_TABLE . " tt ON ms.ms_id = tt.ms_id WHERE ms.ma_id = '0' AND ms_week = '2' AND mb_id = '0' AND tt_type = '편지') s2,
-      (SELECT count(DISTINCT tt_id) FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . TERRITORY_TABLE . " tt ON ms.ms_id = tt.ms_id WHERE ms.ma_id = '0' AND ms_week = '3' AND mb_id = '0' AND tt_type = '편지') s3,
-      (SELECT count(DISTINCT tt_id) FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . TERRITORY_TABLE . " tt ON ms.ms_id = tt.ms_id WHERE ms.ma_id = '0' AND ms_week = '4' AND mb_id = '0' AND tt_type = '편지') s4,
-      (SELECT count(DISTINCT tt_id) FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . TERRITORY_TABLE . " tt ON ms.ms_id = tt.ms_id WHERE ms.ma_id = '0' AND ms_week = '5' AND mb_id = '0' AND tt_type = '편지') s5,
-      (SELECT count(DISTINCT tt_id) FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . TERRITORY_TABLE . " tt ON ms.ms_id = tt.ms_id WHERE ms.ma_id = '0' AND ms_week = '6' AND mb_id = '0' AND tt_type = '편지') s6,
-      (SELECT count(DISTINCT tt_id) FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . TERRITORY_TABLE . " tt ON ms.ms_id = tt.ms_id WHERE ms.ma_id = '0' AND ms_week = '7' AND mb_id = '0' AND tt_type = '편지') s7,
+      " . implode(", ", $week_categories) . ",
       (SELECT count(DISTINCT tt_id) FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . TERRITORY_TABLE . " tt ON ms.ms_id = tt.ms_id WHERE ms.ma_id != '0' AND tt_type = '편지') s8,
-      (SELECT count(DISTINCT tt_id) FROM " . TERRITORY_TABLE . " WHERE ms_id = '0' AND mb_id = '0' AND tt_type = '편지') s9,
-      (SELECT count(DISTINCT tt_id) FROM " . TERRITORY_TABLE . " WHERE mb_id != '0' AND tt_type = '편지') s10) T;";
+      (SELECT count(DISTINCT tt_id) FROM " . TERRITORY_TABLE . " WHERE mb_id != '0' AND tt_type = '편지') s9,
+      (SELECT count(DISTINCT tt_id) FROM " . TERRITORY_TABLE . " WHERE tt_ms_all != '0' AND mb_id = '0' AND tt_type = '편지') s10,
+      (SELECT count(DISTINCT tt_id) FROM " . TERRITORY_TABLE . " WHERE ms_id = '0' AND tt_ms_all = '0' AND mb_id = '0' AND tt_type = '편지') s11) T;";
 $result = $mysqli->query($sql);
 $week_letter = $result->fetch_assoc();
 
-//구역카드 요일별 진행률 (1.미사용, 2.미완료, 3.완료)
-$week = array();
-$sql = "SELECT ms_week, tt_assigned_date, tt_end_date FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . TERRITORY_TABLE . " tt ON ms.ms_id = tt.ms_id WHERE ms.ma_id = '0' AND mb_id = '0' AND tt_type = '편지'";
+//편지구역 진행률 (1.진행전, 2.진행중, 3.완료)
+$lt_status_arr = array();
+$lt_sum = array();
+$sql = "SELECT tt_id, tt_status FROM " . TERRITORY_TABLE . " WHERE mb_id = '0' AND tt_type = '편지'";
+$result = $mysqli->query($sql);
+while ($row = $result->fetch_assoc()) {
+  $records = get_all_past_records('territory', $row['tt_id']);
+  $recent = !empty($records) ? $records[0] : array('visit' => '전체', 'progress' => 'incomplete');
+
+  $visit_mode = $recent['visit'];
+  $prog_status = $recent['progress'];
+
+  $status_key = 1;
+  if ($prog_status == 'completed')
+    $status_key = 3;
+  else if ($prog_status == 'in_progress')
+    $status_key = 2;
+
+  $group_key = $visit_mode;
+
+  if (isset($lt_status_arr[$group_key][0])) {
+    $lt_status_arr[$group_key][0]++;
+  } else {
+    $lt_status_arr[$group_key][0] = 1;
+  }
+  if (isset($lt_sum[0])) {
+    $lt_sum[0]++;
+  } else {
+    $lt_sum[0] = 1;
+  }
+
+  if (isset($lt_status_arr[$group_key][$status_key])) {
+    $lt_status_arr[$group_key][$status_key]++;
+  } else {
+    $lt_status_arr[$group_key][$status_key] = 1;
+  }
+  if (isset($lt_sum[$status_key])) {
+    $lt_sum[$status_key]++;
+  } else {
+    $lt_sum[$status_key] = 1;
+  }
+}
+
+//편지구역 요일별 진행률 (1.진행전, 2.진행중, 3.완료)
+$week_data = array();
+$sql = "SELECT tt_id, ms_week FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . TERRITORY_TABLE . " tt ON ms.ms_id = tt.ms_id WHERE ms.ma_id = '0' AND mb_id = '0' AND tt_type = '편지'";
 $result = $mysqli->query($sql);
 while ($we = $result->fetch_assoc()) {
-  if (isset($week[$we['ms_week']][0])) {
-    $week[$we['ms_week']][0]++;
-  } else {
-    $week[$we['ms_week']][0] = 1;
-  }
-  if (empty_date($we['tt_assigned_date'])) {
-    if (isset($week[$we['ms_week']][1])) {
-      $week[$we['ms_week']][1]++;
-    } else {
-      $week[$we['ms_week']][1] = 1;
-    }
-  } elseif (!empty_date($we['tt_end_date'])) {
-    if (isset($week[$we['ms_week']][3])) {
-      $week[$we['ms_week']][3]++;
-    } else {
-      $week[$we['ms_week']][3] = 1;
-    }
-  } else {
-    if (isset($week[$we['ms_week']][2])) {
-      $week[$we['ms_week']][2]++;
-    } else {
-      $week[$we['ms_week']][2] = 1;
-    }
-  }
+  $records = get_all_past_records('territory', $we['tt_id']);
+  $recent = !empty($records) ? $records[0] : array('visit' => '전체', 'progress' => 'incomplete');
+  $visit_mode = $recent['visit'];
+  $week_key = $we['ms_week'] . '|' . $visit_mode;
+
+  if (!isset($week_data[$week_key][0]))
+    $week_data[$week_key][0] = 0;
+  $week_data[$week_key][0]++;
+
+  $status_key = 1;
+  if ($recent['progress'] == 'completed')
+    $status_key = 3;
+  else if ($recent['progress'] == 'in_progress')
+    $status_key = 2;
+
+  if (!isset($week_data[$week_key][$status_key]))
+    $week_data[$week_key][$status_key] = 0;
+  $week_data[$week_key][$status_key]++;
 }
 
-//구역카드 모임별 진행률
-$meeting_array = array();
-$m_sql = "SELECT ms.ms_id as ms_id, tt_assigned_date, tt_end_date FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . TERRITORY_TABLE . " tt ON ms.ms_id = tt.ms_id WHERE ms.ma_id != '0' AND mb_id = '0' AND tt_type = '편지'";
+//편지구역 모임별 진행률
+$meeting_data_agg = array();
+$m_sql = "SELECT tt_id, ms.ms_id as ms_id FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . TERRITORY_TABLE . " tt ON ms.ms_id = tt.ms_id WHERE ms.ma_id != '0' AND mb_id = '0' AND tt_type = '편지'";
 $m_result = $mysqli->query($m_sql);
 while ($mow = $m_result->fetch_assoc()) {
-  if (isset($meeting_array[$mow['ms_id']][0])) {
-    $meeting_array[$mow['ms_id']][0]++;
-  } else {
-    $meeting_array[$mow['ms_id']][0] = 1;
-  }
-  if (empty_date($mow['tt_assigned_date'])) {
-    if (isset($meeting_array[$mow['ms_id']][1])) {
-      $meeting_array[$mow['ms_id']][1]++;
-    } else {
-      $meeting_array[$mow['ms_id']][1] = 1;
-    }
-  } elseif (!empty_date($mow['tt_assigned_date']) && empty_date($mow['tt_end_date'])) {
-    if (isset($meeting_array[$mow['ms_id']][2])) {
-      $meeting_array[$mow['ms_id']][2]++;
-    } else {
-      $meeting_array[$mow['ms_id']][2] = 1;
-    }
-  } elseif (!empty_date($mow['tt_end_date'])) {
-    if (isset($meeting_array[$mow['ms_id']][3])) {
-      $meeting_array[$mow['ms_id']][3]++;
-    } else {
-      $meeting_array[$mow['ms_id']][3] = 1;
-    }
-  }
+  $records = get_all_past_records('territory', $mow['tt_id']);
+  $recent = !empty($records) ? $records[0] : array('visit' => '전체', 'progress' => 'incomplete');
+  $visit_mode = $recent['visit'];
+  $meeting_key = $mow['ms_id'] . '|' . $visit_mode;
+
+  if (!isset($meeting_data_agg[$meeting_key][0]))
+    $meeting_data_agg[$meeting_key][0] = 0;
+  $meeting_data_agg[$meeting_key][0]++;
+
+  $status_key = 1;
+  if ($recent['progress'] == 'completed')
+    $status_key = 3;
+  else if ($recent['progress'] == 'in_progress')
+    $status_key = 2;
+
+  if (!isset($meeting_data_agg[$meeting_key][$status_key]))
+    $meeting_data_agg[$meeting_key][$status_key] = 0;
+  $meeting_data_agg[$meeting_key][$status_key]++;
 }
 
-foreach ($meeting_array as $ms_id => $letter_con) {
+foreach ($meeting_data_agg as $key => $letter_con) {
+  $key_arr = explode('|', $key);
+  $ms_id = $key_arr[0];
+  $visit_mode = $key_arr[1];
+
   $ms_sql = "SELECT * FROM " . MEETING_SCHEDULE_TABLE . " ms INNER JOIN " . MEETING_PLACE_TABLE . " mp ON ms.mp_id = mp.mp_id LEFT JOIN " . GROUP_TABLE . " g ON ms.g_id = g.g_id
              WHERE ms_id = '{$ms_id}' ORDER BY ms_week, ms_time, mp_name, g_name, ms_id ASC";
   $ms_result = $mysqli->query($ms_sql);
-  $ms = $ms_result->fetch_assoc();
+  $msw = $ms_result->fetch_assoc();
 
-  if (empty($letter_con[3]))
-    $letter_con[3] = 0;
-  if (empty($letter_con[2]))
-    $letter_con[2] = 0;
-  if (empty($letter_con[1]))
-    $letter_con[1] = 0;
-  if (empty($letter_con[0]))
-    $letter_con[0] = 0;
-
-  $tt_meeting[$ms['ms_week']][] = array(
-    'name' => '(' . get_week_text($ms['ms_week']) . ') ' . get_meeting_data_text($ms['ms_time'], $ms['g_name'], $ms['mp_name']),
-    's3' => $letter_con[3],
-    's2' => $letter_con[2],
-    's1' => $letter_con[1],
+  $tt_meeting[$msw['ms_week']][] = array(
+    'name' => '(' . get_week_text($msw['ms_week']) . ') ' . get_meeting_data_text($msw['ms_time'], $msw['g_name'], $msw['mp_name']) . ' [' . $visit_mode . ']',
+    's3' => !empty($letter_con[3]) ? $letter_con[3] : 0,
+    's2' => !empty($letter_con[2]) ? $letter_con[2] : 0,
+    's1' => !empty($letter_con[1]) ? $letter_con[1] : 0,
     's0' => $letter_con[0]
   );
 }
@@ -113,7 +137,7 @@ if (!empty($tt_meeting)) {
   }
 }
 
-if (empty($meeting_array))
+if (empty($meeting_data_agg))
   $ms_meeting[] = array('name' => '전체', 's3' => 0, 's2' => 0, 's1' => 0, 's0' => 0);
 ?>
 
@@ -134,12 +158,13 @@ if (empty($meeting_array))
       ['토', <?= $week_letter['s6'] ?>],
       ['일', <?= $week_letter['s7'] ?>],
       ['기타', <?= $week_letter['s8'] ?>],
-      ['개인', <?= $week_letter['s10'] ?>],
-      ['미배정', <?= $week_letter['s9'] ?>]
+      ['개인구역', <?= $week_letter['s9'] ?>],
+      ['전체', <?= $week_letter['s10'] ?>],
+      ['미분배', <?= $week_letter['s11'] ?>]
     ]);
 
     var options = {
-      colors: ["#8044d4", "#4465d4", "#4cbce4", "#42af47", "#FF9900", "#DC3912", "#8B0707", "#717171", "#000"],
+      colors: ["#8044d4", "#4465d4", "#4cbce4", "#42af47", "#FF9900", "#DC3912", "#8B0707", "#717171", "#000", "#555", "#999"],
       height: 300,
       legend: {
         textStyle: {
@@ -157,84 +182,132 @@ if (empty($meeting_array))
   }
 </script>
 
-<h5 class="border-bottom mt-4 mb-3 pb-2 clearfix"><span class="align-middle mt-2 d-inline-block">편지 구역 현황</span><small
-    class="mt-2 float-right">전체 구역 : <?= $week_letter['sum'] ?>개</small></h5>
+<h5 class="border-bottom mt-4 mb-3 pb-2 clearfix"><span class="align-middle mt-2 d-inline-block">편지 구역 현황
+  </span><small class="mt-2 float-right">전체 구역 : <?= $week_letter['sum'] ?>개</small></h5>
 
 <div id="week_telephone_chart"></div>
 
 <div class="row">
   <div class="col-lg-6">
-    <h5 class="border-bottom mt-4 mb-3 pb-2 clearfix"><span class="align-middle mt-2 d-inline-block">요일별 구역 진행률</span>
+    <h5 class="border-bottom mt-4 mb-3 pb-2 clearfix"><span class="align-middle mt-2 d-inline-block">편지 구역 진행률</span>
     </h5>
-
     <table class="table table-bordered mb-5">
-      <colgroup>
-        <col style="width:70px;">
-      </colgroup>
       <thead class="thead-light text-center">
         <tr>
           <th scope="col">구분</th>
           <th scope="col">완료</th>
-          <th scope="col">미완료</th>
-          <th scope="col">미사용</th>
+          <th scope="col">진행중</th>
+          <th scope="col">진행전</th>
         </tr>
       </thead>
       <tbody class="text-center">
-        <?php for ($k = 1; $k < 8; $k++): ?>
-          <?php $week_total_count = !empty($week[$k][0]) ? $week[$k][0] : 0; ?>
+        <tr>
+          <th scope="row" class="bg-light align-middle">
+            <div>전체</div>
+            <?php $lt_sum_total = !empty($lt_sum[0]) ? $lt_sum[0] : 0; ?>
+            <small class="text-muted">(<?= $lt_sum_total; ?>개)</small>
+          </th>
+          <?php for ($i = 3; $i > 0; $i--):
+            $count = !empty($lt_sum[$i]) ? $lt_sum[$i] : 0;
+            ?>
+            <td>
+              <div><?= $count; ?>개</div>
+              <small class="text-muted">(<?= get_percent($count, $lt_sum_total) . '%'; ?>)</small>
+            </td>
+          <?php endfor; ?>
+        </tr>
+        <?php foreach ($lt_status_arr as $key => $value):
+          $total_count = ($value[0]) ? $value[0] : 0; ?>
           <tr>
             <th scope="row" class="bg-light align-middle">
-              <div><?= get_week_text($k); ?></div>
+              <div>편지구역 [<?= $key ?>]</div>
+              <small class="text-muted">(<?= $total_count; ?>개)</small>
+            </th>
+            <?php for ($i = 3; $i > 0; $i--):
+              $count = !empty($value[$i]) ? $value[$i] : 0; ?>
+              <td>
+                <div><?= $count; ?>개</div>
+                <small class="text-muted">(<?= get_percent($count, $total_count) . '%'; ?>)</small>
+              </td>
+            <?php endfor; ?>
+          </tr>
+        <?php endforeach ?>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-lg-6">
+    <h5 class="border-bottom mt-4 mb-3 pb-2 clearfix"><span class="align-middle mt-2 d-inline-block">요일별 구역 진행률</span>
+    </h5>
+
+    <table class="table table-bordered mb-5">
+      <thead class="thead-light text-center">
+        <tr>
+          <th scope="col">구분</th>
+          <th scope="col">완료</th>
+          <th scope="col">진행중</th>
+          <th scope="col">진행전</th>
+        </tr>
+      </thead>
+      <tbody class="text-center">
+        <?php
+        $week_keys = array_keys($week_data);
+        sort($week_keys);
+        foreach ($week_keys as $wk):
+          $wk_arr = explode('|', $wk);
+          $wk_idx = $wk_arr[0];
+          $wk_mode = $wk_arr[1];
+          $wk_val = $week_data[$wk];
+          $week_total_count = !empty($wk_val[0]) ? $wk_val[0] : 0;
+          ?>
+          <tr>
+            <th scope="row" class="bg-light align-middle">
+              <div style="font-size: 0.9rem;"><?= get_week_text($wk_idx); ?> [<?= $wk_mode ?>]</div>
               <small class="text-muted">(<?= $week_total_count; ?>개)</small>
             </th>
-            <?php for ($i = 3; $i > 0; $i--): ?>
-              <?php $week_count = !empty($week[$k][$i]) ? $week[$k][$i] : 0; ?>
+            <?php for ($i = 3; $i > 0; $i--):
+              $week_count = !empty($wk_val[$i]) ? $wk_val[$i] : 0;
+              ?>
               <td>
                 <div><?= $week_count ?>개</div>
                 <small class="text-muted">(<?= get_percent($week_count, $week_total_count) . '%'; ?>)</small>
               </td>
             <?php endfor; ?>
           </tr>
-        <?php endfor; ?>
+        <?php endforeach; ?>
       </tbody>
     </table>
   </div>
-  <div class="col-lg-6">
+  <div class="col-12">
     <h5 class="border-bottom mt-4 mb-3 pb-2 clearfix"><span class="align-middle mt-2 d-inline-block">기타 구역 진행률</span>
     </h5>
 
     <table class="table table-bordered mb-5">
-      <colgroup>
-        <col style="width:33.33%" span="3">
-      </colgroup>
       <thead class="thead-light text-center">
         <tr>
+          <th scope="col">이름</th>
           <th scope="col">완료</th>
-          <th scope="col">미완료</th>
-          <th scope="col">미사용</th>
+          <th scope="col">진행중</th>
+          <th scope="col">진행전</th>
         </tr>
       </thead>
       <tbody class="text-center">
         <?php foreach ($ms_meeting as $key => $value): ?>
           <tr>
-            <th class="bg-light text-left p-1" colspan="4">
+            <th class="bg-light text-left p-1">
               <div><?= $value['name']; ?><small class="text-muted ml-2">(<?= $value['s0']; ?>개)</small></div>
             </th>
-          </tr>
-          <tr>
-          </tr>
-          <td class="align-middle">
-            <div><?= $value['s3']; ?>개</div>
-            <small class="text-muted">(<?= get_percent($value['s3'], $value['s0']) . '%'; ?>)</small>
-          </td>
-          <td class="align-middle">
-            <div><?= $value['s2']; ?>개</div>
-            <small class="text-muted">(<?= get_percent($value['s2'], $value['s0']) . '%'; ?>)</small>
-          </td>
-          <td class="align-middle">
-            <div><?= $value['s1']; ?>개</div>
-            <small class="text-muted">(<?= get_percent($value['s1'], $value['s0']) . '%'; ?>)</small>
-          </td>
+            <td class="align-middle">
+              <div><?= $value['s3']; ?>개</div>
+              <small class="text-muted">(<?= get_percent($value['s3'], $value['s0']) . '%'; ?>)</small>
+            </td>
+            <td class="align-middle">
+              <div><?= $value['s2']; ?>개</div>
+              <small class="text-muted">(<?= get_percent($value['s2'], $value['s0']) . '%'; ?>)</small>
+            </td>
+            <td class="align-middle">
+              <div><?= $value['s1']; ?>개</div>
+              <small class="text-muted">(<?= get_percent($value['s1'], $value['s0']) . '%'; ?>)</small>
+            </td>
           </tr>
         <?php endforeach; ?>
       </tbody>

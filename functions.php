@@ -1312,7 +1312,19 @@ function get_meeting_id($meeting_date, $ms_id)
 		$ms_limit = (isset($ms['ms_limit']) && $ms['ms_limit'] !== '') ? $ms['ms_limit'] : -1;
 		$sql = "INSERT INTO " . MEETING_TABLE . " (ms_limit, mb_id, m_cancle, m_cancle_reason, m_contents, m_guide, m_date, ms_id, ms_time, ms_week, ms_type, ms_guide, ms_guide2, g_id, mp_id, mp_name, mp_address, m_start_time, m_finish_time)
         VALUES ('{$ms_limit}', '', 0, '', '', '', '{$meeting_date}', '{$ms['ms_id']}', '{$ms['ms_time']}', '{$ms['ms_week']}', '{$ms['ms_type']}', '{$ms['ms_guide']}', '{$ms['ms_guide2']}', '{$ms['g_id']}', '{$mp['mp_id']}', '{$mp['mp_name']}', '{$mp['mp_address']}', '{$ms_start_time}', '{$ms_finish_time}')";
-		$mysqli->query($sql);
+		
+		try {
+			$result = $mysqli->query($sql);
+			// PHP 5.5 등 예외(Exception)를 자동으로 던지지 않는 환경 호환
+			if (!$result) {
+				throw new Exception($mysqli->error);
+			}
+		} catch (Exception $e) {
+			// update.php DB 업데이트가 수행되지 않아 ms_limit 컬럼이 없는 구형 서버(또는 PHP 8.2+의 엄격한 모드) 대응용 호환 쿼리
+			$sql_fallback = "INSERT INTO " . MEETING_TABLE . " (mb_id, m_cancle, m_cancle_reason, m_contents, m_guide, m_date, ms_id, ms_time, ms_week, ms_type, ms_guide, ms_guide2, g_id, mp_id, mp_name, mp_address, m_start_time, m_finish_time)
+            VALUES ('', 0, '', '', '', '', '{$meeting_date}', '{$ms['ms_id']}', '{$ms['ms_time']}', '{$ms['ms_week']}', '{$ms['ms_type']}', '{$ms['ms_guide']}', '{$ms['ms_guide2']}', '{$ms['g_id']}', '{$mp['mp_id']}', '{$mp['mp_name']}', '{$mp['mp_address']}', '{$ms_start_time}', '{$ms_finish_time}')";
+			$mysqli->query($sql_fallback);
+		}
 
 		return $mysqli->insert_id;
 	}

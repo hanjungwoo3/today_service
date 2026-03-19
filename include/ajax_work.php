@@ -15,27 +15,35 @@ if ($work) {
       $row = $result->fetch_assoc();
       $tt_id = $row['tt_id'];
 
-      $sql = "SELECT tt_start_date, tt_assigned_date, mb_id FROM " . TERRITORY_TABLE . " WHERE tt_id = {$tt_id}";
+      // 필요한 구역 정보 조회
+      $sql = "SELECT tt_start_date, tt_assigned_date, mb_id, tt_mb_date FROM " . TERRITORY_TABLE . " WHERE tt_id = {$tt_id}";
       $result = $mysqli->query($sql);
-      $row = $result->fetch_assoc();
-      $tt_start_date = $row['tt_start_date'];
-      $tt_assigned_date = $row['tt_assigned_date'];
-      $mb_id = $row['mb_id'];
+      $t_row = $result->fetch_assoc();
+      $tt_start_date = $t_row['tt_start_date'];
+      $tt_assigned_date = $t_row['tt_assigned_date'];
+      $mb_id = $t_row['mb_id'];
 
       // 방문 체크 업데이트
       $sql = "UPDATE " . HOUSE_TABLE . " SET h_visit = '{$visit}' WHERE h_id = {$pid}";
       $mysqli->query($sql);
 
-      // 배정받은 날짜가 있거나 나의 개인구역일때만 시작날짜/마친날짜 업데이트
-      if (($tt_assigned_date && !empty_date($tt_assigned_date)) || $mb_id == mb_id()) {
+      // 개인구역 정보 동기화 로직 (시작 전/후 관계없이 배정정보가 없으면 보강)
+      $updateData = array();
+      if ($mb_id && (empty($tt_assigned_date) || empty_date($tt_assigned_date))) {
+        $updateData['tt_assigned'] = $mb_id;
+        $updateData['tt_assigned_date'] = $t_row['tt_mb_date'] && !empty_date($t_row['tt_mb_date']) ? $t_row['tt_mb_date'] : date("Y-m-d");
+      }
 
+      // 배정받은 날짜가 있거나 나의 개인구역일때만 시작날짜/마친날짜 업데이트
+      if (($tt_assigned_date && !empty_date($tt_assigned_date)) || $mb_id || !empty($updateData['tt_assigned_date'])) {
         // 시작날짜가 없다면 시작날짜를 오늘 날짜로
         if (empty($tt_start_date) || empty_date($tt_start_date)) {
-          $tt_start_date_value = date("Y-m-d");
-          $updateData = array(
-            'tt_start_date' => $tt_start_date_value,
-          );
-          $updateId = $territory->update($tt_id, $updateData);
+          $updateData['tt_start_date'] = date("Y-m-d");
+        }
+
+        // 업데이트 실행 (배정된 경우에만 실행되도록 if문 안으로 이동 가능하지만, 코드 무결성을 위해 기존 위치 유지하되 end_date를 이 안으로 포함)
+        if (!empty($updateData)) {
+          $territory->update($tt_id, $updateData);
         }
 
         // 진행률이 90% 이상이면 완료날짜 표시
@@ -50,7 +58,6 @@ if ($work) {
           );
           $updateId = $territory->update($tt_id, $updateData);
         }
-
       }
 
     } elseif ($table == 'telephone') {
@@ -60,27 +67,35 @@ if ($work) {
       $row = $result->fetch_assoc();
       $tp_id = $row['tp_id'];
 
-      $sql = "SELECT tp_start_date, tp_assigned_date, mb_id FROM " . TELEPHONE_TABLE . " WHERE tp_id = {$tp_id}";
+      // 필요한 구역 정보 조회
+      $sql = "SELECT tp_start_date, tp_assigned_date, mb_id, tp_mb_date FROM " . TELEPHONE_TABLE . " WHERE tp_id = {$tp_id}";
       $result = $mysqli->query($sql);
-      $row = $result->fetch_assoc();
-      $tp_start_date = $row['tp_start_date'];
-      $tp_assigned_date = $row['tp_assigned_date'];
-      $mb_id = $row['mb_id'];
+      $t_row = $result->fetch_assoc();
+      $tp_start_date = $t_row['tp_start_date'];
+      $tp_assigned_date = $t_row['tp_assigned_date'];
+      $mb_id = $t_row['mb_id'];
 
       // 방문 체크 업데이트
       $sql = "UPDATE " . TELEPHONE_HOUSE_TABLE . " SET tph_visit = '{$visit}' WHERE tph_id = {$pid}";
       $mysqli->query($sql);
 
-      // 배정받은 날짜가 있거나 나의 개인구역일때만 시작날짜/마친날짜 업데이트
-      if (($tp_assigned_date && !empty_date($tp_assigned_date)) || $mb_id == mb_id()) {
+      // 개인구역 정보 동기화 로직 (시작 전/후 관계없이 배정정보가 없으면 보강)
+      $updateData = array();
+      if ($mb_id && (empty($tp_assigned_date) || empty_date($tp_assigned_date))) {
+        $updateData['tp_assigned'] = $mb_id;
+        $updateData['tp_assigned_date'] = $t_row['tp_mb_date'] && !empty_date($t_row['tp_mb_date']) ? $t_row['tp_mb_date'] : date("Y-m-d");
+      }
 
+      // 배정받은 날짜가 있거나 나의 개인구역일때만 시작날짜/마친날짜 업데이트
+      if (($tp_assigned_date && !empty_date($tp_assigned_date)) || $mb_id || !empty($updateData['tp_assigned_date'])) {
         // 시작날짜가 없다면 시작날짜를 오늘 날짜로
         if (empty($tp_start_date) || empty_date($tp_start_date)) {
-          $tp_start_date_value = date("Y-m-d");
-          $updateData = array(
-            'tp_start_date' => $tp_start_date_value,
-          );
-          $updateId = $telephone->update($tp_id, $updateData);
+          $updateData['tp_start_date'] = date("Y-m-d");
+        }
+
+        // 업데이트 실행
+        if (!empty($updateData)) {
+          $telephone->update($tp_id, $updateData);
         }
 
         // 진행률이 90% 이상이면 완료날짜 표시
@@ -95,7 +110,6 @@ if ($work) {
           );
           $updateId = $telephone->update($tp_id, $updateData);
         }
-
       }
 
     }
@@ -226,17 +240,23 @@ if ($work) {
     if (!empty($table) && !empty($id)) {
       if ($table == 'territory') {
 
-        $sql = "SELECT tt_start_date FROM " . TERRITORY_TABLE . " WHERE tt_id = {$id}";
+        $sql = "SELECT tt_start_date, tt_assigned_date, mb_id, tt_mb_date FROM " . TERRITORY_TABLE . " WHERE tt_id = {$id}";
         $result = $mysqli->query($sql);
         $row = $result->fetch_assoc();
         $tt_start_date = $row['tt_start_date'];
 
         // 시작날짜가 없다면 시작날짜를 오늘 날짜로
         if (empty($tt_start_date) || empty_date($tt_start_date)) {
-          $tt_start_date_value = date("Y-m-d");
           $updateData = array(
-            'tt_start_date' => $tt_start_date_value,
+            'tt_start_date' => date("Y-m-d"),
           );
+
+          // 개인구역 정보 동기화 로직 추가
+          if ($row['mb_id'] && (empty($row['tt_assigned_date']) || empty_date($row['tt_assigned_date']))) {
+            $updateData['tt_assigned'] = $row['mb_id'];
+            $updateData['tt_assigned_date'] = $row['tt_mb_date'] && !empty_date($row['tt_mb_date']) ? $row['tt_mb_date'] : date("Y-m-d");
+          }
+
           $updateId = $territory->update($id, $updateData);
           echo json_encode(array('success' => true, 'updateId' => $updateId));
         } else {
@@ -245,17 +265,23 @@ if ($work) {
 
       } elseif ($table == 'telephone') {
 
-        $sql = "SELECT tp_start_date FROM " . TELEPHONE_TABLE . " WHERE tp_id = {$id}";
+        $sql = "SELECT tp_start_date, tp_assigned_date, mb_id, tp_mb_date FROM " . TELEPHONE_TABLE . " WHERE tp_id = {$id}";
         $result = $mysqli->query($sql);
         $row = $result->fetch_assoc();
         $tp_start_date = $row['tp_start_date'];
 
         // 시작날짜가 없다면 시작날짜를 오늘 날짜로
         if (empty($tp_start_date) || empty_date($tp_start_date)) {
-          $tp_start_date_value = date("Y-m-d");
           $updateData = array(
-            'tp_start_date' => $tp_start_date_value,
+            'tp_start_date' => date("Y-m-d"),
           );
+
+          // 개인구역 정보 동기화 로직 추가
+          if ($row['mb_id'] && (empty($row['tp_assigned_date']) || empty_date($row['tp_assigned_date']))) {
+            $updateData['tp_assigned'] = $row['mb_id'];
+            $updateData['tp_assigned_date'] = $row['tp_mb_date'] && !empty_date($row['tp_mb_date']) ? $row['tp_mb_date'] : date("Y-m-d");
+          }
+
           $updateId = $telephone->update($id, $updateData);
           echo json_encode(array('success' => true, 'updateId' => $updateId));
         } else {

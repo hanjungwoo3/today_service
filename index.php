@@ -36,7 +36,8 @@ $cancle = $mysqli->query($cancle_sql);
   <h1 class="text-white mb-0 navbar-brand">오늘의 봉사 <span id="today-date-display"></span></h1>
   <p class="text-white today-info mb-0 ml-md-auto">
     <?php if (!is_moveout($mb_id)): ?>
-      <a onclick="open_meeting_view('<?= $today ?>')" class="btn btn-outline-light btn-sm"><i class="bi bi-info-circle"></i>
+      <a onclick="open_meeting_view('<?= $today ?>')" class="btn btn-outline-light btn-sm"><i
+          class="bi bi-info-circle"></i>
         모임정보</a>
     <?php endif; ?>
   </p>

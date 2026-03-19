@@ -7,6 +7,7 @@ $sql = "SELECT * FROM " . TELEPHONE_TABLE . " WHERE tp_id = {$tp_id}";
 $result = $mysqli->query($sql);
 $row = $result->fetch_assoc();
 
+$minister = '';
 if (!empty_date($row['tp_assigned_date']) || $row['mb_id']) {
   if ($row['tp_assigned']) {
     $assigned_group_arr = get_assigned_group_name($row['tp_assigned'], $row['tp_assigned_group']);
@@ -15,6 +16,9 @@ if (!empty_date($row['tp_assigned_date']) || $row['mb_id']) {
   if ($row['mb_id'])
     $minister = get_member_name($row['mb_id']);
 }
+
+$update_page = isset($update_page) ? $update_page : '';
+$update_wrap_id = isset($update_wrap_id) ? $update_wrap_id : '';
 ?>
 
 <div class="telephone-view" tp_id="<?= $tp_id ?>" update_page="<?= $update_page ?>" update_wrap_id="<?= $update_wrap_id ?>">

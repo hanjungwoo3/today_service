@@ -53,17 +53,17 @@ class Core
     {
         $sql = "DESCRIBE $tableName";
         $result = $this->db->query($sql);
-    
+
         if (!$result) {
             throw new \Exception('Failed to fetch table columns: ' . $this->db->error);
         }
-    
+
         // 컬럼 이름을 배열로 반환
         $columns = [];
         while ($row = $result->fetch_assoc()) {
             $columns[] = $row['Field']; // 컬럼 이름은 'Field' 키로 반환됩니다.
         }
-    
+
         return $columns;
     }
 
@@ -114,7 +114,7 @@ class Core
             if ($column === $autoIncrementColumn) {
                 continue; // 자동 증가 컬럼 제외
             }
-        
+
             if (array_key_exists($column, $data) && $data[$column] !== '') {
                 $filteredData[$column] = $data[$column]; // 전달된 값 사용
             } else {
@@ -135,20 +135,20 @@ class Core
                 $values[] = $value;
             }
         }
-        
+
         $keysString = implode(',', $keys);
         $placeholdersString = implode(',', $placeholders);
-        $sql = "INSERT INTO ".$tableName." ($keysString) VALUES ($placeholdersString)";
+        $sql = "INSERT INTO " . $tableName . " ($keysString) VALUES ($placeholdersString)";
         $stmt = $this->db->prepare($sql);
-        
+
         if (!$stmt) {
             throw new \Exception('Failed to prepare statement: ' . $this->db->error);
         }
-        
+
         $types = str_repeat('s', count($values));
         $bindParams = array_merge([$types], $values);
         call_user_func_array([$stmt, 'bind_param'], $this->refValues($bindParams));
-        
+
         if (!$stmt->execute()) {
             throw new \Exception('SQL Error: ' . $stmt->error . ' | Query: ' . $sql);
         }
@@ -220,7 +220,7 @@ class Core
         if (empty($filteredData)) {
             throw new \InvalidArgumentException('No valid columns provided for update');
         }
-        
+
         // 필드와 값 바인딩 준비
         $fields = [];
         $values = [];
@@ -233,7 +233,7 @@ class Core
         $setClause = implode(', ', $fields);
 
         // UPDATE 쿼리 생성
-        $sql = "UPDATE " . $tableName . " SET $setClause, `update_datetime` = NOW() WHERE `".$autoIncrementColumn."` = ?";
+        $sql = "UPDATE " . $tableName . " SET $setClause, `update_datetime` = NOW() WHERE `" . $autoIncrementColumn . "` = ?";
 
         // Prepared Statement 준비
         $stmt = $this->db->prepare($sql);
@@ -258,16 +258,18 @@ class Core
         }
 
         // 성공적으로 수정되었는지 확인
-        if ($stmt->affected_rows > 0) {
-            $successId = $id; // 수정 성공 시 ID 저장
+        // MySQL은 값이 동일할 경우 affected_rows = 0을 반환하므로,
+        // affected_rows >= 0 이면 쿼리 실행 자체는 성공으로 처리
+        if ($stmt->affected_rows >= 0) {
+            $successId = $id; // 수정 성공 (변경 없어도 성공으로 간주)
         } else {
-            $successId = 0; // 수정되지 않은 경우 0 반환
+            $successId = 0; // 쿼리 실행 자체 실패
         }
 
         $stmt->close();
 
         if ($successId === 0) {
-            throw new \Exception('No rows affected. Update might have failed or no changes were made.');
+            throw new \Exception('Update query failed.');
         }
 
         return $successId;
@@ -302,7 +304,7 @@ class Core
         }
 
         // DELETE 쿼리 생성
-        $sql = "DELETE FROM ".$tableName." WHERE ".$autoIncrementColumn." = ?";
+        $sql = "DELETE FROM " . $tableName . " WHERE " . $autoIncrementColumn . " = ?";
 
         // Prepared Statement 준비
         $stmt = $this->db->prepare($sql);

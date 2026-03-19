@@ -1612,14 +1612,20 @@ $date_parts = explode("-", $date);
         if (territory.m_id == this.m_id) return false;
         // 편지 구역은 제외 (편지 탭에서 처리)
         if (territory.type == '편지') return false;
+        // 총 세대수가 0 이하인 경우 제외
+        if (territory.total <= 0) return false;
 
         // 부재자 방문 사용 여부에 따른 필터링
         if (this.absence_use == 'use') {
-          // 부재자 방문 사용 시: 부재 완료인 구역은 배정 불가
-          // if (territory.current_status == '1' && territory.progress_status == 'completed') return false;
+          // 부재자 방문 사용 시: 전체 집에서 만남 처리된 집을 뺀 나머지가 0개인 구역은 배정 불가
+          if (territory.total - territory.visit <= 0) {
+            return false;
+          }
         } else {
-          // 부재자 방문 미사용 시: 전체 완료인 구역, 부재 구역은 배정 불가
-          if (territory.progress_status == 'completed' || territory.current_status == '1') return false;
+          // 부재자 방문 미사용 시: 전체 완료인 구역, 부재 구역 또는 모든 세대가 방문 처리된 경우 배정 불가
+          if (territory.progress_status == 'completed' || territory.current_status == '1' || (territory.total - (territory.visit + territory.absence) <= 0)) {
+            return false;
+          }
         }
 
         return true;
@@ -1627,14 +1633,20 @@ $date_parts = explode("-", $date);
       isTelephoneAssignable(telephone) {
         // 이미 배정된 전화 구역은 제외
         if (telephone.m_id == this.m_id) return false;
+        // 총 세대수가 0 이하인 경우 제외
+        if (telephone.total <= 0) return false;
 
         // 부재자 방문 사용 여부에 따른 필터링
         if (this.absence_use == 'use') {
-          // 부재자 방문 사용 시: 부재 완료인 구역은 배정 불가
-          if (telephone.current_status == '1' && telephone.progress_status == 'completed') return false;
+          // 부재자 방문 사용 시: 전체 집에서 만남 처리된 집을 뺀 나머지가 0개인 구역은 배정 불가
+          if (telephone.total - telephone.visit <= 0) {
+            return false;
+          }
         } else {
-          // 부재자 방문 미사용 시: 전체 완료인 구역, 부재 구역은 배정 불가
-          if (telephone.progress_status == 'completed' || telephone.current_status == '1') return false;
+          // 부재자 방문 미사용 시: 전체 완료인 구역, 부재 구역 또는 모든 세대가 방문 처리된 경우 배정 불가
+          if (telephone.progress_status == 'completed' || telephone.current_status == '1' || (telephone.total - (telephone.visit + telephone.absence) <= 0)) {
+            return false;
+          }
         }
 
         return true;
@@ -1644,14 +1656,20 @@ $date_parts = explode("-", $date);
         if (territory.m_id == this.m_id) return false;
         // 편지 구역만 포함
         if (territory.type != '편지') return false;
+        // 총 세대수가 0 이하인 경우 제외
+        if (territory.total <= 0) return false;
 
         // 부재자 방문 사용 여부에 따른 필터링
         if (this.absence_use == 'use') {
-          // 부재자 방문 사용 시: 부재 완료인 구역은 배정 불가
-          if (territory.current_status == '1' && territory.progress_status == 'completed') return false;
+          // 부재자 방문 사용 시: 전체 집에서 만남 처리된 집을 뺀 나머지가 0개인 구역은 배정 불가
+          if (territory.total - territory.visit <= 0) {
+            return false;
+          }
         } else {
-          // 부재자 방문 미사용 시: 전체 완료인 구역, 부재 구역은 배정 불가
-          if (territory.progress_status == 'completed' || territory.current_status == '1') return false;
+          // 부재자 방문 미사용 시: 전체 완료인 구역, 부재 구역 또는 모든 세대가 방문 처리된 경우 배정 불가
+          if (territory.progress_status == 'completed' || territory.current_status == '1' || (territory.total - (territory.visit + territory.absence) <= 0)) {
+            return false;
+          }
         }
 
         return true;

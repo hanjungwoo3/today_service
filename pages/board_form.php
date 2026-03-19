@@ -34,7 +34,7 @@ if(!empty($b_id)){
     <div class="col-8 col-md-10">
       <select class="form-control" id="b_notice" name="notice">
         <option value=''>일반</option>
-        <option value='1' <?=($row['b_notice'] && $row['b_notice'] == 1)?'selected="selected"':'';?>>중요</option>
+        <option value='1' <?=(isset($row['b_notice']) && $row['b_notice'] == 1)?'selected="selected"':'';?>>중요</option>
       </select>
     </div>
   </div>

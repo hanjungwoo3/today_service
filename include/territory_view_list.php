@@ -13,6 +13,7 @@ if ($tt_id):
   $is_absence_status = strpos($tt_status_row['tt_status'], 'absence') !== false;
 
   $compare_address = '';
+  $new_compare_address = '';
   $sql = "SELECT * FROM " . HOUSE_TABLE . " WHERE tt_id = {$tt_id} order by h_order";
   $result = $mysqli->query($sql);
   while ($r = $result->fetch_assoc()):
@@ -38,7 +39,7 @@ if ($tt_id):
           style="word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; max-width: 0;">
           <div style="padding-right: 5px;">
             <?= $r['h_address1'] ?>       <?= $r['h_address2'] ?>       <?php if ($r['h_address3'])
-                            echo '(' . $r['h_address3'] . ')'; ?>
+                                echo '(' . $r['h_address3'] . ')'; ?>
           </div>
         </td>
       <?php endif; ?>
@@ -53,10 +54,11 @@ if ($tt_id):
         <td rowspan="2" class="text-center" style="vertical-align: middle; min-width: 45px; width: 45px; position: relative;">
           <label class="visit-check-label <?= ($is_absence_status && $r['h_visit_old'] == 'Y') ? 'disabled' : ''; ?>"
             <?= ($is_absence_status && $r['h_visit_old'] == 'Y') ? 'title="이미 방문 완료된 세대입니다"' : ''; ?>>
-            <input type="checkbox" class="visit-check" name="h_visit" value="Y"
-              <?= ($r['h_visit'] == 'Y') ? 'checked="checked"' : ''; ?>       <?= ($is_absence_status && $r['h_visit_old'] == 'Y') ? 'disabled="disabled"' : ''; ?>
-              onclick="<?= ($is_absence_status && $r['h_visit_old'] == 'Y') ? 'return false;' : 'visit_check(\'territory\',' . $r['h_id'] . ',this);' ?>">
-            <span
+            <input type="checkbox" class="visit-check" name="h_visit" value="Y" <?php
+            echo ($r['h_visit'] == 'Y') ? 'checked="checked" ' : '';
+            echo ($is_absence_status && $r['h_visit_old'] == 'Y') ? 'disabled="disabled" ' : '';
+            echo 'onclick="' . (($is_absence_status && $r['h_visit_old'] == 'Y') ? 'return false;' : "visit_check('territory'," . $r['h_id'] . ",this);") . '"';
+            ?>> <span
               class="visit-check-mark <?= $tt_type == '편지' ? 'letter' : '' ?> <?= ($is_absence_status && $r['h_visit_old'] == 'Y') ? 'disabled' : ''; ?>"></span>
           </label>
         </td>
@@ -64,15 +66,19 @@ if ($tt_id):
           <td rowspan="2" class="text-center" style="vertical-align: middle; min-width: 45px; width: 45px; position: relative;">
             <label class="visit-check-label <?= ($is_absence_status && $r['h_visit_old'] == 'Y') ? 'disabled' : ''; ?>"
               <?= ($is_absence_status && $r['h_visit_old'] == 'Y') ? 'title="이미 방문 완료된 세대입니다"' : ''; ?>>
-              <input type="checkbox" class="visit-check" name="h_visit" value="N"
-                <?= ($r['h_visit'] == 'N') ? 'checked="checked"' : ''; ?>         <?= ($is_absence_status && $r['h_visit_old'] == 'Y') ? 'disabled="disabled"' : ''; ?>
-                onclick="<?= ($is_absence_status && $r['h_visit_old'] == 'Y') ? 'return false;' : 'visit_check(\'territory\',' . $r['h_id'] . ',this);' ?>">
-              <span class="visit-check-mark <?= ($is_absence_status && $r['h_visit_old'] == 'Y') ? 'disabled' : ''; ?>"></span>
+              <input type="checkbox" class="visit-check" name="h_visit" value="N" <?php
+              echo ($r['h_visit'] == 'N') ? 'checked="checked" ' : '';
+              echo ($is_absence_status && $r['h_visit_old'] == 'Y') ? 'disabled="disabled" ' : '';
+              echo 'onclick="' . (($is_absence_status && $r['h_visit_old'] == 'Y') ? 'return false;' : "visit_check('territory'," . $r['h_id'] . ",this);") . '"';
+              ?>> <span
+                class="visit-check-mark <?= ($is_absence_status && $r['h_visit_old'] == 'Y') ? 'disabled' : ''; ?>"></span>
             </label>
           </td>
         <?php endif; ?>
       <?php endif; ?>
-      <td style="text-align:center; vertical-align: middle; min-width: 60px; width: 60px; position: relative; padding-right: 15px;" rowspan="2">
+      <td
+        style="text-align:center; vertical-align: middle; min-width: 60px; width: 60px; position: relative; padding-right: 15px;"
+        rowspan="2">
         <?php if ($condition): ?>
           <button class="btn btn-outline-info btn-sm text-center condition-btn-margin"
             style="width: 34px; height: 34px; padding: 0; line-height: 32px;"

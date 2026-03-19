@@ -57,7 +57,15 @@ $week_val = date('N', strtotime($s_date));
 // 지정된 날짜 내 봉사보고
 $mr_sql = "SELECT * FROM " . MINISTER_REPORT_TABLE . " WHERE mb_id = '{$mb_id}' AND mr_date = '{$s_date}'";
 $mr_result = $mysqli->query($mr_sql);
-$mr = $mr_result->fetch_assoc();
+$mr_tmp = $mr_result->fetch_assoc();
+$mr = $mr_tmp ? $mr_tmp : array(
+  'mr_hour' => '',
+  'mr_min' => '',
+  'mr_pub' => '',
+  'mr_video' => '',
+  'mr_return' => '',
+  'mr_study' => ''
+);
 
 // 지정된 날짜 내 총 봉사보고
 $mrt_sql = "SELECT * FROM " . MINISTER_REPORT_TABLE . " WHERE mr_date >= '{$st_month}' AND mr_date <= '{$fi_month}' AND mb_id = '{$mb_id}'";
@@ -250,8 +258,10 @@ $result = $mysqli->query($sql);
           <div class="mt-n1">
             <small class="align-middle"><?= $row['mp_name'] ?></small>
           </div>
-          <div class="text-secondary"><small><?= $count; ?><?php echo !empty($attend_limit) ? '/' . $attend_limit . ' ' : ''; ?>명
-              참여</small></div>
+          <div class="text-secondary">
+            <small><?= $count; ?><?php echo !empty($attend_limit) ? '/' . $attend_limit . ' ' : ''; ?>명
+              참여</small>
+          </div>
         </div>
         <div class="align-self-center flex-shrink-0">
           <?php
@@ -268,7 +278,7 @@ $result = $mysqli->query($sql);
                   onclick="minister_work('support',<?= $row['ms_id'] ?>, '<?= date('Y-m-d', strtotime($s_date)) ?>',this);">지원</button>
               <?php endif;
             endif; ?>
-          <?php
+            <?php
           endif;
           ?>
         </div>

@@ -63,8 +63,8 @@ if ($row['tt_type'] == '아파트') {
 }
 ?>
 
-<div class="territory-view" tt_id="<?= $tt_id ?>" update_page="<?= $update_page ?>"
-  update_wrap_id="<?= $update_wrap_id ?>">
+<div class="territory-view" tt_id="<?= $tt_id ?>" update_page="<?= isset($update_page) ? $update_page : '' ?>"
+  update_wrap_id="<?= isset($update_wrap_id) ? $update_wrap_id : '' ?>">
   <style>
     /* 가로 스크롤 방지 */
     .territory-view-body {

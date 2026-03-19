@@ -1,7 +1,8 @@
 <?php include_once('../config.php'); ?>
 
 <?php
-if ($tp_id) {
+$tp_id = isset($_REQUEST['tp_id']) ? (int)$_REQUEST['tp_id'] : (isset($tp_id) ? (int)$tp_id : 0);
+if ($tp_id > 0) {
 
   // tp_status 정보 가져오기
   $tp_status_sql = "SELECT tp_status FROM " . TELEPHONE_TABLE . " WHERE tp_id = {$tp_id}";

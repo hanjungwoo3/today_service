@@ -3,6 +3,9 @@
 
 <?php
 $c_territory_type = unserialize(TERRITORY_TYPE);
+$tt_id = isset($_REQUEST['tt_id']) ? (int) $_REQUEST['tt_id'] : (isset($tt_id) ? (int) $tt_id : 0);
+$update_page = isset($_REQUEST['update_page']) ? $_REQUEST['update_page'] : (isset($update_page) ? $update_page : '');
+$update_wrap_id = isset($_REQUEST['update_wrap_id']) ? $_REQUEST['update_wrap_id'] : (isset($update_wrap_id) ? $update_wrap_id : '');
 $tt_data = get_territory_data($tt_id);
 
 // 테이블 라벨
@@ -64,8 +67,8 @@ $result = $mysqli->query($sql);
   <h6>[<?= $tt_data['tt_num'] ?>] <?= $tt_data['tt_name'] ?></h6>
   <form id="territory_house_form">
     <input type="hidden" name="work" value="territory_house">
-    <!-- <input type="hidden" name="update_page" value="<?= $update_page ?>">
-    <input type="hidden" name="update_wrap_id" value="<?= $update_wrap_id ?>"> -->
+    <!-- <input type="hidden" name="update_page" value="<?= isset($update_page) ? $update_page : '' ?>">
+    <input type="hidden" name="update_wrap_id" value="<?= isset($update_wrap_id) ? $update_wrap_id : '' ?>"> -->
     <input type="hidden" name="tt_id" value="<?= $tt_id ?>">
     <div class="table-responsive">
       <table class="table mb-0 table-striped" style="min-width: 1300px;">

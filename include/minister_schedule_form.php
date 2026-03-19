@@ -6,14 +6,17 @@ if (empty($s_date))
   $s_date = date('Y-m-d');
 $s_datetime = date('Y-m-d\TH:i', strtotime($s_date));
 
-if ($me_id) {
+$me = array('me_color' => '', 'me_title' => '', 'me_content' => '', 'me_switch' => '');
+if (!empty($me_id)) {
   $me_sql = "SELECT * FROM " . MINISTER_EVENT_TABLE . " WHERE me_id = '{$me_id}'";
   $me_result = $mysqli->query($me_sql);
-  $me = $me_result->fetch_assoc();
-  $me_date = date('Y-m-d', strtotime($me['me_date']));
-  $me_date2 = date('Y-m-d', strtotime($me['me_date2']));
-  $me_datetime = date('Y-m-d\TH:i', strtotime($me['me_date']));
-  $me_datetime2 = date('Y-m-d\TH:i', strtotime($me['me_date2']));
+  if ($me_result && $me_result->num_rows > 0) {
+    $me = $me_result->fetch_assoc();
+    $me_date = date('Y-m-d', strtotime($me['me_date']));
+    $me_date2 = date('Y-m-d', strtotime($me['me_date2']));
+    $me_datetime = date('Y-m-d\TH:i', strtotime($me['me_date']));
+    $me_datetime2 = date('Y-m-d\TH:i', strtotime($me['me_date2']));
+  }
 }
 
 $d_display = 'd-none';
@@ -36,7 +39,7 @@ if (isset($me['me_switch']) && $me['me_switch'] == 1) {
     <div class="col-8 col-md-10">
       <div class="btn-group btn-group-lg btn-group-toggle w-100" data-toggle="buttons">
         <?php for ($i = 0; $i < 7; $i++): ?>
-          <label class="btn <?= $color[$i] ?> <?= ($me['me_color'] == $i) ? 'active' : ''; ?>">
+          <label class="btn <?= $color[$i] ?> <?= ($me['me_color'] !== '' && $me['me_color'] == $i) ? 'active' : ''; ?>">
             <input type="radio" name="color" value="<?= $i ?>" <?= get_checked_text($me['me_color'], $i); ?>>
           </label>
         <?php endfor; ?>
