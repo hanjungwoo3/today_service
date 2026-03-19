@@ -3,11 +3,14 @@
 
 <?php
 $work = 'add';
-if($tt_id){
+$row = array();
+if(!empty($tt_id)){
   $work = 'edit';
   $sql = "SELECT * FROM ".TERRITORY_TABLE." WHERE tt_id = {$tt_id}";
   $result = $mysqli->query($sql);
-  $row = $result->fetch_assoc(); 
+  if ($result && $result->num_rows > 0) {
+    $row = $result->fetch_assoc(); 
+  }
 }
 ?>
 
@@ -28,7 +31,7 @@ if($tt_id){
         <label for="tt_type" class="col-4 col-md-2 col-form-label">구역 형태</label>
         <div class="col-8 col-md-10">
           <select class="form-control" id="tt_type" name="tt_type">
-            <?php echo get_territory_type_options('edit', $row['tt_type']);?>
+            <?php echo get_territory_type_options('edit', isset($row['tt_type']) ? $row['tt_type'] : '');?>
           </select>
         </div>
       </div>
@@ -79,7 +82,7 @@ if($tt_id){
       <div class="col-8 col-md-10">
         <select class="form-control" id="mb_id" name="mb_id">
           <option value="0">선택 안 함</option>
-          <?php echo get_member_option($row['mb_id']);?>
+          <?php echo get_member_option(isset($row['mb_id']) ? $row['mb_id'] : '');?>
         </select>
       </div>
     </div>

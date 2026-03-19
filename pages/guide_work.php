@@ -1,5 +1,22 @@
 <?php
 include_once('../config.php');
+$work = isset($work) ? $work : '';
+$m_id = isset($m_id) ? (int) $m_id : 0;
+$member = isset($member) ? (is_array($member) ? $member : array()) : array();
+$territories = isset($territories) ? (is_array($territories) ? $territories : array()) : array();
+$telephones = isset($telephones) ? (is_array($telephones) ? $telephones : array()) : array();
+$displays = isset($displays) ? (is_array($displays) ? $displays : array()) : array();
+$assigned_group = isset($assigned_group) ? $assigned_group : '';
+$table = isset($table) ? $table : '';
+$pid = isset($pid) ? $pid : '';
+$action = isset($action) ? $action : '';
+$current_mb_id = isset($current_mb_id) ? $current_mb_id : '';
+$m_contents = isset($m_contents) ? $m_contents : '';
+$new_status = '';
+$old_status = null;
+$is_completed = false;
+
+
 
 $territory = new Territory($mysqli);
 $telephone = new Telephone($mysqli);
@@ -22,6 +39,9 @@ if ($work) {
         $result = $mysqli->query($sql);
         if ($result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
+            $new_status = '';
+            $old_status = null;
+            $is_completed = false;
 
             if (!empty($row['m_id']) && $row['m_id'] == $m_id) { // 구역이 배정되어있고, 배정된 모임 아이디가 현재 모임 아이디와 같을 때 (즉 당일의 구역을 재배정 할때)
 
@@ -32,6 +52,8 @@ if ($work) {
               $updateId = $territory->update($id, $updateData);
 
             } else { // 오늘이 아닌 이전에 배정되었던 구역, 또는 배정이 된 적 없는 구역
+
+              $new_status = 'reassign'; // 기본값 초기화
 
               if ($row['tt_assigned_date'] == '0000-00-00' && empty($row['tt_status'])) { // 미배정
 
@@ -97,6 +119,9 @@ if ($work) {
         $result = $mysqli->query($sql);
         if ($result->num_rows > 0) {
           while ($row = $result->fetch_assoc()) {
+            $new_status = '';
+            $old_status = null;
+            $is_completed = false;
 
             if ($row['m_id'] && $row['m_id'] == $m_id) {
 
@@ -107,7 +132,7 @@ if ($work) {
               $updateId = $telephone->update($id, $updateData);
 
             } else {
-
+              $new_status = 'reassign'; // 기본값 초기화
               if ($row['tp_assigned_date'] == '0000-00-00' && empty($row['tp_status'])) { // 미배정
 
                 $updateData = array(

@@ -9,9 +9,10 @@ if(isset($_POST["m_logincheck"])){
 }else{
 	$m_logincheck = 'off';
 }
-$m_token = xss_filter($_POST["m_token"] ?? '');
+$m_token = isset($_POST["m_token"]) ? xss_filter($_POST["m_token"]) : '';
 
-if ($m_token != ($_SESSION['m_token'] ?? '')){
+$session_m_token = isset($_SESSION['m_token']) ? $_SESSION['m_token'] : '';
+if ($m_token != $session_m_token || empty($m_token)){
 	echo "<SCRIPT LANGUAGE='JavaScript'>
 		alert('로그인 오류');
 		history.back();
