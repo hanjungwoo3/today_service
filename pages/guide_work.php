@@ -76,9 +76,9 @@ if ($work) {
               }
 
               // 이전 상태와 완료 여부를 전달하여 체크박스 비우기 여부 결정
-              if (isset($old_status)) {
+              if (isset($old_status) && isset($new_status)) {
                 territory_house_update($id, '', $new_status, $old_status, isset($is_completed) ? $is_completed : false);
-              } else {
+              } elseif (isset($new_status)) {
                 territory_house_update($id, '', $new_status);
               }
 
