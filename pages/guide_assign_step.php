@@ -4,6 +4,7 @@
 <?php
 $mb_id = mb_id();
 $date = isset($s_date) ? $s_date : date('Y-m-d');
+$ms_id = isset($ms_id) ? $ms_id : '';
 $m_id = get_meeting_id($date, $ms_id);
 $meeting_data = get_meeting_data($m_id);
 $ms_ids = explode(',', get_ms_id_by_guide($mb_id));
