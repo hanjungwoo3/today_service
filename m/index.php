@@ -275,7 +275,7 @@ foreach (['M', 'W'] as $sex) {
     }
 }
 
-// 짝 추천 함수: 짝 횟수가 적은 사람들끼리 그룹핑
+// 짝 추천 함수: 짝 횟수가 적은 사람들끼리 그룹핑 (100회 시도 후 최적 선택)
 function recommendGroups($members, $pair_matrix, $group_size) {
     if (count($members) < 2) return [];
 
@@ -302,18 +302,40 @@ function recommendGroups($members, $pair_matrix, $group_size) {
         return [['members' => $group_info, 'pair_count' => $total_pair_count]];
     }
 
-    // 랜덤 셔플
+    // 100회 시도하여 최적 조합 선택
+    $best_groups = null;
+    $best_total_score = PHP_INT_MAX;
+
+    for ($trial = 0; $trial < 100; $trial++) {
+        $groups = _buildGroups($member_ids, $pair_matrix, $group_size, $id_to_name);
+
+        // 전체 짝 횟수 합산
+        $total_score = 0;
+        foreach ($groups as $g) {
+            $total_score += $g['pair_count'];
+        }
+
+        if ($total_score < $best_total_score) {
+            $best_total_score = $total_score;
+            $best_groups = $groups;
+            if ($total_score === 0) break; // 최적해 도달
+        }
+    }
+
+    return $best_groups;
+}
+
+// 한 번의 그룹 생성 (greedy + 랜덤 셔플)
+function _buildGroups($member_ids, $pair_matrix, $group_size, $id_to_name) {
     shuffle($member_ids);
 
     $groups = [];
     $assigned = [];
 
     while (count($assigned) < count($member_ids)) {
-        // 아직 배정 안된 사람 중 첫번째 선택
-        $available = array_diff($member_ids, $assigned);
+        $available = array_values(array_diff($member_ids, $assigned));
         if (empty($available)) break;
 
-        $available = array_values($available);
         shuffle($available);
 
         $group = [];
@@ -321,16 +343,11 @@ function recommendGroups($members, $pair_matrix, $group_size) {
         $group[] = $first;
         $assigned[] = $first;
 
-        // 그룹에 사람 추가
         while (count($group) < $group_size && count($assigned) < count($member_ids)) {
             $remaining = array_diff($member_ids, $assigned);
             if (empty($remaining)) break;
 
-            // 현재 그룹원들과 짝 횟수 합이 가장 적은 사람 찾기
-            $best_candidate = null;
-            $best_score = PHP_INT_MAX;
             $candidates = [];
-
             foreach ($remaining as $candidate) {
                 $score = 0;
                 foreach ($group as $member) {
@@ -339,17 +356,12 @@ function recommendGroups($members, $pair_matrix, $group_size) {
                 $candidates[] = ['id' => $candidate, 'score' => $score];
             }
 
-            // 점수순 정렬 후 같은 점수 내에서 랜덤 선택
-            usort($candidates, function($a, $b) {
-                return $a['score'] - $b['score'];
-            });
+            usort($candidates, function($a, $b) { return $a['score'] - $b['score']; });
 
-            // 최소 점수와 같은 점수를 가진 후보들 중 랜덤 선택
             $min_score = $candidates[0]['score'];
-            $min_candidates = array_filter($candidates, function($c) use ($min_score) {
+            $min_candidates = array_values(array_filter($candidates, function($c) use ($min_score) {
                 return $c['score'] === $min_score;
-            });
-            $min_candidates = array_values($min_candidates);
+            }));
             shuffle($min_candidates);
 
             $best_candidate = $min_candidates[0]['id'];
@@ -357,14 +369,11 @@ function recommendGroups($members, $pair_matrix, $group_size) {
             $assigned[] = $best_candidate;
         }
 
-        // 그룹 정보 저장 (이름과 함께)
         $group_info = [];
         $total_pair_count = 0;
         foreach ($group as $id) {
             $group_info[] = ['id' => $id, 'name' => $id_to_name[$id]];
         }
-
-        // 그룹 내 짝 횟수 합계 계산
         for ($i = 0; $i < count($group); $i++) {
             for ($j = $i + 1; $j < count($group); $j++) {
                 $total_pair_count += isset($pair_matrix[$group[$i]][$group[$j]]) ? $pair_matrix[$group[$i]][$group[$j]] : 0;
