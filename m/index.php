@@ -40,9 +40,9 @@ $selected_period = isset($_GET['period']) ? $_GET['period'] : '6m';
 $group_size = isset($_GET['group']) ? (int)$_GET['group'] : 4;
 $selected_meeting = isset($_GET['meeting']) ? (int)$_GET['meeting'] : 0;
 
-// 해당 날짜의 호별(ms_type=1) 모임 목록 조회
+// 해당 날짜의 호별(ms_type=1) + 전시대(ms_type=2) 모임 목록 조회
 $meetings = [];
-$sql = "SELECT m_id, ms_id, ms_time, mp_name, mb_id FROM t_meeting WHERE m_date = '{$selected_date}' AND ms_type = 1 ORDER BY ms_time";
+$sql = "SELECT m_id, ms_id, ms_time, ms_type, mp_name, mb_id FROM t_meeting WHERE m_date = '{$selected_date}' AND ms_type IN (1, 2) ORDER BY ms_type, ms_time";
 $result = $mysqli->query($sql);
 if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
@@ -134,7 +134,7 @@ function processAssignment($group_ids, $tt_name, $tt_id, $tt_type, &$attendees, 
             }
         }
 
-        $type = (strpos($tt_name, '공개증거') !== false) ? '공개' : '호별';
+        $type = ($tt_type === 'display') ? '전시대' : ((strpos($tt_name, '공개증거') !== false) ? '공개' : '호별');
 
         foreach (['M', 'W'] as $sex) {
             if (!empty($members_by_sex[$sex])) {
@@ -192,6 +192,19 @@ if ($selected_meeting > 0) {
             processAssignment($group_ids, $row['tt_name'], $row['tt_id'], 'territory', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups);
         }
     }
+
+    // 3. t_display에서 전시대 배정 조회 (선택한 모임 기준)
+    $sql = "SELECT d_id, dp_name, d_assigned FROM " . DISPLAY_TABLE . " WHERE d_assigned_date = '{$selected_date}' AND d_assigned != '' AND m_id = {$selected_meeting}";
+    $result = $mysqli->query($sql);
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $group_ids = array_filter(array_map('trim', explode(',', $row['d_assigned'])), function($id) {
+                return !empty($id) && is_numeric($id);
+            });
+            $group_ids = array_map('intval', $group_ids);
+            processAssignment($group_ids, $row['dp_name'], $row['d_id'], 'display', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups);
+        }
+    }
 }
 $assigned_members['M'] = array_unique($assigned_members['M']);
 $assigned_members['W'] = array_unique($assigned_members['W']);
@@ -223,6 +236,18 @@ function getPairCount($mysqli, $mb_id1, $mb_id2, $days = 180) {
     if ($result2) {
         $row2 = $result2->fetch_assoc();
         $count += (int)$row2['cnt'];
+    }
+
+    // t_display에서도 조회 (전시대 짝 이력)
+    $sql3 = "SELECT COUNT(*) as cnt FROM " . DISPLAY_TABLE . "
+             WHERE FIND_IN_SET({$mb_id1}, d_assigned)
+             AND FIND_IN_SET({$mb_id2}, d_assigned)
+             AND d_assigned_date >= '{$date_from}'
+             AND d_assigned_date != '0000-00-00'";
+    $result3 = $mysqli->query($sql3);
+    if ($result3) {
+        $row3 = $result3->fetch_assoc();
+        $count += (int)$row3['cnt'];
     }
 
     return $count;
@@ -559,14 +584,66 @@ foreach (['M', 'W'] as $sex) {
             cursor: pointer;
             transition: all 0.15s;
         }
-        .group-card.clickable:hover {
-            background: #eef2ff;
-            border-color: #818cf8;
+        @media (hover: hover) {
+            .group-card.clickable:not(.selected):hover {
+                background: #eef2ff;
+                border-color: #818cf8;
+            }
         }
         .group-card .assign-icon {
             margin-left: auto;
             color: #818cf8;
             font-size: 14px;
+        }
+        .group-card .select-check {
+            margin-left: auto;
+            color: transparent;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .group-card.selected {
+            background: #c7d2fe;
+            border-color: #6366f1;
+            border-width: 2px;
+        }
+        .group-card.selected .select-check {
+            color: #4f46e5;
+        }
+        .group-card .select-order {
+            display: none;
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            width: 22px;
+            height: 22px;
+            background: #ef4444;
+            color: #fff;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 22px;
+            z-index: 1;
+        }
+        .group-card.selected .select-order {
+            display: block;
+        }
+        .group-card {
+            position: relative;
+        }
+        .assign-sel-btn {
+            background: #6366f1;
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .assign-sel-btn:active {
+            background: #4f46e5;
         }
         .group-number {
             display: inline-flex;
@@ -778,13 +855,17 @@ foreach (['M', 'W'] as $sex) {
                         <option value="">호별 모임 없음</option>
                     <?php else: ?>
                         <?php foreach ($meetings as $m): ?>
-                            <option value="<?php echo $m['m_id']; ?>" data-msid="<?php echo $m['ms_id']; ?>" <?php echo $selected_meeting == $m['m_id'] ? 'selected' : ''; ?>>
-                                <?php echo htmlspecialchars(substr($m['ms_time'], 0, 5) . ' ' . $m['mp_name'] . ' (' . $m['count'] . '명)'); ?>
+                            <option value="<?php echo $m['m_id']; ?>" data-msid="<?php echo $m['ms_id']; ?>" data-mstype="<?php echo $m['ms_type']; ?>" <?php echo $selected_meeting == $m['m_id'] ? 'selected' : ''; ?>>
+                                <?php
+                                    $type_label = ($m['ms_type'] == 2) ? '[전시대] ' : '';
+                                    echo htmlspecialchars($type_label . substr($m['ms_time'], 0, 5) . ' ' . $m['mp_name'] . ' (' . $m['count'] . '명)');
+                                ?>
                             </option>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </select>
             </div>
+            <div style="flex-basis:100%;height:0;"></div>
             <div class="filter-group">
                 <label for="period">기간:</label>
                 <select id="period" name="period">
@@ -819,7 +900,10 @@ foreach (['M', 'W'] as $sex) {
             <!-- 형제 섹션 -->
             <?php if (count($members['M']) > 0): ?>
             <div class="section">
-                <div class="section-title male" <?php if ($is_elder): ?>onclick="toggleMatrix('matrix-M')"<?php endif; ?>>형제 (<?php echo count($members['M']); ?>명) <?php if ($is_elder): ?><span class="toggle-icon" id="icon-matrix-M">&#9654;</span><?php endif; ?></div>
+                <div class="section-title male" style="display:flex;align-items:center;justify-content:space-between;" <?php if ($is_elder): ?>onclick="toggleMatrix('matrix-M')"<?php endif; ?>>
+                    <span>형제 (<?php echo count($members['M']); ?>명) <?php if ($is_elder): ?><span class="toggle-icon" id="icon-matrix-M">&#9654;</span><?php endif; ?></span>
+                    <button type="button" class="assign-sel-btn" style="display:none;" onclick="event.stopPropagation(); goToAssignSelected()"></button>
+                </div>
                 <div class="member-list-simple"><?php
                     $names_m = array_map(function($m) { return htmlspecialchars($m['mb_name']); }, $members['M']);
                     echo implode(', ', $names_m);
@@ -894,10 +978,11 @@ foreach (['M', 'W'] as $sex) {
                     <?php if (!empty($recommended_groups['M'])): ?>
                     <div class="unassigned-box">
                         <div class="unassigned-title">추천 짝 (<?php echo $group_size; ?>명씩) <button type="button" onclick="location.reload();" class="refresh-btn">다시 추천</button></div>
-                        <div class="group-list">
+                        <div class="group-list" id="recommend-M">
                             <?php foreach ($recommended_groups['M'] as $idx => $group): ?>
                                 <?php $ids = array_map(function($m) { return $m['id']; }, $group['members']); ?>
-                                <div class="group-card clickable" onclick="goToAssign('<?php echo implode(',', $ids); ?>')">
+                                <div class="group-card clickable" data-ids="<?php echo implode(',', $ids); ?>" onclick="toggleSelect(this)">
+                                    <span class="select-order"></span>
                                     <span class="group-number"><?php echo $idx + 1; ?></span>
                                     <span class="group-members">
                                         <?php
@@ -906,7 +991,7 @@ foreach (['M', 'W'] as $sex) {
                                         ?>
                                     </span>
                                     <span class="group-pair-count">(<?php echo $group['pair_count']; ?>회)</span>
-                                    <span class="assign-icon" title="구역 배정으로 이동">&#10132;</span>
+                                    <span class="select-check">&#10003;</span>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -931,7 +1016,10 @@ foreach (['M', 'W'] as $sex) {
             <!-- 자매 섹션 -->
             <?php if (count($members['W']) > 0): ?>
             <div class="section">
-                <div class="section-title female" <?php if ($is_elder): ?>onclick="toggleMatrix('matrix-W')"<?php endif; ?>>자매 (<?php echo count($members['W']); ?>명) <?php if ($is_elder): ?><span class="toggle-icon" id="icon-matrix-W">&#9654;</span><?php endif; ?></div>
+                <div class="section-title female" style="display:flex;align-items:center;justify-content:space-between;" <?php if ($is_elder): ?>onclick="toggleMatrix('matrix-W')"<?php endif; ?>>
+                    <span>자매 (<?php echo count($members['W']); ?>명) <?php if ($is_elder): ?><span class="toggle-icon" id="icon-matrix-W">&#9654;</span><?php endif; ?></span>
+                    <button type="button" class="assign-sel-btn" style="display:none;" onclick="event.stopPropagation(); goToAssignSelected()"></button>
+                </div>
                 <div class="member-list-simple"><?php
                     $names_w = array_map(function($m) { return htmlspecialchars($m['mb_name']); }, $members['W']);
                     echo implode(', ', $names_w);
@@ -1006,10 +1094,11 @@ foreach (['M', 'W'] as $sex) {
                     <?php if (!empty($recommended_groups['W'])): ?>
                     <div class="unassigned-box">
                         <div class="unassigned-title">추천 짝 (<?php echo $group_size; ?>명씩) <button type="button" onclick="location.reload();" class="refresh-btn">다시 추천</button></div>
-                        <div class="group-list">
+                        <div class="group-list" id="recommend-W">
                             <?php foreach ($recommended_groups['W'] as $idx => $group): ?>
                                 <?php $ids = array_map(function($m) { return $m['id']; }, $group['members']); ?>
-                                <div class="group-card clickable" onclick="goToAssign('<?php echo implode(',', $ids); ?>')">
+                                <div class="group-card clickable" data-ids="<?php echo implode(',', $ids); ?>" onclick="toggleSelect(this)">
+                                    <span class="select-order"></span>
                                     <span class="group-number"><?php echo $idx + 1; ?></span>
                                     <span class="group-members">
                                         <?php
@@ -1018,7 +1107,7 @@ foreach (['M', 'W'] as $sex) {
                                         ?>
                                     </span>
                                     <span class="group-pair-count">(<?php echo $group['pair_count']; ?>회)</span>
-                                    <span class="assign-icon" title="구역 배정으로 이동">&#10132;</span>
+                                    <span class="select-check">&#10003;</span>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -1133,6 +1222,80 @@ foreach (['M', 'W'] as $sex) {
         }
     }
 
+    // 다중 선택 토글 (순서 관리)
+    var _selectOrder = [];
+    function toggleSelect(card) {
+        if (card.classList.contains('selected')) {
+            card.classList.remove('selected');
+            _selectOrder = _selectOrder.filter(function(c) { return c !== card; });
+        } else {
+            card.classList.add('selected');
+            _selectOrder.push(card);
+        }
+        updateSelectNumbers();
+        updateAssignBtn();
+    }
+
+    function updateSelectNumbers() {
+        // 모든 카드의 순서 표시 초기화
+        document.querySelectorAll('.select-order').forEach(function(el) { el.textContent = ''; });
+        // 선택 순서대로 번호 표시
+        _selectOrder.forEach(function(card, idx) {
+            var orderEl = card.querySelector('.select-order');
+            if (orderEl) orderEl.textContent = idx + 1;
+        });
+    }
+
+    function updateAssignBtn() {
+        var selected = document.querySelectorAll('.group-card.selected');
+        var btns = document.querySelectorAll('.assign-sel-btn');
+        if (selected.length > 0) {
+            var totalIds = [];
+            selected.forEach(function(c) {
+                c.getAttribute('data-ids').split(',').forEach(function(id) {
+                    if (totalIds.indexOf(id) === -1) totalIds.push(id);
+                });
+            });
+            var label = '선택한 ' + selected.length + '팀 배정하기 (' + totalIds.length + '명) →';
+            btns.forEach(function(btn) {
+                btn.textContent = label;
+                btn.style.display = 'block';
+            });
+        } else {
+            btns.forEach(function(btn) { btn.style.display = 'none'; });
+        }
+    }
+
+    function goToAssignSelected() {
+        if (_selectOrder.length === 0) return;
+        var allIds = [];
+        var groupSizes = [];
+        _selectOrder.forEach(function(c) {
+            var ids = c.getAttribute('data-ids').split(',').filter(function(id) { return id !== ''; });
+            groupSizes.push(ids.length);
+            ids.forEach(function(id) {
+                if (allIds.indexOf(id) === -1) allIds.push(id);
+            });
+        });
+        var date = document.getElementById('date').value;
+        var meetingSelect = document.getElementById('meeting');
+        var selectedOption = meetingSelect.options[meetingSelect.selectedIndex];
+        var msId = selectedOption ? selectedOption.dataset.msid : '';
+        var msType = selectedOption ? selectedOption.dataset.mstype : '1';
+        if (!msId || msId === '0' || msId === 'undefined') {
+            alert('모임 정보를 찾을 수 없습니다.');
+            return;
+        }
+        var url = '../pages/guide_assign_step.php?s_date=' + date + '&ms_id=' + msId + '&preselect=' + allIds.join(',');
+        url += '&group_pattern=' + groupSizes.join('.');
+        if (msType === '2') url += '&tab=display';
+        if (window.top !== window.self) {
+            window.top.location.href = url;
+        } else {
+            window.location.href = url;
+        }
+    }
+
     function updateMeetings(date) {
         fetch('api/meetings.php?date=' + date)
             .then(response => response.json())
@@ -1175,11 +1338,14 @@ foreach (['M', 'W'] as $sex) {
         var meetingSelect = document.getElementById('meeting');
         var selectedOption = meetingSelect.options[meetingSelect.selectedIndex];
         var msId = selectedOption ? selectedOption.dataset.msid : '';
+        var msType = selectedOption ? selectedOption.dataset.mstype : '1';
         if (!msId || msId === '0' || msId === 'undefined') {
             alert('모임 정보를 찾을 수 없습니다.');
             return;
         }
-        var url = '../pages/guide_assign_step.php?s_date=' + date + '&ms_id=' + msId + '&preselect=' + memberIds;
+        var groupSize = document.getElementById('group').value;
+        var url = '../pages/guide_assign_step.php?s_date=' + date + '&ms_id=' + msId + '&preselect=' + memberIds + '&group_pattern=' + groupSize;
+        if (msType === '2') url += '&tab=display';
         // iframe 안이면 상위 윈도우에서 이동
         if (window.top !== window.self) {
             window.top.location.href = url;
@@ -1188,5 +1354,6 @@ foreach (['M', 'W'] as $sex) {
         }
     }
     </script>
+
 </body>
 </html>

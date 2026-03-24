@@ -79,7 +79,7 @@ $date_parts = explode("-", $date);
             <?php endif; ?>
             <?php if((isset($_GET['preselect']) && !empty($_GET['preselect'])) || (isset($_GET['load_tt_id']) && !empty($_GET['load_tt_id']))): ?>
             <li class="nav-item" style="flex: 1; min-width: 0;">
-              <a class="nav-link" href="<?=BASE_PATH?>/pages/ministry_record.php?date=<?=$date?>&meeting=<?=$m_id?>" style="white-space: nowrap; padding: 0.5rem 0.25rem;">호별봉사 짝 배정</a>
+              <a class="nav-link" href="<?=BASE_PATH?>/pages/ministry_record.php?date=<?=$date?>&meeting=<?=$m_id?>" style="white-space: nowrap; padding: 0.5rem 0.25rem;">봉사 짝 배정</a>
             </li>
             <?php endif; ?>
           </ul>
@@ -1707,6 +1707,34 @@ $date_parts = explode("-", $date);
           // 구역 배정 모드로 전환
           if (v_guide_assign_step.selected_members.length > 0) {
             v_guide_assign_step.changeMode('assign');
+            // group_pattern 파라미터로 임의지정 설정 (예: 2, 2.2, 3.2.2)
+            var gp = params.get('group_pattern');
+            if (gp) {
+              var gsCheck = setInterval(function() {
+                var agSel = document.getElementById('assign_group');
+                var customInput = document.getElementById('custom_assign_group');
+                if (!agSel) return;
+                clearInterval(gsCheck);
+                agSel.value = 'custom';
+                agSel.dispatchEvent(new Event('change'));
+                if (customInput) {
+                  customInput.value = gp;
+                  customInput.dispatchEvent(new Event('input'));
+                }
+              }, 300);
+              setTimeout(function() { clearInterval(gsCheck); }, 5000);
+            }
+            // tab=display이면 전시대 탭으로 자동 전환
+            if (params.get('tab') === 'display') {
+              var tabCheck = setInterval(function() {
+                var displayTab = document.getElementById('v-pills-display-tab');
+                if (displayTab && displayTab.offsetParent !== null) {
+                  clearInterval(tabCheck);
+                  displayTab.click();
+                }
+              }, 300);
+              setTimeout(function() { clearInterval(tabCheck); }, 5000);
+            }
           }
         }
       }, 200);

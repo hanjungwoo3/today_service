@@ -1,7 +1,7 @@
 <?php include_once('../header.php');?>
 
 <header class="navbar navbar-expand-xl fixed-top header">
-  <h1 class="text-white mb-0 navbar-brand">호별봉사 짝 배정</h1>
+  <h1 class="text-white mb-0 navbar-brand">봉사 짝 배정</h1>
 </header>
 
 <?php echo footer_menu('오늘의 봉사'); ?>

@@ -90,7 +90,7 @@
         <?php if(is_admin(mb_id())): ?>
         <a href="<?=BASE_PATH?>/pages/ministry_record.php" class="custom-nav-item nav-bg-record">
             <div class="custom-nav-icon nav-record"><i class="bi bi-people"></i></div>
-            <div class="custom-nav-label">호별봉사<br>짝배정</div>
+            <div class="custom-nav-label">봉사<br>짝배정</div>
         </a>
         <?php endif; ?>
     </div>
