@@ -859,7 +859,7 @@ foreach (['M', 'W'] as $sex) {
             </div>
             <div class="filter-group">
                 <label for="meeting">모임:</label>
-                <select id="meeting" name="meeting">
+                <select id="meeting" name="meeting" onchange="autoSubmit()">
                     <?php if (empty($meetings)): ?>
                         <option value="">호별 모임 없음</option>
                     <?php else: ?>
@@ -877,7 +877,7 @@ foreach (['M', 'W'] as $sex) {
             <div style="flex-basis:100%;height:0;"></div>
             <div class="filter-group">
                 <label for="period">기간:</label>
-                <select id="period" name="period">
+                <select id="period" name="period" onchange="autoSubmit()">
                     <?php foreach ($period_options as $key => $opt): ?>
                         <option value="<?php echo $key; ?>" <?php echo $selected_period === $key ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($opt['label']); ?>
@@ -887,7 +887,7 @@ foreach (['M', 'W'] as $sex) {
             </div>
             <div class="filter-group">
                 <label for="group">인원:</label>
-                <select id="group" name="group">
+                <select id="group" name="group" onchange="autoSubmit()">
                     <option value="2" <?php echo $group_size === 2 ? 'selected' : ''; ?>>2명</option>
                     <option value="3" <?php echo $group_size === 3 ? 'selected' : ''; ?>>3명</option>
                     <option value="4" <?php echo $group_size === 4 ? 'selected' : ''; ?>>4명</option>
@@ -1222,6 +1222,13 @@ foreach (['M', 'W'] as $sex) {
         localStorage.setItem('ministry_group', document.getElementById('group').value);
     });
 
+    // 선택 변경 시 자동 조회
+    function autoSubmit() {
+        localStorage.setItem('ministry_period', document.getElementById('period').value);
+        localStorage.setItem('ministry_group', document.getElementById('group').value);
+        document.getElementById('filterForm').submit();
+    }
+
     function toggleMatrix(id) {
         var wrap = document.getElementById(id);
         var icon = document.getElementById('icon-' + id);
@@ -1322,6 +1329,7 @@ foreach (['M', 'W'] as $sex) {
                         select.appendChild(option);
                     });
                 }
+                autoSubmit();
             });
     }
 
