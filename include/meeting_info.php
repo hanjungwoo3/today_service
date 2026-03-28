@@ -111,10 +111,10 @@ if ($member_string) {
       }
       $ms_time_val = $row['ms_time'] ?? '';
       $hour = (int)date('H', strtotime($ms_time_val));
-      if ($hour < 9) $time_idx = 0;        // 새벽 (7시~)
-      elseif ($hour < 13) $time_idx = 1;   // 오전 (9~10시 시작)
-      elseif ($hour < 19) $time_idx = 2;   // 오후 (1~6시 시작)
-      else $time_idx = 3;                   // 저녁 (7시~)
+      if ($hour < 9) $time_idx = 0;        // 새벽 (7~9시)
+      elseif ($hour < 11) $time_idx = 1;   // 오전 (9~10시 시작)
+      elseif ($hour < 19) $time_idx = 2;   // 오후 (11~18시 시작)
+      else $time_idx = 3;                   // 저녁 (19시~)
       $calendar_guide_name = trim($cal_names[$time_idx] ?? '');
     }
   }
