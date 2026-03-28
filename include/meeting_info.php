@@ -97,6 +97,33 @@ if ($member_string) {
 <div class="mb-3">
   <h6 class="text-secondary">인도자</h6>
   <?php
+  // 봉사인도 계획표에서 해당 날짜의 인도자 이름 표시
+  $calendar_guide_name = '';
+  $calendar_json_path = __DIR__ . '/../c/storage/' . date('Y-m', strtotime($s_date)) . '.json';
+  if (file_exists($calendar_json_path)) {
+    $cal_data = json_decode(file_get_contents($calendar_json_path), true);
+    if (!empty($cal_data['dates'][$s_date]['names'])) {
+      $cal_names = $cal_data['dates'][$s_date]['names'];
+      // names: [새벽(~10시), 오전(10~13시), 오후(13~19시), 저녁(19시~)]
+      // 3개 항목인 경우 새벽 없이 [오전, 오후, 저녁]
+      if (count($cal_names) === 3) {
+        array_unshift($cal_names, '');
+      }
+      $ms_time_val = $row['ms_time'] ?? '';
+      $hour = (int)date('H', strtotime($ms_time_val));
+      if ($hour < 10) $time_idx = 0;       // 새벽
+      elseif ($hour < 13) $time_idx = 1;   // 오전
+      elseif ($hour < 19) $time_idx = 2;   // 오후
+      else $time_idx = 3;                   // 저녁
+      $calendar_guide_name = trim($cal_names[$time_idx] ?? '');
+    }
+  }
+  if ($calendar_guide_name) {
+    $time_labels = ['새벽', '오전', '오후', '저녁'];
+    echo '<div class="mb-1"><small class="text-muted">봉사인도(' . $time_labels[$time_idx] . ')</small> <span class="badge badge-info p-1">' . htmlspecialchars($calendar_guide_name) . '</span></div>';
+  }
+  ?>
+  <?php
   $btn_sm = '';
   if (!empty($msw['m_guide'])) {
     $m_guide = get_guide_data($msw['m_guide']);
