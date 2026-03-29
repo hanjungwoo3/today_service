@@ -228,6 +228,9 @@ foreach ($allTalks as $talk) {
 
         .topic-circuit-bg { background: #e8f5e9; }
         .topic-special-bg { background: #fff3e0; }
+        .topic-assembly-co-bg { background: #e3f2fd; }
+        .topic-assembly-br-bg { background: #f3e5f5; }
+        .topic-assembly-reg-bg { background: #fce4ec; }
         .topic-type-label {
             font-weight: 700;
             font-size: 12px;
@@ -235,6 +238,9 @@ foreach ($allTalks as $talk) {
         }
         .topic-type-label.circuit { color: #2e7d32; }
         .topic-type-label.special { color: #e65100; }
+        .topic-type-label.assembly-co { color: #1565c0; }
+        .topic-type-label.assembly-br { color: #7b1fa2; }
+        .topic-type-label.assembly-reg { color: #c62828; }
 
         @media (max-width: 600px) {
             body { overflow-x: auto; }
@@ -298,19 +304,18 @@ foreach ($allTalks as $talk) {
                 <?php foreach ($talks as $index => $talk):
                     $d = new DateTime($talk['date']);
                     $dateDisplay = $d->format('y/m/d');
-                    $topicBg = '';
-                    if ($talk['topic_type'] === 'circuit_visit') $topicBg = 'topic-circuit-bg';
-                    elseif ($talk['topic_type'] === 'special_talk') $topicBg = 'topic-special-bg';
+                    $topicBgMap = ['circuit_visit'=>'topic-circuit-bg','special_talk'=>'topic-special-bg','assembly_co'=>'topic-assembly-co-bg','assembly_br'=>'topic-assembly-br-bg','assembly_reg'=>'topic-assembly-reg-bg'];
+                    $topicBg = $topicBgMap[$talk['topic_type']] ?? '';
+                    $printLabels = ['circuit_visit'=>['circuit','순회 방문 - 공개 강연'],'special_talk'=>['special','특별 강연'],'assembly_co'=>['assembly-co','순회대회(감독자)'],'assembly_br'=>['assembly-br','순회대회(지부)'],'assembly_reg'=>['assembly-reg','지역대회']];
+                    $pl = $printLabels[$talk['topic_type']] ?? null;
                 ?>
                 <tr id="print-row-<?php echo $index; ?>">
                     <td class="pt-col-date"><?php echo $dateDisplay; ?></td>
                     <td class="pt-col-speaker"><?php echo htmlspecialchars($talk['speaker']); ?></td>
                     <td class="pt-col-congregation"><?php echo htmlspecialchars($talk['congregation']); ?></td>
                     <td class="pt-col-topic <?php echo $topicBg; ?>">
-                        <?php if ($talk['topic_type'] === 'circuit_visit'): ?>
-                            <span class="topic-type-label circuit">[순회 방문 - 공개 강연]</span>
-                        <?php elseif ($talk['topic_type'] === 'special_talk'): ?>
-                            <span class="topic-type-label special">[특별 강연]</span>
+                        <?php if ($pl): ?>
+                            <span class="topic-type-label <?php echo $pl[0]; ?>">[<?php echo $pl[1]; ?>]</span>
                         <?php endif; ?>
                         <?php echo htmlspecialchars($talk['topic']); ?>
                     </td>

@@ -193,15 +193,21 @@ foreach ($allTalks as $talk) {
         }
         .topic-label.circuit { background: #43a047; color: white; }
         .topic-label.special { background: #ef6c00; color: white; }
+        .topic-label.assembly-co { background: #1565c0; color: white; }
+        .topic-label.assembly-br { background: #7b1fa2; color: white; }
+        .topic-label.assembly-reg { background: #c62828; color: white; }
         .topic-text {
             display: block;
             line-height: 1.4;
             word-break: keep-all;
         }
 
-        /* 순회방문/특별강연 행 배경 */
+        /* 순회방문/특별강연/순회대회/지역대회 행 배경 */
         tr.row-circuit { background: #e8f5e9; }
         tr.row-special { background: #fff3e0; }
+        tr.row-assembly-co { background: #e3f2fd; }
+        tr.row-assembly-br { background: #f3e5f5; }
+        tr.row-assembly-reg { background: #fce4ec; }
 
         /* 지나간 날짜 */
         .past-row { opacity: 0.5; }
@@ -401,8 +407,8 @@ foreach ($allTalks as $talk) {
                     $d = new DateTime($talk['date']);
                     $dateDisplay = $d->format('y/m/d');
                     $rowClass = '';
-                    if ($talk['topic_type'] === 'circuit_visit') $rowClass = 'row-circuit';
-                    elseif ($talk['topic_type'] === 'special_talk') $rowClass = 'row-special';
+                    $rowClassMap = ['circuit_visit'=>'row-circuit','special_talk'=>'row-special','assembly_co'=>'row-assembly-co','assembly_br'=>'row-assembly-br','assembly_reg'=>'row-assembly-reg'];
+                    $rowClass = $rowClassMap[$talk['topic_type']] ?? '';
                     $sp = trim($talk['speaker']); $cg = trim($talk['congregation']);
                 ?>
                 <tr class="talk-row <?php echo $isPast ? 'past-row' : ''; ?> <?php echo $isNext ? 'next-row' : ''; ?> <?php echo $rowClass; ?>"
@@ -418,13 +424,13 @@ foreach ($allTalks as $talk) {
                     <td class="col-speaker editable" data-field="speaker"><?php echo htmlspecialchars($talk['speaker']) ?: '<span class="cell-empty">-</span>'; ?></td>
                     <td class="col-congregation editable" data-field="congregation"><?php echo htmlspecialchars($talk['congregation']) ?: '<span class="cell-empty">-</span>'; ?></td>
                     <td class="col-topic editable" data-field="topic">
-                        <span class="desktop-only"><?php
-                            if ($talk['topic_type'] === 'circuit_visit') echo '<span class="topic-label circuit">순회 방문</span>';
-                            elseif ($talk['topic_type'] === 'special_talk') echo '<span class="topic-label special">특별 강연</span>';
-                        ?></span>
+                        <?php
+                            $topicLabels = ['circuit_visit'=>['circuit','순회 방문'],'special_talk'=>['special','특별 강연'],'assembly_co'=>['assembly-co','순회대회(감독자)'],'assembly_br'=>['assembly-br','순회대회(지부)'],'assembly_reg'=>['assembly-reg','지역대회']];
+                            $tl = $topicLabels[$talk['topic_type']] ?? null;
+                        ?>
+                        <span class="desktop-only"><?php if ($tl) echo '<span class="topic-label '.$tl[0].'">'.$tl[1].'</span>'; ?></span>
                         <span class="topic-text"><?php
-                            if ($talk['topic_type'] === 'circuit_visit') echo '<span class="topic-label circuit mobile-only-label">순회 방문</span> ';
-                            elseif ($talk['topic_type'] === 'special_talk') echo '<span class="topic-label special mobile-only-label">특별 강연</span> ';
+                            if ($tl) echo '<span class="topic-label '.$tl[0].' mobile-only-label">'.$tl[1].'</span> ';
                             echo htmlspecialchars($talk['topic']) ?: '<span class="cell-empty">-</span>';
                         ?></span>
                         <span class="mobile-speaker"><?php
@@ -713,13 +719,13 @@ foreach ($allTalks as $talk) {
             el.innerHTML = '<span class="date-text">' + formatDateDisplay(value) + '</span>';
         } else if (field === 'topic') {
             var topicType = row.getAttribute('data-topic-type');
+            var topicLabels = {circuit_visit:['circuit','순회 방문'],special_talk:['special','특별 강연'],assembly_co:['assembly-co','순회대회(감독자)'],assembly_br:['assembly-br','순회대회(지부)'],assembly_reg:['assembly-reg','지역대회']};
+            var tl = topicLabels[topicType];
             var html = '<span class="desktop-only">';
-            if (topicType === 'circuit_visit') html += '<span class="topic-label circuit">순회 방문</span>';
-            else if (topicType === 'special_talk') html += '<span class="topic-label special">특별 강연</span>';
+            if (tl) html += '<span class="topic-label ' + tl[0] + '">' + tl[1] + '</span>';
             html += '</span>';
             html += '<span class="topic-text">';
-            if (topicType === 'circuit_visit') html += '<span class="topic-label circuit mobile-only-label">순회 방문</span> ';
-            else if (topicType === 'special_talk') html += '<span class="topic-label special mobile-only-label">특별 강연</span> ';
+            if (tl) html += '<span class="topic-label ' + tl[0] + ' mobile-only-label">' + tl[1] + '</span> ';
             html += (escapeHtml(value) || '<span class="cell-empty">-</span>');
             html += '</span>';
             var sp = row.getAttribute('data-speaker') || '';
@@ -743,9 +749,9 @@ foreach ($allTalks as $talk) {
     // 행 배경색 업데이트
     function updateRowStyle(row) {
         var topicType = row.getAttribute('data-topic-type');
-        row.classList.remove('row-circuit', 'row-special');
-        if (topicType === 'circuit_visit') row.classList.add('row-circuit');
-        else if (topicType === 'special_talk') row.classList.add('row-special');
+        row.classList.remove('row-circuit', 'row-special', 'row-assembly-co', 'row-assembly-br', 'row-assembly-reg');
+        var rowClassMap = {circuit_visit:'row-circuit',special_talk:'row-special',assembly_co:'row-assembly-co',assembly_br:'row-assembly-br',assembly_reg:'row-assembly-reg'};
+        if (rowClassMap[topicType]) row.classList.add(rowClassMap[topicType]);
     }
 
     // 셀 클릭 → 편집 모드
@@ -773,6 +779,9 @@ foreach ($allTalks as $talk) {
             html += '<div class="topic-type-row">';
             html += '<label><input type="checkbox" name="circuit_visit" ' + (topicType === 'circuit_visit' ? 'checked' : '') + ' /> 순회방문</label>';
             html += '<label><input type="checkbox" name="special_talk" ' + (topicType === 'special_talk' ? 'checked' : '') + ' /> 특별강연</label>';
+            html += '<label><input type="checkbox" name="assembly_co" ' + (topicType === 'assembly_co' ? 'checked' : '') + ' /> 순회대회(감독자)</label>';
+            html += '<label><input type="checkbox" name="assembly_br" ' + (topicType === 'assembly_br' ? 'checked' : '') + ' /> 순회대회(지부)</label>';
+            html += '<label><input type="checkbox" name="assembly_reg" ' + (topicType === 'assembly_reg' ? 'checked' : '') + ' /> 지역대회</label>';
             html += '<span class="topic-fetch-row">';
             html += '<input type="number" min="1" max="' + TOPIC_LIST.length + '" placeholder="번호" />';
             html += '<button type="button">가져오기</button>';
@@ -809,14 +818,16 @@ foreach ($allTalks as $talk) {
                 if (e.key === 'Escape') { cancelEdit(el, value); }
             });
 
-            // 체크박스 상호 배타
-            var cbCircuit = el.querySelector('input[name="circuit_visit"]');
-            var cbSpecial = el.querySelector('input[name="special_talk"]');
-            cbCircuit.addEventListener('change', function() {
-                if (this.checked) cbSpecial.checked = false;
-            });
-            cbSpecial.addEventListener('change', function() {
-                if (this.checked) cbCircuit.checked = false;
+            // 체크박스 상호 배타 (라디오 버튼처럼 동작)
+            var allCbs = el.querySelectorAll('.topic-type-row input[type="checkbox"]');
+            allCbs.forEach(function(cb) {
+                cb.addEventListener('change', function() {
+                    if (this.checked) {
+                        allCbs.forEach(function(other) {
+                            if (other !== cb) other.checked = false;
+                        });
+                    }
+                });
             });
         } else {
             el.innerHTML = '<input type="text" value="' + escapeHtml(value) + '" />';
@@ -838,12 +849,13 @@ foreach ($allTalks as $talk) {
 
         if (field === 'topic') {
             var textInput = td.querySelector('input[type="text"]');
-            var cbCircuit = td.querySelector('input[name="circuit_visit"]');
-            var cbSpecial = td.querySelector('input[name="special_talk"]');
             if (textInput) row.setAttribute('data-topic', textInput.value.trim());
             var topicType = 'normal';
-            if (cbCircuit && cbCircuit.checked) topicType = 'circuit_visit';
-            else if (cbSpecial && cbSpecial.checked) topicType = 'special_talk';
+            var typeNames = ['circuit_visit','special_talk','assembly_co','assembly_br','assembly_reg'];
+            typeNames.forEach(function(name) {
+                var cb = td.querySelector('input[name="' + name + '"]');
+                if (cb && cb.checked) topicType = name;
+            });
             row.setAttribute('data-topic-type', topicType);
             updateRowStyle(row);
         } else {

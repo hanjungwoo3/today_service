@@ -160,6 +160,9 @@ foreach ($visibleTalks as $talk) {
         }
         tr.row-circuit { background: #e8f5e9; }
         tr.row-special { background: #fff3e0; }
+        tr.row-assembly-co { background: #e3f2fd; }
+        tr.row-assembly-br { background: #f3e5f5; }
+        tr.row-assembly-reg { background: #fce4ec; }
         .topic-label {
             display: inline-block;
             padding: 1px 6px;
@@ -170,6 +173,9 @@ foreach ($visibleTalks as $talk) {
         }
         .topic-label.circuit { background: #43a047; color: white; }
         .topic-label.special { background: #ef6c00; color: white; }
+        .topic-label.assembly-co { background: #1565c0; color: white; }
+        .topic-label.assembly-br { background: #7b1fa2; color: white; }
+        .topic-label.assembly-reg { background: #c62828; color: white; }
         .topic-text {
             display: block;
             line-height: 1.4;
@@ -298,9 +304,10 @@ foreach ($visibleTalks as $talk) {
                     $d = new DateTime($talk['date']);
                     $dateDisplayFull = $d->format('y/m/d');
                     $dateDisplayShort = $d->format('n/j');
-                    $rowClass = '';
-                    if ($talk['topic_type'] === 'circuit_visit') $rowClass = 'row-circuit';
-                    elseif ($talk['topic_type'] === 'special_talk') $rowClass = 'row-special';
+                    $rowClassMap = ['circuit_visit'=>'row-circuit','special_talk'=>'row-special','assembly_co'=>'row-assembly-co','assembly_br'=>'row-assembly-br','assembly_reg'=>'row-assembly-reg'];
+                    $rowClass = $rowClassMap[$talk['topic_type']] ?? '';
+                    $topicLabels = ['circuit_visit'=>['circuit','순회 방문'],'special_talk'=>['special','특별 강연'],'assembly_co'=>['assembly-co','순회대회(감독자)'],'assembly_br'=>['assembly-br','순회대회(지부)'],'assembly_reg'=>['assembly-reg','지역대회']];
+                    $tl = $topicLabels[$talk['topic_type']] ?? null;
                 ?>
                 <tr class="<?php echo $isPast ? 'past-row' : ''; ?> <?php echo $isNext ? 'next-row' : ''; ?> <?php echo $rowClass; ?>">
                     <td class="col-date"><span class="date-text"><span class="date-full"><?php echo $dateDisplayFull; ?></span><span class="date-short"><?php echo $dateDisplayShort; ?></span></span></td>
@@ -313,13 +320,9 @@ foreach ($visibleTalks as $talk) {
                     </td>
                     <td class="col-congregation"><?php echo htmlspecialchars($talk['congregation']); ?></td>
                     <td class="col-topic">
-                        <span class="desktop-only"><?php
-                            if ($talk['topic_type'] === 'circuit_visit') echo '<span class="topic-label circuit">순회 방문</span>';
-                            elseif ($talk['topic_type'] === 'special_talk') echo '<span class="topic-label special">특별 강연</span>';
-                        ?></span>
+                        <span class="desktop-only"><?php if ($tl) echo '<span class="topic-label '.$tl[0].'">'.$tl[1].'</span>'; ?></span>
                         <span class="topic-text"><?php
-                            if ($talk['topic_type'] === 'circuit_visit') echo '<span class="topic-label circuit mobile-only-label">순회 방문</span> ';
-                            elseif ($talk['topic_type'] === 'special_talk') echo '<span class="topic-label special mobile-only-label">특별 강연</span> ';
+                            if ($tl) echo '<span class="topic-label '.$tl[0].' mobile-only-label">'.$tl[1].'</span> ';
                             echo htmlspecialchars($talk['topic']);
                         ?></span>
                         <span class="mobile-speaker"><?php
