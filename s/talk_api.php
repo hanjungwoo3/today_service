@@ -129,7 +129,7 @@ if (isset($_POST['action']) || (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['R
                     'speaker' => isset($talk['speaker']) ? trim($talk['speaker']) : '',
                     'congregation' => isset($talk['congregation']) ? trim($talk['congregation']) : '',
                     'topic' => isset($talk['topic']) ? trim($talk['topic']) : '',
-                    'topic_type' => isset($talk['topic_type']) && in_array($talk['topic_type'], array('normal', 'circuit_visit', 'special_talk')) ? $talk['topic_type'] : 'normal',
+                    'topic_type' => isset($talk['topic_type']) && in_array($talk['topic_type'], array('normal', 'circuit_visit', 'special_talk', 'assembly_co', 'assembly_br', 'assembly_reg')) ? $talk['topic_type'] : 'normal',
                     'chairman' => isset($talk['chairman']) ? trim($talk['chairman']) : '',
                     'reader' => isset($talk['reader']) ? trim($talk['reader']) : '',
                     'prayer' => isset($talk['prayer']) ? trim($talk['prayer']) : ''
