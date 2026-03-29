@@ -192,11 +192,24 @@ if (file_exists($_talkApiPath)) {
 
             if (!empty($_myRoles)) {
                 $_td = new DateTime($_talk['date']);
-                $_talkAssignments[] = array(
-                    'date' => $_talk['date'],
-                    'roles' => implode(', ', $_myRoles),
-                    'label' => $_td->format('Y') . '년 ' . (int)$_td->format('m') . '월 ' . (int)$_td->format('d') . '일 ' . $_dayLabels[(int)$_td->format('w')] . '요일'
-                );
+                // 역할별 프로그램 구분: 연사=공개강연, 사회/낭독=파수대, 기도=주말집회
+                $_talkRoleLabels = array();
+                foreach ($_myRoles as $_r) {
+                    if ($_r === '사회' || $_r === '낭독') {
+                        $_talkRoleLabels[] = '파수대(' . $_r . ')';
+                    } else if ($_r === '연사') {
+                        $_talkRoleLabels[] = '공개 강연';
+                    } else {
+                        $_talkRoleLabels[] = '주말집회(' . $_r . ')';
+                    }
+                }
+                foreach ($_talkRoleLabels as $_rl) {
+                    $_talkAssignments[] = array(
+                        'date' => $_talk['date'],
+                        'roles' => $_rl,
+                        'label' => $_td->format('Y') . '년 ' . (int)$_td->format('m') . '월 ' . (int)$_td->format('d') . '일 ' . $_dayLabels[(int)$_td->format('w')] . '요일'
+                    );
+                }
             }
         }
     }
@@ -470,7 +483,7 @@ usort($_allItems, function($a, $b) {
             <span class="home-assignment-dday<?= $_isToday ? ' is-today' : '' ?>"><?= $_ddayText ?></span>
             <div class="home-assignment-content">
                 <div class="home-assignment-line">
-                    <div class="home-assignment-section type-talk">공개 강연 (<?=htmlspecialchars($_item['data']['roles'])?>)</div>
+                    <div class="home-assignment-section type-talk"><?=htmlspecialchars($_item['data']['roles'])?></div>
                     <div class="home-assignment-title type-talk"><?=htmlspecialchars($_item['data']['label'])?></div>
                 </div>
             </div>
