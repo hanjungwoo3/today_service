@@ -306,7 +306,7 @@ foreach ($visibleTalks as $talk) {
                     $dateDisplayShort = $d->format('n/j');
                     $rowClassMap = ['circuit_visit'=>'row-circuit','special_talk'=>'row-special','assembly_co'=>'row-assembly-co','assembly_br'=>'row-assembly-br','assembly_reg'=>'row-assembly-reg'];
                     $rowClass = $rowClassMap[$talk['topic_type']] ?? '';
-                    $topicLabels = ['circuit_visit'=>['circuit','순회 방문'],'special_talk'=>['special','특별 강연'],'assembly_co'=>['assembly-co','순회대회(감독자)'],'assembly_br'=>['assembly-br','순회대회(지부)'],'assembly_reg'=>['assembly-reg','지역대회']];
+                    $topicLabels = ['circuit_visit'=>['circuit','순회 방문'],'special_talk'=>['special','특별 강연'],'assembly_co'=>['assembly-co','순회 감독자와 함께하는 순회대회'],'assembly_br'=>['assembly-br','지부 대표자와 함께하는 순회대회'],'assembly_reg'=>['assembly-reg','지역대회']];
                     $tl = $topicLabels[$talk['topic_type']] ?? null;
                 ?>
                 <tr class="<?php echo $isPast ? 'past-row' : ''; ?> <?php echo $isNext ? 'next-row' : ''; ?> <?php echo $rowClass; ?>">

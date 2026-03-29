@@ -425,7 +425,7 @@ foreach ($allTalks as $talk) {
                     <td class="col-congregation editable" data-field="congregation"><?php echo htmlspecialchars($talk['congregation']) ?: '<span class="cell-empty">-</span>'; ?></td>
                     <td class="col-topic editable" data-field="topic">
                         <?php
-                            $topicLabels = ['circuit_visit'=>['circuit','순회 방문'],'special_talk'=>['special','특별 강연'],'assembly_co'=>['assembly-co','순회대회(감독자)'],'assembly_br'=>['assembly-br','순회대회(지부)'],'assembly_reg'=>['assembly-reg','지역대회']];
+                            $topicLabels = ['circuit_visit'=>['circuit','순회 방문'],'special_talk'=>['special','특별 강연'],'assembly_co'=>['assembly-co','순회 감독자와 함께하는 순회대회'],'assembly_br'=>['assembly-br','지부 대표자와 함께하는 순회대회'],'assembly_reg'=>['assembly-reg','지역대회']];
                             $tl = $topicLabels[$talk['topic_type']] ?? null;
                         ?>
                         <span class="desktop-only"><?php if ($tl) echo '<span class="topic-label '.$tl[0].'">'.$tl[1].'</span>'; ?></span>
@@ -719,7 +719,7 @@ foreach ($allTalks as $talk) {
             el.innerHTML = '<span class="date-text">' + formatDateDisplay(value) + '</span>';
         } else if (field === 'topic') {
             var topicType = row.getAttribute('data-topic-type');
-            var topicLabels = {circuit_visit:['circuit','순회 방문'],special_talk:['special','특별 강연'],assembly_co:['assembly-co','순회대회(감독자)'],assembly_br:['assembly-br','순회대회(지부)'],assembly_reg:['assembly-reg','지역대회']};
+            var topicLabels = {circuit_visit:['circuit','순회 방문'],special_talk:['special','특별 강연'],assembly_co:['assembly-co','순회 감독자와 함께하는 순회대회'],assembly_br:['assembly-br','지부 대표자와 함께하는 순회대회'],assembly_reg:['assembly-reg','지역대회']};
             var tl = topicLabels[topicType];
             var html = '<span class="desktop-only">';
             if (tl) html += '<span class="topic-label ' + tl[0] + '">' + tl[1] + '</span>';
@@ -779,8 +779,8 @@ foreach ($allTalks as $talk) {
             html += '<div class="topic-type-row">';
             html += '<label><input type="checkbox" name="circuit_visit" ' + (topicType === 'circuit_visit' ? 'checked' : '') + ' /> 순회방문</label>';
             html += '<label><input type="checkbox" name="special_talk" ' + (topicType === 'special_talk' ? 'checked' : '') + ' /> 특별강연</label>';
-            html += '<label><input type="checkbox" name="assembly_co" ' + (topicType === 'assembly_co' ? 'checked' : '') + ' /> 순회대회(감독자)</label>';
-            html += '<label><input type="checkbox" name="assembly_br" ' + (topicType === 'assembly_br' ? 'checked' : '') + ' /> 순회대회(지부)</label>';
+            html += '<label><input type="checkbox" name="assembly_co" ' + (topicType === 'assembly_co' ? 'checked' : '') + ' /> 순회 감독자와 함께하는 순회대회</label>';
+            html += '<label><input type="checkbox" name="assembly_br" ' + (topicType === 'assembly_br' ? 'checked' : '') + ' /> 지부 대표자와 함께하는 순회대회</label>';
             html += '<label><input type="checkbox" name="assembly_reg" ' + (topicType === 'assembly_reg' ? 'checked' : '') + ' /> 지역대회</label>';
             html += '<span class="topic-fetch-row">';
             html += '<input type="number" min="1" max="' + TOPIC_LIST.length + '" placeholder="번호" />';

@@ -306,7 +306,7 @@ foreach ($allTalks as $talk) {
                     $dateDisplay = $d->format('y/m/d');
                     $topicBgMap = ['circuit_visit'=>'topic-circuit-bg','special_talk'=>'topic-special-bg','assembly_co'=>'topic-assembly-co-bg','assembly_br'=>'topic-assembly-br-bg','assembly_reg'=>'topic-assembly-reg-bg'];
                     $topicBg = $topicBgMap[$talk['topic_type']] ?? '';
-                    $printLabels = ['circuit_visit'=>['circuit','순회 방문 - 공개 강연'],'special_talk'=>['special','특별 강연'],'assembly_co'=>['assembly-co','순회대회(감독자)'],'assembly_br'=>['assembly-br','순회대회(지부)'],'assembly_reg'=>['assembly-reg','지역대회']];
+                    $printLabels = ['circuit_visit'=>['circuit','순회 방문 - 공개 강연'],'special_talk'=>['special','특별 강연'],'assembly_co'=>['assembly-co','순회 감독자와 함께하는 순회대회'],'assembly_br'=>['assembly-br','지부 대표자와 함께하는 순회대회'],'assembly_reg'=>['assembly-reg','지역대회']];
                     $pl = $printLabels[$talk['topic_type']] ?? null;
                 ?>
                 <tr id="print-row-<?php echo $index; ?>">
