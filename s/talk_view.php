@@ -407,24 +407,19 @@ foreach ($visibleTalks as $talk) {
                                 $rows[] = array('마이크', $micVal);
                             }
 
-                            // 안내 - 청중석/출입구
+                            // 청중석
                             $ah1 = trim($h['att_hall1'] ?? '');
                             $ah2 = trim($h['att_hall2'] ?? '');
-                            $ae = trim($h['att_entrance'] ?? '');
-                            if ($ah1 !== '' || $ah2 !== '' || $ae !== '') {
-                                $attVal = '';
-                                if ($ah1 !== '' || $ah2 !== '') {
-                                    $hallMain = array();
-                                    if ($ah1 !== '') $hallMain[] = $hl($ah1);
-                                    if ($ah2 !== '') $hallMain[] = $hl($ah2);
-                                    $attVal .= '<span class="duty-sub-label">청중석:</span>' . implode(',', $hallMain);
-                                }
-                                if ($ae !== '') {
-                                    if ($attVal !== '') $attVal .= '<br>';
-                                    $attVal .= '<span class="duty-sub-label">출입구:</span>' . $hl($ae);
-                                }
-                                $rows[] = array('안내', $attVal);
+                            if ($ah1 !== '' || $ah2 !== '') {
+                                $hallMain = array();
+                                if ($ah1 !== '') $hallMain[] = $hl($ah1);
+                                if ($ah2 !== '') $hallMain[] = $hl($ah2);
+                                $rows[] = array('청중석', implode(',', $hallMain));
                             }
+
+                            // 출입구
+                            $ae = trim($h['att_entrance'] ?? '');
+                            if ($ae !== '') $rows[] = array('출입구', $hl($ae));
 
                             if ($rows):
                 ?>
