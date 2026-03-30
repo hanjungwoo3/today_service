@@ -199,12 +199,14 @@ foreach ($visibleTalks as $talk) {
             border-right: 2px solid #ef4444;
         }
         .duty-sub:hover td { background: #f0f0f0; }
-        .duty-grid { display: grid; grid-template-columns: auto 1fr; gap: 1px 8px; align-items: baseline; }
-        .duty-grid-label { color: #888; white-space: nowrap; text-align: right; }
-        .duty-grid-label::after { content: ':'; }
-        .duty-grid-value { }
+        .duty-grid { display: flex; flex-wrap: wrap; gap: 1px 0; line-height: 1.7; }
+        .duty-item { white-space: nowrap; }
+        .duty-item::after { content: ''; margin: 0 6px; border-right: 1px solid #ddd; }
+        .duty-item:last-child::after { display: none; }
+        .duty-label { color: #888; }
+        .duty-label::after { content: ': '; }
         .duty-assist { color: #999; font-size: 13px; }
-        .duty-sub-label { color: #999; margin-left: 12px; }
+        .duty-sub-label { color: #999; }
 
         .empty-state {
             text-align: center;
@@ -272,7 +274,7 @@ foreach ($visibleTalks as $talk) {
             .desktop-only { display: none !important; }
             .mobile-only-label { display: inline-block !important; }
             .duty-sub td { font-size: 13px; padding: 3px 4px 5px; white-space: normal; }
-            .duty-grid { gap: 0 6px; }
+            .duty-item { white-space: normal; }
         }
     </style>
 </head>
@@ -430,8 +432,7 @@ foreach ($visibleTalks as $talk) {
                     <td colspan="7">
                         <div class="duty-grid">
                             <?php foreach ($rows as $r): ?>
-                            <div class="duty-grid-label"><?php echo $r[0]; ?></div>
-                            <div class="duty-grid-value"><?php echo $r[1]; ?></div>
+                            <span class="duty-item"><span class="duty-label"><?php echo $r[0]; ?></span><?php echo $r[1]; ?></span>
                             <?php endforeach; ?>
                         </div>
                     </td>
