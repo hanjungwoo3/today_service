@@ -190,8 +190,8 @@ foreach ($visibleTalks as $talk) {
         .next-row:not(:has(+ .duty-sub)) td { border-bottom: 2px solid #ef4444; }
         /* duty 서브행 */
         .duty-sub td {
-            padding: 2px 6px 6px;
-            font-size: 15px;
+            padding: 4px 6px 6px;
+            font-size: 14px;
             color: #555;
             background: #f8f8f8;
             border-bottom: 2px solid #ef4444;
@@ -199,10 +199,12 @@ foreach ($visibleTalks as $talk) {
             border-right: 2px solid #ef4444;
         }
         .duty-sub:hover td { background: #f0f0f0; }
-        .duty-label { color: #888; margin-right: 2px; }
-        .duty-label::after { content: ':'; }
-        .duty-assist { color: #999; font-size: 14px; }
-        .duty-sep { color: #ccc; margin: 0 6px; }
+        .duty-grid { display: grid; grid-template-columns: auto 1fr; gap: 1px 8px; align-items: baseline; }
+        .duty-grid-label { color: #888; white-space: nowrap; text-align: right; }
+        .duty-grid-label::after { content: ':'; }
+        .duty-grid-value { }
+        .duty-assist { color: #999; font-size: 13px; }
+        .duty-sub-label { color: #999; margin-left: 12px; }
 
         .empty-state {
             text-align: center;
@@ -269,8 +271,8 @@ foreach ($visibleTalks as $talk) {
             .topic-text { font-weight: 700; }
             .desktop-only { display: none !important; }
             .mobile-only-label { display: inline-block !important; }
-            .duty-sub td { font-size: 14px; padding: 2px 3px 5px; white-space: normal; }
-            .duty-sep { margin: 0 3px; }
+            .duty-sub td { font-size: 13px; padding: 3px 4px 5px; white-space: normal; }
+            .duty-grid { gap: 0 6px; }
         }
     </style>
 </head>
@@ -375,19 +377,19 @@ foreach ($visibleTalks as $talk) {
                                 return htmlspecialchars($name);
                             };
 
-                            $parts = array();
+                            $rows = array();
 
                             // 청소
                             $cg = trim($dutyMonth['cleaning_group'] ?? '');
-                            if ($cg !== '') $parts[] = '<span class="duty-label">청소</span>' . $hl($cg);
+                            if ($cg !== '') $rows[] = array('청소', $hl($cg));
 
                             // 음료: 주(보조)
                             $dm = trim($dutyMonth['drink_main'] ?? '');
                             $da = trim($dutyMonth['drink_assist'] ?? '');
                             if ($dm !== '') {
-                                $drinkText = '<span class="duty-label">음료</span>' . $hl($dm);
-                                if ($da !== '') $drinkText .= '<span class="duty-assist">(' . $hl($da) . ')</span>';
-                                $parts[] = $drinkText;
+                                $drinkVal = $hl($dm);
+                                if ($da !== '') $drinkVal .= '<span class="duty-assist">(' . $hl($da) . ')</span>';
+                                $rows[] = array('음료', $drinkVal);
                             }
 
                             // 마이크: 주1,주2(보조)
@@ -395,33 +397,44 @@ foreach ($visibleTalks as $talk) {
                             $m2 = trim($h['mic2'] ?? '');
                             $ma = trim($h['mic_assist'] ?? '');
                             if ($m1 !== '' || $m2 !== '') {
-                                $micText = '<span class="duty-label">마이크</span>';
                                 $micMain = array();
                                 if ($m1 !== '') $micMain[] = $hl($m1);
                                 if ($m2 !== '') $micMain[] = $hl($m2);
-                                $micText .= implode(',', $micMain);
-                                if ($ma !== '') $micText .= '<span class="duty-assist">(' . $hl($ma) . ')</span>';
-                                $parts[] = $micText;
+                                $micVal = implode(',', $micMain);
+                                if ($ma !== '') $micVal .= '<span class="duty-assist">(' . $hl($ma) . ')</span>';
+                                $rows[] = array('마이크', $micVal);
                             }
 
-                            // 청중석
+                            // 안내 - 청중석/출입구
                             $ah1 = trim($h['att_hall1'] ?? '');
                             $ah2 = trim($h['att_hall2'] ?? '');
-                            if ($ah1 !== '' || $ah2 !== '') {
-                                $hallMain = array();
-                                if ($ah1 !== '') $hallMain[] = $hl($ah1);
-                                if ($ah2 !== '') $hallMain[] = $hl($ah2);
-                                $parts[] = '<span class="duty-label">청중석</span>' . implode(',', $hallMain);
+                            $ae = trim($h['att_entrance'] ?? '');
+                            if ($ah1 !== '' || $ah2 !== '' || $ae !== '') {
+                                $attVal = '';
+                                if ($ah1 !== '' || $ah2 !== '') {
+                                    $hallMain = array();
+                                    if ($ah1 !== '') $hallMain[] = $hl($ah1);
+                                    if ($ah2 !== '') $hallMain[] = $hl($ah2);
+                                    $attVal .= '<span class="duty-sub-label">청중석:</span>' . implode(',', $hallMain);
+                                }
+                                if ($ae !== '') {
+                                    if ($attVal !== '') $attVal .= '<br>';
+                                    $attVal .= '<span class="duty-sub-label">출입구:</span>' . $hl($ae);
+                                }
+                                $rows[] = array('안내', $attVal);
                             }
 
-                            // 출입구
-                            $ae = trim($h['att_entrance'] ?? '');
-                            if ($ae !== '') $parts[] = '<span class="duty-label">출입구</span>' . $hl($ae);
-
-                            if ($parts):
+                            if ($rows):
                 ?>
                 <tr class="duty-sub">
-                    <td colspan="7"><?php echo implode('<span class="duty-sep">|</span>', $parts); ?></td>
+                    <td colspan="7">
+                        <div class="duty-grid">
+                            <?php foreach ($rows as $r): ?>
+                            <div class="duty-grid-label"><?php echo $r[0]; ?></div>
+                            <div class="duty-grid-value"><?php echo $r[1]; ?></div>
+                            <?php endforeach; ?>
+                        </div>
+                    </td>
                 </tr>
                 <?php
                             endif;
