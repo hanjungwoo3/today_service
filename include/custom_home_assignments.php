@@ -20,9 +20,10 @@ if (file_exists($_helpersPath)) {
     $_timeLabels = array('새벽', '오전', '오후', '저녁');
     $_dayLabels = array('일', '월', '화', '수', '목', '금', '토');
 
-    // 이번 달 + 다음 달 검색
+    // 이번 달 + 다음 달 검색 (월말 +1 month 오버플로 방지: 1일 기준으로 계산)
+    $_baseDate = new DateTime($_today->format('Y-m-01'));
     for ($_offset = 0; $_offset <= 1; $_offset++) {
-        $_dt = clone $_today;
+        $_dt = clone $_baseDate;
         if ($_offset > 0) $_dt->modify("+{$_offset} month");
         $_calYear = (int)$_dt->format('Y');
         $_calMonth = (int)$_dt->format('n');
