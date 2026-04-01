@@ -22,7 +22,7 @@ include_once(__DIR__ . '/../config.php');
 header('Content-Type: text/plain; charset=utf-8');
 
 $today = date('Y-m-d');
-$todayDisplay = (int)date('n') . '월 ' . (int)date('j') . '일';
+$todayDisplay = sprintf('%02d월 %02d일', (int)date('n'), (int)date('j'));
 $dayLabels = array('일', '월', '화', '수', '목', '금', '토');
 $todayDay = $dayLabels[(int)date('w')];
 $timeLabels = array('새벽', '오전', '오후', '저녁');
@@ -119,7 +119,7 @@ if ($isMonday) {
                 $talkDate = $talk['date'] ?? '';
                 if ($talkDate < $weekStart || $talkDate > $weekEnd) continue;
                 $td = new DateTime($talkDate);
-                $datePrefix = (int)$td->format('n') . '/' . (int)$td->format('j') . '(' . $dayLabels[(int)$td->format('w')] . ') ';
+                $datePrefix = sprintf('%02d월 %02d일(%s) ', (int)$td->format('n'), (int)$td->format('j'), $dayLabels[(int)$td->format('w')]);
                 foreach ($roleLabels as $key => $label) {
                     $name = trim($talk[$key] ?? '');
                     if ($name !== '' && isset($memberMap[$name])) {
@@ -147,7 +147,7 @@ if ($isMonday) {
             $ws->modify('-' . ($jan4Day - 1) . ' days');
             $ws->modify('+' . (($curWeek - 1) * 7) . ' days');
             $ws->modify('+' . ($meetingDay - 1) . ' days');
-            $meetingDateStr = (int)$ws->format('n') . '/' . (int)$ws->format('j') . '(' . $dayLabels[(int)$ws->format('w')] . ') ';
+            $meetingDateStr = sprintf('%02d월 %02d일(%s) ', (int)$ws->format('n'), (int)$ws->format('j'), $dayLabels[(int)$ws->format('w')]);
 
             // 소개말, 시작기도
             $openings = array('opening_remarks' => '소개말', 'opening_prayer' => '시작 기도');
