@@ -255,13 +255,19 @@ foreach ($notifications as $mb_id => $messages) {
     $result = $mysqli->query($sql);
     if (!$result || !$result->num_rows) continue;
 
-    if ($isMonday && count($messages) > 1) {
-        // 월요일: 여러 배정을 줄바꿈으로 묶어서 발송
+    // 매일 알림(봉사인도)과 주간 알림(집회 배정) 분리
+    $dailyMsgs = array_filter($messages, function($m) { return strpos($m, '봉사인도') === 0; });
+    $weeklyMsgs = array_filter($messages, function($m) { return strpos($m, '봉사인도') !== 0; });
+
+    if (!empty($dailyMsgs) && !empty($weeklyMsgs)) {
+        $title = '배정 알림';
+        $body = $todayDisplay . '(' . $todayDay . ') ' . implode(', ', $dailyMsgs) . "\n" . implode("\n", $weeklyMsgs);
+    } elseif (!empty($weeklyMsgs)) {
         $title = '이번 주 배정 알림';
-        $body = implode("\n", $messages);
+        $body = implode("\n", $weeklyMsgs);
     } else {
         $title = '오늘의 배정 알림';
-        $body = $todayDisplay . '(' . $todayDay . ') ' . implode(', ', $messages);
+        $body = $todayDisplay . '(' . $todayDay . ') ' . implode(', ', $dailyMsgs);
     }
 
     $payload = json_encode([
