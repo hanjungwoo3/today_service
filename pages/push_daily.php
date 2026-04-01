@@ -1,12 +1,14 @@
 <?php
 /**
- * 매일 아침 배정 알림 Push 발송
+ * 배정 알림 Push 발송 (매일 13시 실행)
  * 외부 cron 서비스(cron-job.org 등)에서 호출
  *
- * ■ 매일: 봉사인도 + 오늘 봉사 배정
- * ■ 월요일만: 이번 주 집회 배정 (공개강연/파수대, 평일집회, 마이크/안내인)
+ * ■ 매일: 내일 봉사인도 배정 알림
+ * ■ 일요일: 내일(월)~다음주 일요일까지 집회 배정 알림
+ *   (공개강연/파수대, 평일집회, 마이크/안내인)
  *
  * URL: /pages/push_daily.php?key=비밀키
+ * 테스트: ?key=비밀키&test=mb_id
  */
 
 // 비밀키 검증
@@ -22,14 +24,16 @@ include_once(__DIR__ . '/../config.php');
 header('Content-Type: text/plain; charset=utf-8');
 
 $today = date('Y-m-d');
-$todayDisplay = sprintf('%02d월 %02d일', (int)date('n'), (int)date('j'));
+$tomorrow = date('Y-m-d', strtotime('+1 day'));
+$tomorrowDt = new DateTime($tomorrow);
+$tomorrowDisplay = sprintf('%02d월 %02d일', (int)$tomorrowDt->format('n'), (int)$tomorrowDt->format('j'));
 $dayLabels = array('일', '월', '화', '수', '목', '금', '토');
-$todayDay = $dayLabels[(int)date('w')];
+$tomorrowDay = $dayLabels[(int)$tomorrowDt->format('w')];
 $timeLabels = array('새벽', '오전', '오후', '저녁');
-$isMonday = ((int)date('w') === 1);
+$isSunday = ((int)date('w') === 0);
 $testMbId = isset($_GET['test']) ? intval($_GET['test']) : 0;
 
-// 테스트 모드: lock 무시, 해당 회원에게만 발송
+// 테스트 모드: lock 무시, 주간 알림도 포함
 if (!$testMbId) {
     // 중복 발송 방지: 오늘 이미 발송했으면 스킵
     $lockFile = __DIR__ . '/../c/storage/push_daily.lock';
@@ -39,7 +43,7 @@ if (!$testMbId) {
     }
 } else {
     $lockFile = null;
-    $isMonday = true; // 테스트 시 주간 알림도 포함
+    $isSunday = true; // 테스트 시 주간 알림도 포함
 }
 
 // VAPID 키 확인
@@ -80,16 +84,15 @@ function addNotification($mb_id, $message) {
 }
 
 // ══════════════════════════════════════
-// 매일: 오늘 봉사 배정 + 봉사인도
+// 매일: 내일 봉사인도 배정
 // ══════════════════════════════════════
 
-// ── 1. 봉사인도 캘린더 (매일) ──
 $helpersPath = __DIR__ . '/../c/lib/helpers.php';
 if (file_exists($helpersPath)) {
     require_once $helpersPath;
-    $calData = loadCalendarData((int)date('Y'), (int)date('n'));
-    if (!empty($calData['dates'][$today]['names'])) {
-        foreach ($calData['dates'][$today]['names'] as $idx => $name) {
+    $calData = loadCalendarData((int)$tomorrowDt->format('Y'), (int)$tomorrowDt->format('n'));
+    if (!empty($calData['dates'][$tomorrow]['names'])) {
+        foreach ($calData['dates'][$tomorrow]['names'] as $idx => $name) {
             $name = trim($name);
             if ($name !== '' && isset($memberMap[$name])) {
                 addNotification($memberMap[$name], '봉사인도(' . $timeLabels[$idx] . ')');
@@ -99,15 +102,15 @@ if (file_exists($helpersPath)) {
 }
 
 // ══════════════════════════════════════
-// 월요일만: 이번 주 집회 배정
+// 일요일: 내일(월)~다음주 일요일 집회 배정
 // ══════════════════════════════════════
 
-if ($isMonday) {
-    // 이번 주 날짜 범위 (월~일)
-    $weekStart = date('Y-m-d'); // 오늘 월요일
-    $weekEnd = date('Y-m-d', strtotime('+6 days'));
+if ($isSunday) {
+    // 내일(월) ~ 다음주 일요일 (7일간)
+    $weekStart = $tomorrow;
+    $weekEnd = date('Y-m-d', strtotime('+7 days'));
 
-    // ── 3. 공개강연/파수대 (이번 주) ──
+    // ── 공개강연/파수대 ──
     $talkApiPath = __DIR__ . '/../s/talk_api.php';
     if (file_exists($talkApiPath)) {
         require_once $talkApiPath;
@@ -130,13 +133,15 @@ if ($isMonday) {
         }
     }
 
-    // ── 4. 평일집회 프로그램 (이번 주) ──
+    // ── 평일집회 프로그램 ──
     $meetingApiPath = __DIR__ . '/../s/api.php';
     if (file_exists($meetingApiPath)) {
         require_once $meetingApiPath;
         $meetingMgr = new MeetingDataManager();
-        $curYear = (int)date('o');
-        $curWeek = (int)date('W');
+        // 내일(월)이 속한 ISO 주차
+        $nextMon = new DateTime($tomorrow);
+        $curYear = (int)$nextMon->format('o');
+        $curWeek = (int)$nextMon->format('W');
         $wd = $meetingMgr->load($curYear, $curWeek);
         if ($wd && empty($wd['no_meeting'])) {
             $meetingDay = $meetingMgr->getMeetingWeekday();
@@ -188,14 +193,16 @@ if ($isMonday) {
         }
     }
 
-    // ── 5. 청소/마이크/안내인 (이번 주 해당 반기) ──
+    // ── 청소/마이크/안내인 ──
     $dutyApiPath = __DIR__ . '/../s/duty_api.php';
     if (file_exists($dutyApiPath)) {
         require_once $dutyApiPath;
         $dutyMgr = new DutyDataManager();
-        $dutyData = $dutyMgr->load((int)date('Y'));
-        $month = (string)(int)date('n');
-        $day = (int)date('j');
+        // 내일(월) 기준 반기
+        $dutyDt = new DateTime($tomorrow);
+        $dutyData = $dutyMgr->load((int)$dutyDt->format('Y'));
+        $month = (string)(int)$dutyDt->format('n');
+        $day = (int)$dutyDt->format('j');
         $monthData = $dutyData['months'][$month] ?? null;
         if ($monthData) {
             $half = ($day <= 15) ? 'first_half' : 'second_half';
@@ -255,19 +262,19 @@ foreach ($notifications as $mb_id => $messages) {
     $result = $mysqli->query($sql);
     if (!$result || !$result->num_rows) continue;
 
-    // 매일 알림(봉사인도)과 주간 알림(집회 배정) 분리
+    // 봉사인도(내일)와 주간 알림 분리
     $dailyMsgs = array_filter($messages, function($m) { return strpos($m, '봉사인도') === 0; });
     $weeklyMsgs = array_filter($messages, function($m) { return strpos($m, '봉사인도') !== 0; });
 
     if (!empty($dailyMsgs) && !empty($weeklyMsgs)) {
         $title = '배정 알림';
-        $body = $todayDisplay . '(' . $todayDay . ') ' . implode(', ', $dailyMsgs) . "\n" . implode("\n", $weeklyMsgs);
+        $body = '내일 ' . $tomorrowDisplay . '(' . $tomorrowDay . ') ' . implode(', ', $dailyMsgs) . "\n" . implode("\n", $weeklyMsgs);
     } elseif (!empty($weeklyMsgs)) {
         $title = '이번 주 배정 알림';
         $body = implode("\n", $weeklyMsgs);
     } else {
-        $title = '오늘의 배정 알림';
-        $body = $todayDisplay . '(' . $todayDay . ') ' . implode(', ', $dailyMsgs);
+        $title = '내일 배정 알림';
+        $body = $tomorrowDisplay . '(' . $tomorrowDay . ') ' . implode(', ', $dailyMsgs);
     }
 
     $payload = json_encode([
@@ -303,7 +310,7 @@ foreach ($webPush->flush() as $report) {
 }
 
 // 발송 완료 기록
-$log = date('Y-m-d H:i:s') . ($isMonday ? ' [월요일 주간알림]' : ' [일일알림]');
+$log = date('Y-m-d H:i:s') . ($isSunday ? ' [일요일 주간알림]' : ' [일일알림]');
 $log .= " - queued:{$sentCount} success:{$successCount} fail:{$failCount} members:" . count($notifications) . "\n";
 foreach ($notifications as $mb_id => $messages) {
     $log .= "  " . ($memberNames[$mb_id] ?? $mb_id) . ": " . implode(', ', $messages) . "\n";
