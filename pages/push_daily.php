@@ -53,7 +53,7 @@ require_once $autoload;
 // ── 전체 회원 목록 (이름 → mb_id 매핑) ──
 $memberMap = array(); // name => mb_id
 $memberNames = array(); // mb_id => name
-$sql = "SELECT mb_id, mb_name FROM " . MEMBER_TABLE . " WHERE mb_level >= 1";
+$sql = "SELECT mb_id, mb_name FROM " . MEMBER_TABLE;
 $result = $mysqli->query($sql);
 if ($result) {
     while ($row = $result->fetch_assoc()) {
