@@ -268,7 +268,7 @@ foreach ($notifications as $mb_id => $messages) {
 
     if (!empty($dailyMsgs) && !empty($weeklyMsgs)) {
         $title = '배정 알림';
-        $body = '내일 ' . $tomorrowDisplay . '(' . $tomorrowDay . ') ' . implode(', ', $dailyMsgs) . "\n" . implode("\n", $weeklyMsgs);
+        $body = $tomorrowDisplay . '(' . $tomorrowDay . ') ' . implode(', ', $dailyMsgs) . "\n" . implode("\n", $weeklyMsgs);
     } elseif (!empty($weeklyMsgs)) {
         $title = '이번 주 배정 알림';
         $body = implode("\n", $weeklyMsgs);
