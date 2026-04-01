@@ -271,16 +271,23 @@ foreach ($notifications as $mb_id => $messages) {
 }
 
 // 일괄 발송
+$successCount = 0;
+$failCount = 0;
 foreach ($webPush->flush() as $report) {
-    if ($report->isSubscriptionExpired()) {
-        $expired_endpoint = $mysqli->real_escape_string($report->getEndpoint());
-        $mysqli->query("DELETE FROM " . PUSH_SUBSCRIPTION_TABLE . " WHERE ps_endpoint = '{$expired_endpoint}'");
+    if ($report->isSuccess()) {
+        $successCount++;
+    } else {
+        $failCount++;
+        if ($report->isSubscriptionExpired()) {
+            $expired_endpoint = $mysqli->real_escape_string($report->getEndpoint());
+            $mysqli->query("DELETE FROM " . PUSH_SUBSCRIPTION_TABLE . " WHERE ps_endpoint = '{$expired_endpoint}'");
+        }
     }
 }
 
 // 발송 완료 기록
 $log = date('Y-m-d H:i:s') . ($isMonday ? ' [월요일 주간알림]' : ' [일일알림]');
-$log .= " - sent {$sentCount} push(es) to " . count($notifications) . " member(s)\n";
+$log .= " - queued:{$sentCount} success:{$successCount} fail:{$failCount} members:" . count($notifications) . "\n";
 foreach ($notifications as $mb_id => $messages) {
     $log .= "  " . ($memberNames[$mb_id] ?? $mb_id) . ": " . implode(', ', $messages) . "\n";
 }
