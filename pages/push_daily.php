@@ -29,8 +29,8 @@ $timeLabels = array('새벽', '오전', '오후', '저녁');
 $isMonday = ((int)date('w') === 1);
 
 // 중복 발송 방지: 오늘 이미 발송했으면 스킵
-$lockFile = __DIR__ . '/../c/storage/push_daily_' . $today . '.lock';
-if (file_exists($lockFile)) {
+$lockFile = __DIR__ . '/../c/storage/push_daily.lock';
+if (file_exists($lockFile) && trim(file_get_contents($lockFile, false, null, 0, 10)) === $today) {
     echo "Already sent today.\n";
     exit;
 }
