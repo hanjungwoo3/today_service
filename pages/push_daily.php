@@ -27,12 +27,19 @@ $dayLabels = array('일', '월', '화', '수', '목', '금', '토');
 $todayDay = $dayLabels[(int)date('w')];
 $timeLabels = array('새벽', '오전', '오후', '저녁');
 $isMonday = ((int)date('w') === 1);
+$testMbId = isset($_GET['test']) ? intval($_GET['test']) : 0;
 
-// 중복 발송 방지: 오늘 이미 발송했으면 스킵
-$lockFile = __DIR__ . '/../c/storage/push_daily.lock';
-if (file_exists($lockFile) && trim(file_get_contents($lockFile, false, null, 0, 10)) === $today) {
-    echo "Already sent today.\n";
-    exit;
+// 테스트 모드: lock 무시, 해당 회원에게만 발송
+if (!$testMbId) {
+    // 중복 발송 방지: 오늘 이미 발송했으면 스킵
+    $lockFile = __DIR__ . '/../c/storage/push_daily.lock';
+    if (file_exists($lockFile) && trim(file_get_contents($lockFile, false, null, 0, 10)) === $today) {
+        echo "Already sent today.\n";
+        exit;
+    }
+} else {
+    $lockFile = null;
+    $isMonday = true; // 테스트 시 주간 알림도 포함
 }
 
 // VAPID 키 확인
@@ -221,9 +228,9 @@ if ($isMonday) {
 // Push 발송
 // ══════════════════════════════════════
 
-if (empty($notifications)) {
-    echo "No notifications to send today.\n";
-    file_put_contents($lockFile, date('Y-m-d H:i:s') . " - no notifications\n");
+if (empty($notifications) || ($testMbId && !isset($notifications[$testMbId]))) {
+    echo ($testMbId ? "[TEST] " : "") . "No notifications to send today.\n";
+    if ($lockFile) file_put_contents($lockFile, date('Y-m-d H:i:s') . " - no notifications\n");
     exit;
 }
 
@@ -238,6 +245,10 @@ $auth = [
 $webPush = new \Minishlink\WebPush\WebPush($auth);
 
 $sentCount = 0;
+// 테스트 모드: 해당 회원만 발송
+if ($testMbId) {
+    $notifications = array_intersect_key($notifications, [$testMbId => true]);
+}
 foreach ($notifications as $mb_id => $messages) {
     $sql = "SELECT ps_endpoint, ps_auth, ps_p256dh FROM " . PUSH_SUBSCRIPTION_TABLE . "
             WHERE mb_id = " . intval($mb_id);
@@ -291,5 +302,6 @@ $log .= " - queued:{$sentCount} success:{$successCount} fail:{$failCount} member
 foreach ($notifications as $mb_id => $messages) {
     $log .= "  " . ($memberNames[$mb_id] ?? $mb_id) . ": " . implode(', ', $messages) . "\n";
 }
-file_put_contents($lockFile, $log);
+if ($lockFile) file_put_contents($lockFile, $log);
+if ($testMbId) $log = "[TEST mb_id={$testMbId}] " . $log;
 echo $log;
