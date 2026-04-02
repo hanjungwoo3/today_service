@@ -32,20 +32,11 @@ switch ($action) {
         $escaped_auth = $mysqli->real_escape_string($auth);
         $escaped_p256dh = $mysqli->real_escape_string($p256dh);
 
-        // 기존 동일 endpoint가 있으면 업데이트, 없으면 삽입
-        $check_sql = "SELECT ps_id FROM " . PUSH_SUBSCRIPTION_TABLE . "
-                      WHERE mb_id = {$mb_id} AND ps_endpoint = '{$escaped_endpoint}'";
-        $check_result = $mysqli->query($check_sql);
+        // 해당 사용자의 기존 구독 삭제 후 새로 삽입 (endpoint 변경 시 이전 구독 정리)
+        $mysqli->query("DELETE FROM " . PUSH_SUBSCRIPTION_TABLE . " WHERE mb_id = {$mb_id}");
+        $sql = "INSERT INTO " . PUSH_SUBSCRIPTION_TABLE . " (mb_id, ps_endpoint, ps_auth, ps_p256dh)
+                VALUES ({$mb_id}, '{$escaped_endpoint}', '{$escaped_auth}', '{$escaped_p256dh}')";
 
-        if ($check_result && $check_result->num_rows > 0) {
-            $ps_id = $check_result->fetch_assoc()['ps_id'];
-            $sql = "UPDATE " . PUSH_SUBSCRIPTION_TABLE . "
-                    SET ps_auth = '{$escaped_auth}', ps_p256dh = '{$escaped_p256dh}', ps_created = NOW()
-                    WHERE ps_id = {$ps_id}";
-        } else {
-            $sql = "INSERT INTO " . PUSH_SUBSCRIPTION_TABLE . " (mb_id, ps_endpoint, ps_auth, ps_p256dh)
-                    VALUES ({$mb_id}, '{$escaped_endpoint}', '{$escaped_auth}', '{$escaped_p256dh}')";
-        }
 
         if ($mysqli->query($sql)) {
             echo json_encode(['success' => true]);

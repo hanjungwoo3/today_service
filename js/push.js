@@ -32,13 +32,28 @@ var PushNotify = (function() {
         checkSubscription();
     }
 
-    // 구독 상태 확인 → window._pushSubscribed 설정 + 콜백
+    // 구독 상태 확인 → window._pushSubscribed 설정 + 서버 구독 갱신 + 콜백
     function checkSubscription(callback) {
         if (!_ready) { if (callback) callback(false); return; }
 
         navigator.serviceWorker.ready.then(function(registration) {
             registration.pushManager.getSubscription().then(function(subscription) {
                 window._pushSubscribed = !!subscription;
+                // 구독이 있으면 서버에 endpoint 갱신 (만료 방지)
+                if (subscription) {
+                    var key = subscription.getKey('p256dh');
+                    var auth = subscription.getKey('auth');
+                    $.ajax({
+                        url: _basePath + '/pages/push_api.php',
+                        method: 'POST',
+                        data: {
+                            action: 'subscribe',
+                            endpoint: subscription.endpoint,
+                            p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(key))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
+                            auth: btoa(String.fromCharCode.apply(null, new Uint8Array(auth))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+                        }
+                    });
+                }
                 if (callback) callback(!!subscription);
             });
         });
