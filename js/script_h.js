@@ -1097,7 +1097,7 @@ function guide_meeting_work(work, ms_id, s_date, page) {
               String(now.getDate()).padStart(2, '0')
             ].join('-');
             pageload_custom(BASE_PATH + '/pages/today_service_list.php?s_date=' + today, '#today-service-list');
-            pageload_custom(BASE_PATH + '/pages/minister_calendar.php?s_date=' + s_date + '&toYear=' + toYear + '&toMonth=' + toMonth, '#minister_calendar');
+            pageload_custom(BASE_PATH + '/pages/minister_calendar.php?s_date=' + s_date + '&toYear=' + today.split('-')[0] + '&toMonth=' + String(parseInt(today.split('-')[1], 10)), '#minister_calendar');
           } else if (page == 'minister') {
             pageload_custom(BASE_PATH + '/pages/minister_calendar_schedule.php?s_date=' + s_date, '#minister_calendar_schedule');
           } else if (page == 'display') {
