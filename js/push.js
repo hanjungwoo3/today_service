@@ -39,20 +39,27 @@ var PushNotify = (function() {
         navigator.serviceWorker.ready.then(function(registration) {
             registration.pushManager.getSubscription().then(function(subscription) {
                 window._pushSubscribed = !!subscription;
-                // 구독이 있으면 서버에 endpoint 갱신 (만료 방지)
+                // 구독이 있으면 하루 1회 서버에 endpoint 갱신 (만료 방지)
                 if (subscription) {
-                    var key = subscription.getKey('p256dh');
-                    var auth = subscription.getKey('auth');
-                    $.ajax({
-                        url: _basePath + '/pages/push_api.php',
-                        method: 'POST',
-                        data: {
-                            action: 'subscribe',
-                            endpoint: subscription.endpoint,
-                            p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(key))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
-                            auth: btoa(String.fromCharCode.apply(null, new Uint8Array(auth))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-                        }
-                    });
+                    var today = new Date().toISOString().slice(0, 10);
+                    var lastSync = localStorage.getItem('push_sync_date');
+                    if (lastSync !== today) {
+                        var key = subscription.getKey('p256dh');
+                        var auth = subscription.getKey('auth');
+                        $.ajax({
+                            url: _basePath + '/pages/push_api.php',
+                            method: 'POST',
+                            data: {
+                                action: 'subscribe',
+                                endpoint: subscription.endpoint,
+                                p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(key))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
+                                auth: btoa(String.fromCharCode.apply(null, new Uint8Array(auth))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+                            },
+                            success: function() {
+                                localStorage.setItem('push_sync_date', today);
+                            }
+                        });
+                    }
                 }
                 if (callback) callback(!!subscription);
             });
