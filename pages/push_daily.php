@@ -252,6 +252,8 @@ $auth = [
 $webPush = new \Minishlink\WebPush\WebPush($auth);
 
 $sentCount = 0;
+$sentMembers = array(); // 발송된 회원
+$skippedMembers = array(); // 구독 없는 회원
 // 테스트 모드: 해당 회원만 발송
 if ($testMbId) {
     $notifications = array_intersect_key($notifications, [$testMbId => true]);
@@ -260,7 +262,11 @@ foreach ($notifications as $mb_id => $messages) {
     $sql = "SELECT ps_endpoint, ps_auth, ps_p256dh FROM " . PUSH_SUBSCRIPTION_TABLE . "
             WHERE mb_id = " . intval($mb_id);
     $result = $mysqli->query($sql);
-    if (!$result || !$result->num_rows) continue;
+    if (!$result || !$result->num_rows) {
+        $skippedMembers[] = $mb_id;
+        continue;
+    }
+    $sentMembers[] = $mb_id;
 
     // 봉사인도(내일)와 주간 알림 분리
     $dailyMsgs = array_filter($messages, function($m) { return strpos($m, '봉사인도') === 0; });
@@ -312,8 +318,21 @@ foreach ($webPush->flush() as $report) {
 // 발송 완료 기록
 $log = date('Y-m-d H:i:s') . ($isSunday ? ' [일요일 주간알림]' : ' [일일알림]');
 $log .= " - queued:{$sentCount} success:{$successCount} fail:{$failCount} members:" . count($notifications) . "\n";
+$log .= "[발송] ";
+foreach ($sentMembers as $id) {
+    $log .= ($memberNames[$id] ?? $id) . ", ";
+}
+$log = rtrim($log, ", ") . "\n";
+if (!empty($skippedMembers)) {
+    $log .= "[미구독] ";
+    foreach ($skippedMembers as $id) {
+        $log .= ($memberNames[$id] ?? $id) . ", ";
+    }
+    $log = rtrim($log, ", ") . "\n";
+}
 foreach ($notifications as $mb_id => $messages) {
-    $log .= "  " . ($memberNames[$mb_id] ?? $mb_id) . ": " . implode(', ', $messages) . "\n";
+    $mark = in_array($mb_id, $sentMembers) ? 'O' : 'X';
+    $log .= "  [{$mark}] " . ($memberNames[$mb_id] ?? $mb_id) . ": " . implode(', ', $messages) . "\n";
 }
 if ($lockFile) file_put_contents($lockFile, $log);
 if ($testMbId) $log = "[TEST mb_id={$testMbId}] " . $log;
