@@ -915,6 +915,7 @@ foreach ($allTalks as $talk) {
         var ms = e.target.closest('.mobile-speaker');
         if (!ms || ms.querySelector('.mobile-speaker-edit')) return;
         var row = ms.closest('tr');
+        if (!row) return;
         var sp = row.getAttribute('data-speaker') || '';
         var cg = row.getAttribute('data-congregation') || '';
         var div = document.createElement('div');
