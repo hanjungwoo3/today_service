@@ -903,6 +903,8 @@ foreach ($allTalks as $talk) {
 
     // 셀 클릭 이벤트
     document.getElementById('talkTable').addEventListener('click', function(e) {
+        // mobile-speaker 클릭은 별도 처리
+        if (e.target.closest('.mobile-speaker')) return;
         var td = e.target.closest('td.editable');
         if (td) {
             startEdit(td);
