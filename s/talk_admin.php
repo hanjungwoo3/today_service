@@ -361,7 +361,10 @@ foreach ($allTalks as $talk) {
             .col-date { width: 1%; white-space: nowrap; }
             .col-speaker, .col-congregation { display: none; }
             .col-chairman, .col-reader, .col-prayer { width: 1%; white-space: nowrap; }
-            .mobile-speaker { display: block; font-weight: normal; margin-bottom: 2px; color: #555; }
+            .mobile-speaker { display: block; font-weight: normal; margin-bottom: 2px; color: #555; cursor: pointer; }
+            .mobile-speaker:empty::after { content: '연사/회중 입력'; color: #ccc; }
+            .mobile-speaker-edit { display: flex; gap: 4px; margin-bottom: 4px; }
+            .mobile-speaker-edit input { flex: 1; padding: 4px; font-size: 13px; border: 1px solid #80bdff; border-radius: 3px; }
             .topic-text { font-weight: 700; }
             .desktop-only { display: none !important; }
             .mobile-only-label { display: inline-block !important; }
@@ -907,10 +910,65 @@ foreach ($allTalks as $talk) {
         }
     });
 
+    // 모바일에서 연사/회중 편집 (mobile-speaker 클릭)
+    document.getElementById('talkTable').addEventListener('click', function(e) {
+        var ms = e.target.closest('.mobile-speaker');
+        if (!ms || ms.querySelector('.mobile-speaker-edit')) return;
+        var row = ms.closest('tr');
+        var sp = row.getAttribute('data-speaker') || '';
+        var cg = row.getAttribute('data-congregation') || '';
+        var div = document.createElement('div');
+        div.className = 'mobile-speaker-edit';
+        div.innerHTML = '<input type="text" placeholder="연사" value="' + escapeHtml(sp) + '" />' +
+            '<input type="text" placeholder="회중" value="' + escapeHtml(cg) + '" />';
+        ms.innerHTML = '';
+        ms.appendChild(div);
+        div.querySelector('input').focus();
+        // Enter로 저장, Escape로 취소
+        div.addEventListener('keydown', function(ev) {
+            if (ev.key === 'Enter') { _finishMobileSpeaker(ms, row); ev.preventDefault(); }
+            if (ev.key === 'Escape') { _cancelMobileSpeaker(ms, row); }
+        });
+        e.stopPropagation();
+    });
+
+    function _finishMobileSpeaker(ms, row) {
+        var inputs = ms.querySelectorAll('input');
+        var sp = inputs[0] ? inputs[0].value.trim() : '';
+        var cg = inputs[1] ? inputs[1].value.trim() : '';
+        row.setAttribute('data-speaker', sp);
+        row.setAttribute('data-congregation', cg);
+        // 숨겨진 데스크톱 셀도 갱신
+        var spTd = row.querySelector('td.col-speaker');
+        if (spTd) { spTd.textContent = sp || '-'; }
+        var cgTd = row.querySelector('td.col-congregation');
+        if (cgTd) { cgTd.textContent = cg || '-'; }
+        // mobile-speaker 렌더
+        var html = '';
+        if (sp) { html += escapeHtml(sp); if (cg) html += '(' + escapeHtml(cg) + ')'; }
+        ms.innerHTML = html;
+        autoSave();
+    }
+
+    function _cancelMobileSpeaker(ms, row) {
+        var sp = row.getAttribute('data-speaker') || '';
+        var cg = row.getAttribute('data-congregation') || '';
+        var html = '';
+        if (sp) { html += escapeHtml(sp); if (cg) html += '(' + escapeHtml(cg) + ')'; }
+        ms.innerHTML = html;
+    }
+
     // 외부 클릭 → 편집 완료
     document.addEventListener('click', function(e) {
         if (editingCell && !editingCell.contains(e.target)) {
             finishEdit(editingCell);
+        }
+        // mobile-speaker 편집 중 외부 클릭 → 저장
+        var activeEdit = document.querySelector('.mobile-speaker-edit');
+        if (activeEdit && !activeEdit.contains(e.target)) {
+            var ms = activeEdit.closest('.mobile-speaker');
+            var row = ms.closest('tr');
+            _finishMobileSpeaker(ms, row);
         }
     });
 
