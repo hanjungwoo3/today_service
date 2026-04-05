@@ -359,12 +359,7 @@ foreach ($allTalks as $talk) {
             .talk-table th { padding: 6px 3px; font-size: 13px; }
             .talk-table td { padding: 5px 3px; font-size: 14px; }
             .col-date { width: 1%; white-space: nowrap; }
-            .col-speaker, .col-congregation { display: none; }
             .col-chairman, .col-reader, .col-prayer { width: 1%; white-space: nowrap; }
-            .mobile-speaker { display: block; font-weight: normal; margin-bottom: 2px; color: #555; cursor: pointer; }
-            .mobile-speaker:empty::after { content: '연사/회중 입력'; color: #ccc; }
-            .mobile-speaker-edit { display: flex; gap: 4px; margin-bottom: 4px; }
-            .mobile-speaker-edit input { flex: 1; padding: 4px; font-size: 13px; border: 1px solid #80bdff; border-radius: 3px; }
             .topic-text { font-weight: 700; }
             .desktop-only { display: none !important; }
             .mobile-only-label { display: inline-block !important; }
