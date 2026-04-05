@@ -355,7 +355,7 @@ foreach ($allTalks as $talk) {
         }
         @media (max-width: 768px) {
             .container { padding: 6px; }
-            .talk-table { font-size: 14px; min-width: 420px; }
+            .talk-table { font-size: 14px; min-width: 900px; }
             .talk-table th { padding: 6px 3px; font-size: 13px; }
             .talk-table td { padding: 5px 3px; font-size: 14px; }
             .col-date { width: 1%; white-space: nowrap; }
