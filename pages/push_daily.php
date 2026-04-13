@@ -23,18 +23,21 @@ include_once(__DIR__ . '/../config.php');
 
 header('Content-Type: text/plain; charset=utf-8');
 
-$today = date('Y-m-d');
-$tomorrow = date('Y-m-d', strtotime('+1 day'));
+// 테스트용 기준 날짜 (?date=YYYY-MM-DD), 없으면 오늘
+$testDate = isset($_GET['date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['date']) ? $_GET['date'] : '';
+$today = $testDate ?: date('Y-m-d');
+$todayDt = new DateTime($today);
+$tomorrow = (clone $todayDt)->modify('+1 day')->format('Y-m-d');
 $tomorrowDt = new DateTime($tomorrow);
 $tomorrowDisplay = sprintf('%02d월 %02d일', (int)$tomorrowDt->format('n'), (int)$tomorrowDt->format('j'));
 $dayLabels = array('일', '월', '화', '수', '목', '금', '토');
 $tomorrowDay = $dayLabels[(int)$tomorrowDt->format('w')];
 $timeLabels = array('새벽', '오전', '오후', '저녁');
-$isSunday = ((int)date('w') === 0);
+$isSunday = ((int)$todayDt->format('w') === 0);
 $testMbId = isset($_GET['test']) ? intval($_GET['test']) : 0;
 
 // 테스트 모드: lock 무시, 주간 알림도 포함
-if (!$testMbId) {
+if (!$testMbId && !$testDate) {
     // 중복 발송 방지: 오늘 이미 발송했으면 스킵
     $lockFile = __DIR__ . '/../c/storage/push_daily.lock';
     if (file_exists($lockFile) && trim(file_get_contents($lockFile, false, null, 0, 10)) === $today) {
@@ -108,7 +111,7 @@ if (file_exists($helpersPath)) {
 if ($isSunday) {
     // 내일(월) ~ 다음주 일요일 (7일간)
     $weekStart = $tomorrow;
-    $weekEnd = date('Y-m-d', strtotime('+7 days'));
+    $weekEnd = (clone $todayDt)->modify('+7 days')->format('Y-m-d');
 
     // ── 공개강연/파수대 ──
     $talkApiPath = __DIR__ . '/../s/talk_api.php';
