@@ -257,6 +257,8 @@ $webPush = new \Minishlink\WebPush\WebPush($auth);
 $sentCount = 0;
 $sentMembers = array(); // 발송된 회원
 $skippedMembers = array(); // 구독 없는 회원
+$deliveryMap = array(); // delivery_id => mb_id
+$deliveryLog = __DIR__ . '/../c/storage/push_delivery.log';
 // 테스트 모드: 해당 회원만 발송
 if ($testMbId) {
     $notifications = array_intersect_key($notifications, [$testMbId => true]);
@@ -286,10 +288,17 @@ foreach ($notifications as $mb_id => $messages) {
         $body = $tomorrowDisplay . '(' . $tomorrowDay . ') ' . implode(', ', $dailyMsgs);
     }
 
+    // 수신 확인용 고유 ID
+    $deliveryId = uniqid($mb_id . '_', true);
+    $deliveryId = preg_replace('/[^a-zA-Z0-9_]/', '', $deliveryId);
+    $deliveryMap[$deliveryId] = $mb_id;
+    file_put_contents($deliveryLog, date('Y-m-d H:i:s') . "\tSEND\t" . $deliveryId . "\t" . $mb_id . "\t" . ($memberNames[$mb_id] ?? '') . "\n", FILE_APPEND | LOCK_EX);
+
     $payload = json_encode([
         'title' => $title,
         'body' => $body,
-        'url' => '/'
+        'url' => '/',
+        'deliveryId' => $deliveryId
     ]);
 
     while ($sub = $result->fetch_assoc()) {
@@ -337,6 +346,55 @@ foreach ($notifications as $mb_id => $messages) {
     $mark = in_array($mb_id, $sentMembers) ? 'O' : 'X';
     $log .= "  [{$mark}] " . ($memberNames[$mb_id] ?? $mb_id) . ": " . implode(', ', $messages) . "\n";
 }
+
+// 이전 발송 내역의 ACK 상태 분석 (최근 24시간)
+if (file_exists($deliveryLog)) {
+    $lines = file($deliveryLog, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $cutoff = date('Y-m-d H:i:s', strtotime('-24 hours'));
+    $sent24h = array(); // delivery_id => [ts, mb_id, name]
+    $acked24h = array(); // delivery_id => ack_ts
+    foreach ($lines as $l) {
+        $parts = explode("\t", $l);
+        if (count($parts) < 3 || $parts[0] < $cutoff) continue;
+        if ($parts[1] === 'SEND') {
+            $sent24h[$parts[2]] = array($parts[0], $parts[3] ?? '', $parts[4] ?? '');
+        } elseif ($parts[1] === 'ACK') {
+            $acked24h[$parts[2]] = $parts[0];
+        }
+    }
+    if (!empty($sent24h)) {
+        $ackedCount = 0;
+        $notAcked = array();
+        foreach ($sent24h as $did => $info) {
+            // 방금 발송한 것 제외 (ACK 올 시간 없음)
+            if (isset($deliveryMap[$did])) continue;
+            if (isset($acked24h[$did])) {
+                $ackedCount++;
+            } else {
+                $notAcked[] = $info[2] ?: $info[1];
+            }
+        }
+        $pastTotal = $ackedCount + count($notAcked);
+        if ($pastTotal > 0) {
+            $log .= "\n[직전 24시간] 발송: {$pastTotal}건, 실수신: {$ackedCount}건";
+            if (!empty($notAcked)) {
+                $log .= "\n[미수신] " . implode(', ', $notAcked);
+            }
+            $log .= "\n";
+        }
+    }
+    // 로그 파일 크기 관리: 7일 이상 된 항목 제거
+    $weekAgo = date('Y-m-d H:i:s', strtotime('-7 days'));
+    $keepLines = array();
+    foreach ($lines as $l) {
+        $parts = explode("\t", $l);
+        if (count($parts) >= 1 && $parts[0] >= $weekAgo) $keepLines[] = $l;
+    }
+    if (count($keepLines) < count($lines)) {
+        file_put_contents($deliveryLog, implode("\n", $keepLines) . "\n");
+    }
+}
+
 if ($lockFile) file_put_contents($lockFile, $log);
 if ($testMbId) $log = "[TEST mb_id={$testMbId}] " . $log;
 echo $log;

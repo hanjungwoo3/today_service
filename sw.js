@@ -31,6 +31,11 @@ self.addEventListener('push', event => {
         vibrate: [200, 100, 200]
     };
 
+    // 수신 확인 ACK (deliveryId가 있으면 서버에 알림)
+    if (data.deliveryId) {
+        fetch('/pages/push_ack.php?id=' + encodeURIComponent(data.deliveryId), { method: 'POST', keepalive: true }).catch(function() {});
+    }
+
     event.waitUntil(
         self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
             var visibleClients = clientList.filter(function(c) {
