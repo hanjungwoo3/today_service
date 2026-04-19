@@ -119,7 +119,7 @@ $assigned_members = ['M' => [], 'W' => []]; // 이미 배정된 사람들 ID 목
 $seen_groups = ['M' => [], 'W' => []]; // 중복 체크용
 
 // 배정 처리 함수
-function processAssignment($group_ids, $tt_name, $tt_id, $tt_type, &$attendees, &$member_info, &$assigned_groups, &$assigned_members, &$seen_groups) {
+function processAssignment($group_ids, $tt_name, $tt_id, $tt_type, &$attendees, &$member_info, &$assigned_groups, &$assigned_members, &$seen_groups, $group_pattern = '') {
     $group_attendees = array_values(array_intersect($group_ids, $attendees));
     if (count($group_attendees) >= 1) {
         sort($group_attendees);
@@ -156,7 +156,25 @@ function processAssignment($group_ids, $tt_name, $tt_id, $tt_type, &$attendees, 
                 }
 
                 if (!empty($group_info)) {
-                    $assigned_groups[$sex][] = ['members' => $group_info, 'type' => $type, 'territory' => $tt_name, 'tt_id' => $tt_id, 'tt_type' => $tt_type];
+                    // 그룹 패턴(예: "2.2")에 따라 짝으로 분할
+                    $pairs = array();
+                    if ($group_pattern && preg_match('/^[0-9.]+$/', $group_pattern)) {
+                        $sizes = array_map('intval', explode('.', $group_pattern));
+                        $idx = 0;
+                        foreach ($sizes as $size) {
+                            if ($size <= 0) continue;
+                            $pair = array_slice($group_info, $idx, $size);
+                            if (!empty($pair)) $pairs[] = $pair;
+                            $idx += $size;
+                        }
+                        // 남은 멤버가 있으면 마지막 짝에 추가
+                        if ($idx < count($group_info)) {
+                            $rest = array_slice($group_info, $idx);
+                            if (!empty($pairs)) $pairs[count($pairs) - 1] = array_merge($pairs[count($pairs) - 1], $rest);
+                            else $pairs[] = $rest;
+                        }
+                    }
+                    $assigned_groups[$sex][] = ['members' => $group_info, 'pairs' => $pairs, 'type' => $type, 'territory' => $tt_name, 'tt_id' => $tt_id, 'tt_type' => $tt_type];
                 }
             }
         }
@@ -165,7 +183,7 @@ function processAssignment($group_ids, $tt_name, $tt_id, $tt_type, &$attendees, 
 
 // 1. t_territory에서 현재 배정 조회 (선택한 모임 기준)
 if ($selected_meeting > 0) {
-    $sql = "SELECT tt_id, tt_name, tt_assigned FROM t_territory WHERE tt_assigned_date = '{$selected_date}' AND tt_assigned != '' AND m_id = {$selected_meeting}";
+    $sql = "SELECT tt_id, tt_name, tt_assigned, tt_assigned_group FROM t_territory WHERE tt_assigned_date = '{$selected_date}' AND tt_assigned != '' AND m_id = {$selected_meeting}";
     $result = $mysqli->query($sql);
     if ($result) {
         while ($row = $result->fetch_assoc()) {
@@ -173,12 +191,12 @@ if ($selected_meeting > 0) {
                 return !empty($id) && is_numeric($id);
             });
             $group_ids = array_map('intval', $group_ids);
-            processAssignment($group_ids, $row['tt_name'], $row['tt_id'], 'territory', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups);
+            processAssignment($group_ids, $row['tt_name'], $row['tt_id'], 'territory', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups, $row['tt_assigned_group'] ?? '');
         }
     }
 
     // 2. t_territory_record에서 배정 기록 조회 (선택한 모임 기준)
-    $sql = "SELECT r.ttr_assigned_num, t.tt_id, t.tt_name
+    $sql = "SELECT r.ttr_assigned_num, r.ttr_assigned_group, t.tt_id, t.tt_name
             FROM t_territory_record r
             JOIN t_territory t ON r.tt_id = t.tt_id
             WHERE r.ttr_assigned_date = '{$selected_date}' AND r.ttr_assigned_num != '' AND r.m_id = {$selected_meeting}";
@@ -189,12 +207,12 @@ if ($selected_meeting > 0) {
                 return !empty($id) && is_numeric($id);
             });
             $group_ids = array_map('intval', $group_ids);
-            processAssignment($group_ids, $row['tt_name'], $row['tt_id'], 'territory', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups);
+            processAssignment($group_ids, $row['tt_name'], $row['tt_id'], 'territory', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups, $row['ttr_assigned_group'] ?? '');
         }
     }
 
     // 3. t_display에서 전시대 배정 조회 (선택한 모임 기준)
-    $sql = "SELECT d_id, dp_name, d_assigned FROM " . DISPLAY_TABLE . " WHERE d_assigned_date = '{$selected_date}' AND d_assigned != '' AND m_id = {$selected_meeting}";
+    $sql = "SELECT d_id, dp_name, d_assigned, d_assigned_group FROM " . DISPLAY_TABLE . " WHERE d_assigned_date = '{$selected_date}' AND d_assigned != '' AND m_id = {$selected_meeting}";
     $result = $mysqli->query($sql);
     if ($result) {
         while ($row = $result->fetch_assoc()) {
@@ -202,7 +220,7 @@ if ($selected_meeting > 0) {
                 return !empty($id) && is_numeric($id);
             });
             $group_ids = array_map('intval', $group_ids);
-            processAssignment($group_ids, $row['dp_name'], $row['d_id'], 'display', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups);
+            processAssignment($group_ids, $row['dp_name'], $row['d_id'], 'display', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups, $row['d_assigned_group'] ?? '');
         }
     }
 }
@@ -970,8 +988,17 @@ foreach (['M', 'W'] as $sex) {
                                     <div class="group-detail">
                                         <span class="group-members">
                                             <?php
-                                                $names = array_map(function($m) { return $m['name']; }, $group['members']);
-                                                echo htmlspecialchars(implode(', ', $names));
+                                                if (!empty($group['pairs']) && count($group['pairs']) > 1) {
+                                                    $pair_strs = array();
+                                                    foreach ($group['pairs'] as $pair) {
+                                                        $pair_names = array_map(function($m) { return $m['name']; }, $pair);
+                                                        $pair_strs[] = '(' . htmlspecialchars(implode(', ', $pair_names)) . ')';
+                                                    }
+                                                    echo implode(' ', $pair_strs);
+                                                } else {
+                                                    $names = array_map(function($m) { return $m['name']; }, $group['members']);
+                                                    echo htmlspecialchars(implode(', ', $names));
+                                                }
                                             ?>
                                         </span>
                                         <?php if (!empty($group['territory'])): ?>
@@ -1086,8 +1113,17 @@ foreach (['M', 'W'] as $sex) {
                                     <div class="group-detail">
                                         <span class="group-members">
                                             <?php
-                                                $names = array_map(function($m) { return $m['name']; }, $group['members']);
-                                                echo htmlspecialchars(implode(', ', $names));
+                                                if (!empty($group['pairs']) && count($group['pairs']) > 1) {
+                                                    $pair_strs = array();
+                                                    foreach ($group['pairs'] as $pair) {
+                                                        $pair_names = array_map(function($m) { return $m['name']; }, $pair);
+                                                        $pair_strs[] = '(' . htmlspecialchars(implode(', ', $pair_names)) . ')';
+                                                    }
+                                                    echo implode(' ', $pair_strs);
+                                                } else {
+                                                    $names = array_map(function($m) { return $m['name']; }, $group['members']);
+                                                    echo htmlspecialchars(implode(', ', $names));
+                                                }
                                             ?>
                                         </span>
                                         <?php if (!empty($group['territory'])): ?>
