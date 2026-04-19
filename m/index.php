@@ -120,10 +120,12 @@ $seen_groups = ['M' => [], 'W' => []]; // 중복 체크용
 
 // 배정 처리 함수
 function processAssignment($group_ids, $tt_name, $tt_id, $tt_type, &$attendees, &$member_info, &$assigned_groups, &$assigned_members, &$seen_groups, $group_pattern = '') {
+    // DB 저장 순서(group_ids) 유지 — 짝 분할 정확도에 영향
     $group_attendees = array_values(array_intersect($group_ids, $attendees));
     if (count($group_attendees) >= 1) {
-        sort($group_attendees);
-        $group_key = implode(',', $group_attendees);
+        $dedup_attendees = $group_attendees;
+        sort($dedup_attendees);
+        $group_key = implode(',', $dedup_attendees);
         // 팀+구역 조합 중복 방지 (같은 팀+같은 구역은 스킵)
         $dedup_key = $group_key . ':' . $tt_id;
 
