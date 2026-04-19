@@ -1003,6 +1003,9 @@ foreach (['M', 'W'] as $sex) {
                                 <div class="group-card clickable" onclick="goToAssignLoad('<?php echo $group['tt_id']; ?>', '<?php echo $group['tt_type']; ?>')">
                                     <span class="group-number" style="background:#eab308;"><?php echo $idx + 1; ?></span>
                                     <div class="group-detail">
+                                        <?php if (!empty($group['territory'])): ?>
+                                        <span class="territory-name"><?php echo htmlspecialchars($group['territory']); ?></span>
+                                        <?php endif; ?>
                                         <span class="group-members">
                                             <?php
                                                 if (!empty($group['pairs']) && count($group['pairs']) > 1) {
@@ -1016,9 +1019,6 @@ foreach (['M', 'W'] as $sex) {
                                                 }
                                             ?>
                                         </span>
-                                        <?php if (!empty($group['territory'])): ?>
-                                        <span class="territory-name"><?php echo htmlspecialchars($group['territory']); ?></span>
-                                        <?php endif; ?>
                                     </div>
                                     <span class="type-badge"><?php echo $group['type']; ?></span>
                                 </div>
@@ -1126,6 +1126,9 @@ foreach (['M', 'W'] as $sex) {
                                 <div class="group-card clickable" onclick="goToAssignLoad('<?php echo $group['tt_id']; ?>', '<?php echo $group['tt_type']; ?>')">
                                     <span class="group-number" style="background:#eab308;"><?php echo $idx + 1; ?></span>
                                     <div class="group-detail">
+                                        <?php if (!empty($group['territory'])): ?>
+                                        <span class="territory-name"><?php echo htmlspecialchars($group['territory']); ?></span>
+                                        <?php endif; ?>
                                         <span class="group-members">
                                             <?php
                                                 if (!empty($group['pairs']) && count($group['pairs']) > 1) {
@@ -1139,9 +1142,6 @@ foreach (['M', 'W'] as $sex) {
                                                 }
                                             ?>
                                         </span>
-                                        <?php if (!empty($group['territory'])): ?>
-                                        <span class="territory-name"><?php echo htmlspecialchars($group['territory']); ?></span>
-                                        <?php endif; ?>
                                     </div>
                                     <span class="type-badge"><?php echo $group['type']; ?></span>
                                 </div>
