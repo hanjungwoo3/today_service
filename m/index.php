@@ -611,8 +611,8 @@ foreach (['M', 'W'] as $sex) {
             border: 1px solid #e0e7ff;
             border-radius: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            white-space: nowrap;
         }
+        .group-card .group-detail { min-width: 0; flex: 1; }
         .group-card.clickable {
             cursor: pointer;
             transition: all 0.15s;
@@ -698,7 +698,9 @@ foreach (['M', 'W'] as $sex) {
         .group-members {
             font-size: 16px;
             font-weight: 500;
-            white-space: nowrap;
+            white-space: normal;
+            word-break: keep-all;
+            line-height: 1.4;
         }
         .territory-name {
             font-size: 13px;
