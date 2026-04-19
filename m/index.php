@@ -598,9 +598,14 @@ foreach (['M', 'W'] as $sex) {
             gap: 16px;
         }
         .group-list {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr;
             gap: 10px;
+        }
+        @media (min-width: 768px) {
+            .group-list {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
         .group-card {
             display: flex;
