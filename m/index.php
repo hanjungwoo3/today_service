@@ -997,12 +997,10 @@ foreach (['M', 'W'] as $sex) {
                                         <span class="group-members">
                                             <?php
                                                 if (!empty($group['pairs']) && count($group['pairs']) > 1) {
-                                                    $pair_strs = array();
                                                     foreach ($group['pairs'] as $pair) {
                                                         $pair_names = array_map(function($m) { return $m['name']; }, $pair);
-                                                        $pair_strs[] = '(' . htmlspecialchars(implode(', ', $pair_names)) . ')';
+                                                        echo '<div>(' . htmlspecialchars(implode(', ', $pair_names)) . ')</div>';
                                                     }
-                                                    echo implode(' ', $pair_strs);
                                                 } else {
                                                     $names = array_map(function($m) { return $m['name']; }, $group['members']);
                                                     echo htmlspecialchars(implode(', ', $names));
@@ -1122,12 +1120,10 @@ foreach (['M', 'W'] as $sex) {
                                         <span class="group-members">
                                             <?php
                                                 if (!empty($group['pairs']) && count($group['pairs']) > 1) {
-                                                    $pair_strs = array();
                                                     foreach ($group['pairs'] as $pair) {
                                                         $pair_names = array_map(function($m) { return $m['name']; }, $pair);
-                                                        $pair_strs[] = '(' . htmlspecialchars(implode(', ', $pair_names)) . ')';
+                                                        echo '<div>(' . htmlspecialchars(implode(', ', $pair_names)) . ')</div>';
                                                     }
-                                                    echo implode(' ', $pair_strs);
                                                 } else {
                                                     $names = array_map(function($m) { return $m['name']; }, $group['members']);
                                                     echo htmlspecialchars(implode(', ', $names));
