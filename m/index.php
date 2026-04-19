@@ -156,22 +156,26 @@ function processAssignment($group_ids, $tt_name, $tt_id, $tt_type, &$attendees, 
                 }
 
                 if (!empty($group_info)) {
-                    // 그룹 패턴(예: "2.2")에 따라 짝으로 분할
+                    // 그룹 패턴(예: "2" 또는 "2,2,1")에 따라 짝으로 분할
+                    // "2" 단일값: 2명씩 반복 분할, "2,2,1" 다중값: 각각 순서대로
                     $pairs = array();
-                    if ($group_pattern && preg_match('/^[0-9.]+$/', $group_pattern)) {
-                        $sizes = array_map('intval', explode('.', $group_pattern));
-                        $idx = 0;
-                        foreach ($sizes as $size) {
-                            if ($size <= 0) continue;
-                            $pair = array_slice($group_info, $idx, $size);
-                            if (!empty($pair)) $pairs[] = $pair;
-                            $idx += $size;
-                        }
-                        // 남은 멤버가 있으면 마지막 짝에 추가
-                        if ($idx < count($group_info)) {
-                            $rest = array_slice($group_info, $idx);
-                            if (!empty($pairs)) $pairs[count($pairs) - 1] = array_merge($pairs[count($pairs) - 1], $rest);
-                            else $pairs[] = $rest;
+                    $sizes = array_filter(array_map('intval', explode(',', $group_pattern)));
+                    if (!empty($sizes)) {
+                        $remaining = $group_info;
+                        if (count($sizes) == 1) {
+                            // 단일값: 반복 분할
+                            $s = $sizes[0];
+                            while (!empty($remaining)) {
+                                $pairs[] = array_splice($remaining, 0, $s);
+                            }
+                        } else {
+                            // 다중값: 각각 순서대로
+                            foreach ($sizes as $s) {
+                                if (empty($remaining)) break;
+                                $pairs[] = array_splice($remaining, 0, $s);
+                            }
+                            // 남은 사람은 개별 그룹
+                            foreach ($remaining as $m) $pairs[] = array($m);
                         }
                     }
                     $assigned_groups[$sex][] = ['members' => $group_info, 'pairs' => $pairs, 'type' => $type, 'territory' => $tt_name, 'tt_id' => $tt_id, 'tt_type' => $tt_type];
