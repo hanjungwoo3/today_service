@@ -104,18 +104,35 @@ if ($member_string) {
     $cal_data = json_decode(file_get_contents($calendar_json_path), true);
     if (!empty($cal_data['dates'][$s_date]['names'])) {
       $cal_names = $cal_data['dates'][$s_date]['names'];
-      // names: [새벽(7~9시), 오전(9~13시), 오후(13~19시), 저녁(19시~)]
+      // names: [새벽(~9:59), 오전(10:00~13:29), 오후(13:30~18:59), 저녁(19:00~)]
       // 3개 항목인 경우 새벽 없이 [오전, 오후, 저녁]
       if (count($cal_names) === 3) {
         array_unshift($cal_names, '');
       }
       $ms_time_val = $row['ms_time'] ?? '';
       $hour = (int)date('H', strtotime($ms_time_val));
-      if ($hour < 9) $time_idx = 0;        // 새벽 (7~9시)
-      elseif ($hour < 11) $time_idx = 1;   // 오전 (9~10시 시작)
-      elseif ($hour < 19) $time_idx = 2;   // 오후 (11~18시 시작)
-      else $time_idx = 3;                   // 저녁 (19시~)
+      $minute = (int)date('i', strtotime($ms_time_val));
+      $minutes = $hour * 60 + $minute;
+      if ($minutes < 10 * 60) $time_idx = 0;              // 새벽 (~9:59)
+      elseif ($minutes < 13 * 60 + 30) $time_idx = 1;     // 오전 (10:00~13:29)
+      elseif ($minutes < 19 * 60) $time_idx = 2;          // 오후 (13:30~18:59)
+      else $time_idx = 3;                                  // 저녁 (19:00~)
+
+      // 빈 슬롯 폴백: 가까운 채워진 이름 사용 (토요일 등 4명 다 없을 때)
       $calendar_guide_name = trim($cal_names[$time_idx] ?? '');
+      if ($calendar_guide_name === '') {
+        for ($d = 1; $d <= 3; $d++) {
+          foreach (array($time_idx - $d, $time_idx + $d) as $try_idx) {
+            if ($try_idx < 0 || $try_idx > 3) continue;
+            $try_name = trim($cal_names[$try_idx] ?? '');
+            if ($try_name !== '') {
+              $calendar_guide_name = $try_name;
+              $time_idx = $try_idx;
+              break 2;
+            }
+          }
+        }
+      }
     }
   }
   if ($calendar_guide_name) {
