@@ -119,7 +119,7 @@ $assigned_members = ['M' => [], 'W' => []]; // 이미 배정된 사람들 ID 목
 $seen_groups = ['M' => [], 'W' => []]; // 중복 체크용
 
 // 배정 처리 함수
-function processAssignment($group_ids, $tt_name, $tt_id, $tt_type, &$attendees, &$member_info, &$assigned_groups, &$assigned_members, &$seen_groups, $group_pattern = '') {
+function processAssignment($group_ids, $tt_name, $tt_id, $tt_type, &$attendees, &$member_info, &$assigned_groups, &$assigned_members, &$seen_groups, $group_pattern = '', $tt_num = '') {
     // DB 저장 순서(group_ids) 유지 — 짝 분할 정확도에 영향
     $group_attendees = array_values(array_intersect($group_ids, $attendees));
     if (count($group_attendees) >= 1) {
@@ -180,7 +180,7 @@ function processAssignment($group_ids, $tt_name, $tt_id, $tt_type, &$attendees, 
                             foreach ($remaining as $m) $pairs[] = array($m);
                         }
                     }
-                    $assigned_groups[$sex][] = ['members' => $group_info, 'pairs' => $pairs, 'type' => $type, 'territory' => $tt_name, 'tt_id' => $tt_id, 'tt_type' => $tt_type];
+                    $assigned_groups[$sex][] = ['members' => $group_info, 'pairs' => $pairs, 'type' => $type, 'territory' => $tt_name, 'tt_num' => $tt_num, 'tt_id' => $tt_id, 'tt_type' => $tt_type];
                 }
             }
         }
@@ -189,7 +189,7 @@ function processAssignment($group_ids, $tt_name, $tt_id, $tt_type, &$attendees, 
 
 // 1. t_territory에서 현재 배정 조회 (선택한 모임 기준)
 if ($selected_meeting > 0) {
-    $sql = "SELECT tt_id, tt_name, tt_assigned, tt_assigned_group FROM t_territory WHERE tt_assigned_date = '{$selected_date}' AND tt_assigned != '' AND m_id = {$selected_meeting}";
+    $sql = "SELECT tt_id, tt_num, tt_name, tt_assigned, tt_assigned_group FROM t_territory WHERE tt_assigned_date = '{$selected_date}' AND tt_assigned != '' AND m_id = {$selected_meeting}";
     $result = $mysqli->query($sql);
     if ($result) {
         while ($row = $result->fetch_assoc()) {
@@ -197,12 +197,12 @@ if ($selected_meeting > 0) {
                 return !empty($id) && is_numeric($id);
             });
             $group_ids = array_map('intval', $group_ids);
-            processAssignment($group_ids, $row['tt_name'], $row['tt_id'], 'territory', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups, $row['tt_assigned_group'] ?? '');
+            processAssignment($group_ids, $row['tt_name'], $row['tt_id'], 'territory', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups, $row['tt_assigned_group'] ?? '', $row['tt_num'] ?? '');
         }
     }
 
     // 2. t_territory_record에서 배정 기록 조회 (선택한 모임 기준)
-    $sql = "SELECT r.ttr_assigned_num, r.ttr_assigned_group, t.tt_id, t.tt_name
+    $sql = "SELECT r.ttr_assigned_num, r.ttr_assigned_group, t.tt_id, t.tt_num, t.tt_name
             FROM t_territory_record r
             JOIN t_territory t ON r.tt_id = t.tt_id
             WHERE r.ttr_assigned_date = '{$selected_date}' AND r.ttr_assigned_num != '' AND r.m_id = {$selected_meeting}";
@@ -213,7 +213,7 @@ if ($selected_meeting > 0) {
                 return !empty($id) && is_numeric($id);
             });
             $group_ids = array_map('intval', $group_ids);
-            processAssignment($group_ids, $row['tt_name'], $row['tt_id'], 'territory', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups, $row['ttr_assigned_group'] ?? '');
+            processAssignment($group_ids, $row['tt_name'], $row['tt_id'], 'territory', $attendees, $member_info, $assigned_groups, $assigned_members, $seen_groups, $row['ttr_assigned_group'] ?? '', $row['tt_num'] ?? '');
         }
     }
 
@@ -1004,7 +1004,10 @@ foreach (['M', 'W'] as $sex) {
                                     <span class="group-number" style="background:#eab308;"><?php echo $idx + 1; ?></span>
                                     <div class="group-detail">
                                         <?php if (!empty($group['territory'])): ?>
-                                        <span class="territory-name"><?php echo htmlspecialchars($group['territory']); ?></span>
+                                        <span class="territory-name"><?php
+                                            if (!empty($group['tt_num'])) echo htmlspecialchars($group['tt_num']) . '. ';
+                                            echo htmlspecialchars($group['territory']);
+                                        ?></span>
                                         <?php endif; ?>
                                         <span class="group-members">
                                             <?php
@@ -1127,7 +1130,10 @@ foreach (['M', 'W'] as $sex) {
                                     <span class="group-number" style="background:#eab308;"><?php echo $idx + 1; ?></span>
                                     <div class="group-detail">
                                         <?php if (!empty($group['territory'])): ?>
-                                        <span class="territory-name"><?php echo htmlspecialchars($group['territory']); ?></span>
+                                        <span class="territory-name"><?php
+                                            if (!empty($group['tt_num'])) echo htmlspecialchars($group['tt_num']) . '. ';
+                                            echo htmlspecialchars($group['territory']);
+                                        ?></span>
                                         <?php endif; ?>
                                         <span class="group-members">
                                             <?php
