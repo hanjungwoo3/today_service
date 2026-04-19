@@ -707,6 +707,10 @@ foreach (['M', 'W'] as $sex) {
             word-break: keep-all;
             line-height: 1.4;
         }
+        .pair-block {
+            display: inline-block;
+            white-space: nowrap;
+        }
         .territory-name {
             font-size: 13px;
             color: #6b7280;
@@ -1004,7 +1008,7 @@ foreach (['M', 'W'] as $sex) {
                                                 if (!empty($group['pairs']) && count($group['pairs']) > 1) {
                                                     foreach ($group['pairs'] as $pair) {
                                                         $pair_names = array_map(function($m) { return $m['name']; }, $pair);
-                                                        echo '<div>(' . htmlspecialchars(implode(', ', $pair_names)) . ')</div>';
+                                                        echo '<span class="pair-block">(' . htmlspecialchars(implode(', ', $pair_names)) . ')</span> ';
                                                     }
                                                 } else {
                                                     $names = array_map(function($m) { return $m['name']; }, $group['members']);
@@ -1127,7 +1131,7 @@ foreach (['M', 'W'] as $sex) {
                                                 if (!empty($group['pairs']) && count($group['pairs']) > 1) {
                                                     foreach ($group['pairs'] as $pair) {
                                                         $pair_names = array_map(function($m) { return $m['name']; }, $pair);
-                                                        echo '<div>(' . htmlspecialchars(implode(', ', $pair_names)) . ')</div>';
+                                                        echo '<span class="pair-block">(' . htmlspecialchars(implode(', ', $pair_names)) . ')</span> ';
                                                     }
                                                 } else {
                                                     $names = array_map(function($m) { return $m['name']; }, $group['members']);
