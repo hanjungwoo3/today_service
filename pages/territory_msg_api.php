@@ -13,18 +13,56 @@ if (!$current_mb_id) {
 $current_mb_name = get_member_name($current_mb_id);
 $action = isset($_POST['action']) ? $_POST['action'] : '';
 
-// 권한 확인: 해당 구역에 배정된 사용자인지 (T=호별, D=전시대)
+// 권한 확인: 해당 구역에 배정된 사용자 OR 관리자 OR 모임 인도자
 function verify_territory_access($tt_id, $mb_id, $type = 'T') {
     global $mysqli;
     $tt_id = intval($tt_id);
     $mb_id = intval($mb_id);
+
+    // 관리자는 모든 구역 접근 가능
+    if (function_exists('is_admin') && is_admin($mb_id)) return true;
+
     if ($type === 'D') {
-        $sql = "SELECT d_id FROM " . DISPLAY_TABLE . " WHERE d_id = {$tt_id} AND FIND_IN_SET({$mb_id}, d_assigned)";
+        $sql = "SELECT d_id, m_id FROM " . DISPLAY_TABLE . " WHERE d_id = {$tt_id}";
     } else {
-        $sql = "SELECT tt_id FROM " . TERRITORY_TABLE . " WHERE tt_id = {$tt_id} AND FIND_IN_SET({$mb_id}, tt_assigned)";
+        $sql = "SELECT tt_id, m_id FROM " . TERRITORY_TABLE . " WHERE tt_id = {$tt_id}";
     }
     $result = $mysqli->query($sql);
-    return ($result && $result->num_rows > 0);
+    if (!$result || !$result->num_rows) return false;
+    $row = $result->fetch_assoc();
+    $m_id = intval($row['m_id'] ?? 0);
+
+    // 1. 배정된 멤버인지
+    $field = ($type === 'D') ? 'd_assigned' : 'tt_assigned';
+    $table = ($type === 'D') ? DISPLAY_TABLE : TERRITORY_TABLE;
+    $id_field = ($type === 'D') ? 'd_id' : 'tt_id';
+    $sql = "SELECT {$id_field} FROM {$table} WHERE {$id_field} = {$tt_id} AND FIND_IN_SET({$mb_id}, {$field})";
+    $r = $mysqli->query($sql);
+    if ($r && $r->num_rows > 0) return true;
+
+    // 2. 해당 모임의 인도자인지 (m_guide / ms_guide / ms_guide2)
+    if ($m_id > 0) {
+        $sql = "SELECT m.m_guide, ms.ms_guide, ms.ms_guide2
+                FROM " . MEETING_TABLE . " m
+                LEFT JOIN " . MEETING_SCHEDULE_TABLE . " ms ON m.ms_id = ms.ms_id
+                WHERE m.m_id = {$m_id}";
+        $r = $mysqli->query($sql);
+        if ($r && $r->num_rows) {
+            $g = $r->fetch_assoc();
+            $guides = array();
+            foreach (array('m_guide', 'ms_guide', 'ms_guide2') as $col) {
+                if (!empty($g[$col])) {
+                    foreach (explode(',', $g[$col]) as $gid) {
+                        $gid = intval(trim($gid));
+                        if ($gid > 0) $guides[] = $gid;
+                    }
+                }
+            }
+            if (in_array($mb_id, $guides)) return true;
+        }
+    }
+
+    return false;
 }
 
 $msg_type = isset($_POST['type']) ? $_POST['type'] : 'T';

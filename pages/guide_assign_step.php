@@ -503,6 +503,9 @@ $date_parts = explode("-", $date);
                     <button class="btn btn-sm btn-outline-secondary float-left" type="button"
                       v-on:click="setSelectedMembers(value.id, 'territory', value.assigned_ids,value.assigned_group)"
                       v-if="value.assigned_ids != '' && auth">배정불러오기</button>
+                    <button class="btn btn-sm btn-outline-info ml-1 float-left" type="button"
+                      v-on:click="openTerritoryChat(value.id, value.num)"
+                      v-if="value.assigned_ids != '' && auth"><i class="bi bi-chat-dots"></i> 쪽지</button>
                     <button class="btn btn-sm btn-outline-secondary ml-1 float-right" type="button"
                       v-on:click="ViewTerritory(value.id)">보기</button>
                     <button class="btn btn-sm btn-outline-secondary float-right" type="button"
@@ -796,6 +799,9 @@ $date_parts = explode("-", $date);
                     <button class="btn btn-sm btn-outline-secondary float-left" type="button"
                       v-on:click="setSelectedMembers(value.id, 'display', value.assigned_ids,value.assigned_group)"
                       v-if="value.assigned_ids != '' && auth">배정불러오기</button>
+                    <button class="btn btn-sm btn-outline-info ml-1 float-left" type="button"
+                      v-on:click="openDisplayChat(value.id, value.name)"
+                      v-if="value.assigned_ids != '' && auth"><i class="bi bi-chat-dots"></i> 쪽지</button>
                     <template v-if="(value.address != '') || (value.address != '')">
                       <button class="btn btn-sm btn-outline-secondary ml-1 float-right" type="button"
                         v-on:click="ViewMap(value.address)">지도</button>
@@ -1528,6 +1534,16 @@ $date_parts = explode("-", $date);
       },
       ViewTerritory(id) {
         open_territory_view(id, 'view');
+      },
+      openTerritoryChat(tt_id, tt_num) {
+        if (typeof TerritoryMsg !== 'undefined') {
+          TerritoryMsg.openPanel(tt_id, tt_num || '', <?= mb_id() ?>, 'T');
+        }
+      },
+      openDisplayChat(d_id, dp_name) {
+        if (typeof TerritoryMsg !== 'undefined') {
+          TerritoryMsg.openPanel(d_id, dp_name || '', <?= mb_id() ?>, 'D');
+        }
       },
       ViewTelephone(id) {
         open_telephone_view(id);
