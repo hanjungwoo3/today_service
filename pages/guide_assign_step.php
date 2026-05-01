@@ -456,7 +456,7 @@ $date_parts = explode("-", $date);
                     :class="selected_territories.includes(value.id)?'active':''">
                     <button class="btn btn-sm text-info p-0 border-0 position-absolute" style="top:6px; right:8px; font-size:18px;" type="button"
                       v-on:click="openTerritoryChat(value.id, value.num)"
-                      v-if="value.assigned_ids != '' && auth"><i class="bi bi-chat-dots"></i></button>
+                      v-if="value.assigned_ids != '' && auth && value.assigned_date >= today_date"><i class="bi bi-chat-dots"></i></button>
                     <p class="mb-1">
                       <span class="badge badge-pill badge-success badge-outline px-1 align-middle">{{value.num}} ·
                         {{value.type}}</span>
@@ -786,7 +786,7 @@ $date_parts = explode("-", $date);
                     :class="selected_displays.includes(value.id)?'active':''">
                     <button class="btn btn-sm text-info p-0 border-0 position-absolute" style="top:6px; right:8px; font-size:18px;" type="button"
                       v-on:click="openDisplayChat(value.d_id, value.name)"
-                      v-if="value.d_id && value.assigned_ids != '' && auth"><i class="bi bi-chat-dots"></i></button>
+                      v-if="value.d_id && value.assigned_ids != '' && auth && value.assigned_date >= today_date"><i class="bi bi-chat-dots"></i></button>
                     <p>{{value.name}} {{value.num}}팀</p>
                     <div class="assigned_group_name mt-1">
                       {{value.assigned_group_name}}
@@ -922,7 +922,8 @@ $date_parts = explode("-", $date);
       territoryTypeFilter: 'all',
       territoryTypes: [],
       activeTabId: '',
-      expandedVisits: {}
+      expandedVisits: {},
+      today_date: (function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})()
     },
     methods: {
       formatDate(dateString) {
