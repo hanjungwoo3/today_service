@@ -452,8 +452,11 @@ $date_parts = explode("-", $date);
               <h6 class="border-bottom mt-2 pb-1">일반</h6>
               <ul class="list-group mb-2">
                 <template v-for="(value, index) in assigned_data.territory" v-if="value.type!='편지'">
-                  <li class="list-group-item clearfix border-bottom-0 p-2"
+                  <li class="list-group-item clearfix border-bottom-0 p-2 position-relative"
                     :class="selected_territories.includes(value.id)?'active':''">
+                    <button class="btn btn-sm text-info p-0 border-0 position-absolute" style="top:6px; right:8px; font-size:18px;" type="button"
+                      v-on:click="openTerritoryChat(value.id, value.num)"
+                      v-if="value.assigned_ids != '' && auth"><i class="bi bi-chat-dots"></i></button>
                     <p class="mb-1">
                       <span class="badge badge-pill badge-success badge-outline px-1 align-middle">{{value.num}} ·
                         {{value.type}}</span>
@@ -503,9 +506,6 @@ $date_parts = explode("-", $date);
                     <button class="btn btn-sm btn-outline-secondary float-left" type="button"
                       v-on:click="setSelectedMembers(value.id, 'territory', value.assigned_ids,value.assigned_group)"
                       v-if="value.assigned_ids != '' && auth">배정불러오기</button>
-                    <button class="btn btn-sm btn-outline-info ml-1 float-left" type="button"
-                      v-on:click="openTerritoryChat(value.id, value.num)"
-                      v-if="value.assigned_ids != '' && auth"><i class="bi bi-chat-dots"></i> 쪽지</button>
                     <button class="btn btn-sm btn-outline-secondary ml-1 float-right" type="button"
                       v-on:click="ViewTerritory(value.id)">보기</button>
                     <button class="btn btn-sm btn-outline-secondary float-right" type="button"
@@ -782,8 +782,11 @@ $date_parts = explode("-", $date);
               <h6 class="border-bottom mt-2 pb-1">전시대</h6>
               <ul class="list-group">
                 <template v-for="(value, index) in displays" v-if="value.m_id == m_id">
-                  <li class="list-group-item clearfix border-bottom-0 p-2"
+                  <li class="list-group-item clearfix border-bottom-0 p-2 position-relative"
                     :class="selected_displays.includes(value.id)?'active':''">
+                    <button class="btn btn-sm text-info p-0 border-0 position-absolute" style="top:6px; right:8px; font-size:18px;" type="button"
+                      v-on:click="openDisplayChat(value.d_id, value.name)"
+                      v-if="value.d_id && value.assigned_ids != '' && auth"><i class="bi bi-chat-dots"></i></button>
                     <p>{{value.name}} {{value.num}}팀</p>
                     <div class="assigned_group_name mt-1">
                       {{value.assigned_group_name}}
@@ -799,9 +802,6 @@ $date_parts = explode("-", $date);
                     <button class="btn btn-sm btn-outline-secondary float-left" type="button"
                       v-on:click="setSelectedMembers(value.id, 'display', value.assigned_ids,value.assigned_group)"
                       v-if="value.assigned_ids != '' && auth">배정불러오기</button>
-                    <button class="btn btn-sm btn-outline-info ml-1 float-left" type="button"
-                      v-on:click="openDisplayChat(value.d_id, value.name)"
-                      v-if="value.d_id && value.assigned_ids != '' && auth"><i class="bi bi-chat-dots"></i> 쪽지</button>
                     <template v-if="(value.address != '') || (value.address != '')">
                       <button class="btn btn-sm btn-outline-secondary ml-1 float-right" type="button"
                         v-on:click="ViewMap(value.address)">지도</button>
