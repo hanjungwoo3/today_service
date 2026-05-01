@@ -800,8 +800,8 @@ $date_parts = explode("-", $date);
                       v-on:click="setSelectedMembers(value.id, 'display', value.assigned_ids,value.assigned_group)"
                       v-if="value.assigned_ids != '' && auth">배정불러오기</button>
                     <button class="btn btn-sm btn-outline-info ml-1 float-left" type="button"
-                      v-on:click="openDisplayChat(value.id, value.name)"
-                      v-if="value.assigned_ids != '' && auth"><i class="bi bi-chat-dots"></i> 쪽지</button>
+                      v-on:click="openDisplayChat(value.d_id, value.name)"
+                      v-if="value.d_id && value.assigned_ids != '' && auth"><i class="bi bi-chat-dots"></i> 쪽지</button>
                     <template v-if="(value.address != '') || (value.address != '')">
                       <button class="btn btn-sm btn-outline-secondary ml-1 float-right" type="button"
                         v-on:click="ViewMap(value.address)">지도</button>
