@@ -70,10 +70,10 @@ if ($result->num_rows > 0) {
                 'status' => $status,
                 'assigned_group_name' => $assigned_group_name,
                 'all_past_records' => $all_past_records,
-                'total' => $effective_total,
-                'visit' => $telephone_progress['visit'],
-                'absence' => $telephone_progress['absence'],
-                'progress' => $progress_percent
+                'total' => (int)$effective_total,
+                'visit' => (int)$telephone_progress['visit'],
+                'absence' => (int)$telephone_progress['absence'],
+                'progress' => (int)$progress_percent
             );
         }
     }

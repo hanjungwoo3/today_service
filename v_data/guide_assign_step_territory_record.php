@@ -72,10 +72,10 @@ if ($result->num_rows > 0) {
                 'status' => $status,
                 'assigned_group_name' => $assigned_group_name,
                 'all_past_records' => $all_past_records,
-                'total' => $effective_total,
-                'visit' => $territory_progress['visit'],
-                'absence' => $territory_progress['absence'],
-                'progress' => $progress_percent
+                'total' => (int)$effective_total,
+                'visit' => (int)$territory_progress['visit'],
+                'absence' => (int)$territory_progress['absence'],
+                'progress' => (int)$progress_percent
             );
         }
     }
